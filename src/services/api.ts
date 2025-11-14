@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // Base URL is read from Vite environment variable VITE_API_BASE_URL.
 // If not provided, fall back to the local development API.
+// IMPORTANT: In production, this MUST be set to HTTPS URL (e.g., https://api.sixpine.in/api)
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000/api';
 
 // Create axios instance with base configuration
