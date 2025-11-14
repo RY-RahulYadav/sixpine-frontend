@@ -24,10 +24,8 @@ const AdminCommunication: React.FC = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [selectedRecipientId, setSelectedRecipientId] = useState<string>('');
   const [selectedRecipientEmail, setSelectedRecipientEmail] = useState<string>('');
-  const [selectedRecipientName, setSelectedRecipientName] = useState<string>('');
   const [subject, setSubject] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
   const [loadingRecipients, setLoadingRecipients] = useState<boolean>(false);
 
@@ -67,19 +65,15 @@ const AdminCommunication: React.FC = () => {
       const customer = customers.find(c => c.id.toString() === recipientId);
       if (customer) {
         setSelectedRecipientEmail(customer.email);
-        setSelectedRecipientName(customer.name);
       } else {
         setSelectedRecipientEmail('');
-        setSelectedRecipientName('');
       }
     } else {
       const vendor = vendors.find(v => v.id.toString() === recipientId);
       if (vendor) {
         setSelectedRecipientEmail(vendor.email);
-        setSelectedRecipientName(vendor.name);
       } else {
         setSelectedRecipientEmail('');
-        setSelectedRecipientName('');
       }
     }
   };
@@ -113,7 +107,6 @@ const AdminCommunication: React.FC = () => {
         setMessage('');
         setSelectedRecipientId('');
         setSelectedRecipientEmail('');
-        setSelectedRecipientName('');
       } else {
         showToast(response.data.error || 'Failed to send email', 'error');
       }
@@ -125,7 +118,7 @@ const AdminCommunication: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loadingRecipients) {
     return (
       <div className="admin-loader">
         <div className="spinner"></div>
@@ -158,7 +151,6 @@ const AdminCommunication: React.FC = () => {
                   setRecipientType(e.target.value as 'customer' | 'vendor');
                   setSelectedRecipientId('');
                   setSelectedRecipientEmail('');
-                  setSelectedRecipientName('');
                 }}
               />
               <span>Customer</span>
@@ -173,7 +165,6 @@ const AdminCommunication: React.FC = () => {
                   setRecipientType(e.target.value as 'customer' | 'vendor');
                   setSelectedRecipientId('');
                   setSelectedRecipientEmail('');
-                  setSelectedRecipientName('');
                 }}
               />
               <span>Vendor</span>

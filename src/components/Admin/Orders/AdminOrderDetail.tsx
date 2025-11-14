@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
-import { showToast } from '../utils/adminUtils';
 
 interface OrderItem {
   id: number;
@@ -74,7 +73,6 @@ const AdminOrderDetail: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusUpdating, setStatusUpdating] = useState<boolean>(false);
   
   useEffect(() => {
     const fetchOrderDetails = async () => {

@@ -4,27 +4,11 @@ import { sellerAPI } from '../../../services/api';
 import { showToast } from '../../Admin/utils/adminUtils';
 import '../../../styles/admin-theme.css';
 
-interface VendorData {
-  account_holder_name: string;
-  account_number: string;
-  ifsc_code: string;
-  bank_name: string;
-  branch_name: string;
-  upi_id: string;
-  shipment_address: string;
-  shipment_city: string;
-  shipment_state: string;
-  shipment_pincode: string;
-  shipment_country: string;
-  shipment_latitude: number | null;
-  shipment_longitude: number | null;
-}
 
 const SellerPaymentSettings: React.FC = () => {
   const api = useAdminAPI();
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
-  const [vendor, setVendor] = useState<VendorData | null>(null);
   const [bankDetailsForm, setBankDetailsForm] = useState({
     account_holder_name: '',
     account_number: '',
@@ -62,8 +46,18 @@ const SellerPaymentSettings: React.FC = () => {
           branch_name: vendorData.branch_name || '',
           upi_id: vendorData.upi_id || ''
         };
-        setVendor(paymentData);
         setBankDetailsForm(paymentData);
+        
+        // Set shipment form data
+        setShipmentForm({
+          shipment_address: vendorData.shipment_address || '',
+          shipment_city: vendorData.shipment_city || '',
+          shipment_state: vendorData.shipment_state || '',
+          shipment_pincode: vendorData.shipment_pincode || '',
+          shipment_country: vendorData.shipment_country || 'India',
+          shipment_latitude: vendorData.shipment_latitude ? parseFloat(vendorData.shipment_latitude) : null,
+          shipment_longitude: vendorData.shipment_longitude ? parseFloat(vendorData.shipment_longitude) : null,
+        });
       }
     } catch (err: any) {
       console.error('Error fetching payment settings:', err);
@@ -185,7 +179,6 @@ const SellerPaymentSettings: React.FC = () => {
           shipment_latitude: vendorData.shipment_latitude || null,
           shipment_longitude: vendorData.shipment_longitude || null,
         };
-        setVendor(paymentData);
         setBankDetailsForm({
           account_holder_name: paymentData.account_holder_name,
           account_number: paymentData.account_number,

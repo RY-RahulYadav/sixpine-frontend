@@ -14,7 +14,6 @@ const SellerCommunication: React.FC = () => {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [subject, setSubject] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
   const [sending, setSending] = useState<boolean>(false);
   const [loadingCustomers, setLoadingCustomers] = useState<boolean>(false);
 
@@ -88,7 +87,7 @@ const SellerCommunication: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loadingCustomers) {
     return (
       <div className="admin-loader">
         <div className="spinner"></div>
