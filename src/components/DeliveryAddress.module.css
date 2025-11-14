@@ -1,0 +1,326 @@
+.container {
+    font-family: "Amazon Ember", Arial, sans-serif;
+    padding: 16px 20px;
+    border: 1px solid #d5d9d9;
+    border-radius: 8px;
+    background-color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.title {
+    font-weight: 700;
+    font-size: 16px;
+    color: #0f1111;
+}
+
+.address {
+    font-size: 14px;
+    color: #565959;
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+.link {
+    color: #007185;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.link:hover {
+    text-decoration: underline;
+    color: #C7511F;
+}
+
+.linkButton {
+    background: none;
+    border: none;
+    color: #007185;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.linkButton:hover {
+    text-decoration: underline;
+    color: #C7511F;
+}
+
+.error {
+    color: #c0392b;
+    font-size: 14px;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #ffebee;
+    border-left: 3px solid #c0392b;
+}
+
+/* Address Form Styles */
+.addressForm {
+    margin-top: 16px;
+}
+
+.formRow {
+    margin-bottom: 16px;
+}
+
+.formRow label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0f1111;
+    margin-bottom: 6px;
+}
+
+.formInput {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d5d9d9;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.formInput:focus {
+    outline: none;
+    border-color: #007185;
+    box-shadow: 0 0 0 3px rgba(0, 113, 133, 0.1);
+}
+
+.formRow textarea.formInput {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.formActions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.submitButton {
+    background-color: #FFD814;
+    border: none;
+    color: #0f1111;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submitButton:hover:not(:disabled) {
+    background-color: #F7CA00;
+}
+
+.submitButton:disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.cancelButton {
+    background-color: transparent;
+    border: 1px solid #d5d9d9;
+    color: #0f1111;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.cancelButton:hover {
+    background-color: #f5f5f5;
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modalContent {
+    background-color: #ffffff;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e7e7e7;
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f1111;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #565959;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.closeButton:hover {
+    background-color: #f0f0f0;
+}
+
+.addressList {
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.addressCard {
+    border: 2px solid #d5d9d9;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.addressCard:hover {
+    border-color: #007185;
+    box-shadow: 0 0 0 3px rgba(0, 113, 133, 0.1);
+}
+
+.addressCard.selected {
+    border-color: #007185;
+    background-color: #f0f9ff;
+}
+
+.addressCardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.addressCardHeader strong {
+    font-size: 16px;
+    color: #0f1111;
+    margin-right: 8px;
+}
+
+.defaultBadge {
+    background-color: #FFD814;
+    color: #0f1111;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.addressCardActions {
+    display: flex;
+    gap: 8px;
+}
+
+.actionButton,
+.deleteButton {
+    background: none;
+    border: none;
+    color: #007185;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.actionButton:hover {
+    background-color: #f0f0f0;
+}
+
+.deleteButton {
+    color: #c0392b;
+}
+
+.deleteButton:hover {
+    background-color: #ffebee;
+}
+
+.addressCardBody {
+    color: #565959;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.addressCardBody p {
+    margin: 4px 0;
+}
+
+.modalFooter {
+    padding: 20px;
+    border-top: 1px solid #e7e7e7;
+}
+
+.addButton {
+    width: 100%;
+    background-color: #ffd814;
+    border: none;
+    color: #0f1111;
+    padding: 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.addButton:hover {
+    background-color: #F7CA00;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modalContent {
+        max-width: 95%;
+    }
+    
+    .addressCardHeader {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .addressCardActions {
+        flex-direction: column;
+        width: 100%;
+    }
+}

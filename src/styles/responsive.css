@@ -1,0 +1,754 @@
+/* ============================================ */
+/* COMPREHENSIVE RESPONSIVE STYLES */
+/* Global responsive utilities and page-specific responsive styles */
+/* ============================================ */
+
+/* ============================================ */
+/* CART PAGE RESPONSIVE STYLES */
+/* ============================================ */
+
+@media (max-width: 991px) {
+  .cart-page .cart-items {
+    margin-bottom: 20px;
+  }
+  
+  .cart-page .cart-summary {
+    position: static;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .cart-page .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .cart-page .cart-item img {
+    width: 100%;
+    max-width: 200px;
+    margin-bottom: 15px;
+  }
+  
+  .cart-page .quantity-controls {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  
+  .cart-page .cart-summary {
+    padding: 15px;
+  }
+  
+  .cart-page h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .cart-page .cart-item {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .cart-page .cart-item img {
+    max-width: 150px;
+  }
+  
+  .cart-page h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .cart-page .btn {
+    font-size: 13px;
+    padding: 8px 15px;
+  }
+  
+  .cart-page .cart-summary {
+    padding: 12px;
+  }
+  
+  .cart-page .cart-summary h4 {
+    font-size: 1.1rem;
+  }
+}
+
+/* ============================================ */
+/* CHECKOUT PAGE RESPONSIVE STYLES */
+/* ============================================ */
+
+@media (max-width: 991px) {
+  .checkout-page .address-list {
+    margin-bottom: 20px;
+  }
+  
+  .checkout-page .order-summary {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .checkout-page .address-card {
+    margin-bottom: 15px;
+  }
+  
+  .checkout-page .address-card .card-body {
+    padding: 12px;
+  }
+  
+  .checkout-page h2 {
+    font-size: 1.5rem;
+  }
+  
+  .checkout-page h3 {
+    font-size: 1.3rem;
+  }
+  
+  .checkout-page .btn {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .checkout-page .address-card {
+    margin-bottom: 12px;
+  }
+  
+  .checkout-page h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .checkout-page h3 {
+    font-size: 1.15rem;
+  }
+  
+  .checkout-page .order-summary .list-group-item {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* ============================================ */
+/* ORDERS PAGE RESPONSIVE STYLES */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .orders-page .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .orders-page table {
+    min-width: 600px;
+    font-size: 13px;
+  }
+  
+  .orders-page h2 {
+    font-size: 1.5rem;
+  }
+  
+  .orders-page .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  
+  .orders-page .btn-sm {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .orders-page table {
+    min-width: 550px;
+    font-size: 12px;
+  }
+  
+  .orders-page h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .orders-page th,
+  .orders-page td {
+    padding: 8px 6px;
+  }
+  
+  .orders-page .badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  
+  .orders-page .btn-sm {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* ============================================ */
+/* PROFILE PAGE RESPONSIVE STYLES */
+/* ============================================ */
+
+@media (max-width: 991px) {
+  .profile-page .nav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .profile-page .nav-tabs .nav-link {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .profile-page .nav-tabs {
+    font-size: 14px;
+  }
+  
+  .profile-page .nav-tabs .nav-link {
+    padding: 10px 15px;
+  }
+  
+  .profile-page h2 {
+    font-size: 1.5rem;
+  }
+  
+  .profile-page .card {
+    margin-bottom: 15px;
+  }
+  
+  .profile-page .address-card .card-body {
+    padding: 12px;
+  }
+  
+  .profile-page .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .profile-page .btn-group .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 575px) {
+  .profile-page .nav-tabs {
+    font-size: 13px;
+  }
+  
+  .profile-page .nav-tabs .nav-link {
+    padding: 8px 12px;
+  }
+  
+  .profile-page h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .profile-page h3 {
+    font-size: 1.15rem;
+  }
+  
+  .profile-page .card-body {
+    padding: 12px;
+  }
+  
+  .profile-page .form-label {
+    font-size: 13px;
+  }
+  
+  .profile-page .form-control {
+    font-size: 14px;
+  }
+  
+  .profile-page .btn {
+    font-size: 13px;
+    padding: 8px 15px;
+  }
+}
+
+/* ============================================ */
+/* LANDING PAGE RESPONSIVE STYLES */
+/* ============================================ */
+
+@media (max-width: 991px) {
+  .landing-page .section {
+    padding: 40px 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .landing-page .section {
+    padding: 30px 15px;
+  }
+  
+  .landing-page .hero-section {
+    min-height: 50vh;
+  }
+  
+  .landing-page .feature-card {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 575px) {
+  .landing-page .section {
+    padding: 25px 10px;
+  }
+  
+  .landing-page .hero-section {
+    min-height: 45vh;
+  }
+  
+  .landing-page .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .landing-page .feature-card {
+    margin-bottom: 15px;
+  }
+}
+
+/* ============================================ */
+/* MODAL RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .modal-dialog {
+    margin: 10px;
+  }
+  
+  .modal-content {
+    border-radius: 10px;
+  }
+  
+  .modal-header {
+    padding: 12px 15px;
+  }
+  
+  .modal-header .modal-title {
+    font-size: 1.15rem;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+  
+  .modal-footer {
+    padding: 10px 15px;
+  }
+  
+  .modal-footer .btn {
+    font-size: 13px;
+    padding: 8px 15px;
+  }
+}
+
+@media (max-width: 575px) {
+  .modal-dialog {
+    margin: 8px;
+    max-width: calc(100% - 16px);
+  }
+  
+  .modal-header {
+    padding: 10px 12px;
+  }
+  
+  .modal-header .modal-title {
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: 12px;
+  }
+  
+  .modal-footer {
+    padding: 8px 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+/* ============================================ */
+/* OFFCANVAS RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .offcanvas {
+    max-width: 90%;
+  }
+  
+  .offcanvas-header {
+    padding: 12px 15px;
+  }
+  
+  .offcanvas-body {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 575px) {
+  .offcanvas {
+    max-width: 95%;
+  }
+  
+  .offcanvas-header {
+    padding: 10px 12px;
+  }
+  
+  .offcanvas-header .offcanvas-title {
+    font-size: 1.1rem;
+  }
+  
+  .offcanvas-body {
+    padding: 12px;
+  }
+}
+
+/* ============================================ */
+/* BREADCRUMB RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .breadcrumb {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  
+  .breadcrumb-item + .breadcrumb-item::before {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 575px) {
+  .breadcrumb {
+    font-size: 12px;
+    padding: 6px 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+  
+  .breadcrumb::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ============================================ */
+/* ALERT RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .alert {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  .alert-heading {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .alert {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .alert-heading {
+    font-size: 1rem;
+  }
+}
+
+/* ============================================ */
+/* PAGINATION RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .pagination {
+    font-size: 14px;
+  }
+  
+  .pagination .page-link {
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 575px) {
+  .pagination {
+    font-size: 13px;
+  }
+  
+  .pagination .page-link {
+    padding: 5px 10px;
+  }
+  
+  .pagination .page-item:not(:first-child):not(:last-child) {
+    display: none;
+  }
+  
+  .pagination .page-item.active {
+    display: block;
+  }
+}
+
+/* ============================================ */
+/* DROPDOWN MENU RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .dropdown-menu {
+    font-size: 14px;
+  }
+  
+  .dropdown-item {
+    padding: 8px 15px;
+  }
+}
+
+@media (max-width: 575px) {
+  .dropdown-menu {
+    font-size: 13px;
+  }
+  
+  .dropdown-item {
+    padding: 7px 12px;
+  }
+}
+
+/* ============================================ */
+/* LIST GROUP RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .list-group-item {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 575px) {
+  .list-group-item {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* ============================================ */
+/* BADGE RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 575px) {
+  .badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* ============================================ */
+/* SPINNER/LOADER RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .spinner-border {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+/* ============================================ */
+/* TOAST/NOTIFICATION RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .toast {
+    max-width: 90%;
+    font-size: 14px;
+  }
+  
+  .toast-header {
+    padding: 8px 10px;
+  }
+  
+  .toast-body {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .toast {
+    max-width: 95%;
+    font-size: 13px;
+  }
+  
+  .toast-header {
+    padding: 7px 8px;
+  }
+  
+  .toast-body {
+    padding: 8px;
+  }
+}
+
+/* ============================================ */
+/* ACCORDION RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .accordion-button {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  .accordion-body {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 575px) {
+  .accordion-button {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  .accordion-body {
+    padding: 12px;
+  }
+}
+
+/* ============================================ */
+/* PROGRESS BAR RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .progress {
+    height: 1rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .progress {
+    height: 0.875rem;
+  }
+  
+  .progress-bar {
+    font-size: 11px;
+  }
+}
+
+/* ============================================ */
+/* CAROUSEL RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+@media (max-width: 767px) {
+  .carousel-caption {
+    padding-bottom: 15px;
+  }
+  
+  .carousel-caption h5 {
+    font-size: 1.1rem;
+  }
+  
+  .carousel-caption p {
+    font-size: 13px;
+  }
+  
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (max-width: 575px) {
+  .carousel-caption {
+    padding-bottom: 10px;
+  }
+  
+  .carousel-caption h5 {
+    font-size: 1rem;
+  }
+  
+  .carousel-caption p {
+    font-size: 12px;
+    display: none;
+  }
+  
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .carousel-indicators {
+    bottom: 5px;
+  }
+  
+  .carousel-indicators [data-bs-target] {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* ============================================ */
+/* UTILITY CLASSES FOR RESPONSIVE SPACING */
+/* ============================================ */
+
+/* Mobile-specific margin utilities */
+@media (max-width: 767px) {
+  .m-mobile-0 { margin: 0 !important; }
+  .m-mobile-1 { margin: 0.25rem !important; }
+  .m-mobile-2 { margin: 0.5rem !important; }
+  .m-mobile-3 { margin: 1rem !important; }
+  .m-mobile-4 { margin: 1.5rem !important; }
+  .m-mobile-5 { margin: 3rem !important; }
+  
+  .p-mobile-0 { padding: 0 !important; }
+  .p-mobile-1 { padding: 0.25rem !important; }
+  .p-mobile-2 { padding: 0.5rem !important; }
+  .p-mobile-3 { padding: 1rem !important; }
+  .p-mobile-4 { padding: 1.5rem !important; }
+  .p-mobile-5 { padding: 3rem !important; }
+}
+
+/* ============================================ */
+/* FIX COMMON MOBILE LAYOUT ISSUES */
+/* ============================================ */
+
+/* Prevent text overflow */
+@media (max-width: 767px) {
+  h1, h2, h3, h4, h5, h6, p, span, div {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Ensure images don't overflow */
+@media (max-width: 767px) {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Fix viewport on iOS */
+@media (max-width: 767px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+}

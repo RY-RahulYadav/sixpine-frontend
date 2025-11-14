@@ -1,0 +1,219 @@
+/* Bulk Order Form Section */
+.bulkOrderFormSection {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 60px 0px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.sectionTitle {
+  font-size: clamp(1.8rem, 3.5vw, 2.3rem);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.sectionDescription {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 40px;
+  color: #666;
+  font-size: clamp(15px, 1.1vw, 17px);
+  line-height: 1.6;
+}
+
+.bulkOrderForm {
+  background: #f9f9f9;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.formColumns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.formColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 15px;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #333;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  border-color: #333;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: #999;
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.formActions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.formDisclaimer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.formDisclaimer input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.formDisclaimer a {
+  color: #ff6b35;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.formDisclaimer a:hover {
+  text-decoration: underline;
+}
+
+.submitButton {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 15px 50px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.submitButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(255, 107, 53, 0.4);
+}
+
+.submitButton:active {
+  transform: translateY(0);
+}
+
+.submitButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .bulkOrderFormSection {
+    padding: 50px 15px;
+  }
+
+  .bulkOrderForm {
+    padding: 35px;
+  }
+
+  .formColumns {
+    gap: 25px;
+  }
+}
+
+@media (max-width: 767px) {
+  .bulkOrderFormSection {
+    padding: 40px 15px;
+    border-radius: 0;
+  }
+
+  .bulkOrderForm {
+    padding: 30px 20px;
+  }
+
+  .formColumns {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .formColumn {
+    gap: 18px;
+  }
+
+  .submitButton {
+    width: 100%;
+    padding: 14px 30px;
+  }
+}
+
+@media (max-width: 575px) {
+  .bulkOrderFormSection {
+    padding: 30px 10px;
+  }
+
+  .bulkOrderForm {
+    padding: 25px 15px;
+  }
+
+  .formGroup label {
+    font-size: 14px;
+  }
+
+  .formGroup input,
+  .formGroup select,
+  .formGroup textarea {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .formDisclaimer {
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .submitButton {
+    font-size: 15px;
+  }
+}

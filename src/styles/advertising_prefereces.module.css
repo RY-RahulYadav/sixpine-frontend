@@ -1,0 +1,168 @@
+.container {
+  max-width: 96%;
+  margin: auto;
+  padding: 20px 0px;
+  font-family: Arial, sans-serif;
+  color: #222;
+  line-height: 1.6;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.icon {
+  font-size: 22px;
+  color: #555;
+}
+
+.heading {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Sub Text */
+.subText {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+/* Title with Icon */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.titleIcon {
+  color: #c00;
+  font-size: 18px;
+}
+
+.subHeading {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.desc {
+  margin-bottom: 20px;
+}
+
+/* Sections */
+.section {
+  margin-bottom: 18px;
+}
+
+h4 {
+  margin-bottom: 6px;
+  color: #111;
+}
+
+/* Check List */
+.checkList {
+  list-style: none;
+  padding: 0;
+}
+
+.checkList li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.checkIcon {
+  color: green;
+  font-size: 14px;
+}
+
+/* ✅ Responsive Styles */
+
+/* Tablets (portrait & landscape) */
+@media (max-width: 992px) {
+  .container {
+    padding: 15px;
+  }
+
+  .heading {
+    font-size: 18px;
+  }
+
+  .subHeading {
+    font-size: 15px;
+  }
+
+  .subText {
+    font-size: 13px;
+  }
+}
+
+/* Mobile Devices */
+@media (max-width: 600px) {
+  .container {
+    padding: 12px;
+  }
+
+  .header, .title {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .heading {
+    font-size: 16px;
+  }
+
+  .subHeading {
+    font-size: 14px;
+  }
+
+  .subText {
+    font-size: 12px;
+  }
+
+  h4 {
+    font-size: 14px;
+  }
+
+  .checkList li {
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .checkIcon {
+    font-size: 12px;
+  }
+}
+@media (max-width: 375px) {
+  .checkList li {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .checkIcon {
+    font-size: 12px;
+    width: 12px;
+    /* margin-right: 5px; */
+  }
+}
+
+/* ✅ Very small screens (325px) */
+@media (max-width: 325px) {
+  .checkList li {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .checkIcon {
+    font-size: 11px;
+    width: 11px;
+    margin-right: 4px;
+  }
+}

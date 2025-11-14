@@ -1,0 +1,220 @@
+/* Hero Styles (collision-safe) */
+
+.hero-section {
+    background: #f6f6f3;
+    position: relative;
+}
+
+.hero-slide {
+    min-height: 75vh;
+    display: flex;
+    align-items: center;
+}
+
+.hero-copy .eyebrow {
+    color: #b2182b;
+    font-weight: 600;
+    letter-spacing: .05em;
+    margin-bottom: 10px;
+}
+
+.hero-copy .headline {
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 64px);
+    margin: 16px 0;
+}
+
+.hero-copy .sub {
+    font-size: clamp(14px, 1.2vw, 18px);
+    max-width: 520px;
+    color: #333;
+}
+
+.hero-image img {
+    width: 80% !important;
+    max-height: 520px;
+    object-fit: cover;
+}
+
+
+/* Dots styling (jaise reference) */
+
+.hero-section .owl-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+}
+
+.hero-section .owl-dot span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #9e9e9e;
+    opacity: .6;
+    margin: 0 6px;
+    display: block;
+}
+
+.hero-section .owl-dot.active span {
+    background: transparent;
+    border: 2px solid #000;
+    width: 12px;
+    height: 12px;
+    opacity: 1;
+}
+
+
+/* Ensure only one slide visible cleanly */
+
+.hero-section .owl-stage-outer {
+    overflow: hidden;
+}
+
+/* ============================================ */
+/* RESPONSIVE STYLES FOR HERO SECTION */
+/* ============================================ */
+
+/* Tablets (768px - 991px) */
+@media (max-width: 991px) {
+    .hero-slide {
+        min-height: 60vh;
+    }
+    
+    .hero-copy .headline {
+        font-size: clamp(1.8rem, 4.5vw, 48px);
+        margin: 12px 0;
+    }
+    
+    .hero-copy .sub {
+        font-size: clamp(13px, 1.1vw, 16px);
+        max-width: 450px;
+    }
+    
+    .hero-image img {
+        width: 85% !important;
+        max-height: 450px;
+    }
+}
+
+/* Mobile Landscape and Small Tablets (576px - 767px) */
+@media (max-width: 767px) {
+    .hero-section {
+        background: #f6f6f3;
+    }
+    
+    .hero-slide {
+        min-height: 50vh;
+        padding: 20px 0;
+    }
+    
+    .hero-copy .eyebrow {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+    
+    .hero-copy .headline {
+        font-size: clamp(1.5rem, 4vw, 36px);
+        margin: 10px 0;
+        line-height: 1.2;
+    }
+    
+    .hero-copy .sub {
+        font-size: clamp(12px, 1vw, 15px);
+        max-width: 100%;
+    }
+    
+    .hero-image img {
+        width: 90% !important;
+        max-height: 350px;
+    }
+    
+    .hero-section .owl-dots {
+        bottom: 10px;
+    }
+    
+    .hero-section .owl-dot span {
+        width: 8px;
+        height: 8px;
+        margin: 0 4px;
+    }
+    
+    .hero-section .owl-dot.active span {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+/* Mobile Portrait (320px - 575px) */
+@media (max-width: 575px) {
+    .hero-slide {
+        min-height: 45vh;
+        padding: 15px 0;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .hero-copy {
+        order: 2;
+        padding: 10px;
+    }
+    
+    .hero-copy .eyebrow {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+    
+    .hero-copy .headline {
+        font-size: clamp(1.3rem, 3.5vw, 28px);
+        margin: 8px 0;
+    }
+    
+    .hero-copy .sub {
+        font-size: clamp(11px, 0.9vw, 14px);
+        margin: 0 auto;
+    }
+    
+    .hero-image {
+        order: 1;
+        margin-bottom: 10px;
+    }
+    
+    .hero-image img {
+        width: 95% !important;
+        max-height: 280px;
+    }
+    
+    .hero-section .owl-dots {
+        bottom: 8px;
+    }
+    
+    .hero-section .owl-dot span {
+        width: 7px;
+        height: 7px;
+        margin: 0 3px;
+    }
+    
+    .hero-section .owl-dot.active span {
+        width: 9px;
+        height: 9px;
+    }
+}
+
+/* Extra Small Devices (320px - 374px) */
+@media (max-width: 374px) {
+    .hero-slide {
+        min-height: 40vh;
+    }
+    
+    .hero-copy .headline {
+        font-size: clamp(1.2rem, 3vw, 24px);
+    }
+    
+    .hero-copy .sub {
+        font-size: 12px;
+    }
+    
+    .hero-image img {
+        max-height: 240px;
+    }
+}

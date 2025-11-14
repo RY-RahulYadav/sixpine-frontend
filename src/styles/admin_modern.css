@@ -1,0 +1,632 @@
+/* Modern Admin Dashboard Styles - Enhanced with Tailwind */
+
+/* Admin-specific utility classes that complement Tailwind */
+.admin-card {
+  
+  @apply tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-gray-200 tw-p-6 tw-transition-all tw-duration-200;
+}
+
+.admin-card:hover {
+  @apply tw-shadow-md;
+}
+
+.admin-card-header {
+  @apply tw-flex tw-items-center tw-justify-between tw-mb-6 tw-pb-4 tw-border-b tw-border-gray-100;
+}
+
+.admin-card-title {
+  @apply tw-text-lg tw-font-semibold tw-text-gray-900;
+}
+
+/* Stats Card */
+.admin-stat-card {
+  @apply tw-bg-white tw-rounded-xl tw-p-6 tw-border tw-border-gray-200 tw-transition-all tw-duration-200 hover:tw-shadow-lg hover:tw--translate-y-1;
+}
+
+.admin-stat-icon {
+  @apply tw-w-12 tw-h-12 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-mb-4;
+}
+
+.admin-stat-value {
+  @apply tw-text-2xl tw-font-bold tw-text-gray-900 tw-mb-1;
+}
+
+.admin-stat-label {
+  @apply tw-text-sm tw-text-gray-600;
+}
+
+.admin-stat-change {
+  @apply tw-text-xs tw-font-medium tw-mt-2;
+}
+
+.admin-stat-change.positive {
+  @apply tw-text-green-600;
+}
+
+.admin-stat-change.negative {
+  @apply tw-text-red-600;
+}
+
+/* Button Styles */
+.admin-btn {
+  @apply tw-inline-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2.5 tw-rounded-lg tw-font-medium tw-text-sm tw-transition-all tw-duration-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-offset-2;
+}
+
+.admin-btn.primary {
+  @apply tw-bg-gradient-to-r tw-from-blue-600 tw-to-purple-600 tw-text-white hover:tw-from-blue-700 hover:tw-to-purple-700 tw-shadow-md hover:tw-shadow-lg focus:tw-ring-blue-500;
+}
+
+.admin-btn.secondary {
+  @apply tw-bg-gray-100 tw-text-gray-700 hover:tw-bg-gray-200 focus:tw-ring-gray-500;
+}
+
+.admin-btn.success {
+  @apply tw-bg-green-600 tw-text-white hover:tw-bg-green-700 tw-shadow-md hover:tw-shadow-lg focus:tw-ring-green-500;
+}
+
+.admin-btn.danger {
+  @apply tw-bg-red-600 tw-text-white hover:tw-bg-red-700 tw-shadow-md hover:tw-shadow-lg focus:tw-ring-red-500;
+}
+
+.admin-btn.warning {
+  @apply tw-bg-amber-500 tw-text-white hover:tw-bg-amber-600 tw-shadow-md hover:tw-shadow-lg focus:tw-ring-amber-500;
+}
+
+.admin-btn.info {
+  @apply tw-bg-blue-500 tw-text-white hover:tw-bg-blue-600 tw-shadow-md hover:tw-shadow-lg focus:tw-ring-blue-500;
+}
+
+.admin-btn.outline {
+  @apply tw-border-2 tw-border-gray-300 tw-bg-transparent tw-text-gray-700 hover:tw-bg-gray-50 focus:tw-ring-gray-500;
+}
+
+.admin-btn:disabled {
+  @apply tw-opacity-50 tw-cursor-not-allowed;
+}
+
+.admin-btn.block {
+  @apply tw-w-full tw-justify-center;
+}
+
+/* Table Styles */
+.admin-table-container {
+  @apply tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-gray-200 tw-overflow-hidden;
+}
+
+.admin-table {
+  @apply tw-w-full tw-text-sm tw-text-left;
+}
+
+.admin-table thead {
+  @apply tw-bg-gray-50 tw-border-b tw-border-gray-200;
+}
+
+.admin-table thead th {
+  @apply tw-px-6 tw-py-4 tw-text-xs tw-font-semibold tw-text-gray-700 tw-uppercase tw-tracking-wider;
+}
+
+.admin-table tbody tr {
+  @apply tw-border-b tw-border-gray-100 hover:tw-bg-gray-50 tw-transition-colors;
+}
+
+.admin-table tbody tr:last-child {
+  @apply tw-border-b-0;
+}
+
+.admin-table tbody td {
+  @apply tw-px-6 tw-py-4 tw-text-gray-900;
+}
+
+/* Badge Styles */
+.admin-badge {
+  @apply tw-inline-flex tw-items-center tw-gap-1 tw-px-2.5 tw-py-1 tw-rounded-full tw-text-xs tw-font-semibold;
+}
+
+.admin-badge.success {
+  @apply tw-bg-green-100 tw-text-green-800;
+}
+
+.admin-badge.warning {
+  @apply tw-bg-amber-100 tw-text-amber-800;
+}
+
+.admin-badge.danger {
+  @apply tw-bg-red-100 tw-text-red-800;
+}
+
+.admin-badge.info {
+  @apply tw-bg-blue-100 tw-text-blue-800;
+}
+
+.admin-badge.neutral {
+  @apply tw-bg-gray-100 tw-text-gray-800;
+}
+
+/* Form Styles */
+.admin-form-group {
+  @apply tw-mb-5;
+}
+
+.admin-form-label {
+  @apply tw-block tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2;
+}
+
+.admin-form-input {
+  @apply tw-w-full tw-px-4 tw-py-2.5 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-transition-all;
+}
+
+.admin-form-input:disabled {
+  @apply tw-bg-gray-50 tw-cursor-not-allowed;
+}
+
+.admin-form-textarea {
+  @apply tw-w-full tw-px-4 tw-py-2.5 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-transition-all tw-resize-y;
+}
+
+.admin-form-select {
+  @apply tw-w-full tw-px-4 tw-py-2.5 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-transition-all tw-appearance-none tw-bg-white;
+}
+
+.admin-form-checkbox {
+  @apply tw-w-4 tw-h-4 tw-text-blue-600 tw-border-gray-300 tw-rounded focus:tw-ring-2 focus:tw-ring-blue-500;
+}
+
+.admin-form-helper {
+  @apply tw-mt-1.5 tw-text-xs tw-text-gray-500;
+}
+
+.admin-form-error {
+  @apply tw-mt-1.5 tw-text-xs tw-text-red-600 tw-flex tw-items-center tw-gap-1;
+}
+
+/* Alert Messages */
+.admin-alert {
+  @apply tw-flex tw-items-center tw-gap-3 tw-p-4 tw-rounded-lg tw-mb-4;
+}
+
+.admin-alert.success {
+  @apply tw-bg-green-50 tw-text-green-800 tw-border tw-border-green-200;
+}
+
+.admin-alert.error {
+  @apply tw-bg-red-50 tw-text-red-800 tw-border tw-border-red-200;
+}
+
+.admin-alert.warning {
+  @apply tw-bg-amber-50 tw-text-amber-800 tw-border tw-border-amber-200;
+}
+
+.admin-alert.info {
+  @apply tw-bg-blue-50 tw-text-blue-800 tw-border tw-border-blue-200;
+}
+
+/* Loading States */
+.admin-loader {
+  @apply tw-flex tw-flex-col tw-items-center tw-justify-center tw-min-h-screen;
+}
+
+.admin-spinner {
+  @apply tw-w-12 tw-h-12 tw-border-4 tw-border-gray-200 tw-border-t-blue-600 tw-rounded-full tw-animate-spin;
+}
+
+/* Empty State */
+.admin-empty-state {
+  @apply tw-flex tw-flex-col tw-items-center tw-justify-center tw-py-16 tw-text-center;
+}
+
+.admin-empty-icon {
+  @apply tw-w-16 tw-h-16 tw-bg-gray-100 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mb-4;
+}
+
+.admin-empty-title {
+  @apply tw-text-lg tw-font-semibold tw-text-gray-900 tw-mb-2;
+}
+
+.admin-empty-description {
+  @apply tw-text-sm tw-text-gray-600 tw-mb-6 tw-max-w-md;
+}
+
+/* Pagination */
+.admin-pagination {
+  @apply tw-flex tw-items-center tw-justify-between tw-mt-6 tw-px-6 tw-py-4 tw-bg-white tw-rounded-lg tw-border tw-border-gray-200;
+}
+
+.admin-pagination-btn {
+  @apply tw-px-4 tw-py-2 tw-rounded-lg tw-text-sm tw-font-medium tw-transition-all;
+}
+
+.admin-pagination-btn:not(:disabled) {
+  @apply tw-text-gray-700 hover:tw-bg-gray-100;
+}
+
+.admin-pagination-btn:disabled {
+  @apply tw-text-gray-400 tw-cursor-not-allowed;
+}
+
+.admin-pagination-info {
+  @apply tw-text-sm tw-text-gray-700;
+}
+
+/* Tabs */
+.admin-tabs {
+  @apply tw-flex tw-gap-2 tw-border-b tw-border-gray-200 tw-mb-6;
+}
+
+.admin-tab {
+  @apply tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-gray-600 tw-border-b-2 tw-border-transparent hover:tw-text-gray-900 hover:tw-border-gray-300 tw-transition-all tw-cursor-pointer;
+}
+
+.admin-tab.active {
+  @apply tw-text-blue-600 tw-border-blue-600;
+}
+
+/* Dropdown */
+.admin-dropdown {
+  @apply tw-relative tw-inline-block;
+}
+
+.admin-dropdown-menu {
+  @apply tw-absolute tw-right-0 tw-mt-2 tw-w-48 tw-bg-white tw-rounded-lg tw-shadow-lg tw-border tw-border-gray-200 tw-py-1 tw-z-10;
+}
+
+.admin-dropdown-item {
+  @apply tw-flex tw-items-center tw-gap-3 tw-px-4 tw-py-2.5 tw-text-sm tw-text-gray-700 hover:tw-bg-gray-50 tw-transition-colors tw-cursor-pointer;
+}
+
+/* Modal/Dialog */
+.admin-modal-overlay {
+  @apply tw-fixed tw-inset-0 tw-bg-black tw-bg-opacity-50 tw-z-50 tw-flex tw-items-center tw-justify-center tw-p-4;
+}
+
+.admin-modal {
+  @apply tw-bg-white tw-rounded-xl tw-shadow-2xl tw-max-w-lg tw-w-full tw-max-h-screen tw-overflow-y-auto;
+}
+
+.admin-modal-header {
+  @apply tw-flex tw-items-center tw-justify-between tw-p-6 tw-border-b tw-border-gray-200;
+}
+
+.admin-modal-title {
+  @apply tw-text-xl tw-font-bold tw-text-gray-900;
+}
+
+.admin-modal-body {
+  @apply tw-p-6;
+}
+
+.admin-modal-footer {
+  @apply tw-flex tw-items-center tw-justify-end tw-gap-3 tw-p-6 tw-border-t tw-border-gray-200 tw-bg-gray-50;
+}
+
+/* Charts Container */
+.admin-chart-container {
+  @apply tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-gray-200 tw-p-6;
+}
+
+/* Action Buttons Group */
+.admin-actions {
+  @apply tw-flex tw-items-center tw-gap-2;
+}
+
+.admin-action-btn {
+  @apply tw-p-2 tw-rounded-lg tw-text-gray-600 hover:tw-bg-gray-100 tw-transition-colors;
+}
+
+.admin-action-btn.edit {
+  @apply hover:tw-text-blue-600 hover:tw-bg-blue-50;
+}
+
+.admin-action-btn.delete {
+  @apply hover:tw-text-red-600 hover:tw-bg-red-50;
+}
+
+.admin-action-btn.view {
+  @apply hover:tw-text-green-600 hover:tw-bg-green-50;
+}
+
+/* Status Indicators */
+.admin-status-dot {
+  @apply tw-w-2 tw-h-2 tw-rounded-full;
+}
+
+.admin-status-dot.active {
+  @apply tw-bg-green-500;
+}
+
+.admin-status-dot.inactive {
+  @apply tw-bg-gray-400;
+}
+
+.admin-status-dot.pending {
+  @apply tw-bg-amber-500;
+}
+
+/* Grid Layouts */
+.admin-grid {
+  @apply tw-grid tw-gap-6;
+}
+
+.admin-grid.cols-2 {
+  @apply md:tw-grid-cols-2;
+}
+
+.admin-grid.cols-3 {
+  @apply md:tw-grid-cols-2 lg:tw-grid-cols-3;
+}
+
+.admin-grid.cols-4 {
+  @apply md:tw-grid-cols-2 lg:tw-grid-cols-4;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .admin-hide-mobile {
+    @apply tw-hidden;
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.admin-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.admin-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Gradient Backgrounds */
+.admin-gradient-blue {
+  @apply tw-bg-gradient-to-br tw-from-blue-500 tw-to-blue-600;
+}
+
+.admin-gradient-purple {
+  @apply tw-bg-gradient-to-br tw-from-purple-500 tw-to-purple-600;
+}
+
+.admin-gradient-green {
+  @apply tw-bg-gradient-to-br tw-from-green-500 tw-to-green-600;
+}
+
+.admin-gradient-orange {
+  @apply tw-bg-gradient-to-br tw-from-orange-500 tw-to-orange-600;
+}
+
+.admin-gradient-red {
+  @apply tw-bg-gradient-to-br tw-from-red-500 tw-to-red-600;
+}
+
+/* Quick Action Cards */
+.admin-quick-action {
+  @apply tw-flex tw-items-center tw-gap-4 tw-p-4 tw-bg-white tw-rounded-lg tw-border tw-border-gray-200 hover:tw-border-blue-300 hover:tw-shadow-md tw-transition-all tw-cursor-pointer;
+}
+
+.admin-quick-action-icon {
+  @apply tw-w-12 tw-h-12 tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-text-white;
+}
+
+/* Product Image in Table */
+.admin-product-image {
+  @apply tw-w-12 tw-h-12 tw-rounded-lg tw-object-cover tw-border tw-border-gray-200;
+}
+
+/* Success/Error Notification Toast */
+.admin-toast {
+  @apply tw-fixed tw-bottom-4 tw-right-4 tw-bg-white tw-rounded-lg tw-shadow-lg tw-border tw-border-gray-200 tw-p-4 tw-max-w-md tw-z-50 tw-animate-slide-up;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.tw-animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Keep existing admin.css styles for legacy support */
+.admin-header-actions {
+  @apply tw-flex tw-items-center tw-justify-between tw-mb-6;
+}
+
+.admin-header-actions h2 {
+  @apply tw-text-2xl tw-font-bold tw-text-gray-900;
+}
+
+.admin-filters {
+  @apply tw-flex tw-flex-wrap tw-gap-4 tw-mb-6 tw-p-4 tw-bg-white tw-rounded-lg tw-border tw-border-gray-200;
+}
+
+.admin-content-grid {
+  @apply tw-grid tw-gap-6 lg:tw-grid-cols-3;
+}
+
+.admin-content-main {
+  @apply lg:tw-col-span-2;
+}
+
+.admin-content-sidebar {
+  @apply tw-space-y-6;
+}
+
+.form-row {
+  @apply tw-grid tw-gap-4 md:tw-grid-cols-2 tw-mb-4;
+}
+
+.form-group {
+  @apply tw-mb-4;
+}
+
+.form-group label {
+  @apply tw-block tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  @apply tw-w-full tw-px-4 tw-py-2.5 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-transition-all;
+}
+
+.form-group small.form-helper {
+  @apply tw-text-xs tw-text-gray-500 tw-mt-1 tw-block;
+}
+
+.form-actions {
+  @apply tw-flex tw-items-center tw-justify-end tw-gap-3 tw-mt-8 tw-pt-6 tw-border-t tw-border-gray-200;
+}
+
+.checkbox-row {
+  @apply tw-flex tw-flex-wrap tw-gap-6;
+}
+
+.form-group.checkbox {
+  @apply tw-flex tw-items-center tw-gap-2;
+}
+
+.form-group.checkbox input {
+  @apply tw-w-4 tw-h-4;
+}
+
+.form-group.checkbox label {
+  @apply tw-mb-0;
+}
+
+/* Variants Section */
+.variant-item {
+  @apply tw-p-4 tw-bg-gray-50 tw-rounded-lg tw-border tw-border-gray-200 tw-mb-4;
+}
+
+.variant-header {
+  @apply tw-flex tw-items-center tw-justify-between tw-mb-4;
+}
+
+.variant-header h4 {
+  @apply tw-font-semibold tw-text-gray-900;
+}
+
+.remove-variant-btn {
+  @apply tw-p-1.5 tw-rounded-lg tw-text-red-600 hover:tw-bg-red-50 tw-transition-colors;
+}
+
+.variants-container {
+  @apply tw-space-y-4;
+}
+
+.form-section {
+  @apply tw-mb-8;
+}
+
+.form-section-header {
+  @apply tw-flex tw-items-center tw-justify-between tw-mb-4 tw-pb-3 tw-border-b tw-border-gray-200;
+}
+
+.form-section-header h3 {
+  @apply tw-text-lg tw-font-semibold tw-text-gray-900;
+}
+
+/* Product Info List */
+.product-info-list {
+  @apply tw-space-y-3;
+}
+
+.info-item {
+  @apply tw-flex tw-justify-between tw-py-2 tw-border-b tw-border-gray-100;
+}
+
+.info-item label {
+  @apply tw-text-sm tw-font-medium tw-text-gray-600;
+}
+
+.info-item span {
+  @apply tw-text-sm tw-text-gray-900 tw-font-medium;
+}
+
+/* Inventory Status */
+.inventory-status {
+  @apply tw-space-y-4;
+}
+
+.stock-badge {
+  @apply tw-flex tw-items-center tw-gap-2 tw-p-3 tw-rounded-lg tw-text-sm tw-font-semibold;
+}
+
+.stock-badge.in-stock {
+  @apply tw-bg-green-50 tw-text-green-700 tw-border tw-border-green-200;
+}
+
+.stock-badge.low-stock {
+  @apply tw-bg-amber-50 tw-text-amber-700 tw-border tw-border-amber-200;
+}
+
+.stock-badge.out-of-stock {
+  @apply tw-bg-red-50 tw-text-red-700 tw-border tw-border-red-200;
+}
+
+/* Quick Actions */
+.quick-actions {
+  @apply tw-space-y-3;
+}
+
+/* Success Message */
+.admin-success-message {
+  @apply tw-flex tw-items-center tw-gap-3 tw-p-4 tw-bg-green-50 tw-text-green-800 tw-border tw-border-green-200 tw-rounded-lg tw-mb-4;
+}
+
+.admin-error-message {
+  @apply tw-flex tw-items-center tw-gap-3 tw-p-4 tw-bg-red-50 tw-text-red-800 tw-border tw-border-red-200 tw-rounded-lg tw-mb-4;
+}
+
+/* Back Button */
+.admin-header-with-back {
+  @apply tw-flex tw-items-center tw-gap-3;
+}
+
+.admin-back-button {
+  @apply tw-p-2 tw-rounded-lg tw-text-gray-600 hover:tw-bg-gray-100 tw-transition-colors;
+}
+
+.header-actions {
+  @apply tw-flex tw-items-center tw-gap-3;
+}
+
+/* Empty Table State */
+.empty-table {
+  @apply tw-text-center tw-py-12;
+}
+
+.empty-table > div {
+  @apply tw-flex tw-flex-col tw-items-center;
+}
+
+.empty-table span.material-symbols-outlined {
+  @apply tw-text-6xl tw-text-gray-300 tw-mb-4;
+}
+
+.empty-table p {
+  @apply tw-text-gray-600 tw-mb-4;
+}

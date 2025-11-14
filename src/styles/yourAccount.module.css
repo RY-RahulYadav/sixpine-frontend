@@ -1,0 +1,187 @@
+.container {
+  padding: 20px 0px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+   max-width: 1500px; 
+  margin: 0 auto;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: left;
+  color: #222;
+}
+
+/* Common Grid Layout */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Card Styling */
+.card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  max-height: 160px; 
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  text-align: left;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.icon {
+  font-size: 1.6rem;
+  color: #104ec8;
+  margin-bottom: 8px;
+}
+
+.card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.card p {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+.card a {
+  color: #104ec8;
+  text-decoration: none;
+}
+
+.card a:hover {
+  text-decoration: underline;
+}
+
+/* Divider */
+.divider {
+  border: 0;
+  border-top: 1px solid #ddd;
+  margin: 30px 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* Tablets: 768px */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    
+  }
+
+  .card {
+    max-height: 200px;
+    padding: 14px;
+    
+  }
+
+  .heading {
+    font-size: 1.8rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+  }
+
+  .card p {
+    font-size: 0.85rem;
+  }
+}
+
+/* Large Mobile: 425px */
+@media (max-width: 425px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .card {
+    height: auto;
+    padding: 12px;
+  }
+
+  .heading {
+    font-size: 1.6rem;
+  }
+
+  .card h3 {
+    font-size: 0.95rem;
+  }
+
+  .card p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Small Mobile: 375px */
+@media (max-width: 375px) {
+  .container {
+    padding: 15px;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 10px;
+  }
+
+  .card h3 {
+    font-size: 0.9rem;
+  }
+
+  .card p {
+    font-size: 0.75rem;
+  }
+
+  .icon {
+    font-size: 1.4rem;
+  }
+}
+
+/* Extra Small Mobile: 325px */
+@media (max-width: 325px) {
+  .container {
+    padding: 10px;
+  }
+
+  .heading {
+    font-size: 1.3rem;
+  }
+
+  .card h3 {
+    font-size: 0.85rem;
+  }
+
+  .card p {
+    font-size: 0.7rem;
+  }
+
+  .icon {
+    font-size: 1.2rem;
+  }
+}

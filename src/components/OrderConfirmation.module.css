@@ -1,0 +1,21 @@
+.confirmationContainer {
+    font-family: "Amazon Ember", Arial, sans-serif;
+    font-size: 12px;
+    color: #565959;
+    padding: 20px;
+       background-color: #fff;
+}
+
+.confirmationContainer p {
+    margin: 0 0 1em 0;
+}
+
+.confirmationContainer a {
+    color: #007185;
+    text-decoration: none;
+}
+
+.confirmationContainer a:hover {
+    text-decoration: underline;
+    color: #C7511F;
+}

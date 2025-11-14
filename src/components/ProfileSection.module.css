@@ -1,0 +1,731 @@
+/* Profile Section Styles with sx-profile- prefix */
+
+/* ======================
+   Container & Layout
+   ====================== */
+.sx-profile-hub-container {
+  display: flex;
+  justify-content: flex-start;
+  gap: 48px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 40px;
+  margin-bottom: 24px;
+  max-width: 1500px;
+  width: 100%;
+  padding-left: 32px;
+  padding-right: 32px;
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+.sx-profile-hub-content {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 260px); /* leave room for avatar column (200px + gap) */
+  max-width: calc(1500px - 260px);
+}
+
+/* ======================
+   Profile Header
+   ====================== */
+.sx-profile-header {
+  display: flex;
+  width: 200px;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 4px;
+  align-items: center;
+}
+
+.sx-profile-avatar {
+  width: 100px;
+  height: 100px;
+  min-width: 100px;
+  min-height: 100px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #d5d9d9;
+}
+
+.sx-profile-name-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 0;
+  padding-inline-start: 26px;
+  gap: 8px;
+}
+
+.sx-profile-name {
+  color: #0f1111;
+  text-align: center;
+  font-weight: 400;
+  word-break: break-word;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+/* ======================
+   Edit Profile Button
+   ====================== */
+.sx-edit-profile {
+  position: relative;
+}
+
+.sx-edit-pencil-icon-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+}
+
+.sx-edit-pencil-icon-button:focus {
+  border-radius: 5px;
+  outline: 3px solid #007185;
+  outline-offset: 2px;
+}
+
+.sx-edit-name-icon {
+  vertical-align: inherit;
+  color: #0f1111;
+}
+
+.sx-edit-name-icon:hover {
+  cursor: pointer;
+}
+
+/* ======================
+   Language Selector
+   ====================== */
+.sx-language-of-preference {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.sx-flag {
+  width: 24px;
+  position: relative;
+  display: inline-block;
+  height: 18px;
+  margin: 0 8px 0 0;
+  background-image: url("https://m.media-amazon.com/images/S/sash/vqXWsNPg$9994Pg.png");
+  background-size: 194px 295px;
+}
+
+.sx-flag-in {
+  background-position: 0 -166px;
+}
+
+/* ======================
+   Category & Headers
+   ====================== */
+.sx-program-grid {
+  margin-top: 24px;
+}
+
+.sx-redesign {
+  margin-top: 0;
+}
+
+.sx-context-header {
+  font-style: normal;
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sx-profile-hub-category {
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.sx-header {
+  display: flex;
+  border: 1px solid #d5d9d9;
+  border-radius: 4px;
+  background-color: #f7fafa;
+  flex-direction: row;
+  padding: 14px 18px;
+}
+
+.sx-title {
+  font-style: normal;
+  font-weight: 400;
+  padding-inline-end: 12px;
+  line-height: 32px;
+  font-size: 24px;
+}
+
+.sx-subtitle {
+  font-style: normal;
+  font-weight: 400;
+  color: #565959;
+  border-inline-start: 1px solid #565959;
+  line-height: 24px;
+  font-size: 18px;
+  padding-inline-start: 12px;
+  padding-top: 5px;
+}
+
+.sx-content {
+  margin-top: 16px;
+}
+
+.sx-primary {
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 36px;
+}
+
+.sx-secondary {
+  font-size: 16px;
+  line-height: 24px;
+  color: #565959;
+}
+
+/* ======================
+   Section Headers
+   ====================== */
+.sx-section-header {
+  display: flex;
+  flex-direction: column;
+  font-style: normal;
+  line-height: 24px;
+  padding-block: 8px 12px;
+  gap: 4px;
+  margin-top: 0;
+}
+
+.sx-section-header .sx-primary {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.sx-section-header .sx-secondary {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.sx-inline-header {
+  display: flex;
+  flex-direction: row;
+  font-style: normal;
+  line-height: 24px;
+  padding-block: 16px 12px;
+  gap: 4px;
+}
+
+.sx-inline-header .sx-primary {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* ======================
+   Accordion Styles
+   ====================== */
+.sx-profile-hub-attributes-section {
+  margin-bottom: 16px;
+}
+
+.sx-accordion {
+  font-family: "Amazon Ember", "Amazon Ember Arabic", Arial, sans-serif;
+}
+
+.sx-accordion-item {
+  border-top: 1px solid #d5d9d9;
+  border-bottom: 1px solid #d5d9d9;
+}
+
+.sx-accordion-item + .sx-accordion-item {
+  margin-top: -1px;
+}
+
+.sx-accordion-header {
+  display: grid;
+  padding-bottom: 0;
+  margin: 0;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.sx-accordion-trigger {
+  align-items: center;
+  background-color: transparent;
+  border: none;
+  transition: all 0.15s;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: 1.2fr 1fr 15px;
+  overflow: hidden;
+  text-align: start;
+  text-overflow: ellipsis;
+  padding: 13px 18px;
+  cursor: pointer;
+}
+
+.sx-accordion-trigger:hover {
+  background-color: #f7fafa;
+}
+
+.sx-accordion-trigger-content {
+  color: #0f1111;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 24px;
+  font-size: 18px;
+}
+
+.sx-preview {
+  color: #565959;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  list-style: none;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.sx-chevron {
+  transition: transform 0.2s;
+}
+
+/* ======================
+   Filter Pills/Tabs
+   ====================== */
+.sx-filters-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.sx-filter-pill {
+  display: flex;
+  align-items: center;
+  padding: 13px 18px 12px 18px;
+  background: none;
+  border: none;
+  color: #000;
+  cursor: pointer;
+  text-align: center;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.sx-selected {
+  border-bottom: 2px solid #007185;
+  color: #007185;
+  font-weight: 700;
+  padding: 13px 18px 9px 18px;
+}
+
+/* ======================
+   Interest Pills
+   ====================== */
+.sx-pill-drawer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.sx-pill-drawer-label {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.sx-mako-description {
+  font-style: normal;
+  font-weight: 400;
+  color: #565959;
+  font-size: 12px;
+  padding-inline-start: 4px;
+  padding-top: 1px;
+}
+
+.sx-pill-drawer-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.sx-pill-drawer-content li {
+  list-style-type: none;
+}
+
+.sx-pill-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 8px;
+  background: #fff;
+  border: 0.524282px solid #d5d9d9;
+  box-shadow: 0 2px 5.5px rgba(0, 0, 0, 0.05);
+  border-radius: 50px;
+  cursor: pointer;
+}
+
+.sx-pill-container:hover {
+  background-color: #f7fafa;
+}
+
+.sx-pill-icon {
+  width: 12px;
+  height: auto;
+}
+
+.sx-pill-content {
+  display: inline-flex;
+  flex-direction: column;
+  height: 20px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: #032f36;
+  flex-shrink: 0;
+}
+
+/* ======================
+   Buttons
+   ====================== */
+.sx-inline-button-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 20px;
+}
+
+.sx-button {
+  display: inline-block;
+  border-radius: 100px;
+  border-width: 1px;
+  background-color: #fff;
+  border-color: #888c8c;
+  padding: 0;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  border-style: solid;
+  overflow: hidden;
+}
+
+.sx-button:hover {
+  background-color: #f7fafa;
+  border-color: #888c8c;
+}
+
+.sx-button-inner {
+  position: relative;
+  display: block;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.sx-button-text {
+  white-space: nowrap;
+  display: block;
+  padding: 5px 11px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+  color: #0f1111;
+  width: 100%;
+  height: 100%;
+}
+
+.sx-button-primary {
+  background-color: #ffd814;
+  border-color: #ffd814;
+}
+
+.sx-button-primary:hover {
+  border-color: #ffce12;
+  background-color: #ffce12;
+}
+
+.sx-button-primary .sx-button-inner {
+  box-shadow: 0 2px 5px 0 rgba(213, 217, 217, 0.5);
+}
+
+.sx-button-primary .sx-button-text {
+  color: #0f1111;
+}
+
+.sx-button-disabled {
+  background-color: #f0f2f2;
+  border-color: #d5d9d9;
+  cursor: default;
+}
+
+.sx-button-disabled:hover {
+  background-color: #f0f2f2;
+  border-color: #d5d9d9;
+}
+
+.sx-button-disabled .sx-button-text {
+  color: #565959;
+}
+
+.sx-button-input {
+  color: transparent;
+  opacity: 0.01;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+}
+
+/* ======================
+   Footer
+   ====================== */
+.sx-footer-container {
+  padding-block: 0px 8px;
+  padding-inline: 16px;
+}
+
+/* ======================
+   Utility Classes
+   ====================== */
+.sx-desktop {
+  /* Desktop modifier class */
+}
+
+.sx-aok-hidden {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.sx-a-popover-preload {
+  display: none;
+}
+
+/* ======================
+   Edit Profile Modal
+   ====================== */
+.sx-edit-name-changeover {
+  position: absolute;
+  top: 10%;
+  inset-inline-start: 0;
+}
+
+.sx-a-changeover {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  overflow: visible;
+  z-index: 1200;
+}
+
+.sx-a-changeover-inner {
+  background-color: #fff;
+  border-color: #d5d9d9;
+  border-radius: 12px;
+  color: #0f1111;
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 400;
+  text-align: center;
+  border-width: 1px;
+  border-style: solid;
+  padding: 12px 16px;
+  width: 300px;
+}
+
+.sx-a-icon {
+  background-image: url(https://m.media-amazon.com/images/S/sash/McBZv0ZvnbehkIx.png);
+  background-size: 400px 900px;
+  background-repeat: no-repeat;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.sx-a-icon-checkmark-inverse {
+  width: 15px;
+  height: 17px;
+  background-position: -172px -82px;
+  opacity: 0.6;
+  margin-right: 0.6em;
+  vertical-align: baseline;
+}
+
+.sx-a-size-medium {
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.sx-edit-profile-image-wrapper {
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.sx-edit-profile-image {
+  width: 70px;
+  height: 70px;
+  margin-top: 10px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sx-change-avatar-link-wrapper {
+  margin-top: 10px;
+}
+
+.sx-change-avatar-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sx-change-avatar-link {
+  cursor: pointer;
+  color: #007185;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.sx-change-avatar-link:hover {
+  text-decoration: underline;
+}
+
+.sx-a-text-normal {
+  font-weight: 400;
+  font-style: normal;
+  text-transform: none;
+  text-decoration-line: none;
+}
+
+.sx-a-size-base-plus {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.sx-a-color-link {
+  color: #007185;
+}
+
+.sx-edit-error {
+  color: #ba0933;
+  font-size: 90%;
+  padding-inline-start: 1px;
+}
+
+.sx-edit-profile-buttons {
+  margin-top: 20px;
+  padding-inline-end: 4px;
+  width: 100%;
+}
+
+.sx-edit-profile-buttons::after,
+.sx-edit-profile-buttons::before {
+  display: table;
+  content: '';
+  line-height: 0;
+  font-size: 0;
+}
+
+.sx-edit-profile-buttons::after {
+  clear: both;
+}
+
+.sx-a-row {
+  width: 100%;
+}
+
+.sx-a-column {
+  margin-right: 2%;
+  float: left;
+  min-height: 1px;
+  overflow: visible;
+}
+
+.sx-a-span4 {
+  width: 31.948%;
+}
+
+.sx-a-span-last {
+  margin-right: 0;
+  float: right;
+}
+
+.sx-edit-profile-cancel-button {
+  color: #565959;
+  display: block;
+  line-height: 1.35;
+  font-size: 14px;
+  padding: 5px 3px 5px 6px;
+  cursor: pointer;
+}
+
+.sx-edit-profile-cancel-button:hover {
+  text-decoration: underline;
+}
+
+.sx-edit-profile-cancel-button-wrapper {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.sx-edit-profile-cancel-button-wrapper:focus {
+  border-radius: 5px;
+  outline: 3px solid #007185;
+  outline-offset: 2px;
+}
+
+.sx-edit-profile-continue-button {
+  float: inline-end;
+}
+
+.sx-a-declarative {
+  /* Declarative styles */
+}
+
+.sx-a-section {
+  margin-bottom: 22px;
+}
+
+.sx-a-section:last-child {
+  margin-bottom: 0;
+}
+

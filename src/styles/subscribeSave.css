@@ -1,0 +1,400 @@
+/* Subscribe & Save Page Styles */
+
+.ss-container {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  background-color: #ffffff;
+}
+
+/* Hero Section */
+.ss-hero-section {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  padding: 30px 0;
+  margin-bottom: 20px;
+}
+
+.ss-hero-image {
+  flex-shrink: 0;
+  padding-left: 20px;
+}
+
+.ss-hero-svg-image {
+  width: 400px;
+  height: 420px;
+  object-fit: contain;
+  display: block;
+}
+
+.ss-hero-content {
+  flex: 1;
+}
+
+.ss-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: #0f1111;
+  margin: 0 0 14px 0;
+  line-height: 1.2;
+}
+
+.ss-description {
+  font-size: 13px;
+  color: #0f1111;
+  line-height: 1.6;
+  margin: 0 0 18px 0;
+}
+
+.ss-benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px 0;
+}
+
+.ss-benefits-list li {
+  font-size: 13px;
+  color: #0f1111;
+  line-height: 1.8;
+  padding-left: 18px;
+  position: relative;
+}
+
+.ss-benefits-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #0f1111;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.ss-shop-btn {
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  background-color: #ffd814;
+  border: 1px solid #fcd200;
+  border-radius: 999px; /* fully rounded */
+  color: #0f1111;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  box-shadow: 0 2px 5px rgba(213, 217, 217, 0.5);
+}
+
+.ss-shop-btn:hover {
+  background-color: #f7ca00;
+  border-color: #f2c200;
+}
+
+.ss-shop-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 216, 20, 0.16);
+}
+
+/* Page Counter */
+.ss-page-counter {
+  font-size: 11px;
+  color: #565959;
+  text-align: right;
+  margin: 15px 0;
+  padding-right: 10px;
+}
+
+.ss-page-counter-bottom {
+  font-size: 11px;
+  color: #565959;
+  text-align: right;
+  margin: 15px 0 25px 0;
+  padding-right: 10px;
+}
+
+/* Products Section */
+.ss-products-section {
+  margin-top: 25px;
+}
+
+.ss-products-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f1111;
+  margin: 0 0 18px 0;
+}
+
+/* Carousel */
+.ss-carousel {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.ss-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #ffffff;
+  border: 1.5px solid #0f1111;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  box-shadow: 0 2px 5px rgba(15, 17, 17, 0.15);
+  transition: all 0.2s ease;
+}
+
+.ss-carousel-btn:hover {
+  background-color: #f7f8f8;
+  border-color: #565959;
+}
+
+.ss-carousel-prev {
+  left: -22px;
+}
+
+.ss-carousel-next {
+  right: -22px;
+}
+
+.ss-carousel-btn svg {
+  color: #0f1111;
+}
+
+/* Products Grid */
+.ss-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 0 10px;
+}
+
+.ss-product-card {
+  background-color: #ffffff;
+  border: 1px solid #d5d9d9;
+  border-radius: 6px;
+  padding: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.ss-product-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.ss-product-image-wrapper {
+  width: 100%;
+  aspect-ratio: 1;
+  margin-bottom: 8px;
+  overflow: hidden;
+  border-radius: 3px;
+  background-color: #f7f8f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ss-product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.ss-product-card:hover .ss-product-image {
+  transform: scale(1.05);
+}
+
+.ss-product-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ss-product-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f1111;
+  margin: 0 0 5px 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ss-product-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+
+.ss-stars {
+  display: flex;
+  gap: 1px;
+}
+
+.ss-star {
+  font-size: 12px;
+  color: #ffa41c;
+}
+
+.ss-star.empty {
+  color: #d5d9d9;
+}
+
+.ss-reviews {
+  font-size: 10px;
+  color: #007185;
+  cursor: pointer;
+}
+
+.ss-reviews:hover {
+  color: #c7511f;
+  text-decoration: underline;
+}
+
+.ss-product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.ss-price-current {
+  font-size: 15px;
+  font-weight: 700;
+  color: #b12704;
+}
+
+.ss-price-original {
+  font-size: 11px;
+  color: #565959;
+  text-decoration: line-through;
+}
+
+.ss-product-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.ss-shop-now-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  background-color: #ffd814;
+  border: 1px solid #fcd200;
+  border-radius: 4px;
+  color: #0f1111;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ss-shop-now-btn:hover {
+  background-color: #f7ca00;
+  border-color: #f2c200;
+}
+
+.ss-add-icon-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1px solid #d5d9d9;
+  border-radius: 4px;
+  color: #0f1111;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ss-add-icon-btn:hover {
+  background-color: #f7f8f8;
+  border-color: #888c8c;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .ss-products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .ss-hero-section {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  .ss-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ss-hero-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 30px;
+  }
+
+  .ss-hero-svg-image {
+    width: 180px;
+    height: 180px;
+  }
+
+  .ss-carousel-prev {
+    left: -16px;
+  }
+
+  .ss-carousel-next {
+    right: -16px;
+  }
+
+  .ss-carousel-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media (max-width: 600px) {
+  .ss-container {
+    padding: 20px 15px;
+  }
+
+  .ss-title {
+    font-size: 24px;
+  }
+
+  .ss-description {
+    font-size: 13px;
+  }
+
+  .ss-benefits-list li {
+    font-size: 13px;
+  }
+
+  .ss-products-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .ss-hero-section {
+    padding: 20px 0;
+  }
+
+  .ss-hero-svg-image {
+    width: 140px;
+    height: 140px;
+  }
+
+  .ss-shop-btn {
+    width: 220px;
+    margin: 0 auto;
+    display: block;
+  }
+}

@@ -1,0 +1,118 @@
+.Appcontainer {
+  /* max-width: 1100px; */
+  /* margin: 0 auto; */
+  padding: 30px 0px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  margin-top: 20px;
+}
+
+.heading {
+  /* text-align: center; */
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+}
+
+.intro {
+  /* text-align: center; */
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+ 
+}
+
+.section {
+  margin-bottom: 2rem;
+  border-top: 1px solid #ccc;
+  padding-top: 1.5rem;
+}
+
+.subheading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #104ec8;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  flex-wrap: wrap;
+}
+
+.icon {
+  margin-right: 10px;
+  color: #0066cc;
+  min-width: 22px;
+  min-height: 22px;
+  flex-shrink: 0;
+}
+
+.steps {
+  padding-left: 1.2rem;
+}
+
+.steps li {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+}
+
+.contact {
+  margin-top: 1rem;
+  font-size: 1rem;
+  /* text-align: center; */
+}
+
+.contact a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.contact a:hover {
+  text-decoration: underline;
+}
+
+.iconSmall {
+  margin-right: 6px;
+  vertical-align: middle;
+  color: #0066cc;
+}
+
+.footer {
+  /* text-align: center; */
+  margin-top: 2rem;
+  font-weight: bold;
+  color: #222;
+  font-size: 1rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1024px) {
+  .heading { font-size: 2rem; }
+  .subheading { font-size: 1.3rem; }
+}
+
+@media (max-width: 768px) {
+  .Appcontainer { padding: 1.5rem; }
+  .heading { font-size: 1.8rem; }
+  .intro { font-size: 1rem; }
+  .list li, .steps li { font-size: 0.95rem; }
+}
+
+@media (max-width: 480px) {
+  .Appcontainer { padding: 1rem;  }
+  .heading { font-size: 1.5rem; }
+  .intro { font-size: 0.95rem; }
+  .subheading { font-size: 1.2rem; }
+  .list li, .steps li { font-size: 0.9rem; }
+  .footer { font-size: 0.9rem; }
+}

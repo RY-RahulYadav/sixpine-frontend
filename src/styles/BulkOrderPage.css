@@ -1,0 +1,35 @@
+/* Bulk Order Page Container Styling */
+.bulkorder_container {
+ 
+  max-width: 1500px !important;
+  padding: 0 !important;
+  margin: 0 auto !important;
+}
+
+.bulkorder_container > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Add spacing between sections - matching homepage */
+.bulkorder_container > section:not(:first-child) {
+  margin-top: 30px;
+}
+
+/* Ensure smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Responsive adjustments - matching homepage container */
+@media (max-width: 768px) {
+  .bulkorder_container {
+    margin: 0 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .bulkorder_container {
+    margin: 0 10px !important;
+  }
+}

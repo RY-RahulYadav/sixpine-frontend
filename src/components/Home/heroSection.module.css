@@ -1,0 +1,1002 @@
+
+
+.heroContainer {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Standardized vertical spacing */
+  margin-top: 40px;
+  margin-bottom: 0;
+  padding-top: 0px;
+  /* preserve original horizontal padding (was 0) */
+  padding-left: 0;
+  padding-right: 0;
+  min-height: 100%;
+  position: relative;
+  z-index: 10;
+  background: white;
+}
+
+.heroWrapper {
+  margin: 0 auto;
+  max-width: 100%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px; /* increased for better visual balance between big left hero and right panels */
+  height: 450px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+}
+
+/* Main Carousel Styles */
+.mainCarousel {
+  position: relative;
+  border-radius: 10px ; /* rounded left corners to match design */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.5s ease-in-out; /* Smooth background transition */
+  height: 100%;
+}
+
+.navArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  /* faded gray circular background for arrows */
+  background-color: rgba(0,0,0,0.18);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9;
+  transition: all 0.25s ease;
+  color: #fff; /* white chevrons on gray background */
+}
+
+.navArrow:hover {
+  background-color: rgba(0,0,0,0.26);
+  transform: translateY(-50%) scale(1.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.navArrowLeft {
+  left: 10px; /* keep arrows away from text */
+}
+
+.navArrowRight {
+  right: 10px; /* keep arrows away from text */
+}
+
+.slideContent {
+  display: flex;
+  width: 100%;
+  /* add extra horizontal padding so arrows don't overlap text */
+  padding: 0 60px;
+  /* For smooth content transition (optional, depends on desired effect) */
+  transition: opacity 0.5s ease-in-out;
+  /* background-color: #FF6B35; */
+}
+
+.slideText {
+  flex: 1;
+  color: white;
+  z-index: 1;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.slideSubtitle {
+  font-size: 18px;
+  /* margin-bottom: 8px; */
+  font-weight: 300;
+  opacity: 0.95;
+}
+
+.slideTitle {
+  font-size: 48px;
+  font-weight: 200;
+  margin-bottom: 25px;
+  line-height: 1.2;
+  position: relative;
+  display: inline-block;
+}
+
+.slideTitle::after {
+  content: "";
+  display: block;
+  width: 150px;
+  height: 0.5px;
+  background: #fff;
+  /* margin-top: 10px; */
+}
+
+.priceSection {
+  margin-bottom: 35px;
+}
+
+.startingFrom {
+  font-size: 16px;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+
+.priceContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price {
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.asterisk {
+  font-size: 36px;
+  opacity: 0.8;
+}
+
+.buyNowBtn {
+  background-color: rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  color: white;
+  padding: 5px 20px;
+  font-size: 16px;
+  width: 70%;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.buyNowBtn:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+}
+
+.productImage {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* Needed for absolute positioning of image if desired for transition */
+}
+
+.imagePlaceholder {
+  width: 100%; 
+  max-width: 400px; 
+  height: 100%; 
+  max-height: 320px;
+  border-radius: 10px; 
+  overflow: hidden;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+}
+
+.productImg {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover; /* Or 'cover' */
+  display: block;
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; 
+}
+
+.brandLogo {
+  position: absolute;
+  bottom: 15px;
+  left: 40px;
+  color: white;
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.slideIndicators {
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  display: flex;
+  gap: 10px;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background-color: white;
+  transform: scale(1.2);
+}
+
+.indicator:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Right Panels Styles */
+.rightPanels {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* consistent spacing between right panels */
+  align-items: stretch; /* ensure panels align uniformly */
+}
+
+/* Bedroom Panel */
+.bedroomPanel {
+  background-image: url("/images/Home/bedroomPanel.webp");
+  background-size: cover; /* Use cover to ensure it fills the background */
+  background-position: center;
+  border-radius:10px;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+  flex: 1; /* Make it take available height */
+  display: flex; /* For aligning content */
+  align-items: flex-start;
+}
+
+.bedroomContent {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  align-items: flex-start;
+  position: relative;
+  width: 100%;
+  padding-top: 47px;}
+
+.bedroomText {
+  flex: 1;
+  position: relative;
+  color: white; /* Ensure text is visible */
+}
+
+.specialDealBadge {
+  position: absolute;
+  top: -30px;
+  left: -20px;
+  background: linear-gradient(45deg, #ff6b35, #ff8c42);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 0 20px 20px 0;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.uptoText {
+  font-size: 14px;
+  opacity: 0.9;
+  font-weight: bold;
+  margin-top: 5px; /* reduced so bedroom aligns with mattress panel padding */
+}
+
+.discountPrice {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  line-height: 1;
+}
+
+.instantDiscount {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 20px;
+  font-weight: 400;
+}
+
+.bedroomBuyBtn {
+  background-color: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  padding: 8px 18px;
+  font-size: 11px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.bedroomBuyBtn:hover {
+  background-color: rgba(29, 27, 27, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Mattress Panel */
+.mattressPanel {
+  background-image: url("/images/metress.png");
+
+  background-size: cover;
+  background-position: center;
+  border-radius: 10px;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+  flex: 1; /* Make it take available height */
+  display: flex;
+  align-items: flex-start;
+}
+
+.shipsBadge {
+  position: absolute;
+  left: 0px;
+  background: linear-gradient(45deg, #4a90e2, #357abd);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 0 20px 20px 0;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.mattressContent {
+  display: flex;
+  justify-content: space-between;
+  height: 100%;
+  align-items: flex-start;
+  padding-top: 35px;
+  width: 100%;
+  color: #333;
+}
+
+.mattressText {
+  flex: 1;
+}
+
+.mattressTitle {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 8px 0 0px 0;
+  letter-spacing: 1px;
+}
+
+.mattressSubtitle {
+  font-size: 12px;
+  opacity: 0.85;
+  margin: 0 0 10px 0;
+  font-weight: 400;
+}
+
+.mattressPriceSection {
+  margin-bottom: 10px;
+}
+
+.startingText {
+  font-size: 12px;
+  opacity: 0.8;
+  display: block;
+  margin-bottom: 5px;
+  position: relative;
+  font-weight: 600;
+}
+
+.startingText::before {
+  content: "";
+  display: block;
+  width: 70px;
+  height: 1px;
+  background: #aba8a8;
+  margin-bottom: 6px;
+}
+
+.mattressPrice {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.freeDelivery {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 400;
+  font-weight: 600;
+}
+
+/* Customer Support Buttons */
+
+.supportButtons {
+  position: fixed;
+  right:0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.supportBtn {
+  border-radius: 12px 0 0 12px;
+  padding: 5px 5px;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.supportBtn:hover {
+  transform: scale(1.05) translateY(0.5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.phoneBtn {
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+}
+
+.expertBtn {
+  background: linear-gradient(135deg, #4a90e2, #357abd);
+}
+
+.supportIcon {
+  /* margin-bottom: px; */
+  display: flex;
+  justify-content: center;
+}
+
+.supportText {
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.supportText div:first-child {
+  margin-bottom: 2px;
+}
+
+
+
+
+.popupOverlay {
+  position: fixed;
+  top: 20%;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background: rgba(0, 0, 0, 0.5); */
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  z-index: 1000;
+}
+
+.popupContent {
+  background: white;
+  width: 320px;
+  padding: 10px;
+  margin-top: 80px;
+  /* margin-right: 20px; */
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Callback specific variations */
+.callbackContent {
+  /* Match the phone popup width so both modals look consistent */
+  width: 320px;
+  /* Slightly reduced padding to match compact screenshot */
+  padding: 14px 14px 18px 14px;
+  /* Keep drawer visually similar height as phone popup; grow with content */
+  min-height: 320px;
+}
+
+.callbackHeader {
+  text-align: center;
+  padding-top: 6px;
+}
+
+.callbackTitle {
+  font-size: 18px;
+  margin: 0 0 6px 0;
+  color: #333;
+}
+
+.callbackSubtitle {
+  font-size: 12px;
+  color: #777;
+  margin: 0;
+}
+
+.callbackForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.formGroup {
+  width: 100%;
+}
+
+.inputField {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inputField:focus {
+  border-color: #ff8c42;
+  box-shadow: 0 0 0 3px rgba(255,140,66,0.08);
+}
+
+.submitBtn {
+  background: linear-gradient(135deg,#ff6b35,#ff8c42);
+  color: white;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+
+.submitBtn:hover {
+  filter: brightness(0.95);
+}
+
+.visitBanner {
+  margin-top: 6px;
+  background: #fef0ec;
+  padding: 10px;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Close Icon */
+.closeIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #333;
+  transition: color 0.2s;
+}
+
+.closeIcon:hover {
+  color: #333;
+}
+
+/* Header */
+.popupHeader {
+  text-align: center;
+}
+
+.bulletPoint {
+  font-size: 12px;
+  color: #4caf50;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.popupTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.popupTime {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+
+/* Phone Display - TEXT ONLY with Icon */
+.phoneDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.phoneIcon {
+  flex-shrink: 0;
+  ;
+}
+
+.phoneNumber {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.phoneNumber:hover {
+  color: #ff5722;
+}
+
+/* OR Divider */
+.orDivider {
+  text-align: center;
+  font-weight: bold;
+  color: #999;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Chat Button - Orange */
+.chatButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #ff5722;
+  color: white;
+  padding: 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  transition: background 0.3s;
+  border: none;
+  cursor: pointer;
+
+   width: fit-content;
+  margin: 0 auto; 
+ 
+}
+
+.chatButton:hover {
+  background: #e64a19;
+}
+
+.chatButton img {
+  filter: brightness(1);
+}
+
+/* Footer Text */
+.footerText {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin: 5px 0 0 0;
+}
+
+.footerText strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .popupOverlay
+  {
+    top:35%;
+  }
+  .popupContent {
+    width: 90%;
+    margin: 60px 15px 0 0;
+  }
+  
+  .phoneNumber {
+    font-size: 18px;
+  }
+}
+
+
+
+
+
+
+
+/* Banner Container */
+.bannerContainer {
+  margin-top: 40px;
+}
+
+.bannerImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-radius:10px
+}
+
+/* -------------------- Responsive -------------------- */
+
+/* Laptop & Large Tablets (≤1024px) */
+@media (max-width: 1024px) {
+  .heroGrid {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 15px;
+  }
+  .slideTitle {
+    font-size: 42px;
+  }
+  .productImage {
+    padding-left: 10px;
+  }
+  .imagePlaceholder {
+    max-width: 100%;
+    max-height: 280px;
+  } /* Adjusted max-height */
+}
+
+/* Tablets (≤768px) */
+@media (max-width: 768px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 10px;
+
+  }
+  .slideContent {
+    padding: 15px 35px;
+    flex-direction: row;
+    text-align: start;
+  }
+
+  .slideText {
+    padding-right: 0;
+    margin-bottom: 20px;
+    align-items: self-start;
+  } /* Center text */
+  /* .slideTitle::after { margin: 10px auto; }  */
+  .slideTitle {
+    font-size: 34px;
+  }
+  .price {
+    font-size: 32px;
+  }
+  .imagePlaceholder {
+    width: 100%;
+    height: 250px;
+    max-width: 350px;
+    margin: auto;
+  } /* Adjusted image sizing */
+  .rightPanels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  
+}
+/* Mobiles (≤425px) */
+@media (max-width: 425px) {
+  .heroContainer {
+    padding: 0 10px;
+  }
+  .navArrow {
+    width: 20px;
+    height: 20px;
+    top: 47%;
+  }
+  .slideTitle::after {
+    display: none;
+  }
+
+  .slideContent {
+    display: flex;
+    flex-direction: row; /* Keep content in a row */
+    justify-content: space-between;
+    align-items: center;
+    text-align: start;
+    padding: 10px 15px;
+    flex-wrap: nowrap; /* Prevent wrapping */
+    /* gap: 10px;  */
+    /* background-color: #FF6B35; */
+  }
+
+  .slideTitle {
+    font-size: 20px;
+    line-height: 1.2;
+    flex-shrink: 1; /* Allow title to shrink if needed */
+  }
+
+  .slideSubtitle {
+    font-size: 12px;
+    flex-shrink: 1;
+  }
+
+  .slideText {
+    margin-bottom: 0;
+    padding-right: 0;
+    flex-shrink: 1;
+  }
+
+  .price {
+    font-size: 18px;
+  }
+  .asterisk {
+    font-size: 26px;
+    opacity: 0.8;
+  }
+
+  .buyNowBtn {
+    font-size: 12px;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    flex-shrink: 0; /* Keep button readable */
+  }
+
+  .imagePlaceholder {
+    width: 100%; /* Adjust smaller width */
+    height: 100%; /* Adjust smaller height */
+    border-radius: 20px;
+    flex-shrink: 0; /* Prevent image from shrinking too much */
+  }
+
+  .rightPanels {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .discountPrice {
+    font-size: 20px;
+  }
+
+  .mattressTitle {
+    font-size: 16px;
+  }
+
+  .bedroomBuyBtn {
+    font-size: 10px;
+    padding: 5px 10px;
+  }
+
+  .brandLogo {
+    display: none;
+  }
+
+  .slideIndicators {
+    right: 10px;
+    bottom: 5px;
+  }
+  .supportButtons
+  {
+  top: 70%;
+}
+
+.submitBtn {
+  background: linear-gradient(135deg,#ff6b35,#ff8c42);
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  cursor: pointer;
+  /* Make the submit button narrower and centered like the screenshot */
+  width: 140px;
+  display: block;
+  margin: 6px auto 0 auto;
+  box-shadow: 0 6px 14px rgba(255,108,60,0.18);
+}
+.submitBtn:hover {
+  filter: brightness(0.95);
+}
+
+}
+
+@media (max-width: 375px) {
+  .slideTitle {
+    font-size: 20px;
+  }
+  .slideSubtitle {
+    font-size: 12px;
+  }
+  .price {
+    font-size: 20px;
+  }
+  .buyNowBtn {
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+  .imagePlaceholder {
+    height: 180px;
+    max-width: 200px;
+  }
+  .discountPrice {
+    font-size: 22px;
+  }
+  .mattressTitle {
+    font-size: 16px;
+  }
+  /* .supportButtons { display: none; } */
+}
+
+/* Extra Small Mobiles (≤325px) */
+@media (max-width: 325px) {
+  .slideTitle {
+    font-size: 18px;
+  }
+  .slideSubtitle {
+    font-size: 10px;
+  }
+  .price {
+    font-size: 18px;
+  }
+  .buyNowBtn {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  .imagePlaceholder {
+    height: 150px;
+    max-width: 180px;
+  }
+  .discountPrice {
+    font-size: 20px;
+  }
+  .mattressTitle {
+    font-size: 14px;
+  }
+  .bedroomBuyBtn {
+    font-size: 9px;
+    padding: 5px 10px;
+  }
+  .slideContent {
+    padding: 15px;
+  }
+}
+
+.bannerImage {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* Optional: Responsive height for smaller screens */
+@media (max-width: 768px) {
+  .bannerContainer {
+    margin-top: 10px; 
+    /* padding: 0 10px; */
+  }
+  .bannerImage {
+    height: auto;
+  }
+}

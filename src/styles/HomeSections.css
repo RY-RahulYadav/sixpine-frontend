@@ -1,0 +1,102 @@
+/* HomeSections.css - Global section styling for homepage */
+
+/* Unified Section Spacing System */
+.hero-section {
+  margin-top: 30px;
+  padding: 0;
+}
+
+.category-section {
+    margin-top: 30px;
+
+  /* padding: 25px 0; */
+  /* background-color: #f9f9f9; */
+  /* border-radius: 12px; */
+  /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03); */
+}
+
+.featured-section {
+    margin-top: 30px;
+
+  /* padding: 25px 0; */
+  /* removed decorative separator to prevent lines between sections */
+  position: relative;
+}
+
+.collections-section {
+  /* padding: 25px 0; */
+}
+
+.furniture-section {
+  /* padding: 25px 0; */
+  /* background-color: #f9f9f9;
+  border-radius: 12px; */
+}
+
+.offers-section {
+  padding: 25px 0;
+}
+
+.features-section {
+  padding: 30px 20px 25px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.banner-section {
+  padding: 0;
+}
+
+/* Responsive adjustments - maintaining consistent spacing ratios */
+@media (max-width: 768px) {
+  .hero-section {
+    margin-bottom: 35px;
+    padding: 0;
+  }
+  
+  .category-section,
+  .featured-section,
+  .collections-section,
+  .furniture-section,
+  .offers-section {
+    margin: 35px 0;
+    padding: 20px 0;
+  }
+  
+  .features-section {
+    margin: 35px 0;
+    padding: 25px 15px 20px;
+  }
+  
+  .banner-section {
+    margin: 35px 0;
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    margin-bottom: 25px;
+    padding: 0;
+  }
+  
+  .category-section,
+  .featured-section,
+  .collections-section,
+  .furniture-section,
+  .offers-section {
+    margin: 25px 0;
+    padding: 15px 0;
+  }
+  
+  .features-section {
+    margin: 25px 0;
+    padding: 20px 10px 15px;
+  }
+  
+  .banner-section {
+    margin: 25px 0;
+    padding: 0;
+  }
+}

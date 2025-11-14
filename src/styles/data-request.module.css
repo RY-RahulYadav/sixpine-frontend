@@ -1,0 +1,135 @@
+.Datacontainer {
+  max-width: 100%;
+  margin: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding:60px 30px;
+  /* color: #222; */
+}
+
+.heading {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 5px;
+
+}
+
+.subtext {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.cardContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  margin-top: 20px;
+  /* background-color: #b41111; */
+   /* width: 20px;
+  height: 25px; */
+  /* border-radius: 50%;  */
+
+}
+
+.textContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.description {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.4;
+}
+
+.requestBtn {
+  background: transparent;
+  border: 1px solid #0066c0;
+  color: #0066c0;
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  /* height: fit-content; */
+  transition: background 0.2s, color 0.2s;
+  width: 150px;       /* fixed width across all cards */
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 20px;
+}
+
+.requestBtn:hover {
+  background: #0066c0;
+  color: #fff;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+.Datacontainer {
+  max-width: 100%;
+ padding: 60px 20px;
+}
+
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+     /* justify-content: center; */
+  }
+  .requestBtn {
+    margin-top: -10px;
+   
+  }
+}
+
+@media (max-width: 425px) {
+  .heading {
+    text-align: center;
+  }
+  .subtext {
+    text-align: center;
+  }
+  .requestBtn {
+    /* margin-top: -10px; */
+    margin:auto;
+    width: 50%;
+  }
+  .icon
+  {
+    display: none;
+  }
+}
+@media (max-width: 425px) {
+  .requestBtn {
+    /* margin-top: -10px; */
+    margin:auto;
+    width: 100%;
+  }
+}

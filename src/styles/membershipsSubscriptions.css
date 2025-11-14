@@ -1,0 +1,254 @@
+/* Memberships & Subscriptions Page Styles */
+
+.msp-container {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+/* Header & Breadcrumb */
+.msp-header {
+  margin-bottom: 15px;
+}
+
+.msp-breadcrumb {
+  font-size: 12px;
+  color: #565959;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.msp-breadcrumb-link {
+  color: #007185;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.msp-breadcrumb-link:hover {
+  color: #c7511f;
+  text-decoration: underline;
+}
+
+.msp-breadcrumb-separator {
+  color: #565959;
+  margin: 0 2px;
+}
+
+.msp-breadcrumb-current {
+  color: #565959;
+}
+
+/* Page Title */
+.msp-page-title {
+  font-size: 28px;
+  font-weight: 400;
+  color: #0f1111;
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+}
+
+/* Filters Section */
+.msp-filters-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e7e7e7;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.msp-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.msp-filter-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f1111;
+  white-space: nowrap;
+}
+
+.msp-filter-select {
+  padding: 6px 28px 6px 10px;
+  font-size: 13px;
+  color: #0f1111;
+  background-color: #f0f2f2;
+  border: 1px solid #d5d9d9;
+  border-radius: 8px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23565959' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  min-width: 180px;
+  transition: all 0.2s ease;
+}
+
+.msp-filter-select:hover {
+  background-color: #e3e6e6;
+  border-color: #888c8c;
+}
+
+.msp-filter-select:focus {
+  outline: none;
+  border-color: #007185;
+  box-shadow: 0 0 0 3px rgba(0, 113, 133, 0.15);
+}
+
+.msp-search-group {
+  margin-left: auto;
+}
+
+.msp-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.msp-search-input {
+  width: 280px;
+  padding: 8px 40px 8px 12px;
+  font-size: 13px;
+  color: #0f1111;
+  border: 1px solid #888c8c;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.msp-search-input::placeholder {
+  color: #888c8c;
+}
+
+.msp-search-input:focus {
+  outline: none;
+  border-color: #e77600;
+  box-shadow: 0 0 0 3px rgba(231, 118, 0, 0.15);
+}
+
+.msp-search-btn {
+  position: absolute;
+  right: 2px;
+  background-color: #0f1111;
+  border: none;
+  border-radius: 0 3px 3px 0;
+  padding: 9px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+.msp-search-btn:hover {
+  background-color: #374151;
+}
+
+.msp-search-btn svg {
+  color: #ffffff;
+}
+
+/* No Subscription Message */
+.msp-no-subscription {
+  text-align: center;
+  padding: 30px 20px;
+  margin-bottom: 30px;
+}
+
+.msp-no-subscription-text {
+  font-size: 14px;
+  color: #565959;
+  margin: 0;
+}
+
+/* Help Section */
+.msp-help-section {
+  text-align: center;
+  padding: 20px 0 30px 0;
+  margin-bottom: 20px;
+}
+
+.msp-help-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f1111;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.msp-help-link {
+  color: #007185;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.msp-help-link:hover {
+  color: #c7511f;
+  text-decoration: underline;
+}
+
+/* Page Counter */
+.msp-page-counter {
+  font-size: 11px;
+  color: #565959;
+  text-align: right;
+  margin: 15px 0;
+  padding-right: 10px;
+}
+
+.msp-page-counter-middle {
+  margin: 20px 0;
+}
+
+/* Products Section */
+.msp-products-section {
+  margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .msp-filters-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .msp-search-group {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .msp-search-input {
+    width: 100%;
+  }
+
+  .msp-filter-select {
+    min-width: 100%;
+  }
+
+  .msp-filter-group {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .msp-container {
+    padding: 15px;
+  }
+
+  .msp-page-title {
+    font-size: 22px;
+  }
+
+  .msp-help-title {
+    font-size: 16px;
+  }
+
+  .msp-filters-section {
+    gap: 12px;
+  }
+}

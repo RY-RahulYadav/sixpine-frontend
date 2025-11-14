@@ -1,0 +1,291 @@
+/* loginsecurity.module.css */
+
+.logincontainer {
+    font-family: Arial, sans-serif;
+    width: 100%;
+    margin:  auto;
+    padding: 60px 0px;
+    
+}
+
+
+.header {
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.header a {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.header a:hover {
+    text-decoration: underline;
+}
+
+.main
+{
+  border: 1px solid #ddd; 
+    /* border-radius: 8px; */
+    background-color: #fff;
+    padding:  0 20px;
+  
+}
+
+.sectionTitle {
+    font-size: 1.8em;
+    color: #333;
+    /* margin-bottom: 25px; */
+    padding-bottom: 10px;
+    /* border-bottom: 1px solid #eee; */
+    
+}
+
+.securitySection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+}
+
+.securityItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; 
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.securityItem:last-child {
+    border-bottom: none; /* No border for the last item */
+}
+
+.securityInfo {
+    flex-grow: 1;
+}
+
+.label {
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+
+.value {
+    color: #333;
+    font-size: 1em;
+    display: block;
+}
+
+.description {
+    font-size: 0.85em;
+    color: #777;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.editInput {
+    width: calc(100% - 20px); /* Adjust width as needed */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+.securityActions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.editButton,
+.saveButton,
+.cancelButton,
+.manageButton {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+   
+}
+.saveButton,
+.cancelButton{
+   margin-top: 25px;
+}
+
+.editButton {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.editButton:hover {
+    background-color: #e0e0e0;
+}
+
+.saveButton {
+    background-color: #28a745;
+    color: white;
+}
+
+.saveButton:hover {
+    background-color: #218838;
+}
+
+.cancelButton {
+    background-color: #dc3545;
+    color: white;
+}
+
+.cancelButton:hover {
+    background-color: #c82333;
+}
+
+
+
+.manageButton {
+    background-color: #007bff;
+    color: white;
+}
+
+.manageButton:hover {
+    background-color: #0056b3;
+}
+
+
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .securityItem {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .securityActions {
+        margin-top: 10px;
+        justify-content: flex-end; /* Align buttons to the right */
+         flex-direction: column;
+    }
+
+    .editInput {
+        width: 100%;
+    }
+}
+
+
+
+/* Tablets (<=768px) */
+@media (max-width: 768px) {
+    .logincontainer {
+        width: 100%;
+     padding: 40px 20px;
+    }
+
+    .sectionTitle {
+        font-size: 1.5em;
+    }
+
+    .securityItem {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    .securityInfo {
+        flex: 1 1 100%;
+    }
+
+    .editInput {
+        max-width: 100%;
+    }
+
+    .securityActions {
+        justify-content: flex-start;
+    }
+}
+
+/* Mobile Large (<=425px) */
+@media (max-width: 425px) {
+    .sectionTitle {
+        font-size: 1.3em;
+    }
+
+    .label {
+        font-size: 1em;
+    }
+
+    .value {
+        font-size: 0.95em;
+    }
+
+    .description {
+        font-size: 0.8em;
+    }
+    
+
+    .editButton,
+    .saveButton,
+    .cancelButton,
+    .manageButton {
+        padding: 6px 12px;
+        font-size: 0.85em;
+        margin-top: 10px;
+    }
+}
+
+/* Mobile Medium (<=375px) */
+@media (max-width: 375px) {
+    .sectionTitle {
+        font-size: 1.2em;
+    }
+
+    .label {
+        font-size: 0.95em;
+    }
+
+    .value {
+        font-size: 0.9em;
+    }
+
+    .description {
+        font-size: 0.75em;
+    }
+
+    .editButton,
+    .saveButton,
+    .cancelButton,
+    .manageButton {
+        padding: 5px 10px;
+        font-size: 0.8em;
+    }
+}
+
+/* Mobile Small (<=325px) */
+@media (max-width: 325px) {
+    .sectionTitle {
+        font-size: 1.1em;
+    }
+
+    .label {
+        font-size: 0.9em;
+    }
+
+    .value {
+        font-size: 0.85em;
+    }
+
+    .description {
+        font-size: 0.7em;
+    }
+
+    .editButton,
+    .saveButton,
+    .cancelButton,
+    .manageButton {
+        padding: 4px 8px;
+        font-size: 0.75em;
+    }
+}

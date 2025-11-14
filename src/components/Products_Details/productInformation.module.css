@@ -1,0 +1,184 @@
+.infocontainer {
+  padding: 0 0px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  margin-top: 60px; /* Match home page section spacing */
+  margin-bottom: 30px;
+}
+
+.heading {
+  font-size: 2rem;
+  font-weight: 700;
+  /* text-align: left; */
+  /* margin-bottom: 20px; */
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.card {
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 10px;
+  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); */
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.card ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.card ul li::before {
+  content: "✔";
+  margin-right: 8px;
+  color: green;
+}
+
+.description h3 {
+  font-size: 1.9rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.description p {
+  margin-bottom: 10px;
+  line-height: 1.7;
+  font-size: 1.05rem;
+  color: #333;
+}
+
+.description ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.description ul li::before {
+  content: "✔";
+  margin-right: 8px;
+  color: green;
+}
+
+/* ============================= */
+/* ✅ RESPONSIVE BREAKPOINTS */
+/* ============================= */
+
+/* Large screens (Desktops > 1200px) */
+/* @media (min-width: 1200px) {
+  .container {
+  
+    margin: 0 auto;
+  }
+} */
+
+/* Medium screens (Tablets) */
+@media (max-width: 991px) {
+  .heading {
+    font-size: 1.8rem;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .description h3 {
+    font-size: 1.65rem;
+  }
+}
+
+/* Small screens (Mobiles) */
+@media (max-width: 576px) {
+  .infocontainer {
+    padding: 15px;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr; /* single column */
+  }
+
+  .card {
+    padding: 12px 15px;
+  }
+
+  .description h3 {
+    font-size: 1.45rem;
+  }
+
+  .description p {
+    font-size: 0.98rem;
+  }
+}
+
+/* 📱 For devices up to 425px width */
+@media (max-width: 425px) {
+  .infocontainer {
+    padding: 12px;
+  }
+
+  .heading {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr; /* single column */
+    gap: 15px;
+  }
+
+  .card {
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+
+  .description h3 {
+    font-size: 1.35rem;
+  }
+
+  .description p {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+}
+
+/* 📱 For devices up to 375px width */
+@media (max-width: 375px) {
+  .infocontainer {
+    padding: 10px;
+  }
+
+  .heading {
+    font-size: 1.2rem;
+  }
+
+  .card {
+    padding: 8px 10px;
+  }
+
+  .description h3 {
+    font-size: 1.2rem;
+  }
+
+  .description p {
+    font-size: 0.9rem;
+  }
+
+  .cardHeader {
+    font-size: 0.9rem;
+    gap: 6px;
+  }
+}

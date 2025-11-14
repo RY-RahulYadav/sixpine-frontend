@@ -1,0 +1,289 @@
+.Reviewcontainer {
+  width: 100%;
+  /* margin: auto; */
+  padding: 0 0px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 80px; /* Increased spacing for better visual separation */
+  margin-bottom: 30px;
+}
+
+.title {
+  margin-bottom: 0 10px;
+  font-size: 20px;
+}
+
+.reviewSection {
+  display: flex;
+  gap: 10%;
+ 
+  padding:0 1px;
+}
+
+/* Left Side */
+.left {
+  flex: 1;
+}
+.left h4{
+  margin-bottom: 10px;                    
+  font-size: 20px;
+  font-weight: 400;
+
+}
+
+.bars {
+  /* margin: 20px 0; */
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.progress {
+  flex: 1;
+  height: 8px;
+  background: #f1f1f1;
+  margin: 0 10px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+}
+
+.fill5 {
+  width: 70%;
+  background: #4caf50;
+}
+
+.fill4 {
+  width: 50%;
+  background: #2196f3;
+}
+
+.fill3 {
+  width: 30%;
+  background: #00bcd4;
+}
+
+.fill2 {
+  width: 15%;
+  background: #ff9800;
+}
+
+.fill1 {
+  width: 5%;
+  background: #f44336;
+}
+
+/* Add Review Form */
+.addReview {
+  margin-top: 15px;
+}
+
+.ratingStars span {
+  font-size: 20px;
+  color: #ccc;
+  margin-right: 5px;
+  cursor: pointer;
+  top: 5px;
+}
+
+.addReview input,
+.addReview textarea {
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.addReview button {
+  background: #2196f3;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.addReview button:hover {
+  background: #0b7dda;
+}
+
+/* Right Side */
+.right {
+  flex: 1.5;
+}
+
+.right h4{
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 300;
+}
+.reviewCard {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding:10px;
+  margin-bottom: 5px;
+  background: #fafafa;
+}
+
+.reviewCard p{
+  font-size: 16px;
+  color: #333;
+}
+
+.star {
+  color: gold;
+}
+
+
+/* Mobile */
+@media (max-width: 600px) {
+  .Reviewcontainer {
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .reviewSection {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .left,
+  .right {
+    width: 100%;
+    top: 10%;
+  }
+
+  .bar {
+    font-size: 12px;
+  }
+
+  .addReview input,
+  .addReview textarea {
+    font-size: 14px;
+    padding: 6px;
+  }
+
+  .addReview button {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .reviewCard {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+
+/* Tablets (up to 768px) */
+@media (max-width: 768px) {
+  .reviewSection {
+    flex-direction: column;
+    gap: 25px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .bar {
+    font-size: 13px;
+  }
+
+  .reviewCard {
+    padding: 12px;
+    font-size: 15px;
+  }
+}
+
+/* Large Mobile (up to 425px) */
+@media (max-width: 425px) {
+  .Reviewcontainer {
+    padding: 15px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .bar {
+    font-size: 12px;
+  }
+
+  .addReview input,
+  .addReview textarea {
+    font-size: 14px;
+    padding: 6px;
+  }
+
+  .addReview button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .reviewCard {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+/* Medium Mobile (up to 375px) */
+@media (max-width: 375px) {
+  .title {
+    font-size: 15px;
+  }
+
+  .bar {
+    font-size: 11px;
+  }
+
+  .ratingStars span {
+    font-size: 18px;
+  }
+
+  .reviewCard {
+    font-size: 13px;
+    padding: 8px;
+  }
+}
+
+/* Small Mobile (up to 325px) */
+@media (max-width: 325px) {
+  .Reviewcontainer {
+    padding: 8px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .bar {
+    font-size: 10px;
+  }
+
+  .addReview input,
+  .addReview textarea {
+    font-size: 12px;
+    padding: 5px;
+  }
+
+  .addReview button {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .reviewCard {
+    font-size: 12px;
+    padding: 6px;
+  }
+}

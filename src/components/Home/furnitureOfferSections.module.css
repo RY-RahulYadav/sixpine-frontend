@@ -1,0 +1,251 @@
+.offercontainer {
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 30px;
+  margin-bottom: 0;
+}
+
+
+
+/* Section */
+.section {
+  margin-top: 40px; /* standardized top spacing */
+  margin-bottom: 0px;
+  border-radius: 0px;
+  /* box-shadow: 0 4px 15px rgba(0,0,0,0.04); */
+}
+
+/* 2nd section: left/right 10px, top/bottom 20px */
+
+
+
+.sectionBox {
+  padding: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Ensure each section's white inner box has a consistent gray border on all sides */
+.sectionBox {
+  box-sizing: border-box; /* include border in sizing calculations */
+  border: 5px solid #eee; /* uniform light gray border */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.sectionHeader {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 15px;
+  padding: 0 20px 0px;
+  margin-bottom: 15px;
+}
+
+.sectionHeader h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+  position: relative;
+}
+
+.sectionHeader a {
+  font-size: 14px;
+  color: #007ec3;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.sectionHeader a:hover {
+  background-color: rgba(0, 126, 195, 0.1);
+  text-decoration: none;
+}
+
+/* Slider */
+.sliderWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.slider {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 15px;
+  /* padding: 15px 20px; */
+  scroll-snap-type: x mandatory;
+  margin: 0 20px;
+}
+
+/* ✅ Thin scrollbar */
+.slider::-webkit-scrollbar {
+  height: 3px; /* thin horizontal scrollbar */
+}
+
+.slider::-webkit-scrollbar-track {
+  background: transparent; /* optional */
+}
+
+.slider::-webkit-scrollbar-thumb {
+  background: #ccc; /* color of the scrollbar */
+  border-radius: 10px;
+}
+
+.slider::-webkit-scrollbar-thumb:hover {
+  background: #999; /* darker on hover */
+}
+
+
+/* Card */
+.card {
+  flex: 0 0 auto;
+  width: 230px;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid #eee; /* match the light gray family for cards */
+  margin: 5px 3px;
+}
+
+.card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover img {
+  transform: scale(1.05);
+}
+
+/* Navigation Buttons */
+
+.navBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  /* Square button with subtle rounded corners to match furnitureSections */
+  background: #fff;
+  border: none;
+  border-radius: 6px;
+  width: 50px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: normal;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  padding: 0;
+  color: #000;
+}
+
+.navBtn:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.leftBtn {
+  left: -15px; /* Positioned at the edge/outside of gray section */
+}
+
+.rightBtn {
+  right: -15px; /* Positioned at the edge/outside of gray section */
+}
+/* ---------------- RESPONSIVE BREAKPOINTS ---------------- */
+
+/* Large screens (desktops) */
+@media (max-width: 1280px) {
+  .card {
+    width: 200px;
+    height: 180px;
+  }
+}
+
+/* Tablets landscape */
+@media (max-width: 1024px) {
+  .card {
+   width: 220px;
+    height: 180px;
+  }
+}
+
+/* Tablets portrait */
+@media (max-width: 768px) {
+  .card {
+    width: 215px;
+    height: 150px;
+  }
+  .sectionHeader h2 {
+    font-size: 16px;
+  }
+  .sectionHeader a {
+    font-size: 13px;
+  }
+}
+
+/* Mobile large */
+@media (max-width: 425px) {
+  .card {
+    width: 160px;
+    height: 150px;
+    
+
+  }
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Mobile medium */
+@media (max-width: 375px) {
+ .card {
+    width: 150px;
+    height: 120px;
+    
+
+  }
+  .sectionHeader h2 {
+    font-size: 15px;
+  }
+  .sectionHeader a {
+    font-size: 12px;
+  }
+}
+
+/* Mobile small */
+@media (max-width: 325px) {
+  .card {
+    width: 120px;
+    height: 100px;
+  }
+  .sectionHeader h2 {
+    font-size: 14px;
+  }
+}

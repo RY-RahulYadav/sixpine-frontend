@@ -1,0 +1,912 @@
+/* Sixpine Authentication Styles */
+
+/* Make sure html and body take full height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Main app wrapper to use flexbox */
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+}
+
+/* Sixpine Auth Page */
+.sixpine-auth-page {
+  /* Make the area tall enough to account for navbar/subnav so the card centers in remaining space */
+  min-height: calc(100vh - 110px);
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 12px;
+  
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Auth Container */
+.sixpine-auth-container {
+  width: 100%;
+  /* Increased width to give forms more horizontal space */
+  max-width: 420px;
+  /* center horizontally and allow small top/bottom margin */
+  margin: 10px auto;
+}
+
+/* Auth Card */
+.sixpine-auth-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: visible;
+  width: 100%;
+  /* Remove fixed height constraints to allow content to flow naturally */
+  margin: 6px auto;
+}
+
+/* Brand Header */
+.sixpine-brand {
+  text-align: center;
+  padding: 24px 20px 12px;
+}
+
+.sixpine-brand h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+/* Toggle Buttons */
+.sixpine-toggle-buttons {
+  display: flex;
+  margin: 0 20px 18px;
+  border-radius: 50px;
+  background-color: #f8f9fa;
+  padding: 3px;
+}
+
+.sixpine-toggle-btn {
+  flex: 1;
+  padding: 12px 24px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  border-radius: 46px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: block;
+}
+
+.sixpine-toggle-btn.active {
+  background: #333;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sixpine-toggle-btn:hover:not(.active) {
+  color: #333;
+}
+
+/* Form Styles */
+.sixpine-form {
+  padding: 0 28px 16px;
+}
+
+.sixpine-form-group {
+  margin-bottom: 14px;
+}
+
+.sixpine-form-group label {
+  display: block;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.sixpine-form-group input {
+  width: 100%;
+  /* Slightly smaller inputs to reduce card height */
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  min-height: 32px;
+}
+
+.sixpine-form-group input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.sixpine-form-group input.sixpine-prefilled {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+/* Password Input with Toggle */
+.sixpine-password-input {
+  position: relative;
+}
+
+.sixpine-password-input input {
+  padding-right: 40px;
+}
+
+.sixpine-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+}
+
+/* Password Header with Forget Link */
+.sixpine-password-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sixpine-forgot-link {
+  font-size: 14px;
+  color: #666;
+  text-decoration: none;
+}
+
+.sixpine-forgot-link:hover {
+  color: #333;
+}
+
+/* Checkbox */
+.sixpine-checkbox-group {
+  margin: 12px 0;
+}
+
+.sixpine-checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.sixpine-checkbox-label input {
+  margin-right: 8px;
+  width: auto;
+}
+
+/* Submit Button */
+.sixpine-submit-btn {
+  width: 100%;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 12px;
+}
+
+/* Footer line inside forms (e.g., "Remember your password? Sign in") */
+.sixpine-form-footer {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.sixpine-form-footer p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.sixpine-form-footer p a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.sixpine-form-footer p a:hover {
+  text-decoration: underline;
+}
+
+.sixpine-submit-btn:hover:not(:disabled) {
+  background-color: #555;
+}
+
+.sixpine-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Footer Links */
+.sixpine-footer-links {
+  text-align: center;
+  padding: 20px 40px 40px;
+  font-size: 14px;
+  color: #666;
+}
+
+.sixpine-footer-links a {
+  color: #666;
+  text-decoration: none;
+  margin: 0 8px;
+}
+
+.sixpine-footer-links a:hover {
+  color: #333;
+}
+
+.sixpine-footer-links span {
+  margin: 0 4px;
+}
+
+/* Error/Success Messages */
+.sixpine-error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 0 40px 20px;
+  font-size: 14px;
+}
+
+.sixpine-success-message {
+  background-color: #efe;
+  border: 1px solid #cfc;
+  color: #3c3;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 0 40px 20px;
+  font-size: 14px;
+}
+
+/* OTP Verification Styles */
+.sixpine-otp-section {
+  text-align: center;
+}
+
+/* OTP Method Selection */
+.sixpine-otp-selection {
+  padding: 0;
+}
+
+.otp-method-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.otp-method-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.otp-method-btn:hover:not(:disabled) {
+  border-color: #333;
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.otp-method-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.otp-method-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.otp-method-content {
+  flex: 1;
+  text-align: left;
+}
+
+.otp-method-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.otp-method-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Row helpers for placing fields side-by-side */
+.sixpine-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.sixpine-col {
+  flex: 1 1 0;
+  min-width: 0; /* prevent overflow on narrow screens */
+}
+
+.sixpine-otp-section p {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.sixpine-otp-input {
+  font-size: 20px !important;
+  text-align: center;
+  letter-spacing: 8px;
+  font-weight: 600;
+  padding: 16px !important;
+}
+
+.sixpine-otp-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sixpine-link-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+  padding: 5px 0;
+}
+
+.sixpine-link-btn:hover:not(:disabled) {
+  color: #0056b3;
+}
+
+.sixpine-link-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .sixpine-auth-page {
+    padding: 8px;
+  }
+  
+  .sixpine-brand {
+    padding: 18px 18px 10px;
+  }
+  
+  .sixpine-brand h1 {
+    font-size: 22px;
+  }
+  
+  .sixpine-toggle-buttons {
+    margin: 0 16px 14px;
+  }
+  
+  .sixpine-form {
+    padding: 0 16px 12px;
+  }
+  
+  .sixpine-footer-links {
+    padding: 12px 16px 20px;
+  }
+  
+  .sixpine-error-message,
+  .sixpine-success-message {
+    margin: 0 16px 12px;
+  }
+}
+
+/* Auth card styling */
+.auth-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #e0e0e0;
+}
+
+.auth-card:hover {
+  transform: translateY(-3px);
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 8px 20px;
+}
+
+/* Card header */
+.auth-card-header {
+  background: #1a3ba9;
+  color: white;
+  padding: 30px;
+  text-align: center;
+  border-bottom: 3px solid #0d6efd;
+}
+
+.auth-card-header h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  font-family: 'Poppins', var(--ff-heading), sans-serif;
+}
+
+.auth-card-header p {
+  margin: 8px 0 0;
+  opacity: 0.95;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Card body */
+.auth-card-body {
+  padding: 40px;
+}
+
+/* Form inputs */
+.auth-form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.auth-form-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 14px;
+  display: block;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.auth-form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.auth-form-control:focus {
+  outline: none;
+  border-color: #0d6efd;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+}
+
+.auth-form-control::placeholder {
+  color: #999;
+}
+
+/* Submit button */
+.auth-submit-btn {
+  width: 100%;
+  padding: 13px;
+  background: #1a3ba9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+  background: #0d6efd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Alerts */
+.auth-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  border: none;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.auth-alert-error {
+  background: #fff3f3;
+  color: #dc3545;
+  border-left: 4px solid #dc3545;
+}
+
+.auth-alert-success {
+  background: #f0f9ff;
+  color: #198754;
+  border-left: 4px solid #198754;
+}
+
+/* Footer link */
+.auth-footer-text {
+  text-align: center;
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+  font-size: 14px;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.auth-footer-text a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.auth-footer-text a:hover {
+  color: #1a3ba9;
+  text-decoration: underline;
+}
+
+/* OTP verification specific styles */
+.otp-icon {
+  font-size: 64px;
+  color: #0d6efd;
+  margin-bottom: 20px;
+}
+
+.otp-input {
+  font-size: 32px !important;
+  letter-spacing: 15px !important;
+  text-align: center;
+  font-weight: 700;
+  padding: 20px !important;
+  background: white;
+}
+
+.otp-input:focus {
+  background: white;
+  border-color: #0d6efd;
+}
+
+.otp-timer {
+  color: #666;
+  font-size: 13px;
+  margin-top: 10px;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.resend-btn {
+  background: transparent;
+  border: 2px solid #0d6efd;
+  color: #0d6efd;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.resend-btn:hover:not(:disabled) {
+  background: #0d6efd;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.resend-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.back-btn {
+  background: transparent;
+  border: 2px solid #ddd;
+  color: #666;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 15px;
+  font-family: var(--ff-body), sans-serif;
+}
+
+.back-btn:hover {
+  border-color: #0d6efd;
+  color: #0d6efd;
+  background: #f0f9ff;
+}
+
+/* Form text helper */
+.auth-form-text {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  font-family: var(--ff-body), sans-serif;
+}
+
+/* Row spacing for register form */
+.auth-row {
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.auth-col {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+/* Password strength indicator */
+.password-strength {
+  margin-top: 8px;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.password-strength-bar {
+  height: 100%;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.password-strength-weak {
+  width: 33%;
+  background: #ff4444;
+}
+
+.password-strength-medium {
+  width: 66%;
+  background: #ffbb33;
+}
+
+.password-strength-strong {
+  width: 100%;
+  background: #00C851;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .auth-page {
+    padding: 20px 10px;
+    min-height: calc(100vh - 140px);
+  }
+
+  .auth-card-header {
+    padding: 20px;
+  }
+
+  .auth-card-header h2 {
+    font-size: 24px;
+  }
+
+  .auth-card-body {
+    padding: 25px 20px;
+  }
+
+  .otp-input {
+    font-size: 24px !important;
+    letter-spacing: 10px !important;
+  }
+}
+
+/* ============================================ */
+/* ADDITIONAL RESPONSIVE STYLES FOR AUTH */
+/* ============================================ */
+
+/* Mobile Portrait (320px - 575px) */
+@media (max-width: 575px) {
+  .auth-page {
+    padding: 15px 8px;
+    min-height: calc(100vh - 120px);
+  }
+  
+  .auth-card {
+    border-radius: 10px;
+  }
+  
+  .auth-card-header {
+    padding: 18px 15px;
+  }
+  
+  .auth-card-header h2 {
+    font-size: 22px;
+  }
+  
+  .auth-card-header p {
+    font-size: 13px;
+  }
+  
+  .auth-card-body {
+    padding: 20px 15px;
+  }
+  
+  .auth-form-group {
+    margin-bottom: 16px;
+  }
+  
+  .auth-form-label {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  
+  .auth-form-control {
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+  
+  .auth-submit-btn {
+    padding: 11px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+  
+  .auth-alert {
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+  
+  .auth-footer-text {
+    margin-top: 20px;
+    padding-top: 20px;
+    font-size: 13px;
+  }
+  
+  .otp-icon {
+    font-size: 52px;
+    margin-bottom: 15px;
+  }
+  
+  .otp-input {
+    font-size: 20px !important;
+    letter-spacing: 8px !important;
+    padding: 15px !important;
+  }
+  
+  .otp-timer {
+    font-size: 12px;
+  }
+  
+  .resend-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+  
+  .back-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+    margin-top: 12px;
+  }
+  
+  .auth-form-text {
+    font-size: 11px;
+  }
+  
+  .password-strength {
+    height: 3px;
+  }
+}
+
+/* Extra Small Devices (320px - 374px) */
+@media (max-width: 374px) {
+  .auth-page {
+    padding: 12px 5px;
+  }
+  
+  .auth-card-header {
+    padding: 15px 12px;
+  }
+  
+  .auth-card-header h2 {
+    font-size: 20px;
+  }
+  
+  .auth-card-header p {
+    font-size: 12px;
+  }
+  
+  .auth-card-body {
+    padding: 18px 12px;
+  }
+  
+  .auth-form-group {
+    margin-bottom: 14px;
+  }
+  
+  .auth-form-label {
+    font-size: 12px;
+  }
+  
+  .auth-form-control {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+  
+  .auth-submit-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  .otp-icon {
+    font-size: 48px;
+  }
+  
+  .otp-input {
+    font-size: 18px !important;
+    letter-spacing: 6px !important;
+    padding: 12px !important;
+  }
+}
+
+/* Tablet landscape optimization */
+@media (min-width: 768px) and (max-width: 991px) {
+  .auth-card {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
+
+/* Ensure proper spacing on all mobile devices */
+@media (max-width: 767px) {
+  .auth-row {
+    margin-left: -5px;
+    margin-right: -5px;
+  }
+  
+  .auth-col {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+/* Footer always at bottom */
+.footer-wrapper {
+  margin-top: auto;
+}

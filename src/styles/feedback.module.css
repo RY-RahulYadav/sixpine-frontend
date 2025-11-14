@@ -1,0 +1,105 @@
+:root {
+  --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --yes: #16a34a;
+  --no: #dc2626;
+}
+
+.container {
+  font-family: var(--font);
+  color: var(--text);
+  line-height: 1.6;
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.content p {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.sectionTitle {
+  font-weight: 600;
+  margin: 16px 0 8px;
+  font-size: 1rem;
+}
+
+.feedbackBox {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.feedbackQuestion {
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.btnYes {
+  color: var(--yes);
+  border-color: var(--yes);
+  background: transparent;
+}
+.btnYes:hover {
+  background: var(--yes);
+  color: #fff;
+}
+
+.btnNo {
+  color: var(--no);
+  border-color: var(--no);
+  background: transparent;
+}
+.btnNo:hover {
+  background: var(--no);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+    width: 100%;
+    margin: 0;
+    
+  }
+  .actions {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .btn {
+    width: 30%;
+    text-align: center;
+  }
+}

@@ -1,0 +1,180 @@
+/* heroSection2.module.css */
+.homepage {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  font-family: Arial, sans-serif;
+  margin: 0px auto 0; /* top 30px, bottom 0 */
+}
+
+.special {
+  background-color: #f3f3f3; /* light grey background for cards 2, 3, 4 */
+}
+.card {
+  background-color: #fff; /* white background for first card */
+  padding: 20px;
+  /* consistent 4px border on all sides for every card */
+  border: 4px solid #e7e7e7;
+  border-radius: 6px;
+  display: flex; /* make it flex */
+  flex-direction: column; /* stack vertically */
+  min-height: 400px; /* increased height for better tile display */
+  max-height: 500px;
+}
+.card h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #0f1111;
+  line-height: 1.3;
+}
+
+.card a {
+  display: inline-block;
+  margin-top: auto;
+  font-size: 13px;
+  color: #007185; /* Amazon teal-blue */
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.card a:hover {
+  text-decoration: underline;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 10px; /* Added margin to separate grid from the "See more" link */
+}
+
+.item {
+  text-align: left;
+}
+
+.grid img {
+  width: 100%;
+  height: 140px; /* increased height */
+  border-radius: 4px;
+  border: 1px solid #e3e6e6;
+  object-fit: cover;
+  cursor: pointer; 
+  transition: transform 0.2s ease-in-out;
+  background-color: #fff; /* white bg for images */
+}
+
+.item p {
+  font-size: 12px;
+  margin: 6px 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item span {
+  font-weight: bold;
+  font-size: 13px;
+  display: block;
+  color: #111;
+}
+
+/* All cards use a consistent border now (see .card rule above) */
+
+/* RESPONSIVE BREAKPOINTS */
+
+/* 1024px (Laptop) */
+@media (max-width: 1024px) {
+  .homepage {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax for better layout on smaller laptops */
+  }
+  .grid img {
+    height: 140px;
+  }
+}
+
+/* 768px (Tablet) */
+@media (max-width: 768px) {
+  .homepage {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Allowing 2 columns for smaller tablets if space permits */
+    gap: 18px;
+    padding: 18px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr); /* Keep 2 items per row in grid */
+  }
+  .grid img {
+    height: 130px;
+  }
+  .card h3 {
+    font-size: 15px;
+  }
+  .item p {
+    font-size: 12px;
+  }
+}
+
+/* 425px (Mobile Large) */
+@media (max-width: 425px) {
+  .homepage {
+    grid-template-columns: 1fr; /* full width card */
+    gap: 15px;
+    padding: 15px;
+  }
+  .grid img {
+    height: 120px;
+  }
+  .card h3 {
+    font-size: 14px;
+  }
+  .item p {
+    font-size: 11.5px;
+  }
+  .card a {
+    font-size: 13px;
+  }
+}
+
+/* 375px (Mobile Medium) */
+@media (max-width: 375px) {
+  .homepage {
+    padding: 12px;
+    gap: 12px;
+  }
+  .grid img {
+    height: 110px;
+  }
+  .card h3 {
+    font-size: 13px;
+  }
+  .item p {
+    font-size: 11px;
+  }
+  .card a {
+    font-size: 12px;
+  }
+}
+
+/* 325px (Mobile Small) */
+@media (max-width: 325px) {
+  .homepage {
+    padding: 10px;
+    gap: 10px;
+  }
+  .grid img {
+    height: 100px;
+  }
+  .card h3 {
+    font-size: 12px;
+  }
+  .item p {
+    font-size: 10px;
+  }
+  .item span {
+    font-size: 12px;
+  }
+  .card a {
+    font-size: 11px;
+  }
+}

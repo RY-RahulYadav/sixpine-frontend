@@ -1,0 +1,237 @@
+/* Bulk Order Process Section */
+.processSection {
+  padding: 80px 20px;
+  background: #f9f9f9;
+  position: relative;
+  margin: 0 auto;
+}
+
+.processSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(0,0,0,0.03)"/></pattern></defs><rect width="60" height="60" fill="url(%23dots)"/></svg>');
+  opacity: 0.5;
+}
+
+.container {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.sectionSubtitle {
+  font-size: clamp(16px, 1.2vw, 18px);
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.processTimeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  position: relative;
+}
+
+.stepCard {
+  background: #fff;
+  border-radius: 15px;
+  padding: 35px 25px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: all 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stepCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.stepNumber {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+.stepIcon {
+  width: 80px;
+  height: 80px;
+  background: #f3f3f3;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.stepCard:hover .stepIcon {
+  transform: scale(1.1);
+  background: #e0e0e0;
+  color: #333;
+}
+
+.stepContent {
+  flex: 1;
+}
+
+.stepTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.stepDescription {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.stepConnector {
+  display: none;
+}
+
+/* Add connecting line for desktop */
+@media (min-width: 992px) {
+  .stepCard:nth-child(1)::after,
+  .stepCard:nth-child(2)::after,
+  .stepCard:nth-child(4)::after,
+  .stepCard:nth-child(5)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -40px;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(to right, #e0e0e0, transparent);
+    transform: translateY(-50%);
+    z-index: -1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .processTimeline {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+
+  .stepCard:nth-child(odd):not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -30px;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(to right, #e0e0e0, transparent);
+    transform: translateY(-50%);
+    z-index: -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .processSection {
+    padding: 60px 15px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 40px;
+  }
+
+  .processTimeline {
+    grid-template-columns: 1fr;
+    gap: 50px;
+  }
+
+  .stepCard {
+    padding: 40px 25px 30px;
+  }
+
+  .stepCard::after {
+    display: none !important;
+  }
+
+  /* Vertical connector line */
+  .stepCard:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 50px;
+    background: linear-gradient(to bottom, #e0e0e0, transparent);
+    z-index: -1;
+  }
+}
+
+@media (max-width: 575px) {
+  .processSection {
+    padding: 40px 10px;
+  }
+
+  .stepCard {
+    padding: 35px 20px 25px;
+  }
+
+  .stepNumber {
+    width: 45px;
+    height: 45px;
+    font-size: 16px;
+  }
+
+  .stepIcon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .stepIcon svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .stepTitle {
+    font-size: 1.15rem;
+  }
+
+  .stepDescription {
+    font-size: 13px;
+  }
+}

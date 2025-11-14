@@ -1,0 +1,650 @@
+.helpHeader {
+  color: white;
+ 
+}
+
+.headerContainer {
+  max-width: 1500px;
+  margin: 0 auto;
+  text-align: center;
+padding-left: 1.5rem;
+padding-right: 1.5rem;
+padding-top: 3.7rem;
+padding-bottom: 5rem;
+  background-color: #f8f9fa;
+
+}
+
+.headerTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.searchContainer {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 3rem 1rem 1.5rem;
+  border-radius: 50px;
+  border: none;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.searchInput:focus {
+  outline: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.searchButton {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ff6f00;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.quickLinks {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  
+}
+
+.quickLink {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border: 1px solid #000;
+  border-radius: 50px;
+  transition: background-color 0.3s;
+  cursor: pointer;
+  color: black;
+}
+
+.quickLink:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.quickLink svg {
+  margin-right: 8px;
+  width: 20px;
+  height: 20px;
+}
+
+.helpCategories {
+  padding: 4rem 1.5rem;
+}
+
+.containerFluid {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.containerNarrow {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #333;
+}
+
+.sectionDescription {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 3rem;
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.categoryCard {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.categoryCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.categoryIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: rgba(255, 111, 0, 0.1);
+  color: #ff6f00;
+  margin-bottom: 1.5rem;
+}
+
+.categoryTitle {
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.categoryLinks {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.categoryLinks li {
+  margin-bottom: 0.5rem;
+}
+
+.categoryLink {
+  text-decoration: none;
+  color: #555;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+
+.categoryLink:hover {
+  color: #ff6f00;
+}
+
+.viewAllLink {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #ff6f00;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+
+.viewAllLink svg {
+  margin-left: 6px;
+  transition: transform 0.3s;
+}
+
+.viewAllLink:hover svg {
+  transform: translateX(4px);
+}
+
+.frequentQuestionsSection {
+  padding: 4rem 1.5rem;
+  background-color: #f8f9fa;
+}
+
+.faqList {
+  margin-bottom: 2rem;
+}
+
+.faqItem {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.faqQuestion {
+  padding: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  color: #333;
+}
+
+.faqQuestion:hover {
+  background-color: rgba(255, 111, 0, 0.05);
+}
+
+.faqToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ff6f00;
+}
+
+.faqAnswer {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  padding: 0 1.25rem;
+  color: #666;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.faqAnswerActive {
+  max-height: 500px; 
+  padding: 1.25rem;
+  border-top: 1px solid #eee;
+}
+
+.viewMoreContainer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.viewMoreButton {
+  background-color: transparent;
+  color: #ff6f00;
+  border: 1px solid #ff6f00;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.viewMoreButton:hover {
+  background-color: #ff6f00;
+  color: white;
+}
+
+.contactSection {
+  padding: 4rem 1.5rem;
+}
+
+.contactCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.contactCard {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.contactCard:hover {
+  transform: translateY(-5px);
+}
+
+.contactIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: rgba(255, 111, 0, 0.1);
+  color: #ff6f00;
+  margin: 0 auto 1.5rem;
+}
+
+.contactTitle {
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.contactDescription {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.contactInfo {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.contactTimeInfo {
+  color: #777;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.contactButton {
+  background-color: #ff6f00;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 100%;
+}
+
+.contactButton:hover {
+  background-color: #c43e00;
+}
+
+.contactFormSection {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.formControl {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.formControl:focus {
+  outline: none;
+  border-color: #ff6f00;
+  box-shadow: 0 0 0 2px rgba(255, 111, 0, 0.2);
+}
+
+.formSubmit {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.submitButton {
+  background-color: #ff6f00;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.75rem 2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: #c43e00;
+}
+
+.resourcesSection {
+  width: 1500px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  background-color: #f8f9fa;
+}
+
+.resourcesGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.resourceCard {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: transform 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.resourceCard:hover {
+  transform: translateY(-5px);
+}
+
+.resourceIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background-color: rgba(255, 111, 0, 0.1);
+  color: #ff6f00;
+  margin: 0 auto 1.5rem;
+}
+
+.resourceTitle {
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.resourceDescription {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.resourceLink {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: #ff6f00;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+
+.resourceLink svg {
+  margin-left: 6px;
+  transition: transform 0.3s;
+}
+
+.resourceLink:hover svg {
+  transform: translateX(4px);
+}
+
+.downloadSection {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.downloadTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.downloadDescription {
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto 1.5rem;
+}
+
+.appButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.appButton {
+  display: flex;
+  align-items: center;
+  background-color: #333;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.appButton:hover {
+  background-color: #000;
+}
+
+.appButton svg {
+  margin-right: 10px;
+}
+
+.appButtonText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.appButtonLabel {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.appButtonStore {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.feedbackSection {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  text-align: center;
+}
+
+.feedbackTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.feedbackDescription {
+  color: #666;
+  max-width: 700px;
+  margin: 0 auto 1.5rem;
+}
+
+.feedbackButton {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ff6f00;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.feedbackButton:hover {
+  background-color: #c43e00;
+}
+
+.feedbackButton svg {
+  margin-right: 8px;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .contactCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .resourcesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .headerTitle {
+    font-size: 2rem;
+  }
+  
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .appButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .categoriesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .contactCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .resourcesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sectionTitle {
+    font-size: 1.5rem;
+  }
+  
+  .quickLinks {
+    flex-direction: column;
+  }
+}

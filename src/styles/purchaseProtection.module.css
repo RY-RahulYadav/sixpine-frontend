@@ -1,0 +1,146 @@
+.container {
+  /* max-width: 1100px; */
+  /* margin: 0 auto; */
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  padding: 25px 0px;
+  
+}
+
+.heading {
+  /* text-align: center; */
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+  
+}
+
+.intro {
+  /* text-align: center; */
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  /* max-width: 800px; */
+  /* margin-left: auto; */
+  /* margin-right: auto; */
+}
+
+ .section {
+  margin-bottom: 2rem;
+  padding-top: 1rem; 
+}
+
+.section .subheading {
+  border-top: 1px solid #545252;
+  padding-top: 0.8rem; /* heading ke aur text ke beech gap */
+}
+
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  flex-wrap: wrap; /* allows text to wrap under icon */
+}
+
+.icon {
+  margin-right: 10px;
+  color: #0066cc;
+  min-width: 22px;
+  min-height: 22px;
+  flex-shrink: 0;
+}
+
+.steps {
+  padding-left: 1.2rem;
+}
+
+.steps li {
+  margin-bottom: 0.8rem;
+}
+
+.contact {
+  margin-top: 1rem;
+  font-size: 1rem;
+  /* text-align: center; */
+}
+
+.contact a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.contact a:hover {
+  text-decoration: underline;
+}
+
+.footer {
+  /* text-align: center; */
+  /* margin-top: 2rem; */
+  font-weight: bold;
+  color: #222;
+  font-size: 1rem;
+}
+
+/* ========== RESPONSIVE STYLES ========== */
+
+@media (max-width: 1024px) {
+  .heading {
+    font-size: 2rem;
+  }
+  .subheading {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+    margin-top: 10px;
+  }
+  .heading {
+    font-size: 1.8rem;
+  }
+  .intro {
+    font-size: 1rem;
+  }
+  .list li {
+    font-size: 0.95rem;
+  }
+  .steps li {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+    margin-top: 10px;
+  }
+  .heading {
+    font-size: 1.5rem;
+  }
+  .intro {
+    font-size: 0.95rem;
+  }
+  .subheading {
+    font-size: 1.2rem;
+  }
+  .list li {
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+  }
+  .steps li {
+    font-size: 0.9rem;
+  }
+  .footer {
+    font-size: 0.9rem;
+  }
+}

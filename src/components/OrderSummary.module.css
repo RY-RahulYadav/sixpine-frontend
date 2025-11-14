@@ -1,0 +1,57 @@
+.orderSummaryContainer {
+    background-color: #ffffff;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-family: "Amazon Ember", Arial, sans-serif;
+    width: 100%;
+}
+
+.paymentButton {
+    background-color: #ffd814;
+    border-color: #fcd200;
+    color: #0f1111;
+    border: none;
+    padding: 10px 0;
+    width: 100%;
+    border-radius: 50px;
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.paymentButton:hover:not(:disabled) {
+    background-color: #f7ca00;
+}
+
+.paymentButton.disabled,
+.paymentButton:disabled {
+    background-color: #ddd;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.separator {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 15px 0;
+}
+
+.summaryDetails {
+    padding: 0 5px;
+}
+
+.summaryLine {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #0f1111;
+}
+
+.orderTotal {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0f1111;
+}

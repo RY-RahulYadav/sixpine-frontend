@@ -1,0 +1,148 @@
+.main {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.7;
+  color: #333;
+  padding: 40px 20px;  
+  max-width: 80%;  
+  margin: 0 auto;      
+}
+
+.note {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.warningBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: #fff8e5;
+  border: 1px solid #f0c36d;
+  padding: 16px;
+  border-radius: 6px;
+  margin: 20px 0;
+}
+
+.icon {
+  color: #e6a700;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-top: 4px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  max-width: 300px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mobileBreak {
+  display: none;
+}
+
+.submitBtn {
+  background-color: #d9534f;
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.submitBtn:hover {
+  background-color: #c9302c;
+}
+
+.footerNote {
+  font-size: 13px;
+  color: #555;
+  margin-top: 20px;
+}
+
+/* ------------------------- */
+/* ✅ Responsive Media Queries */
+/* ------------------------- */
+
+/* Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+  .main {
+    max-width: 90%;
+    padding: 30px 15px;
+  }
+
+  .warningBox {
+    flex-direction: column;
+  }
+
+  .icon {
+    margin-bottom: 8px;
+  }
+}
+
+/* Mobile (up to 768px) */
+@media (max-width: 768px) {
+  .main {
+    max-width: 95%;
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .warningBox {
+    flex-direction: column;
+    padding: 12px;
+  }
+
+  .form {
+    gap: 12px;
+  }
+
+  .submitBtn {
+    width: 30%;
+    text-align: center;
+  }
+}
+
+/* Small Mobile (up to 480px) */
+@media (max-width: 425px) {
+  .main {
+    max-width: 95%;
+    padding: 20px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .footerNote {
+    font-size: 12px;
+  }
+.submitBtn {
+    width: 80%;
+    text-align: center;
+  }
+  .checkbox
+  {
+    display: inline;
+    gap: 10px;
+      }
+
+
+}

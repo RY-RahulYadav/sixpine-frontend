@@ -1,0 +1,353 @@
+.furnitureContainer {
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* padding:10px 20px; */
+  /* max-width: 1200px;  */
+  margin-top: 30px;
+  margin-bottom: 0;
+}
+
+.section {
+  margin-top: 30px; /* ensure each sub-section follows spacing */
+  margin-bottom: 0; 
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+   padding: 0 10px;
+}
+
+.sectionHeader h2 {
+  font-size: 22px; /* Slightly larger for prominence */
+  margin: 0;
+  /* padding: 0 10px; */
+}
+
+.sectionHeader p {
+  font-size: 16px; /* Slightly larger */
+  color: #555; /* Darker gray for better readability */
+  margin: 0 0 10px;
+  /* padding: 0 20px; */
+}
+
+.viewBtn {
+  background: #fff; /* white pill */
+  border: 1px solid rgba(0,0,0,0.08); /* subtle gray border */
+  color: #000000; /* blue text color */
+  font-size: 13px; /* slightly smaller text */
+  cursor: pointer;
+  border-radius: 20px; /* pill shape */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease; /* Smooth transition for hover */
+  padding: 6px 18px; /* wider horizontal padding to increase visual width */
+  gap: 8px; /* space between text and icon */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  min-width: 140px; /* increase clickable width on desktop */
+}
+
+.viewBtn:hover {
+  background: #f5f9ff;
+  color: #074a8f;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.viewBtnText {
+  font-weight: 600;
+}
+.viewBtnIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  font-size: 14px;
+}
+
+.productWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  /* padding: 0 5px; */
+  /* background-color: #000; */
+}
+.navBtn {
+  /* Square button with subtle rounded corners to match design */
+  background: #fff;
+  border: none;
+  color: #000;
+  font-size: 16px;
+  font-weight: normal;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  padding: 0; /* Remove padding to ensure icon is perfectly centered */
+}
+
+.navBtn:hover {
+  background: #fff;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.navBtn:first-of-type {
+  left: -15px; /* Positioned at the edge/outside of gray section */
+}
+
+.navBtn:last-of-type {
+  right: -15px; /* Positioned at the edge/outside of gray section */
+}
+
+
+/* Shared Product List */
+.productList {
+  display: flex;
+  gap: 16px; /* Increased gap between cards */
+  /* margin-top: 20px; */
+  /* padding-bottom: 20px; */
+  flex: 1;
+}
+
+/* Scroll (slider) Mode */
+.scroll {
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory; /* Ensure snapping to cards */
+  -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+.scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+
+/* Grid (View All) Mode */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start; 
+  /* gap: 16px; */
+}
+
+
+
+
+.discoverSection {
+  background-color: #f5f5f5; 
+  padding-top: 30px; 
+  padding-bottom: 40px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 10px; 
+  margin-top: 10px;
+}
+
+/* Ensure ProductCard font sizes are not overridden */
+.discoverSection :global(.craftedProductCard) {
+  font-size: 16px !important; /* Base font size */
+}
+
+.discoverSection :global(.productTitle) {
+  font-size: 1rem !important;
+}
+
+.discoverSection :global(.productDesc) {
+  font-size: 0.85rem !important;
+}
+
+.discoverSection :global(.productRating) {
+  font-size: 1rem !important;
+}
+
+.discoverSection :global(.productRating span) {
+  font-size: 1rem !important;
+}
+
+.discoverSection :global(.moreCount) {
+  font-size: 0.85rem !important;
+}
+
+.discoverSection :global(.oldPrice) {
+  font-size: 0.9rem !important;
+}
+
+.discoverSection :global(.newPrice) {
+  font-size: 1.05rem !important;
+}
+
+.discoverSection :global(.buyBtn) {
+  font-size: 0.9rem !important;
+}
+
+
+
+
+
+
+
+/* ------------------ ✅ RESPONSIVE BREAKPOINTS ------------------ */
+
+/* Large Desktop (≥1200px) - 4 cards for grid */
+@media (min-width: 1200px) {
+  .grid :global(.craftedProductCard) {
+    flex: 1 1 calc(25% - 15px); /* 4 cards per row, adjust gap */
+    max-width: calc(25% - 15px);
+  }
+}
+
+/* Desktop (992px to 1199px) - 3 cards for grid */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .grid :global(.craftedProductCard) {
+    flex: 1 1 calc(33.33% - 13.33px); /* 3 cards per row */
+    max-width: calc(33.33% - 13.33px);
+  }
+}
+
+/* Tablets (768px to 991px) - 2 cards for grid */
+@media (min-width: 768px) and (max-width: 991px) {
+  .grid :global(.craftedProductCard) {
+    flex: 1 1 calc(50% - 10px); /* 2 cards per row */
+    max-width: calc(50% - 10px);
+  }
+  .sectionHeader h2 {
+    font-size: 24px;
+  }
+  .sectionHeader p {
+    font-size: 15px;
+  }
+  .navBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    border-radius: 6px;
+  }
+  .navBtn:first-of-type {
+    left: 0px;
+  }
+  .navBtn:last-of-type {
+    right: 0px;
+  }
+}
+
+/* Small Tablets & Large Phones (481px to 767px) - 2 cards for grid, better scroll */
+@media (min-width: 481px) and (max-width: 767px) {
+  .grid :global(.craftedProductCard) {
+    flex: 1 1 calc(50% - 10px); /* 2 cards per row */
+    max-width: calc(50% - 10px);
+  }
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .sectionHeader h2, .sectionHeader p {
+    padding: 0 10px;
+  }
+  .viewBtn {
+    min-width: 140px; /* keep wider on tablets */
+    margin: 10px 10px 0;
+    font-size: 13px;
+  }
+  .navBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    margin: 0 5px;
+    border-radius: 4px;
+  }
+  .navBtn:first-of-type {
+    left: 5px;
+  }
+  .navBtn:last-of-type {
+    right: 5px;
+  }
+  .productList {
+    gap: 15px;
+  }
+}
+
+/* Phones (≤480px) - 1 card for grid */
+@media (max-width: 480px) {
+  .grid :global(.craftedProductCard) {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+  .furnitureContainer {
+    padding: 10px;
+  }
+  .sectionHeader {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+
+
+  .sectionHeader h2 {
+    font-size: 16px;
+    /* padding: 0 10px; */
+  }
+  .sectionHeader p {
+    font-size: 14px;
+    /* padding: 0 10px; */
+    margin-bottom: 0;
+  }
+  .viewBtn {
+    width: 70px;
+    /* height: 36px; */
+    font-size: 12px;
+    /* margin: 10px 10px 0; */
+    border: none;
+    justify-content: right;
+    /* background-color: #0077cc; */
+    padding: 6px 10px;
+  }
+  .productWrapper {
+    /* margin-top: 10px; */
+   
+    margin: 0;
+  }
+  .navBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    margin: 0 0px;
+    border-radius: 4px;
+    padding: 0;
+  }
+  .navBtn:first-of-type {
+    left: 0px;
+  }
+  .navBtn:last-of-type {
+    right: 2px;
+  }
+  .productList {
+    gap: 15px;
+    /* padding-bottom: 15px; */
+  }
+}

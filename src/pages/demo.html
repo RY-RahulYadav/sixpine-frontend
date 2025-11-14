@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Order Total</title>
+  <style>
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f3f3f3;
+  color: #333;
+  line-height: 1.4;
+}
+
+.container {
+  max-width: 768px;
+  margin: 0 auto;
+  background-color: white;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background-color: #232f3e;
+  padding: 8px 0;
+  position: relative;
+}
+
+.progress-bar {
+  height: 4px;
+  background-color: #ffd814;
+  width: 100%;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #ffd814;
+  width: 66%;
+}
+
+.step-indicator {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+}
+
+.step-text {
+  color: white;
+  font-size: 12px;
+}
+
+/* Main Content */
+.main-content {
+  padding: 20px;
+}
+
+/* Order Total Section */
+.order-total {
+  margin-bottom: 30px;
+}
+
+.order-total h2 {
+  font-size: 24px;
+  font-weight: normal;
+  margin-bottom: 15px;
+}
+
+.delivery-info {
+  background-color: #f7f7f7;
+  padding: 15px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.delivery-info p {
+  margin-bottom: 5px;
+}
+
+.delivery-info .address {
+  color: #666;
+  font-size: 14px;
+}
+
+.change-link {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #0066c0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.change-link:hover {
+  text-decoration: underline;
+}
+
+/* Payment Method Section */
+.payment-method {
+  margin-bottom: 30px;
+}
+
+.payment-method h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.payment-option {
+  margin-bottom: 25px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.payment-option h4 {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Card Input Group */
+.card-input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.card-input-group input[type="radio"] {
+  margin-right: 10px;
+}
+
+.card-input-group label {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  cursor: pointer;
+}
+
+.card-text {
+  margin-right: 10px;
+}
+
+.card-icons {
+  display: flex;
+  gap: 5px;
+}
+
+.card-icons img {
+  width: 24px;
+  height: 16px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+}
+
+/* Card Details */
+.card-details {
+  margin-left: 25px;
+}
+
+.card-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.card-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.expiry-input, .cvv-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.expiry-input {
+  flex: 1;
+}
+
+.cvv-input {
+  width: 80px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  margin: 0;
+}
+
+.checkbox-group label {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Balance Group */
+.balance-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.balance-group input[type="radio"] {
+  margin: 0;
+}
+
+.balance-group label {
+  flex: 1;
+  cursor: pointer;
+}
+
+.apply-btn {
+  background-color: #ffd814;
+  border: 1px solid #fcd200;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.apply-btn:hover {
+  background-color: #f7ca00;
+}
+
+/* Payment Methods */
+.payment-methods {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.method-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.method-group input[type="radio"] {
+  margin: 0;
+}
+
+.method-group label {
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delivery-note {
+  margin-left: 25px;
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.payment-icons {
+  display: flex;
+  gap: 5px;
+}
+
+.payment-icons img {
+  width: 32px;
+  height: 20px;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+}
+
+/* Use Payment Button */
+.use-payment-btn {
+  background-color: #ffd814;
+  border: 1px solid #fcd200;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.use-payment-btn:hover {
+  background-color: #f7ca00;
+}
+
+/* Review Section */
+.review-section {
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+
+.review-section h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.delivery-date {
+  background-color: #f7f7f7;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.delivery-date p {
+  font-size: 14px;
+}
+
+.item-details {
+  margin-bottom: 15px;
+}
+
+.item-details p {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.shipping-info {
+  margin-bottom: 15px;
+}
+
+.shipping-info p {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.faster-link {
+  color: #0066c0;
+  text-decoration: none;
+}
+
+.faster-link:hover {
+  text-decoration: underline;
+}
+
+.gift-options {
+  margin-bottom: 15px;
+}
+
+.gift-options p {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.gift-message-input {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 200px;
+}
+
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.quantity-selector label {
+  font-size: 14px;
+}
+
+.qty-select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.delete-btn, .save-later-btn {
+  background: none;
+  border: none;
+  color: #0066c0;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-btn:hover, .save-later-btn:hover {
+  color: #004499;
+}
+
+.item-actions {
+  font-size: 14px;
+  color: #0066c0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 15px;
+  }
+  
+  .card-row {
+    flex-direction: column;
+  }
+  
+  .cvv-input {
+    width: 100%;
+  }
+  
+  .payment-methods {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .quantity-selector {
+    flex-wrap: wrap;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="step-indicator">
+        <span class="step-text">Step 2 of 3</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Order Total Section -->
+      <section class="order-total">
+        <h2>Order Total</h2>
+        <div class="delivery-info">
+          <p><strong>Delivering to INDIRA MARKET SEC</strong></p>
+          <p class="address">INDIRA MARKET, UTTAR PRADESH, 201301, India</p>
+          <a href="#" class="change-link">Change</a>
+        </div>
+      </section>
+
+      <!-- Payment Method Section -->
+      <section class="payment-method">
+        <h3>Payment method</h3>
+        
+        <!-- Credit & Debit Cards -->
+        <div class="payment-option">
+          <h4>CREDIT & DEBIT CARDS</h4>
+          <div class="card-input-group">
+            <input type="radio" id="card-payment" name="payment" checked>
+            <label for="card-payment">
+              <span class="card-text">Enter your card number ending in</span>
+              <div class="card-icons">
+                <img src="https://dummyimage.com/24x16/ffffff/000000?text=VISA" alt="Visa" referrerpolicy="no-referrer">
+                <img src="https://dummyimage.com/24x16/ffffff/000000?text=MC" alt="Mastercard" referrerpolicy="no-referrer">
+              </div>
+            </label>
+          </div>
+          <div class="card-details">
+            <input type="text" placeholder="Card number" class="card-input">
+            <div class="card-row">
+              <input type="text" placeholder="MM/YY" class="expiry-input">
+              <input type="text" placeholder="CVV" class="cvv-input">
+            </div>
+            <div class="checkbox-group">
+              <input type="checkbox" id="save-card">
+              <label for="save-card">Securely save this payment method</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Available Balance -->
+        <div class="payment-option">
+          <h4>Your available balance</h4>
+          <div class="balance-group">
+            <input type="radio" id="gift-card" name="payment">
+            <label for="gift-card">Gift Card Balance: ₹0.00</label>
+            <button class="apply-btn">Apply</button>
+          </div>
+        </div>
+
+        <!-- Another Payment Method -->
+        <div class="payment-option">
+          <h4>Another payment method</h4>
+          
+          <div class="payment-methods">
+            <div class="method-group">
+              <input type="radio" id="cod" name="payment">
+              <label for="cod">Cash on delivery</label>
+            </div>
+            <div class="payment-icons">
+              <img src="https://dummyimage.com/32x20/ffffff/000000?text=VISA" alt="Visa" referrerpolicy="no-referrer">
+              <img src="https://dummyimage.com/32x20/ffffff/000000?text=MC" alt="Mastercard" referrerpolicy="no-referrer">
+              <img src="https://dummyimage.com/32x20/ffffff/000000?text=AMEX" alt="American Express" referrerpolicy="no-referrer">
+              <img src="https://dummyimage.com/32x20/ffffff/000000?text=DC" alt="Diners Club" referrerpolicy="no-referrer">
+              <img src="https://dummyimage.com/32x20/ffffff/000000?text=DISC" alt="Discover" referrerpolicy="no-referrer">
+            </div>
+          </div>
+
+          <div class="method-group">
+            <input type="radio" id="net-banking" name="payment">
+            <label for="net-banking">Net Banking</label>
+          </div>
+
+          <div class="method-group">
+            <input type="radio" id="other-upi" name="payment">
+            <label for="other-upi">Other UPI Apps</label>
+          </div>
+
+          <div class="method-group">
+            <input type="radio" id="emi" name="payment">
+            <label for="emi">EMI</label>
+          </div>
+
+          <div class="method-group">
+            <input type="radio" id="cash-delivery" name="payment">
+            <label for="cash-delivery">Cash on Delivery</label>
+            <p class="delivery-note">Available for this shipment</p>
+          </div>
+        </div>
+
+        <!-- Use Payment Button -->
+        <button class="use-payment-btn">Use this payment method</button>
+      </section>
+
+      <!-- Review Items Section -->
+      <section class="review-section">
+        <h3>Review items and shipping</h3>
+        <div class="delivery-date">
+          <p><strong>Delivery date: Check each page or contact us for delivery dates</strong></p>
+        </div>
+        <div class="item-details">
+          <p>Items sent from and sold by Amazon.com Services LLC. Gift-wrap available.</p>
+          <p>Sold by: Amazon.com Services LLC</p>
+          <p>₹1,234.00</p>
+        </div>
+        <div class="shipping-info">
+          <p>FREE delivery by <strong>Thu, 7 Feb</strong> on orders over ₹499.00 shipped by Amazon or get <strong>One-Day Delivery</strong> for ₹40.00</p>
+          <p>Want it faster? <a href="#" class="faster-link">Add ₹40.00 for One-Day Delivery</a></p>
+        </div>
+        <div class="gift-options">
+          <p>This item can be gift-wrapped.</p>
+          <p>Gift Message (optional): <input type="text" class="gift-message-input"></p>
+        </div>
+        <div class="quantity-selector">
+          <label>Qty: </label>
+          <select class="qty-select">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+          </select>
+          <button class="delete-btn">Delete</button>
+          <button class="save-later-btn">Save for later</button>
+        </div>
+        <div class="item-actions">
+          <p>See more like this | Share</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

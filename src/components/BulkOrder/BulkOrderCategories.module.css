@@ -1,0 +1,202 @@
+/* Bulk Order Categories Section */
+.categoriesSection {
+  padding: 80px 20px;
+  background: #fff;
+  margin: 0 auto;
+}
+
+.container {
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.sectionTitle {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.sectionSubtitle {
+  font-size: clamp(16px, 1.2vw, 18px);
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.categoryCard {
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.cardImage {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.cardImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.categoryCard:hover .cardImage img {
+  transform: scale(1.1);
+}
+
+.cardOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.cardContent {
+  padding: 30px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.cardDescription {
+  font-size: 15px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.itemsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 25px 0;
+  flex: 1;
+}
+
+.itemsList li {
+  padding: 8px 0;
+  color: #555;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #f3f3f3;
+  color: #666;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.cardButton {
+  display: inline-block;
+  text-align: center;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  margin-top: auto;
+}
+
+.cardButton:hover {
+  background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+  transform: translateX(5px);
+  color: #fff;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+  }
+}
+
+@media (max-width: 767px) {
+  .categoriesSection {
+    padding: 60px 15px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 40px;
+  }
+
+  .categoriesGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .cardImage {
+    height: 200px;
+  }
+
+  .cardContent {
+    padding: 25px;
+  }
+
+  .cardTitle {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .categoriesSection {
+    padding: 40px 10px;
+  }
+
+  .cardImage {
+    height: 180px;
+  }
+
+  .cardContent {
+    padding: 20px;
+  }
+
+  .itemsList li {
+    font-size: 13px;
+  }
+}
