@@ -117,10 +117,10 @@ export const vendorAPI = {
     username?: string;
     password: string;
     password_confirm: string;
-  }) => API.post('/auth/vendor/register/', vendorData),
+  }) => API.post('/auth/seller/register/', vendorData),
   
   login: (credentials: { username: string; password: string }) =>
-    API.post('/auth/vendor/login/', credentials),
+    API.post('/auth/seller/login/', credentials),
   
   getProfile: () => API.get('/auth/vendor/profile/'),
 };

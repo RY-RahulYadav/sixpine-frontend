@@ -56,14 +56,39 @@ const VendorRegisterPage: React.FC = () => {
 
     try {
       await vendorAPI.register(formData as any);
-      setSuccess('Vendor registration successful! Your account is pending approval.');
+      setSuccess('Seller registration successful! Your account is pending approval.');
       
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate('/vendor/login');
+        navigate('/seller/login');
       }, 2000);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.response?.data?.details || 'Registration failed. Please try again.';
+      // Improved error handling - show detailed backend errors
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // Check for field-specific errors
+        if (errorData.details && typeof errorData.details === 'object') {
+          const fieldErrors = Object.entries(errorData.details)
+            .map(([field, messages]: [string, any]) => {
+              const messageArray = Array.isArray(messages) ? messages : [messages];
+              return `${field}: ${messageArray.join(', ')}`;
+            })
+            .join('\n');
+          errorMessage = fieldErrors || errorData.error || errorMessage;
+        } else if (errorData.error) {
+          errorMessage = typeof errorData.error === 'string' 
+            ? errorData.error 
+            : JSON.stringify(errorData.error);
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -81,16 +106,16 @@ const VendorRegisterPage: React.FC = () => {
           <div className="sixpine-auth-card">
             <div className="sixpine-brand">
               <h1>Sixpine</h1>
-              <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>Vendor Registration</p>
+              <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>Seller Registration</p>
             </div>
             
             <div className="sixpine-toggle-buttons">
-              <Link to="/vendor/login" className="sixpine-toggle-btn">Sign in</Link>
+              <Link to="/seller/login" className="sixpine-toggle-btn">Sign in</Link>
               <button className="sixpine-toggle-btn active">Create account</button>
             </div>
 
             {error && (
-              <div className="sixpine-error-message">
+              <div className="sixpine-error-message" style={{ whiteSpace: 'pre-line' }}>
                 {error}
               </div>
             )}
@@ -215,7 +240,7 @@ const VendorRegisterPage: React.FC = () => {
                 className="sixpine-submit-btn"
                 disabled={loading}
               >
-                {loading ? 'Registering...' : 'Register as Vendor'}
+                {loading ? 'Registering...' : 'Register as Seller'}
               </button>
             </form>
 

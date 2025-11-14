@@ -102,12 +102,12 @@ const AdminFilterOptions: React.FC = () => {
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      await Promise.all([
-        fetchCategories(),
-        fetchColors(),
-        fetchMaterials(),
-        fetchDiscounts()
-      ]);
+        await Promise.all([
+          fetchCategories(),
+          fetchColors(),
+          fetchMaterials(),
+          fetchDiscounts()
+        ]);
     } catch (error) {
       console.error('Error fetching filter options:', error);
       showToast('Failed to load filter options', 'error');
@@ -200,7 +200,7 @@ const AdminFilterOptions: React.FC = () => {
         showToast('Category created successfully', 'success');
       }
       resetCategoryForm();
-      await fetchCategories();
+        await fetchCategories();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to save category', 'error');
     } finally {
@@ -233,7 +233,7 @@ const AdminFilterOptions: React.FC = () => {
     try {
       await adminAPI.deleteCategory(id);
       showToast('Category deleted successfully', 'success');
-      await fetchCategories();
+        await fetchCategories();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to delete category', 'error');
     }
@@ -308,7 +308,7 @@ const AdminFilterOptions: React.FC = () => {
         showToast('Color created successfully', 'success');
       }
       resetColorForm();
-      await fetchColors();
+        await fetchColors();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to save color', 'error');
     } finally {
@@ -339,7 +339,7 @@ const AdminFilterOptions: React.FC = () => {
     try {
       await adminAPI.deleteColor(id);
       showToast('Color deleted successfully', 'success');
-      await fetchColors();
+        await fetchColors();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to delete color', 'error');
     }
@@ -358,7 +358,7 @@ const AdminFilterOptions: React.FC = () => {
         showToast('Material created successfully', 'success');
       }
       resetMaterialForm();
-      await fetchMaterials();
+        await fetchMaterials();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to save material', 'error');
     } finally {
@@ -389,7 +389,7 @@ const AdminFilterOptions: React.FC = () => {
     try {
       await adminAPI.deleteMaterial(id);
       showToast('Material deleted successfully', 'success');
-      await fetchMaterials();
+        await fetchMaterials();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to delete material', 'error');
     }
@@ -408,7 +408,7 @@ const AdminFilterOptions: React.FC = () => {
         showToast('Discount filter option created successfully', 'success');
       }
       resetDiscountForm();
-      await fetchDiscounts();
+        await fetchDiscounts();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to save discount filter option', 'error');
     } finally {
@@ -439,7 +439,7 @@ const AdminFilterOptions: React.FC = () => {
     try {
       await adminAPI.deleteDiscount(id);
       showToast('Discount deleted successfully', 'success');
-      await fetchDiscounts();
+        await fetchDiscounts();
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to delete discount', 'error');
     }
@@ -457,7 +457,7 @@ const AdminFilterOptions: React.FC = () => {
   return (
     <div className="admin-filter-options">
       <div className="admin-header-actions">
-        <h2>Filter Options Management</h2>
+          <h2>Filter Options Management</h2>
       </div>
 
       {/* Section Tabs */}
@@ -499,16 +499,16 @@ const AdminFilterOptions: React.FC = () => {
             <div className="admin-card">
               <div className="admin-card-header">
                 <h3>Categories</h3>
-                <button
-                  className="admin-btn primary"
-                  onClick={() => {
-                    resetCategoryForm();
-                    setShowCategoryModal(true);
-                  }}
-                >
-                  <span className="material-symbols-outlined">add</span>
-                  Add Category
-                </button>
+                  <button
+                    className="admin-btn primary"
+                    onClick={() => {
+                      resetCategoryForm();
+                      setShowCategoryModal(true);
+                    }}
+                  >
+                    <span className="material-symbols-outlined">add</span>
+                    Add Category
+                  </button>
               </div>
 
               <div className="categories-list">
@@ -521,24 +521,24 @@ const AdminFilterOptions: React.FC = () => {
                         {!category.is_active && <span className="status-badge inactive">Inactive</span>}
                       </div>
                       <div className="category-actions">
-                        <button
-                          className="admin-btn icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditCategory(category);
-                          }}
-                        >
-                          <span className="material-symbols-outlined">edit</span>
-                        </button>
-                        <button
-                          className="admin-btn icon danger"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCategory(category.id);
-                          }}
-                        >
-                          <span className="material-symbols-outlined">delete</span>
-                        </button>
+                            <button
+                              className="admin-btn icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditCategory(category);
+                              }}
+                            >
+                              <span className="material-symbols-outlined">edit</span>
+                            </button>
+                            <button
+                              className="admin-btn icon danger"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCategory(category.id);
+                              }}
+                            >
+                              <span className="material-symbols-outlined">delete</span>
+                            </button>
                         <span className="material-symbols-outlined">
                           {expandedCategory === category.id ? 'expand_less' : 'expand_more'}
                         </span>
@@ -549,18 +549,18 @@ const AdminFilterOptions: React.FC = () => {
                       <div className="subcategories-section">
                         <div className="subcategories-header">
                           <h5>Subcategories</h5>
-                          <button
-                            className="admin-btn primary"
-                            onClick={() => {
-                              resetSubcategoryForm();
-                              setSubcategoryForm(prev => ({ ...prev, category: category.id.toString() }));
-                              setShowSubcategoryModal(true);
-                            }}
-                            style={{ fontSize: '13px', padding: '8px 16px' }}
-                          >
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
-                            Add Subcategory
-                          </button>
+                            <button
+                              className="admin-btn primary"
+                              onClick={() => {
+                                resetSubcategoryForm();
+                                setSubcategoryForm(prev => ({ ...prev, category: category.id.toString() }));
+                                setShowSubcategoryModal(true);
+                              }}
+                              style={{ fontSize: '13px', padding: '8px 16px' }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                              Add Subcategory
+                            </button>
                         </div>
 
                         <div className="subcategories-list">
@@ -572,18 +572,18 @@ const AdminFilterOptions: React.FC = () => {
                                 {!subcat.is_active && <span className="status-badge inactive">Inactive</span>}
                               </div>
                               <div className="category-actions">
-                                <button
-                                  className="admin-btn icon"
-                                  onClick={() => handleEditSubcategory(subcat)}
-                                >
-                                  <span className="material-symbols-outlined">edit</span>
-                                </button>
-                                <button
-                                  className="admin-btn icon danger"
-                                  onClick={() => handleDeleteSubcategory(subcat.id, category.id)}
-                                >
-                                  <span className="material-symbols-outlined">delete</span>
-                                </button>
+                                    <button
+                                      className="admin-btn icon"
+                                      onClick={() => handleEditSubcategory(subcat)}
+                                    >
+                                      <span className="material-symbols-outlined">edit</span>
+                                    </button>
+                                    <button
+                                      className="admin-btn icon danger"
+                                      onClick={() => handleDeleteSubcategory(subcat.id, category.id)}
+                                    >
+                                      <span className="material-symbols-outlined">delete</span>
+                                    </button>
                               </div>
                             </div>
                           ))}
@@ -743,16 +743,16 @@ const AdminFilterOptions: React.FC = () => {
             <div className="admin-card">
               <div className="admin-card-header">
                 <h3>Colors</h3>
-                <button
-                  className="admin-btn primary"
-                  onClick={() => {
-                    resetColorForm();
-                    setShowColorModal(true);
-                  }}
-                >
-                  <span className="material-symbols-outlined">add</span>
-                  Add Color
-                </button>
+                  <button
+                    className="admin-btn primary"
+                    onClick={() => {
+                      resetColorForm();
+                      setShowColorModal(true);
+                    }}
+                  >
+                    <span className="material-symbols-outlined">add</span>
+                    Add Color
+                  </button>
               </div>
 
               <div className="admin-table-container">
@@ -789,18 +789,18 @@ const AdminFilterOptions: React.FC = () => {
                           </span>
                         </td>
                         <td>
-                          <button
-                            className="admin-btn icon"
-                            onClick={() => handleEditColor(color)}
-                          >
-                            <span className="material-symbols-outlined">edit</span>
-                          </button>
-                          <button
-                            className="admin-btn icon danger"
-                            onClick={() => handleDeleteColor(color.id)}
-                          >
-                            <span className="material-symbols-outlined">delete</span>
-                          </button>
+                              <button
+                                className="admin-btn icon"
+                                onClick={() => handleEditColor(color)}
+                              >
+                                <span className="material-symbols-outlined">edit</span>
+                              </button>
+                              <button
+                                className="admin-btn icon danger"
+                                onClick={() => handleDeleteColor(color.id)}
+                              >
+                                <span className="material-symbols-outlined">delete</span>
+                              </button>
                         </td>
                       </tr>
                     ))}
@@ -881,16 +881,16 @@ const AdminFilterOptions: React.FC = () => {
             <div className="admin-card">
               <div className="admin-card-header">
                 <h3>Materials</h3>
-                <button
-                  className="admin-btn primary"
-                  onClick={() => {
-                    resetMaterialForm();
-                    setShowMaterialModal(true);
-                  }}
-                >
-                  <span className="material-symbols-outlined">add</span>
-                  Add Material
-                </button>
+                  <button
+                    className="admin-btn primary"
+                    onClick={() => {
+                      resetMaterialForm();
+                      setShowMaterialModal(true);
+                    }}
+                  >
+                    <span className="material-symbols-outlined">add</span>
+                    Add Material
+                  </button>
               </div>
 
               <div className="admin-table-container">
@@ -914,18 +914,18 @@ const AdminFilterOptions: React.FC = () => {
                           </span>
                         </td>
                         <td>
-                          <button
-                            className="admin-btn icon"
-                            onClick={() => handleEditMaterial(material)}
-                          >
-                            <span className="material-symbols-outlined">edit</span>
-                          </button>
-                          <button
-                            className="admin-btn icon danger"
-                            onClick={() => handleDeleteMaterial(material.id)}
-                          >
-                            <span className="material-symbols-outlined">delete</span>
-                          </button>
+                              <button
+                                className="admin-btn icon"
+                                onClick={() => handleEditMaterial(material)}
+                              >
+                                <span className="material-symbols-outlined">edit</span>
+                              </button>
+                              <button
+                                className="admin-btn icon danger"
+                                onClick={() => handleDeleteMaterial(material.id)}
+                              >
+                                <span className="material-symbols-outlined">delete</span>
+                              </button>
                         </td>
                       </tr>
                     ))}
@@ -998,16 +998,16 @@ const AdminFilterOptions: React.FC = () => {
                 <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
                   These are filter options for product pages. For checkout discounts, use Coupons.
                 </p>
-                <button
-                  className="admin-btn primary"
-                  onClick={() => {
-                    resetDiscountForm();
-                    setShowDiscountModal(true);
-                  }}
-                >
-                  <span className="material-symbols-outlined">add</span>
-                  Add Discount Filter
-                </button>
+                  <button
+                    className="admin-btn primary"
+                    onClick={() => {
+                      resetDiscountForm();
+                      setShowDiscountModal(true);
+                    }}
+                  >
+                    <span className="material-symbols-outlined">add</span>
+                    Add Discount Filter
+                  </button>
               </div>
 
               <div className="admin-table-container">
@@ -1044,18 +1044,18 @@ const AdminFilterOptions: React.FC = () => {
                             </span>
                           </td>
                           <td>
-                            <button
-                              className="admin-btn icon"
-                              onClick={() => handleEditDiscount(discount)}
-                            >
-                              <span className="material-symbols-outlined">edit</span>
-                            </button>
-                            <button
-                              className="admin-btn icon danger"
-                              onClick={() => handleDeleteDiscount(discount.id)}
-                            >
-                              <span className="material-symbols-outlined">delete</span>
-                            </button>
+                                <button
+                                  className="admin-btn icon"
+                                  onClick={() => handleEditDiscount(discount)}
+                                >
+                                  <span className="material-symbols-outlined">edit</span>
+                                </button>
+                                <button
+                                  className="admin-btn icon danger"
+                                  onClick={() => handleDeleteDiscount(discount.id)}
+                                >
+                                  <span className="material-symbols-outlined">delete</span>
+                                </button>
                           </td>
                         </tr>
                       ))

@@ -35,7 +35,7 @@ const SellerLayout: React.FC = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('vendor');
     localStorage.removeItem('userType');
-    navigate('/vendor/login');
+    navigate('/seller/login');
   };
   
   const isActive = (path: string) => {

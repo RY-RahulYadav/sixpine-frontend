@@ -1,5 +1,5 @@
 /* Homepage.css */
-.homepage_container, .aboutpage_container,  .career_container,
+ .aboutpage_container,  .career_container,
 .accountpage_container,
 .closeyoursixpineaccount_container,
 .communicationpreferences_container,
@@ -18,7 +18,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.recentlybrowsed_container, .productdetails_container{
+.homepage_container,.recentlybrowsed_container, .productdetails_container{
   margin: 0 auto;
   width: 100%;
   margin-bottom: 60px;

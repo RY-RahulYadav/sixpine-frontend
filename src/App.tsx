@@ -67,9 +67,9 @@ function AppContent() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            {/* Vendor routes */}
-            <Route path="/vendor/login" element={<VendorLoginPage />} />
-            <Route path="/vendor/register" element={<VendorRegisterPage />} />
+            {/* Seller routes */}
+            <Route path="/seller/login" element={<VendorLoginPage />} />
+            <Route path="/seller/register" element={<VendorRegisterPage />} />
             <Route path="/products" element={<ProductListPage />} />
             <Route path="/products-details/:slug" element={<NewProductDetails />} />
             <Route path="/about" element={<AboutPage />} />

@@ -42,7 +42,26 @@ const VendorLoginPage: React.FC = () => {
       // Navigate to seller panel
       navigate('/seller', { replace: true });
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Invalid credentials. Please try again.';
+      // Improved error handling
+      let errorMessage = 'Invalid credentials. Please try again.';
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        if (errorData.error) {
+          errorMessage = typeof errorData.error === 'string' 
+            ? errorData.error 
+            : (Array.isArray(errorData.error) ? errorData.error.join(', ') : JSON.stringify(errorData.error));
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.details) {
+          errorMessage = typeof errorData.details === 'string' 
+            ? errorData.details 
+            : JSON.stringify(errorData.details);
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -60,16 +79,16 @@ const VendorLoginPage: React.FC = () => {
           <div className="sixpine-auth-card">
             <div className="sixpine-brand">
               <h1>Sixpine</h1>
-              <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>Vendor Login</p>
+              <p style={{ fontSize: '14px', color: '#666', marginTop: '10px' }}>Seller Login</p>
             </div>
             
             <div className="sixpine-toggle-buttons">
               <button className="sixpine-toggle-btn active">Sign in</button>
-              <Link to="/vendor/register" className="sixpine-toggle-btn">Register as Vendor</Link>
+              <Link to="/seller/register" className="sixpine-toggle-btn">Register as Seller</Link>
             </div>
 
             {error && (
-              <div className="sixpine-error-message">
+              <div className="sixpine-error-message" style={{ whiteSpace: 'pre-line' }}>
                 {error}
               </div>
             )}

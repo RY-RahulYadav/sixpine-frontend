@@ -52,15 +52,20 @@
   background: white;
   cursor: pointer;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  max-height: 600px;
 }
 
 .mainImage {
   width: 100%;
-  height: 480px;
-  display: block;
-  object-fit: contain;
+  height: 100%;
+  min-height: 500px;
   max-height: 600px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
   /* padding: 10px; */
   /* border: 5px solid #9c0b0b; */
 }

@@ -10,16 +10,38 @@ interface SearchSuggestion {
   label?: string;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { state, openCartSidebar } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLFormElement>(null);
   const debounceRef = useRef<number | null>(null);
+
+  // Fetch categories from backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await productAPI.getCategories();
+        setCategories(response.data.results || response.data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   // Update search query when URL params change
   useEffect(() => {
@@ -78,9 +100,23 @@ const Navbar: React.FC = () => {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSuggestions(false);
+    
+    const params = new URLSearchParams();
+    
     if (searchQuery.trim()) {
-      setShowSuggestions(false);
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      params.append('search', searchQuery.trim());
+    }
+    
+    if (selectedCategory) {
+      params.append('category', selectedCategory);
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      navigate(`/products?${queryString}`);
+    } else if (searchQuery.trim() || selectedCategory) {
+      navigate(`/products?${searchQuery.trim() ? `search=${encodeURIComponent(searchQuery.trim())}` : `category=${selectedCategory}`}`);
     }
   };
 
@@ -161,11 +197,17 @@ const Navbar: React.FC = () => {
 
         {/* Search Bar */}
         <form className="d-flex flex-grow-1 mx-lg-3 search-box order-3 order-lg-2" onSubmit={handleSearch} ref={searchRef}>
-          <select className="form-select category-select me-2">
+          <select 
+            className="form-select category-select me-2"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
             <option value="">All Categories</option>
-            <option value="electronics">Electronics</option>
-            <option value="fashion">Fashion</option>
-            <option value="home-kitchen">Home & Kitchen</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.slug}>
+                {category.name}
+              </option>
+            ))}
           </select>
           <div className="position-relative flex-grow-1">
             <input 

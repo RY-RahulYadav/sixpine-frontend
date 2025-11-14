@@ -36,13 +36,13 @@ const SellerRouter = () => {
     );
   }
   
-  // If not vendor and trying to access seller routes, redirect to vendor login
-  if (!isVendor && location.pathname !== '/vendor/login') {
-    return <Navigate to="/vendor/login" replace />;
+  // If not vendor and trying to access seller routes, redirect to seller login
+  if (!isVendor && location.pathname !== '/seller/login' && location.pathname !== '/seller/register') {
+    return <Navigate to="/seller/login" replace />;
   }
   
   // If vendor and trying to access login, redirect to dashboard
-  if (isVendor && location.pathname === '/vendor/login') {
+  if (isVendor && (location.pathname === '/seller/login' || location.pathname === '/seller/register')) {
     return <Navigate to="/seller" replace />;
   }
 
