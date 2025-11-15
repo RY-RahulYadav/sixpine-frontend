@@ -175,6 +175,14 @@ export const sellerAPI = {
   getColor: (id: number) => API.get(`/admin/colors/${id}/`),
   getMaterials: (params?: any) => API.get('/admin/materials/', { params }),
   getMaterial: (id: number) => API.get(`/admin/materials/${id}/`),
+  // Media
+  getMedia: (params?: any) => API.get('/seller/media/', { params }),
+  getMediaItem: (id: number) => API.get(`/seller/media/${id}/`),
+  uploadMedia: (formData: FormData) => API.post('/seller/media/upload/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000
+  }),
+  deleteMedia: (id: number) => API.delete(`/seller/media/${id}/`),
 };
 
 // Product API calls
@@ -230,6 +238,8 @@ export const productAPI = {
   
   clearBrowsingHistory: (productId?: number) =>
     API.delete('/browsing-history/clear/', { params: productId ? { product_id: productId } : {} }),
+  
+  clearAllUserData: () => API.delete('/clear-all-data/'),
 };
 
 // Cart API calls
@@ -332,6 +342,24 @@ export const orderAPI = {
   }) => API.post('/orders/complete-payment/', data),
   
   getPaymentCharges: () => API.get('/payment-charges/'),
+  
+  // Return requests
+  submitReturnRequest: (data: {
+    order_id: string;
+    order_item: number;
+    reason: string;
+    reason_description?: string;
+    pickup_date: string;
+  }) => API.post('/returns/submit/', data),
+  
+  getReturnRequests: () => API.get('/returns/'),
+  
+  getSellerReturnRequests: () => API.get('/returns/seller/'),
+  
+  approveReturnRequest: (returnRequestId: number, data: {
+    approval: boolean;
+    seller_notes?: string;
+  }) => API.post(`/returns/${returnRequestId}/approve/`, data),
 };
 
 // Homepage Content API calls (public)
@@ -367,6 +395,20 @@ export const dataRequestAPI = {
 export const accountClosureAPI = {
   checkEligibility: () => API.get('/auth/account/check-deletion-eligibility/'),
   closeAccount: (reason?: string) => API.post('/auth/account/close/', { reason }),
+};
+
+// Packaging Feedback API calls
+export const packagingFeedbackAPI = {
+  submitFeedback: (data: {
+    feedback_type?: string;
+    rating?: number;
+    was_helpful?: boolean;
+    message: string;
+    order_id?: string;
+    product_id?: number;
+    email?: string;
+    name?: string;
+  }) => API.post('/auth/packaging-feedback/submit/', data),
 };
 
 export default API;

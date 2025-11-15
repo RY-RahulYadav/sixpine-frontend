@@ -23,7 +23,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px 12px;
+  padding: 10px 12px;
   
 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -34,8 +34,8 @@ html, body, #root {
   width: 100%;
   /* Increased width to give forms more horizontal space */
   max-width: 420px;
-  /* center horizontally and allow small top/bottom margin */
-  margin: 10px auto;
+  /* center horizontally with equal top and bottom margin */
+  margin: 0 auto;
 }
 
 /* Auth Card */
@@ -46,7 +46,7 @@ html, body, #root {
   overflow: visible;
   width: 100%;
   /* Remove fixed height constraints to allow content to flow naturally */
-  margin: 6px auto;
+  margin: 0 auto;
 }
 
 /* Brand Header */
@@ -404,6 +404,11 @@ html, body, #root {
   cursor: not-allowed;
 }
 
+/* Vendor Register - Same width as seller login */
+.vendor-register-container {
+  max-width: 420px !important;
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
   .sixpine-auth-page {
@@ -433,6 +438,11 @@ html, body, #root {
   .sixpine-error-message,
   .sixpine-success-message {
     margin: 0 16px 12px;
+  }
+  
+  /* On mobile, stack vendor register fields vertically for better UX */
+  .vendor-register-container .sixpine-form > div[style*="grid"] {
+    grid-template-columns: 1fr !important;
   }
 }
 

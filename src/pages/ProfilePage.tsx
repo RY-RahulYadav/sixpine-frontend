@@ -47,6 +47,9 @@ const ProfilePage: React.FC = () => {
           reviews: product.reviews || product.review_count || 0,
           oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
           newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,  // Use slug or productSlug
         }));
         setFrequentlyViewedProducts(transformedFrequentlyViewed);
       }
@@ -61,6 +64,9 @@ const ProfilePage: React.FC = () => {
           reviews: product.reviews || product.review_count || 0,
           oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
           newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,  // Use slug or productSlug
         }));
         setInspiredProducts(transformedInspired);
       }

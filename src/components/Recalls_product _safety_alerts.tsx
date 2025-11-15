@@ -1,6 +1,8 @@
 import styles from '../styles/Recalls_product _safety_alerts.module.css';
+import { useFooterSettings } from '../hooks/useFooterSettings';
 
 const Safety = () => {
+  const { whatsAppNumber, displayPhoneNumber } = useFooterSettings();
   return (
     <div className={styles.main}>
       <section className={styles.safetySection}>
@@ -43,7 +45,7 @@ const Safety = () => {
               </p>
               <p className={styles.contact}>
                 📧 <a href="mailto:skwoodcity@gmail.com">skwoodcity@gmail.com</a><br />
-                📞 <a href="https://wa.me/919897268972" target="_blank" rel="noopener noreferrer">+91 9897268972 (WhatsApp)</a><br />
+                📞 <a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer">{displayPhoneNumber} (WhatsApp)</a><br />
                 🌐 <a href="https://www.sixpine.in" target="_blank" rel="noopener noreferrer">www.sixpine.in</a>
               </p>
 

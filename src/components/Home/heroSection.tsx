@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './heroSection.module.css';
 import API from '../../services/api';
 import { homepageAPI } from '../../services/api';
+import { useFooterSettings } from '../../hooks/useFooterSettings';
 
 interface HeroSlide {
   id: number;
@@ -11,13 +13,16 @@ interface HeroSlide {
   buttonText: string;
   backgroundColor: string;
   imageSrc: string;
+  navigateUrl?: string;
 }
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpertOpen, setIsExpertOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { whatsAppNumber, displayPhoneNumber, phoneNumber } = useFooterSettings();
   const [slides, setSlides] = useState<HeroSlide[]>([
     {
       id: 1,
@@ -47,6 +52,7 @@ const HeroSection = () => {
       imageSrc: "/images/Home/livingroom.jpg"
     }
   ]);
+
   const [, setLoading] = useState(true);
   const [specialDealBanner, setSpecialDealBanner] = useState<any>(null);
   const [mattressBanner, setMattressBanner] = useState<any>(null);
@@ -165,7 +171,17 @@ const HeroSection = () => {
                     <span className={styles.asterisk}>*</span>
                   </div>
                 </div>
-                <button className={styles.buyNowBtn}>{slides[currentSlide]?.buttonText || 'BUY NOW'}</button>
+                <button 
+                  className={styles.buyNowBtn}
+                  onClick={() => {
+                    const url = slides[currentSlide]?.navigateUrl;
+                    if (url && url.trim()) {
+                      navigate(url);
+                    }
+                  }}
+                >
+                  {slides[currentSlide]?.buttonText || 'BUY NOW'}
+                </button>
               </div>
 
               {/* Product Image */}
@@ -214,7 +230,17 @@ const HeroSection = () => {
                   <div className={styles.uptoText}>{specialDealBanner?.uptoText || 'UPTO'}</div>
                   <div className={styles.discountPrice}>{specialDealBanner?.discountText || '₹5000 OFF'}</div>
                   <div className={styles.instantDiscount}>{specialDealBanner?.instantDiscountText || 'INSTANT DISCOUNT'}</div>
-                  <button className={styles.bedroomBuyBtn}>{specialDealBanner?.buttonText || 'BUY NOW'}</button>
+                  <button 
+                    className={styles.bedroomBuyBtn}
+                    onClick={() => {
+                      const url = specialDealBanner?.navigateUrl;
+                      if (url && url.trim()) {
+                        navigate(url);
+                      }
+                    }}
+                  >
+                    {specialDealBanner?.buttonText || 'BUY NOW'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -227,6 +253,12 @@ const HeroSection = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               } : {}}
+              onClick={() => {
+                const url = mattressBanner?.navigateUrl;
+                if (url && url.trim()) {
+                  navigate(url);
+                }
+              }}
             >
               {/* Ships in 2 Days Badge */}
               <div className={styles.shipsBadge}>
@@ -307,14 +339,14 @@ const HeroSection = () => {
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className={styles.phoneIcon}>
           <path d="M22 16.92V19.92C22 20.52 21.52 21.01 20.92 21.01C9.39 21.01 2.99 14.61 2.99 3.08C2.99 2.48 3.48 2 4.08 2H7.08C7.68 2 8.16 2.48 8.16 3.08C8.16 4.08 8.35 5.05 8.71 5.94C8.87 6.31 8.76 6.76 8.44 7.04L6.9 8.22C8.07 10.86 10.13 12.92 12.77 14.09L13.95 12.55C14.23 12.23 14.68 12.12 15.05 12.28C15.94 12.64 16.91 12.83 17.91 12.83C18.51 12.83 18.99 13.31 18.99 13.91V16.91H22V16.92Z" stroke="#ff5722" strokeWidth="2"/>
         </svg>
-        <a href="tel:9897268972" className={styles.phoneNumber}>9897268972</a>
+        <a href={`tel:${whatsAppNumber}`} className={styles.phoneNumber}>{displayPhoneNumber}</a>
       </div>
 
       {/* OR Divider */}
       <div className={styles.orDivider}>OR</div>
 
       {/* WhatsApp Button */}
-      <a href="https://wa.me/9628209929" target="_blank" rel="noopener noreferrer" className={styles.chatButton}>
+      <a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer" className={styles.chatButton}>
         <img 
           src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
           alt="WhatsApp" 
@@ -435,7 +467,16 @@ const HeroSection = () => {
 
 
       {/* Bottom Banner */}
-      <div className={styles.bannerContainer}>
+      <div 
+        className={styles.bannerContainer}
+        onClick={() => {
+          const url = bottomBanner?.navigateUrl;
+          if (url && url.trim()) {
+            navigate(url);
+          }
+        }}
+        style={{ cursor: bottomBanner?.navigateUrl ? 'pointer' : 'default' }}
+      >
         <img
           src={bottomBanner?.imageUrl || 'https://ii1.pepperfry.com/assets/a08eed1c-bbbd-4e8b-b381-07df5fbfe959.jpg'}
           alt={bottomBanner?.altText || 'Sixpine Banner'}

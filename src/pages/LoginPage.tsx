@@ -27,11 +27,21 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Clear any previous errors
+    if (state.error) {
+      // Error will be cleared by context when new login attempt starts
+    }
+    
     try {
       await login(formData);
+      // Only navigate if login is successful
       navigate('/');
-    } catch (error) {
-      // Error is handled in context
+    } catch (error: any) {
+      // Error is handled in context, but ensure it's displayed
+      // The error message from backend will be shown automatically
+      // Backend returns: "Admin users must login through the admin login page"
+      // or "Vendor users must login through the seller login page"
     }
   };
 

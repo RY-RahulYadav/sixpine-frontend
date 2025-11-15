@@ -42,6 +42,7 @@ import TermsPage from './pages/terms';
 import WarrantyPage from './pages/warranty';
 import FAQsPage from './pages/faqs';
 import HelpPage from './pages/HelpPage';
+import HelpCenterPage from './pages/HelpCenterPage';
 import ShoppingListPage from './pages/ShoppingListPage';
 import MembershipPage from './pages/MembershipPage';
 import LeavePackagingFeedbackPage from './pages/LeavePackagingFeedbackPage';
@@ -99,6 +100,7 @@ function AppContent() {
             <Route path="/warranty-policy" element={<WarrantyPage />} />
             <Route path="/faqs" element={<FAQsPage />} />
             <Route path="/help" element={<HelpPage />} />
+            <Route path="/help-center" element={<HelpCenterPage />} />
             <Route path="/shopping-list" element={<ShoppingListPage />} />
             <Route path="/membership" element={<MembershipPage />} />
             <Route path="/packaging-feedback" element={<LeavePackagingFeedbackPage />} />

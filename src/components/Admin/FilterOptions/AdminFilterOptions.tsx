@@ -515,10 +515,10 @@ const AdminFilterOptions: React.FC = () => {
                 {categories.map((category) => (
                   <div key={category.id} className="category-item">
                     <div className="category-header" onClick={() => setExpandedCategory(expandedCategory === category.id ? null : category.id)}>
-                      <div>
-                        <h4>{category.name}</h4>
-                        <span className="category-slug">/{category.slug}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                        <h4 style={{ margin: 0 }}>{category.name}</h4>
                         {!category.is_active && <span className="status-badge inactive">Inactive</span>}
+                        {category.is_active && <span className="status-badge active">Active</span>}
                       </div>
                       <div className="category-actions">
                             <button
@@ -527,6 +527,7 @@ const AdminFilterOptions: React.FC = () => {
                                 e.stopPropagation();
                                 handleEditCategory(category);
                               }}
+                              title="Edit Category"
                             >
                               <span className="material-symbols-outlined">edit</span>
                             </button>
@@ -536,10 +537,11 @@ const AdminFilterOptions: React.FC = () => {
                                 e.stopPropagation();
                                 handleDeleteCategory(category.id);
                               }}
+                              title="Delete Category"
                             >
                               <span className="material-symbols-outlined">delete</span>
                             </button>
-                        <span className="material-symbols-outlined">
+                        <span className="material-symbols-outlined" style={{ marginLeft: '8px', fontSize: '24px' }}>
                           {expandedCategory === category.id ? 'expand_less' : 'expand_more'}
                         </span>
                       </div>
@@ -566,21 +568,23 @@ const AdminFilterOptions: React.FC = () => {
                         <div className="subcategories-list">
                           {(subcategoriesMap[category.id] || []).map((subcat) => (
                             <div key={subcat.id} className="subcategory-item">
-                              <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
                                 <strong>{subcat.name}</strong>
-                                <span className="category-slug">/{subcat.slug}</span>
                                 {!subcat.is_active && <span className="status-badge inactive">Inactive</span>}
+                                {subcat.is_active && <span className="status-badge active">Active</span>}
                               </div>
                               <div className="category-actions">
                                     <button
                                       className="admin-btn icon"
                                       onClick={() => handleEditSubcategory(subcat)}
+                                      title="Edit Subcategory"
                                     >
                                       <span className="material-symbols-outlined">edit</span>
                                     </button>
                                     <button
                                       className="admin-btn icon danger"
                                       onClick={() => handleDeleteSubcategory(subcat.id, category.id)}
+                                      title="Delete Subcategory"
                                     >
                                       <span className="material-symbols-outlined">delete</span>
                                     </button>

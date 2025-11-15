@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./bannerCards.module.css"; // Import CSS module
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { homepageAPI } from '../../services/api';
@@ -8,6 +9,7 @@ interface BannerCard {
   img: string;
   title?: string;
   text?: string;
+  navigateUrl?: string;
 }
 
 interface Product {
@@ -20,6 +22,9 @@ interface Product {
   newPrice: string;
   productId?: number;
   productSlug?: string;
+  navigateUrl?: string;
+  variantCount?: number;
+  variant_count?: number;
 }
 
 // Default Banner Data
@@ -148,6 +153,7 @@ const defaultProducts2: Product[] = [
 ];
 
 const BannerCards = () => {
+  const navigate = useNavigate();
   const slider1 = useRef<HTMLDivElement>(null);
   const slider2 = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -223,6 +229,9 @@ const BannerCards = () => {
         oldPrice={p.oldPrice}
         newPrice={p.newPrice}
         productSlug={p.productSlug}
+        productId={p.productId}
+        navigateUrl={(p as any).navigateUrl}
+        variantCount={p.variantCount || p.variant_count}
       />
     ));
 
@@ -240,8 +249,17 @@ const BannerCards = () => {
         {bannerCards.map((b, i) => (
           <div
             className={styles.bannerCard}
-            style={{ backgroundImage: `url(${b.img})` }}
+            style={{ 
+              backgroundImage: `url(${b.img})`,
+              cursor: b.navigateUrl ? 'pointer' : 'default'
+            }}
             key={i}
+            onClick={() => {
+              const url = b.navigateUrl;
+              if (url && url.trim()) {
+                navigate(url);
+              }
+            }}
           >
             <div className={styles.bannerOverlay}>
               <h4>{b.title}</h4>

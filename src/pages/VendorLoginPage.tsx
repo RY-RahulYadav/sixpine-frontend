@@ -43,15 +43,24 @@ const VendorLoginPage: React.FC = () => {
       // Navigate to seller panel
       navigate('/seller', { replace: true });
     } catch (err: any) {
-      // Improved error handling
+      // Enhanced error handling with proper backend validation message extraction
       let errorMessage = 'Invalid credentials. Please try again.';
       
       if (err.response?.data) {
         const errorData = err.response.data;
-        if (errorData.error) {
-          errorMessage = typeof errorData.error === 'string' 
-            ? errorData.error 
-            : (Array.isArray(errorData.error) ? errorData.error.join(', ') : JSON.stringify(errorData.error));
+        
+        // Check for non_field_errors (from serializer validation)
+        if (errorData.non_field_errors && Array.isArray(errorData.non_field_errors)) {
+          errorMessage = errorData.non_field_errors[0];
+        } else if (errorData.error) {
+          // Handle string, array, or object error formats
+          if (typeof errorData.error === 'string') {
+            errorMessage = errorData.error;
+          } else if (Array.isArray(errorData.error)) {
+            errorMessage = errorData.error.join(', ');
+          } else {
+            errorMessage = JSON.stringify(errorData.error);
+          }
         } else if (errorData.message) {
           errorMessage = errorData.message;
         } else if (errorData.details) {
@@ -63,6 +72,9 @@ const VendorLoginPage: React.FC = () => {
         errorMessage = err.message;
       }
       
+      // Display the error message (backend will return messages like:
+      // "Admin users must login through the admin login page"
+      // "This account is not registered as a vendor. Please use the regular login page.")
       setError(errorMessage);
     } finally {
       setLoading(false);

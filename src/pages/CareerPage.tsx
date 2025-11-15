@@ -21,9 +21,8 @@ const CareerPage: React.FC = () => {
        
       </div>
   
-         <div className="career_container">
+         <div className="sixpineapp_container">
       <Career />
-      
 </div>
   
       <Footer />

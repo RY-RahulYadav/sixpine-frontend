@@ -9,6 +9,7 @@ import '../styles/Pages.css';
 // Import components for Recently Browsed page
 import BrowsingHistory from '../components/RecentlyBrowsed/BrowsingHistory';
 import RelatedCategories from '../components/RecentlyBrowsed/RelatedCategories.tsx';
+import Wishlist from '../components/RecentlyBrowsed/Wishlist';
 
 const RecentlyBrowsedPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -61,6 +62,9 @@ const RecentlyBrowsedPage: React.FC = () => {
         {/* Recently Viewed Products */}
         <RelatedCategories />
         <BrowsingHistory />
+        
+        {/* Wishlist */}
+        <Wishlist />
 
         {/* Products Related to Browsing History */}
         {/* <RecommendedProducts /> */}

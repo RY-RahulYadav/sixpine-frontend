@@ -82,9 +82,10 @@ interface OrderDetailsModalProps {
   orderId: string;
   show: boolean;
   onHide: () => void;
+  onRequestReturn?: (order: OrderDetails, orderItem: any) => void;
 }
 
-const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, onHide }) => {
+const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, onHide, onRequestReturn }) => {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
@@ -311,6 +312,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
                               <th>Price</th>
                               <th>Quantity</th>
                               <th>Subtotal</th>
+                              {order.status === 'delivered' && onRequestReturn && <th>Actions</th>}
                             </tr>
                           </thead>
                           <tbody>
@@ -342,6 +344,16 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
                                   <td>₹{formatAmount(it.unitPrice)}</td>
                                   <td>{it.quantity}</td>
                                   <td>₹{formatAmount(it.subtotal)}</td>
+                                  {order.status === 'delivered' && onRequestReturn && (
+                                    <td>
+                                      <button
+                                        className="btn btn-sm btn-outline-primary"
+                                        onClick={() => onRequestReturn(order, item)}
+                                      >
+                                        Return/Replace
+                                      </button>
+                                    </td>
+                                  )}
                                 </tr>
                               );
                             })}

@@ -1,6 +1,8 @@
 import styles from "../styles/Advertise.module.css";
+import { useFooterSettings } from "../hooks/useFooterSettings";
 
 export default function AdvertisePage() {
+  const { whatsAppNumber, displayPhoneNumber } = useFooterSettings();
   return (
     <div className={styles.advertisePage}>
       {/* Header Section */}
@@ -72,8 +74,8 @@ export default function AdvertisePage() {
           Expand your reach, boost sales, and build brand recognition by advertising with Sixpine.
         </p>
         <p>📧 <a href="mailto:skwoodcity@gmail.com">skwoodcity@gmail.com</a></p>
-        <p>📞 <a href="https://wa.me/919897268972" target="_blank" rel="noopener noreferrer">
-          +91 9897268972 (WhatsApp)
+        <p>📞 <a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer">
+          {displayPhoneNumber} (WhatsApp)
         </a></p>
         <p>🌐 <a href="https://www.sixpine.in" target="_blank" rel="noopener noreferrer">
           www.sixpine.in

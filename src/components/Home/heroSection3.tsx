@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import styles from "./heroSection3.module.css";
@@ -11,6 +12,7 @@ interface CategoryItem {
   id: number;
   name: string;
   img: string;
+  navigateUrl?: string;
 }
 
 interface SliderCard {
@@ -22,6 +24,7 @@ interface SliderCard {
   img: string;
   productSlug?: string;
   productId?: number;
+  navigateUrl?: string;
 }
 
 interface HeroSection3Data {
@@ -31,6 +34,7 @@ interface HeroSection3Data {
   leftProductCard: {
     name: string;
     img: string;
+    navigateUrl?: string;
   };
   categoryItems: CategoryItem[];
   sliderCards: SliderCard[];
@@ -84,6 +88,7 @@ const defaultData: HeroSection3Data = {
 };
 
 const HeroSection3 = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState<HeroSection3Data>(defaultData);
   const [loading, setLoading] = useState(true);
 
@@ -163,7 +168,16 @@ const HeroSection3 = () => {
             <span className={styles.offer}>{data.offerBadge}</span>
           </div>
 
-          <div className={styles.leftProductCard}>
+          <div 
+            className={styles.leftProductCard}
+            onClick={() => {
+              const url = data.leftProductCard.navigateUrl;
+              if (url && url.trim()) {
+                navigate(url);
+              }
+            }}
+            style={{ cursor: data.leftProductCard.navigateUrl ? 'pointer' : 'default' }}
+          >
             <img
               src={data.leftProductCard.img}
               alt={data.leftProductCard.name}
@@ -175,7 +189,17 @@ const HeroSection3 = () => {
 
         <div className={styles.rightGrid}>
           {displayItems.map((card) => (
-            <div key={card.id} className={styles.productCard}>
+            <div 
+              key={card.id} 
+              className={styles.productCard}
+              onClick={() => {
+                const url = card.navigateUrl;
+                if (url && url.trim()) {
+                  navigate(url);
+                }
+              }}
+              style={{ cursor: card.navigateUrl ? 'pointer' : 'default' }}
+            >
               <img className={styles.productImg} src={card.img} alt={card.name} />
               <div className={styles.productName}>{card.name}</div>
             </div>
@@ -187,12 +211,13 @@ const HeroSection3 = () => {
         <Slider {...settings} className={styles.slider}>
           {data.sliderCards.map((s) => {
             const handleClick = () => {
-              if (s.productSlug) {
-                window.location.href = `/products-details/${s.productSlug}`;
+              const url = s.navigateUrl || (s.productSlug ? `/products-details/${s.productSlug}` : null);
+              if (url) {
+                navigate(url);
               }
             };
             return (
-              <div key={s.id} className={styles.slideWrapper} onClick={handleClick} style={{ cursor: s.productSlug ? 'pointer' : 'default' }}>
+              <div key={s.id} className={styles.slideWrapper} onClick={handleClick} style={{ cursor: (s.navigateUrl || s.productSlug) ? 'pointer' : 'default' }}>
                 <div className={styles.sliderCard}>
                   <div className={styles.cardContent}>
                     <div className={styles.discountTag}>{s.tag}</div>

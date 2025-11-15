@@ -28,6 +28,9 @@ import AdminSixpineProducts from './Products/AdminSixpineProducts';
 import AdminProductDetail from './Products/AdminProductDetail';
 import AdminSixpineOrders from './Orders/AdminSixpineOrders';
 import AdminDataRequests from './DataRequests/AdminDataRequests';
+import AdminMedia from './Media/AdminMedia';
+import AdminPackagingFeedback from './PackagingFeedback/AdminPackagingFeedback';
+import AdminBrandAnalytics from './Analytics/AdminBrandAnalytics';
 
 const AdminRouter = () => {
   const { state } = useApp();
@@ -66,6 +69,7 @@ const AdminRouter = () => {
         <Route path="customers" element={<AdminUsers />} />
         <Route path="users/:id" element={<AdminUserDetail />} />
         <Route path="brands" element={<AdminBrands />} />
+        <Route path="brand-analytics" element={<AdminBrandAnalytics />} />
         <Route path="orders" element={<AdminOrders />} />
         <Route path="orders/:id" element={<AdminOrderDetail />} />
         <Route path="sixpine-orders" element={<AdminSixpineOrders />} />
@@ -87,6 +91,8 @@ const AdminRouter = () => {
         <Route path="bulk-orders" element={<AdminBulkOrders />} />
         <Route path="data-requests" element={<AdminDataRequests />} />
         <Route path="communication" element={<AdminCommunication />} />
+        <Route path="media" element={<AdminMedia />} />
+        <Route path="packaging-feedback" element={<AdminPackagingFeedback />} />
         {/* Settings Section */}
         <Route path="payment-charges" element={<AdminPaymentCharges />} />
         <Route path="filter-options" element={<AdminFilterOptions />} />

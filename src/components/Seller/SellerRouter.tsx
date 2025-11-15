@@ -12,7 +12,9 @@ import SellerBrandAnalytics from './Analytics/SellerBrandAnalytics';
 import SellerSettings from './Settings/SellerSettings';
 import SellerPaymentSettings from './Settings/SellerPaymentSettings';
 import SellerCommunication from './Communication/SellerCommunication';
+import SellerMedia from './Media/SellerMedia';
 import SellerPaymentDashboard from './Payment/SellerPaymentDashboard';
+import SellerReturnRequests from './Returns/SellerReturnRequests';
 
 const SellerRouter = () => {
   const location = useLocation();
@@ -60,6 +62,8 @@ const SellerRouter = () => {
         <Route path="payment" element={<SellerPaymentDashboard />} />
         <Route path="payment-settings" element={<SellerPaymentSettings />} />
         <Route path="communication" element={<SellerCommunication />} />
+        <Route path="media" element={<SellerMedia />} />
+        <Route path="returns" element={<SellerReturnRequests />} />
         <Route path="settings" element={<SellerSettings />} />
       </Route>
     </Routes>

@@ -237,63 +237,342 @@ const AdminUserDetail: React.FC = () => {
               </div>
             </div>
             
-            <div className="admin-card">
-              <h3>User Preferences</h3>
-              <div className="preferences-section">
+            <div className="admin-card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ 
+                padding: '20px 24px',
+                color: 'black'
+              }}>
+                <h3 style={{ 
+                  margin: 0, 
+                  fontSize: '18px', 
+                  fontWeight: 600,
+                  color: 'black'
+                }}>
+                  User Preferences
+                </h3>
+              </div>
+              
+              <div style={{ padding: '24px' }}>
                 {/* Interest Preferences */}
-                <div className="preference-group">
-                  <h4>Interest Preferences</h4>
+                <div style={{ 
+                  marginBottom: '28px',
+                  paddingBottom: '28px',
+                  borderBottom: '1px solid #e5e7eb'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px',
+                    marginBottom: '16px'
+                  }}>
+                    <span className="material-symbols-outlined" style={{ 
+                      fontSize: '20px', 
+                      color: 'var(--admin-primary)' 
+                    }}>
+                      favorite
+                    </span>
+                    <h4 style={{ 
+                      fontSize: '16px', 
+                      fontWeight: 600, 
+                      color: 'var(--admin-dark)',
+                      margin: 0
+                    }}>
+                      Interest Preferences
+                    </h4>
+                  </div>
                   {user.interests && user.interests.length > 0 ? (
-                    <div className="preference-tags">
+                    <div style={{ 
+                      display: 'flex', 
+                      flexWrap: 'wrap', 
+                      gap: '10px' 
+                    }}>
                       {user.interests.map((interest, index) => (
-                        <span key={index} className="preference-tag">{interest}</span>
+                        <span 
+                          key={index} 
+                          style={{ 
+                            padding: '8px 16px',
+                            backgroundColor: '#f0f9ff',
+                            borderRadius: '20px',
+                            fontSize: '13px',
+                            color: 'var(--admin-primary)',
+                            border: '1px solid #bfdbfe',
+                            fontWeight: 500
+                          }}
+                        >
+                          {interest}
+                        </span>
                       ))}
                     </div>
                   ) : (
-                    <p className="preference-empty">No interests selected</p>
+                    <div style={{ 
+                      padding: '12px',
+                      backgroundColor: '#f9fafb',
+                      borderRadius: '8px',
+                      border: '1px dashed #d1d5db'
+                    }}>
+                      <span style={{ 
+                        fontSize: '14px',
+                        color: '#6b7280'
+                      }}>
+                        No interests selected
+                      </span>
+                    </div>
                   )}
                 </div>
 
                 {/* Advertising Preferences */}
-                <div className="preference-group">
-                  <h4>Advertising Preferences</h4>
-                  <div className="preference-item">
-                    <span className="preference-label">Personalized Ads:</span>
-                    <span className={`preference-value ${user.advertising_enabled ? 'enabled' : 'disabled'}`}>
-                      {user.advertising_enabled ? 'Enabled' : 'Disabled'}
+                <div style={{ 
+                  marginBottom: '28px',
+                  paddingBottom: '28px',
+                  borderBottom: '1px solid #e5e7eb'
+                }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px',
+                    marginBottom: '16px'
+                  }}>
+                    <span className="material-symbols-outlined" style={{ 
+                      fontSize: '20px', 
+                      color: '#f97316' 
+                    }}>
+                      campaign
                     </span>
+                    <h4 style={{ 
+                      fontSize: '16px', 
+                      fontWeight: 600, 
+                      color: 'var(--admin-dark)',
+                      margin: 0
+                    }}>
+                      Advertising Preferences
+                    </h4>
+                  </div>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '14px 16px',
+                    backgroundColor: '#f9fafb',
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb'
+                  }}>
+                    <span style={{ 
+                      fontSize: '14px', 
+                      color: '#374151',
+                      fontWeight: 500
+                    }}>
+                      Personalized Ads
+                    </span>
+                    <div style={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{ 
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: user.advertising_enabled ? '#059669' : '#6b7280',
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        backgroundColor: user.advertising_enabled ? '#d1fae5' : '#f3f4f6',
+                        border: `1px solid ${user.advertising_enabled ? '#10b981' : '#d1d5db'}`
+                      }}>
+                        {user.advertising_enabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Communication Preferences */}
-                <div className="preference-group">
-                  <h4>Communication Preferences</h4>
-                  <div className="preference-subgroup">
-                    <h5>WhatsApp</h5>
-                    <div className="preference-item">
-                      <span className="preference-label">WhatsApp Enabled:</span>
-                      <span className={`preference-value ${user.whatsapp_enabled ? 'enabled' : 'disabled'}`}>
-                        {user.whatsapp_enabled ? 'Yes' : 'No'}
+                <div>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '10px',
+                    marginBottom: '20px'
+                  }}>
+                    <span className="material-symbols-outlined" style={{ 
+                      fontSize: '20px', 
+                      color: '#f97316' 
+                    }}>
+                      notifications
+                    </span>
+                    <h4 style={{ 
+                      fontSize: '16px', 
+                      fontWeight: 600, 
+                      color: 'var(--admin-dark)',
+                      margin: 0
+                    }}>
+                      Communication Preferences
+                    </h4>
+                  </div>
+                  
+                  {/* WhatsApp Subsection */}
+                  <div style={{ 
+                    marginBottom: '24px',
+                    padding: '16px',
+                    backgroundColor: '#f0fdf4',
+                    borderRadius: '10px',
+                    border: '1px solid #bbf7d0'
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      marginBottom: '16px'
+                    }}>
+                      <span className="material-symbols-outlined" style={{ 
+                        fontSize: '18px', 
+                        color: '#16a34a' 
+                      }}>
+                        chat
                       </span>
+                      <h5 style={{ 
+                        fontSize: '15px', 
+                        fontWeight: 600, 
+                        color: '#166534',
+                        margin: 0
+                      }}>
+                        WhatsApp
+                      </h5>
                     </div>
-                    <div className="preference-item">
-                      <span className="preference-label">Order Updates:</span>
-                      <span className={`preference-value ${user.whatsapp_order_updates ? 'enabled' : 'disabled'}`}>
-                        {user.whatsapp_order_updates ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    <div className="preference-item">
-                      <span className="preference-label">Promotional Messages:</span>
-                      <span className={`preference-value ${user.whatsapp_promotional ? 'enabled' : 'disabled'}`}>
-                        {user.whatsapp_promotional ? 'Yes' : 'No'}
-                      </span>
+                    <div style={{ 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      gap: '12px'
+                    }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '10px 12px',
+                        backgroundColor: 'white',
+                        borderRadius: '6px'
+                      }}>
+                        <span style={{ 
+                          fontSize: '14px', 
+                          color: '#374151',
+                          fontWeight: 500
+                        }}>
+                          WhatsApp Enabled
+                        </span>
+                        <span style={{ 
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: user.whatsapp_enabled ? '#059669' : '#6b7280',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          backgroundColor: user.whatsapp_enabled ? '#d1fae5' : '#f3f4f6'
+                        }}>
+                          {user.whatsapp_enabled ? 'Yes' : 'No'}
+                        </span>
+                      </div>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '10px 12px',
+                        backgroundColor: 'white',
+                        borderRadius: '6px'
+                      }}>
+                        <span style={{ 
+                          fontSize: '14px', 
+                          color: '#374151',
+                          fontWeight: 500
+                        }}>
+                          Order Updates
+                        </span>
+                        <span style={{ 
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: user.whatsapp_order_updates ? '#059669' : '#6b7280',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          backgroundColor: user.whatsapp_order_updates ? '#d1fae5' : '#f3f4f6'
+                        }}>
+                          {user.whatsapp_order_updates ? 'Yes' : 'No'}
+                        </span>
+                      </div>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '10px 12px',
+                        backgroundColor: 'white',
+                        borderRadius: '6px'
+                      }}>
+                        <span style={{ 
+                          fontSize: '14px', 
+                          color: '#374151',
+                          fontWeight: 500
+                        }}>
+                          Promotional Messages
+                        </span>
+                        <span style={{ 
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: user.whatsapp_promotional ? '#059669' : '#6b7280',
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          backgroundColor: user.whatsapp_promotional ? '#d1fae5' : '#f3f4f6'
+                        }}>
+                          {user.whatsapp_promotional ? 'Yes' : 'No'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="preference-subgroup">
-                    <h5>Email</h5>
-                    <div className="preference-item">
-                      <span className="preference-label">Promotional Emails:</span>
-                      <span className={`preference-value ${user.email_promotional ? 'enabled' : 'disabled'}`}>
+                  
+                  {/* Email Subsection */}
+                  <div style={{ 
+                    padding: '16px',
+                    backgroundColor: '#eff6ff',
+                    borderRadius: '10px',
+                    border: '1px solid #bfdbfe'
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      marginBottom: '16px'
+                    }}>
+                      <span className="material-symbols-outlined" style={{ 
+                        fontSize: '18px', 
+                        color: '#2563eb' 
+                      }}>
+                        mail
+                      </span>
+                      <h5 style={{ 
+                        fontSize: '15px', 
+                        fontWeight: 600, 
+                        color: '#1e40af',
+                        margin: 0
+                      }}>
+                        Email
+                      </h5>
+                    </div>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '10px 12px',
+                      backgroundColor: 'white',
+                      borderRadius: '6px'
+                    }}>
+                      <span style={{ 
+                        fontSize: '14px', 
+                        color: '#374151',
+                        fontWeight: 500
+                      }}>
+                        Promotional Emails
+                      </span>
+                      <span style={{ 
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: user.email_promotional ? '#059669' : '#6b7280',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        backgroundColor: user.email_promotional ? '#d1fae5' : '#f3f4f6'
+                      }}>
                         {user.email_promotional ? 'Yes' : 'No'}
                       </span>
                     </div>

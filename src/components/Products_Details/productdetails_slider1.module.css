@@ -119,10 +119,30 @@
   font-size: 1rem;
   color: #f39c12;
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .productRating span {
   color: #444;
+}
+
+/* Color swatches/mini badges next to rating */
+.colorSwatches {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.colorSwatches .moreCount {
+  font-size: 0.85rem;
+  color: #fd9935;
+  background: #fff;
+  padding: 2px 6px;
 }
 
 .productPrices {

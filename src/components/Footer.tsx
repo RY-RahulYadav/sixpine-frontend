@@ -1,9 +1,38 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 import styles from "../styles/footer.module.css";
+import API from '../services/api';
+import { useFooterSettings } from '../hooks/useFooterSettings';
+
+interface FooterSettings {
+  footer_phone_number: string;
+  footer_linkedin_url: string;
+  footer_twitter_url: string;
+  footer_instagram_url: string;
+}
 
 export default function Footer() {
+  const { whatsAppNumber } = useFooterSettings();
+  const [footerSettings, setFooterSettings] = useState<FooterSettings>({
+    footer_phone_number: '',
+    footer_linkedin_url: '',
+    footer_twitter_url: '',
+    footer_instagram_url: ''
+  });
+
+  useEffect(() => {
+    fetchFooterSettings();
+  }, []);
+
+  const fetchFooterSettings = async () => {
+    try {
+      const response = await API.get('/footer-settings/');
+      setFooterSettings(response.data);
+    } catch (error) {
+      console.error('Error fetching footer settings:', error);
+    }
+  };
   const scrollToTop = () => {
     // Try window first
     try {
@@ -68,11 +97,11 @@ export default function Footer() {
           <h3>Quick Links</h3>
           <ul>
             <li><Link to="/">Home</Link></li>
-              <li>About Us</li>
-                <li>Offers & Discounts</li>
+              <li><Link to="/about">About Us</Link></li>
+                <li><Link to="/best-deals">Offers & Discounts</Link></li>
           
-            <li>Blog / Furniture Guides</li>
-              <li>Contact Us</li>
+            {/* <li>Blog / Furniture Guides</li> */}
+              <li><Link to="/contact">Contact Us</Link></li>
       
           
           </ul>
@@ -90,9 +119,34 @@ export default function Footer() {
         <div>
           <h3>Connect with Us</h3>
           <ul>
-            <li><a href="#">Facebook</a></li>
-            <li><a href="#">Twitter</a></li>
-            <li><a href="#">Instagram</a></li>
+            {footerSettings.footer_linkedin_url && (
+              <li>
+                <a href={footerSettings.footer_linkedin_url} target="_blank" rel="noopener noreferrer">
+                  LinkedIn
+                </a>
+              </li>
+            )}
+            {footerSettings.footer_twitter_url && (
+              <li>
+                <a href={footerSettings.footer_twitter_url} target="_blank" rel="noopener noreferrer">
+                  Twitter
+                </a>
+              </li>
+            )}
+            {footerSettings.footer_instagram_url && (
+              <li>
+                <a href={footerSettings.footer_instagram_url} target="_blank" rel="noopener noreferrer">
+                  Instagram
+                </a>
+              </li>
+            )}
+            {!footerSettings.footer_linkedin_url && !footerSettings.footer_twitter_url && !footerSettings.footer_instagram_url && (
+              <>
+                <li><a href="#">LinkedIn</a></li>
+                <li><a href="#">Twitter</a></li>
+                <li><a href="#">Instagram</a></li>
+              </>
+            )}
           </ul>
         </div>
 
@@ -111,9 +165,9 @@ export default function Footer() {
           <h3>Customer Support</h3>
           <ul>
             <li><Link to="/faqs">FAQs</Link></li>
-            <li><Link to="/products-details">Products Details</Link></li>
+            <li><Link to="/products">Products Details</Link></li>
             <li><Link to="/warranty-policy">Warranty Policy</Link></li>
-            <li>Payment Options</li>
+            <li><Link to="/manage-payment">Payment Options</Link></li>
             <li><Link to="/privacy-policy">Privacy Policy</Link></li>
             <li><Link to="/terms-and-conditions">Terms & Conditions</Link></li>
           </ul>
@@ -123,9 +177,9 @@ export default function Footer() {
           <h3>Customer Service</h3>
           <ul>
             <li><Link to="/faqs">FAQ</Link></li>
-            <li>Shipping</li>
-            <li>Returns Centre</li>
-            <li>Support Link to WhatsApp</li>
+            <li><Link to="/orders">Shipping</Link></li>
+            <li><Link to="/orders?tab=returns">Returns Centre</Link></li>
+            <li><a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer">Support Link to WhatsApp</a></li>
           </ul>
         </div>
 
@@ -138,7 +192,7 @@ export default function Footer() {
             <li> <Link to ="/purchaseProtection">100% Purchase Protection </Link></li>
             <li> <Link to ="/your-app">Download  Sixpine App 📱</Link></li>
           
-            <li><Link to ="/help">Help</Link></li>
+            <li><Link to ="/help-center">Help</Link></li>
           </ul>
         </div>
       </div>

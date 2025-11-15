@@ -1,6 +1,8 @@
 import styles from '../styles/Privacy.module.css'
+import { useFooterSettings } from '../hooks/useFooterSettings';
 
 const Terms = () => {
+  const { whatsAppNumber, displayPhoneNumber } = useFooterSettings();
   return (
     <div className={styles.main}>
       <section className={styles.globalSection}>
@@ -71,7 +73,7 @@ const Terms = () => {
               <p className={styles.text}>
                 <b>Sixpine</b><br />
                 Email: <a href="mailto:skwoodcity@gmail.com">skwoodcity@gmail.com</a><br />
-                Phone: <a href="tel:+919897268972">+919897268972</a><br />
+                Phone: <a href={`tel:${whatsAppNumber}`}>{displayPhoneNumber}</a><br />
                 Address: Sixpine, Saharanpur-247001, India
               </p>
 

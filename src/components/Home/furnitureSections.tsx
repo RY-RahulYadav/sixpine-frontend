@@ -16,6 +16,9 @@ interface Product {
   image: string;
   productId?: number;
   productSlug?: string;
+  navigateUrl?: string;
+  variantCount?: number;
+  variant_count?: number;
 }
 
 interface FurnitureSectionsData {
@@ -216,6 +219,8 @@ const Section = ({ title, subtitle, products, extraClass }: {
               oldPrice={p.oldPrice}
               productSlug={p.productSlug}
               productId={p.productId}
+              navigateUrl={p.navigateUrl}
+              variantCount={p.variantCount || p.variant_count}
             />
           ))}
         </div>

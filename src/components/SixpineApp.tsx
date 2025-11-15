@@ -1,7 +1,9 @@
 import styles from "../styles/sixpineApp.module.css";
 import { Smartphone, ShoppingBag, Truck, Shield, Heart } from "lucide-react";
+import { useFooterSettings } from "../hooks/useFooterSettings";
 
 export default function SixpineApp() {
+  const { whatsAppNumber, displayPhoneNumber, iosAppUrl, androidAppUrl } = useFooterSettings();
   return (
     <div className={styles.Appcontainer}>
       <h1 className={styles.heading}>Download the Sixpine App 📲</h1>
@@ -29,11 +31,19 @@ export default function SixpineApp() {
        <ul className={styles.steps}>
   <li>
     📱 <strong>Android Users</strong> – Download on{" "}
-    <a href="https://play.google.com" target="_blank" rel="noopener noreferrer">Google Play</a>
+    {androidAppUrl ? (
+      <a href={androidAppUrl} target="_blank" rel="noopener noreferrer">Google Play</a>
+    ) : (
+      <span>[Google Play Store Link]</span>
+    )}
   </li>
   <li>
     🍎 <strong>iOS Users</strong> – Download on{" "}
-    <a href="https://www.apple.com/app-store/" target="_blank" rel="noopener noreferrer">App Store</a>
+    {iosAppUrl ? (
+      <a href={iosAppUrl} target="_blank" rel="noopener noreferrer">App Store</a>
+    ) : (
+      <span>[App Store Link]</span>
+    )}
   </li>
   <li>
     <small>(Links will be activated once the app is live on stores)</small>
@@ -53,7 +63,7 @@ export default function SixpineApp() {
         </ul>
          <p className={styles.contact}>
                   📧 <a href="mailto:skwoodcity@gmail.com">skwoodcity@gmail.com</a><br />
-                  📞 <a href="https://wa.me/919897268972" target="_blank" rel="noopener noreferrer">+91 9897268972 (WhatsApp)</a><br />
+                  📞 <a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer">{displayPhoneNumber} (WhatsApp)</a><br />
                   🌐 <a href="https://www.sixpine.in" target="_blank" rel="noopener noreferrer">www.sixpine.in</a>
                 </p>
       </section>

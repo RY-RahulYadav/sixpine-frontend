@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./furnitureCategories.module.css";
 import { homepageAPI } from '../../services/api';
 
@@ -7,13 +8,14 @@ interface CategoryItem {
   title: string;
   category: string;
   img: string;
+  navigateUrl?: string;
 }
 
 interface SliderItem {
   id: number;
   title: string;
   img: string;
-  url?: string;
+  navigateUrl?: string;
 }
 
 interface FurnitureCategoriesData {
@@ -48,18 +50,19 @@ const defaultData: FurnitureCategoriesData = {
   shortDescription: "Buy Furniture Online from our extensive collection of wooden furniture units to give your home an elegant touch at affordable prices.",
   fullDescription: "Buy Furniture Online from our extensive collection of wooden furniture units to give your home an elegant touch at affordable prices. We offer a wide range of Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus deleniti dolor a aspernatur esse necessitatibus nihil blanditiis repellat ipsa ut praesentium qui, neque quidem soluta earum impedit eveniet corrupti fugit.",
     sliderItems: [
-      { id: 1, title: "Living Room", img: "/images/Home/livingroom.jpg", url: "" },
-      { id: 2, title: "Bedroom", img: "/images/Home/bedroom.jpg", url: "" },
-      { id: 3, title: "Dining Room", img: "/images/Home/diningroom.jpg", url: "" },
-      { id: 4, title: "Study", img: "/images/Home/studytable.jpg", url: "" },
-      { id: 5, title: "Outdoor", img: "/images/Home/outdoor.jpg", url: "" },
-      { id: 6, title: "Living Room", img: "/images/Home/livingroom.jpg", url: "" },
-      { id: 7, title: "Bedroom", img: "/images/Home/bedroom.jpg", url: "" },
-      { id: 8, title: "Dining Room", img: "/images/Home/diningroom.jpg", url: "" }
+      { id: 1, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
+      { id: 2, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
+      { id: 3, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" },
+      { id: 4, title: "Study", img: "/images/Home/studytable.jpg", navigateUrl: "" },
+      { id: 5, title: "Outdoor", img: "/images/Home/outdoor.jpg", navigateUrl: "" },
+      { id: 6, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
+      { id: 7, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
+      { id: 8, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" }
     ]
 };
 
 export default function FurnitureCategories() {
+  const navigate = useNavigate();
   const [data, setData] = useState<FurnitureCategoriesData>(defaultData);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
@@ -80,7 +83,10 @@ export default function FurnitureCategories() {
             sliderTitle: response.data.content.sliderTitle || defaultData.sliderTitle,
             shortDescription: response.data.content.shortDescription || defaultData.shortDescription,
             fullDescription: response.data.content.fullDescription || defaultData.fullDescription,
-            sliderItems: response.data.content.sliderItems || defaultData.sliderItems
+            sliderItems: (response.data.content.sliderItems || defaultData.sliderItems).map((item: any) => ({
+              ...item,
+              navigateUrl: item.navigateUrl || item.url || ''
+            }))
           });
         }
       } catch (error) {
@@ -141,7 +147,17 @@ export default function FurnitureCategories() {
 
       <div className={styles.gridContainer}>
         {filteredCategories.map((item) => (
-          <div key={item.id} className={styles.card}>
+          <div 
+            key={item.id} 
+            className={styles.card}
+            onClick={() => {
+              const url = item.navigateUrl;
+              if (url && url.trim()) {
+                navigate(url);
+              }
+            }}
+            style={{ cursor: item.navigateUrl ? 'pointer' : 'default' }}
+          >
             <img src={item.img} alt={item.title} />
             <p>{item.title}</p>
           </div>
@@ -175,8 +191,9 @@ export default function FurnitureCategories() {
               .slice(startIndex, startIndex + visibleCount)
               .map((item) => {
                 const handleSliderClick = () => {
-                  if (item.url) {
-                    window.location.href = item.url;
+                  const url = item.navigateUrl;
+                  if (url && url.trim()) {
+                    navigate(url);
                   }
                 };
                 return (
@@ -184,7 +201,7 @@ export default function FurnitureCategories() {
                     key={item.id} 
                     className={styles.sliderCard}
                     onClick={handleSliderClick}
-                    style={{ cursor: item.url ? 'pointer' : 'default' }}
+                    style={{ cursor: item.navigateUrl ? 'pointer' : 'default' }}
                   >
                     <img src={item.img} alt={item.title} />
                     <p>{item.title}</p>

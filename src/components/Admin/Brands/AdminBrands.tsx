@@ -532,18 +532,21 @@ const AdminBrands: React.FC = () => {
                       {orders.map((order) => (
                         <tr key={order.id}>
                           <td>#{order.order_number || order.id}</td>
-                          <td>{order.user?.email || order.user_email || 'N/A'}</td>
+                          <td>
+                            {order.customer_name || order.customer_email || order.user?.email || order.user_email || 'N/A'}
+                          </td>
                           <td>{new Date(order.created_at).toLocaleDateString()}</td>
                           <td>
                             <span className={`admin-status-badge ${
-                              order.status === 'completed' ? 'success' :
-                              order.status === 'cancelled' ? 'error' :
+                              order.status === 'delivered' ? 'success' :
+                              order.status === 'cancelled' || order.status === 'returned' ? 'error' :
+                              order.status === 'processing' || order.status === 'shipped' ? 'info' :
                               'warning'
                             }`}>
-                              {order.status}
+                              {order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'N/A'}
                             </span>
                           </td>
-                          <td>{formatCurrency(order.total_amount || 0)}</td>
+                          <td>{formatCurrency(parseFloat(order.order_value || order.total_amount || '0'))}</td>
                           <td>
                             <button
                               className="admin-modern-btn secondary icon-only"

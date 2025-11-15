@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./heroSection2.module.css";
 import { homepageAPI } from '../../services/api';
 
@@ -7,6 +8,7 @@ interface SectionItem {
   imageUrl: string;
   text: string;
   altText?: string;
+  navigateUrl?: string;
 }
 
 interface Section {
@@ -73,6 +75,7 @@ const defaultSections: Section[] = [
 ];
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const [sections, setSections] = useState<Section[]>(defaultSections);
   const [loading, setLoading] = useState(true);
 
@@ -112,7 +115,17 @@ const HomePage = () => {
           <h3>{section.title}</h3>
           <div className={styles.grid}>
             {section.items.map((item) => (
-              <div key={item.id} className={styles.item}>
+              <div 
+                key={item.id} 
+                className={styles.item}
+                onClick={() => {
+                  const url = item.navigateUrl;
+                  if (url && url.trim()) {
+                    navigate(url);
+                  }
+                }}
+                style={{ cursor: item.navigateUrl ? 'pointer' : 'default' }}
+              >
                 <img src={item.imageUrl} alt={item.altText || item.text} />
                 <p>{item.text}</p>
               </div>

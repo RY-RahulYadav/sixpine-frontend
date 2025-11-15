@@ -4,6 +4,7 @@ import API from './api';
 export const adminAPI = {
   // Dashboard
   getDashboardStats: () => API.get('/admin/dashboard/stats/'),
+  getPlatformAnalytics: () => API.get('/admin/platform/analytics/'),
   
   // Users
   getUsers: (params?: any) => API.get('/admin/users/', { params }),
@@ -163,6 +164,22 @@ export const adminAPI = {
   getVendorsList: () => API.get('/admin/communication/vendors/'),
   sendEmail: (data: { recipient_type: 'customer' | 'vendor'; recipient_id: number; subject: string; message: string }) => 
     API.post('/admin/communication/send-email/', data),
+  
+  // Media
+  getMedia: (params?: any) => API.get('/admin/media/', { params }),
+  getMediaItem: (id: number) => API.get(`/admin/media/${id}/`),
+  uploadMedia: (formData: FormData) => API.post('/admin/media/upload/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000
+  }),
+  deleteMedia: (id: number) => API.delete(`/admin/media/${id}/`),
+  
+  // Packaging Feedback
+  getPackagingFeedback: (params?: any) => API.get('/admin/packaging-feedback/', { params }),
+  getPackagingFeedbackItem: (id: number) => API.get(`/admin/packaging-feedback/${id}/`),
+  updatePackagingFeedbackStatus: (id: number, status: string, adminNotes?: string) =>
+    API.post(`/admin/packaging-feedback/${id}/update-status/`, { status, admin_notes: adminNotes }),
+  deletePackagingFeedback: (id: number) => API.delete(`/admin/packaging-feedback/${id}/`),
 };
 
 export default adminAPI;

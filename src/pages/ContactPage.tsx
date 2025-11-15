@@ -4,23 +4,26 @@ import Footer from '../components/Footer';
 import '../styles/contact.css';
 import SubNav from '../components/SubNav';
 import CategoryTabs from '../components/CategoryTabs';
+import { useFooterSettings } from '../hooks/useFooterSettings';
 
 const ContactPage: React.FC = () => {
+  const { whatsAppNumber, displayPhoneNumber } = useFooterSettings();
+
   const handleStartChatting = () => {
-    // You can integrate with a chat service like Intercom, Tawk.to, or Zendesk
-    alert('Opening chat...');
-    // Example: window.open('https://wa.me/919189726897', '_blank');
+    // Open WhatsApp chat
+    const message = encodeURIComponent('Hi, I would like to inquire about my order.');
+    window.open(`https://wa.me/${whatsAppNumber}?text=${message}`, '_blank');
   };
 
   const handleCallMe = () => {
     // Open phone dialer
-    window.location.href = 'tel:+919189726897';
+    window.location.href = `tel:${whatsAppNumber}`;
   };
 
   const handleWhatsApp = () => {
     // Open WhatsApp with pre-filled message
     const message = encodeURIComponent('Hi, I would like to inquire about my order.');
-    window.open(`https://wa.me/919189726897?text=${message}`, '_blank');
+    window.open(`https://wa.me/${whatsAppNumber}?text=${message}`, '_blank');
   };
 
   return (
@@ -82,7 +85,7 @@ const ContactPage: React.FC = () => {
               <p className="whatsapp-text">
                 or directly WhatsApp us at{' '}
                 <button className="whatsapp-link" onClick={handleWhatsApp}>
-                  +919189726897
+                  {displayPhoneNumber}
                 </button>{' '}
                 with order details
               </p>

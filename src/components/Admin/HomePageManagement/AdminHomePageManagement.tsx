@@ -22,6 +22,7 @@ interface HeroSlide {
   buttonText: string;
   backgroundColor: string;
   imageSrc: string;
+  navigateUrl?: string;
 }
 
 interface SpecialDealBanner {
@@ -31,6 +32,7 @@ interface SpecialDealBanner {
   instantDiscountText: string;
   buttonText: string;
   backgroundImage: string;
+  navigateUrl?: string;
 }
 
 interface MattressBanner {
@@ -42,6 +44,7 @@ interface MattressBanner {
   price: string;
   deliveryText: string;
   backgroundImage: string;
+  navigateUrl?: string;
 }
 
 interface HeroSection2Item {
@@ -49,6 +52,7 @@ interface HeroSection2Item {
   imageUrl: string;
   text: string;
   altText?: string;
+  navigateUrl?: string;
 }
 
 interface HeroSection2Section {
@@ -64,6 +68,7 @@ interface HeroSection3CategoryItem {
   id: number;
   name: string;
   img: string;
+  navigateUrl?: string;
 }
 
 interface HeroSection3SliderCard {
@@ -75,6 +80,7 @@ interface HeroSection3SliderCard {
   img: string;
   productSlug?: string;
   productId?: number;
+  navigateUrl?: string;
 }
 
 interface HeroSection3Data {
@@ -84,6 +90,7 @@ interface HeroSection3Data {
   leftProductCard: {
     name: string;
     img: string;
+    navigateUrl?: string;
   };
   categoryItems: HeroSection3CategoryItem[];
   sliderCards: HeroSection3SliderCard[];
@@ -94,13 +101,14 @@ interface FurnitureCategoryItem {
   title: string;
   category: string;
   img: string;
+  navigateUrl?: string;
 }
 
 interface FurnitureSliderItem {
   id: number;
   title: string;
   img: string;
-  url?: string;
+  navigateUrl?: string;
 }
 
 interface FurnitureCategoriesData {
@@ -125,6 +133,7 @@ interface FurnitureSectionProduct {
   image: string;
   productId?: number;
   productSlug?: string;
+  navigateUrl?: string;
 }
 
 interface FurnitureSectionsData {
@@ -180,6 +189,7 @@ interface BannerCard {
   img: string;
   title?: string;
   text?: string;
+  navigateUrl?: string;
 }
 
 interface BannerProduct {
@@ -192,6 +202,7 @@ interface BannerProduct {
   newPrice: string;
   productId?: number;
   productSlug?: string;
+  navigateUrl?: string;
 }
 
 interface BannerCardsData {
@@ -316,7 +327,8 @@ const AdminHomePageManagement: React.FC = () => {
     discountText: '₹5000 OFF',
     instantDiscountText: 'INSTANT DISCOUNT',
     buttonText: 'BUY NOW',
-    backgroundImage: ''
+    backgroundImage: '',
+    navigateUrl: ''
   };
 
   const defaultMattressBanner: MattressBanner = {
@@ -327,12 +339,14 @@ const AdminHomePageManagement: React.FC = () => {
     startingText: 'Starting From',
     price: '₹9,999',
     deliveryText: 'FREE Delivery Available',
-    backgroundImage: ''
+    backgroundImage: '',
+    navigateUrl: ''
   };
 
   const defaultBottomBanner = {
     imageUrl: 'https://ii1.pepperfry.com/assets/a08eed1c-bbbd-4e8b-b381-07df5fbfe959.jpg',
-    altText: 'Sixpine Banner'
+    altText: 'Sixpine Banner',
+    navigateUrl: ''
   };
 
   // Hero section form data - initialize with defaults
@@ -470,14 +484,14 @@ const AdminHomePageManagement: React.FC = () => {
     shortDescription: "Buy Furniture Online from our extensive collection of wooden furniture units to give your home an elegant touch at affordable prices.",
     fullDescription: "Buy Furniture Online from our extensive collection of wooden furniture units to give your home an elegant touch at affordable prices. We offer a wide range of Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus deleniti dolor a aspernatur esse necessitatibus nihil blanditiis repellat ipsa ut praesentium qui, neque quidem soluta earum impedit eveniet corrupti fugit.",
     sliderItems: [
-      { id: 1, title: "Living Room", img: "/images/Home/livingroom.jpg", url: "" },
-      { id: 2, title: "Bedroom", img: "/images/Home/bedroom.jpg", url: "" },
-      { id: 3, title: "Dining Room", img: "/images/Home/diningroom.jpg", url: "" },
-      { id: 4, title: "Study", img: "/images/Home/studytable.jpg", url: "" },
-      { id: 5, title: "Outdoor", img: "/images/Home/outdoor.jpg", url: "" },
-      { id: 6, title: "Living Room", img: "/images/Home/livingroom.jpg", url: "" },
-      { id: 7, title: "Bedroom", img: "/images/Home/bedroom.jpg", url: "" },
-      { id: 8, title: "Dining Room", img: "/images/Home/diningroom.jpg", url: "" }
+      { id: 1, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
+      { id: 2, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
+      { id: 3, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" },
+      { id: 4, title: "Study", img: "/images/Home/studytable.jpg", navigateUrl: "" },
+      { id: 5, title: "Outdoor", img: "/images/Home/outdoor.jpg", navigateUrl: "" },
+      { id: 6, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
+      { id: 7, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
+      { id: 8, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" }
     ]
   };
 
@@ -1318,7 +1332,7 @@ const AdminHomePageManagement: React.FC = () => {
       id: furnitureCategoriesData.sliderItems.length + 1,
       title: 'New Item',
       img: '',
-      url: ''
+      navigateUrl: ''
     };
     setFurnitureCategoriesData({
       ...furnitureCategoriesData,
@@ -2077,6 +2091,19 @@ const AdminHomePageManagement: React.FC = () => {
 
                     <div className="admin-form-row">
                       <div className="admin-form-group">
+                        <label className="admin-form-label">Navigate URL</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={slide.navigateUrl || ''}
+                          onChange={(e) => handleSlideChange(index, 'navigateUrl', e.target.value)}
+                          placeholder="/products-details/product-slug or /category"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
                         <label className="admin-form-label">Background Color</label>
                         <div className="color-input-group">
                           <input
@@ -2180,6 +2207,19 @@ const AdminHomePageManagement: React.FC = () => {
                       />
                     </div>
                     <div className="admin-form-group">
+                      <label className="admin-form-label">Navigate URL</label>
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        value={specialDealBanner.navigateUrl || ''}
+                        onChange={(e) => setSpecialDealBanner({ ...specialDealBanner, navigateUrl: e.target.value })}
+                        placeholder="/products-details/product-slug or /category"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-form-row">
+                    <div className="admin-form-group">
                       <label className="admin-form-label">Background Image URL</label>
                       <input
                         type="text"
@@ -2270,6 +2310,16 @@ const AdminHomePageManagement: React.FC = () => {
 
                   <div className="admin-form-row">
                     <div className="admin-form-group">
+                      <label className="admin-form-label">Navigate URL</label>
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        value={mattressBanner.navigateUrl || ''}
+                        onChange={(e) => setMattressBanner({ ...mattressBanner, navigateUrl: e.target.value })}
+                        placeholder="/products-details/product-slug or /category"
+                      />
+                    </div>
+                    <div className="admin-form-group">
                       <label className="admin-form-label">Background Image URL</label>
                       <input
                         type="text"
@@ -2308,6 +2358,18 @@ const AdminHomePageManagement: React.FC = () => {
                         value={bottomBanner.altText}
                         onChange={(e) => setBottomBanner({ ...bottomBanner, altText: e.target.value })}
                         placeholder="Banner Description"
+                      />
+                    </div>
+                  </div>
+                  <div className="admin-form-row">
+                    <div className="admin-form-group">
+                      <label className="admin-form-label">Navigate URL</label>
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        value={bottomBanner.navigateUrl || ''}
+                        onChange={(e) => setBottomBanner({ ...bottomBanner, navigateUrl: e.target.value })}
+                        placeholder="/products-details/product-slug or /category"
                       />
                     </div>
                   </div>
@@ -2509,6 +2571,16 @@ const AdminHomePageManagement: React.FC = () => {
                                   placeholder="Image description"
                                 />
                               </div>
+                              <div className="admin-form-group">
+                                <label className="admin-form-label">Navigate URL</label>
+                                <input
+                                  type="text"
+                                  className="admin-form-input"
+                                  value={item.navigateUrl || ''}
+                                  onChange={(e) => handleSection2ItemChange(sectionIndex, itemIndex, 'navigateUrl', e.target.value)}
+                                  placeholder="/products-details/product-slug or /category"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2650,6 +2722,18 @@ const AdminHomePageManagement: React.FC = () => {
                     />
                   </div>
                 </div>
+                <div className="admin-form-row">
+                  <div className="admin-form-group">
+                    <label className="admin-form-label">Navigate URL</label>
+                    <input
+                      type="text"
+                      className="admin-form-input"
+                      value={heroSection3Data.leftProductCard.navigateUrl || ''}
+                      onChange={(e) => handleHeroSection3Change('leftProductCard', { ...heroSection3Data.leftProductCard, navigateUrl: e.target.value })}
+                      placeholder="/products-details/product-slug or /category"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -2685,6 +2769,18 @@ const AdminHomePageManagement: React.FC = () => {
                             value={item.img}
                             onChange={(e) => handleCategoryItemChange(index, 'img', e.target.value)}
                             placeholder="/images/Home/image.jpg"
+                          />
+                        </div>
+                      </div>
+                      <div className="admin-form-row">
+                        <div className="admin-form-group">
+                          <label className="admin-form-label">Navigate URL</label>
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={item.navigateUrl || ''}
+                            onChange={(e) => handleCategoryItemChange(index, 'navigateUrl', e.target.value)}
+                            placeholder="/products-details/product-slug or /category"
                           />
                         </div>
                       </div>
@@ -2790,6 +2886,18 @@ const AdminHomePageManagement: React.FC = () => {
                           <span style={{ fontSize: '12px', color: '#666', marginTop: '4px', display: 'block' }}>
                             {card.productSlug ? `Will navigate to: /products-details/${card.productSlug}` : 'Leave empty if no product link'}
                           </span>
+                        </div>
+                      </div>
+                      <div className="admin-form-row">
+                        <div className="admin-form-group">
+                          <label className="admin-form-label">Navigate URL</label>
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={card.navigateUrl || ''}
+                            onChange={(e) => handleSliderCardChange(index, 'navigateUrl', e.target.value)}
+                            placeholder="/products-details/product-slug or /category"
+                          />
                         </div>
                       </div>
                     </div>
@@ -2974,6 +3082,16 @@ const AdminHomePageManagement: React.FC = () => {
                             placeholder="/images/Home/image.jpg"
                           />
                         </div>
+                        <div className="admin-form-group">
+                          <label className="admin-form-label">Navigate URL</label>
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={item.navigateUrl || ''}
+                            onChange={(e) => handleCategoryItemChangeFC(index, 'navigateUrl', e.target.value)}
+                            placeholder="/products-details/product-slug or /category"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3080,16 +3198,16 @@ const AdminHomePageManagement: React.FC = () => {
                       </div>
                       <div className="admin-form-row">
                         <div className="admin-form-group">
-                          <label className="admin-form-label">Navigation URL (Optional)</label>
+                          <label className="admin-form-label">Navigate URL</label>
                           <input
                             type="text"
                             className="admin-form-input"
-                            value={item.url || ''}
-                            onChange={(e) => handleSliderItemChange(index, 'url', e.target.value)}
-                            placeholder="/category/living-room or /products?category=bedroom"
+                            value={item.navigateUrl || ''}
+                            onChange={(e) => handleSliderItemChange(index, 'navigateUrl', e.target.value)}
+                            placeholder="/products-details/product-slug or /category"
                           />
                           <span style={{ fontSize: '12px', color: '#666', marginTop: '4px', display: 'block' }}>
-                            {item.url ? `Will navigate to: ${item.url}` : 'Leave empty if no navigation'}
+                            {item.navigateUrl ? `Will navigate to: ${item.navigateUrl}` : 'Leave empty if no navigation'}
                           </span>
                         </div>
                       </div>
@@ -3786,6 +3904,7 @@ const AdminHomePageManagement: React.FC = () => {
                 <h3 className="banner-editor-title">Banner Cards (2 banners only)</h3>
                 {bannerCardsData.bannerCards.slice(0, 2).map((banner, index) => (
                   <div key={index} className="banner-editor-card" style={{ marginBottom: 'var(--spacing-md)' }}>
+                    <div className="admin-form-row">
                     <div className="admin-form-group">
                       <label className="admin-form-label">Banner {index + 1} - Image URL</label>
                       <input
@@ -3798,6 +3917,21 @@ const AdminHomePageManagement: React.FC = () => {
                           setBannerCardsData({ ...bannerCardsData, bannerCards: updated });
                         }}
                       />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Navigate URL</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={banner.navigateUrl || ''}
+                          onChange={(e) => {
+                            const updated = [...bannerCardsData.bannerCards];
+                            updated[index].navigateUrl = e.target.value;
+                            setBannerCardsData({ ...bannerCardsData, bannerCards: updated });
+                          }}
+                          placeholder="/products-details/product-slug or /category"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}

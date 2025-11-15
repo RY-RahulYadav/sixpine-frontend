@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import styles from "./furnitureOfferSections.module.css";
 import { homepageAPI } from '../../services/api';
@@ -63,6 +64,7 @@ const defaultSections: Section[] = [
 ];
 
 const FurnitureOfferSections = () => {
+  const navigate = useNavigate();
   const [sections, setSections] = useState<Section[]>(defaultSections);
   const [loading, setLoading] = useState(true);
   const sliderRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -145,20 +147,20 @@ const FurnitureOfferSections = () => {
             >
               {section.products.map((product: OfferProduct | string, i: number) => {
                 const imageUrl = typeof product === 'string' ? product : product.imageUrl;
-                const navigateUrl = typeof product === 'string' ? '#' : product.navigateUrl;
+                const navigateUrl = typeof product === 'string' ? '' : product.navigateUrl;
                 return (
-                  <a 
+                  <div 
                     key={i} 
-                    href={navigateUrl}
                     className={styles.card}
-                    onClick={(e) => {
-                      if (navigateUrl === '#' || !navigateUrl) {
-                        e.preventDefault();
+                    onClick={() => {
+                      if (navigateUrl && navigateUrl.trim() && navigateUrl !== '#') {
+                        navigate(navigateUrl);
                       }
                     }}
+                    style={{ cursor: (navigateUrl && navigateUrl.trim() && navigateUrl !== '#') ? 'pointer' : 'default' }}
                   >
                     <img src={imageUrl} alt={`Product ${i + 1}`} />
-                  </a>
+                  </div>
                 );
               })}
             </div>

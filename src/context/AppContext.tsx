@@ -147,15 +147,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const login = async (credentials: { username: string; password: string }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null }); // Clear previous errors
+      
       const response = await authAPI.login(credentials);
       const { user, token } = response.data;
+      
+      // Additional validation: Check if user is staff or vendor (shouldn't happen due to backend validation)
+      if (user.is_staff || user.is_superuser) {
+        const errorMessage = 'Admin users must login through the admin login page';
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+        throw new Error(errorMessage);
+      }
+      
+      // Check if user has vendor profile (shouldn't happen due to backend validation)
+      // Note: We can't check vendor_profile from user object directly, backend handles this
       
       localStorage.setItem('authToken', token);
       localStorage.setItem('user', JSON.stringify(user));
       
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Login failed';
+      // Enhanced error extraction to handle backend validation messages
+      let errorMessage = 'Login failed';
+      
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        
+        // Check for non_field_errors (from serializer validation)
+        if (errorData.non_field_errors && Array.isArray(errorData.non_field_errors)) {
+          errorMessage = errorData.non_field_errors[0];
+        } else if (errorData.error) {
+          // Handle string, array, or object error formats
+          if (typeof errorData.error === 'string') {
+            errorMessage = errorData.error;
+          } else if (Array.isArray(errorData.error)) {
+            errorMessage = errorData.error.join(', ');
+          } else {
+            errorMessage = JSON.stringify(errorData.error);
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Backend returns messages like:
+      // "Admin users must login through the admin login page"
+      // "Vendor users must login through the seller login page"
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw new Error(errorMessage);
     } finally {

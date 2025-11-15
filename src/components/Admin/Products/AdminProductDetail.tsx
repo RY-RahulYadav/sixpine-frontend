@@ -859,7 +859,7 @@ const AdminProductDetail: React.FC = () => {
                     value={formData.sku}
                     onChange={handleChange}
                     placeholder="Stock Keeping Unit"
-                    className="tw-w-full"
+                  className="tw-w-full"
                   />
                 </div>
               </div>

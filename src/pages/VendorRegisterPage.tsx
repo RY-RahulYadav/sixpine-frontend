@@ -104,7 +104,7 @@ const VendorRegisterPage: React.FC = () => {
         <CategoryTabs />
       </div>
       <div className="sixpine-auth-page">
-        <div className="sixpine-auth-container">
+        <div className="sixpine-auth-container vendor-register-container">
           <div className="sixpine-auth-card">
             <div className="sixpine-brand">
               <h1>Sixpine</h1>
@@ -159,70 +159,74 @@ const VendorRegisterPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="sixpine-form-group">
-                <label>Email *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="abc@gmail.com"
-                  required
-                />
-              </div>
-
-              <div className="sixpine-form-group">
-                <label>Username</label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="Auto-generated from email"
-                />
-              </div>
-
-              <div className="sixpine-form-group">
-                <label>Password *</label>
-                <div className="sixpine-password-input">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="sixpine-form-group">
+                  <label>Email *</label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
+                    type="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
-                    placeholder="••••••"
+                    placeholder="abc@gmail.com"
                     required
-                    minLength={8}
                   />
-                  <button
-                    type="button"
-                    className="sixpine-password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? '🙈' : '👁️'}
-                  </button>
+                </div>
+
+                <div className="sixpine-form-group">
+                  <label>Username</label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Auto-generated from email"
+                  />
                 </div>
               </div>
 
-              <div className="sixpine-form-group">
-                <label>Confirm Password *</label>
-                <div className="sixpine-password-input">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    name="password_confirm"
-                    value={formData.password_confirm}
-                    onChange={handleChange}
-                    placeholder="••••••"
-                    required
-                    minLength={8}
-                  />
-                  <button
-                    type="button"
-                    className="sixpine-password-toggle"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? '🙈' : '👁️'}
-                  </button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="sixpine-form-group">
+                  <label>Password *</label>
+                  <div className="sixpine-password-input">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••"
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      className="sixpine-password-toggle"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? '🙈' : '👁️'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="sixpine-form-group">
+                  <label>Confirm Password *</label>
+                  <div className="sixpine-password-input">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="password_confirm"
+                      value={formData.password_confirm}
+                      onChange={handleChange}
+                      placeholder="••••••"
+                      required
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      className="sixpine-password-toggle"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? '🙈' : '👁️'}
+                    </button>
+                  </div>
                 </div>
               </div>
 

@@ -58,6 +58,7 @@ const SellerLayout: React.FC = () => {
     { path: '/seller', icon: 'dashboard', label: 'Dashboard', exact: true, section: 'main' },
     { path: '/seller/products', icon: 'inventory_2', label: 'Products Management', section: 'main' },
     { path: '/seller/orders', icon: 'shopping_bag', label: 'Orders Management', section: 'main' },
+    { path: '/seller/returns', icon: 'assignment_return', label: 'Return Requests', section: 'main' },
     // Payment Settings Section
     // Analytics Section
     { path: '/seller/analytics/brand', icon: 'analytics', label: 'Brand Analytics', section: 'analytics' },
@@ -68,6 +69,8 @@ const SellerLayout: React.FC = () => {
 
     // Communication Section
     { path: '/seller/communication', icon: 'mail', label: 'Communication', section: 'communication' },
+    // Media Section
+    { path: '/seller/media', icon: 'image', label: 'Media Library', section: 'communication' },
     // Settings Section
     { path: '/seller/settings', icon: 'settings', label: 'Settings', section: 'settings' },
   ];
@@ -226,18 +229,6 @@ const SellerLayout: React.FC = () => {
               </div>
             )}
           </nav>
-          
-          {/* Sidebar Footer */}
-          <div className="admin-sidebar-footer">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="admin-modern-btn outline"
-              style={{ width: '100%' }}
-            >
-              <span className="material-symbols-outlined">{sidebarOpen ? 'menu_open' : 'menu'}</span>
-              <span className="admin-menu-text">{sidebarOpen ? 'Collapse' : 'Expand'}</span>
-            </button>
-          </div>
         </aside>
         
         {/* Main Content */}
@@ -248,11 +239,13 @@ const SellerLayout: React.FC = () => {
               {location.pathname === '/seller' && 'Dashboard'}
               {location.pathname.startsWith('/seller/products') && 'Products'}
               {location.pathname.startsWith('/seller/orders') && 'Orders'}
+              {location.pathname.startsWith('/seller/returns') && 'Return Requests'}
               {location.pathname.startsWith('/seller/coupons') && 'Coupons'}
               {location.pathname.startsWith('/seller/analytics/brand') && 'Brand Analytics'}
               {location.pathname.startsWith('/seller/payment') && !location.pathname.startsWith('/seller/payment-settings') && 'Payment Dashboard'}
               {location.pathname.startsWith('/seller/payment-settings') && 'Payment & Shipment Settings'}
               {location.pathname.startsWith('/seller/communication') && 'Communication'}
+              {location.pathname.startsWith('/seller/media') && 'Media Library'}
               {location.pathname.startsWith('/seller/settings') && 'Settings'}
             </h1>
             </div>

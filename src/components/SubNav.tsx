@@ -13,7 +13,7 @@ const SubNav: React.FC = () => {
     { to: '/bulk-order', label: 'Buy in Bulk', isActive: true },
     { to: '/orders', label: 'Track Order', isActive: true },
     { to: '/contact', label: 'Contact Us', isActive: true },
-    { to: '/help', label: 'Help', isActive: true },
+    { to: '/help-center', label: 'Help', isActive: true },
   ];
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, item: typeof items[0]) => {

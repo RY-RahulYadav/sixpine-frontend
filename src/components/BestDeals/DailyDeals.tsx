@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
-import styles from './BestDeals.module.css';
 import { homepageAPI } from '../../services/api';
+import { useApp } from '../../context/AppContext';
+import styles from './BestDeals.module.css';
 
 interface DailyDeal {
   id: number;
@@ -17,10 +19,13 @@ interface DailyDeal {
 }
 
 const DailyDeals = () => {
+  const navigate = useNavigate();
+  const { state, addToCart } = useApp();
   const [visibleCount, setVisibleCount] = useState(4);
   const [dailyDeals, setDailyDeals] = useState<DailyDeal[]>([]);
   const [sectionTitle, setSectionTitle] = useState('Deals of the Day');
   const [loading, setLoading] = useState(true);
+  const [cartLoading, setCartLoading] = useState<number | null>(null);
 
   // Default data for daily deals
   const defaultDeals: DailyDeal[] = [
@@ -172,7 +177,45 @@ const DailyDeals = () => {
 
   const handleDealClick = (deal: DailyDeal) => {
     if (deal.navigateUrl && deal.navigateUrl !== '#') {
-      window.location.href = deal.navigateUrl;
+      navigate(deal.navigateUrl);
+    }
+  };
+
+  const handleBuyNow = async (deal: DailyDeal, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (state.isAuthenticated && deal.id) {
+      try {
+        await addToCart(deal.id, 1);
+        navigate('/checkout');
+      } catch (error: any) {
+        console.error('Error adding to cart:', error);
+        handleDealClick(deal);
+      }
+    } else if (deal.navigateUrl && deal.navigateUrl !== '#') {
+      navigate(deal.navigateUrl);
+    } else if (!state.isAuthenticated) {
+      navigate('/login');
+    }
+  };
+
+  const handleAddToCart = async (deal: DailyDeal, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!state.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    if (!deal.id) {
+      alert('Product ID is missing');
+      return;
+    }
+    setCartLoading(deal.id);
+    try {
+      await addToCart(deal.id, 1);
+    } catch (error: any) {
+      console.error('Add to cart error:', error);
+      alert(error.response?.data?.error || 'Failed to add to cart');
+    } finally {
+      setCartLoading(null);
     }
   };
 
@@ -245,20 +288,20 @@ const DailyDeals = () => {
               <div className={styles.dealActions}>
                 <button 
                   className={styles.buyNowBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDealClick(deal);
-                  }}
+                  onClick={(e) => handleBuyNow(deal, e)}
+                  disabled={cartLoading === deal.id}
                 >
-                  Buy Now
+                  {cartLoading === deal.id ? 'Loading...' : 'Buy Now'}
                 </button>
                 <button 
                   className={styles.cartIconBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // TODO: Add to cart logic
-                  }}
+                  onClick={(e) => handleAddToCart(deal, e)}
                   title="Add to Cart"
+                  disabled={cartLoading === deal.id}
+                  style={{ 
+                    cursor: cartLoading === deal.id ? 'wait' : 'pointer',
+                    opacity: cartLoading === deal.id ? 0.6 : 1
+                  }}
                 >
                   <FaShoppingCart />
                 </button>

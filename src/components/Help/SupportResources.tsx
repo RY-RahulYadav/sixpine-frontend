@@ -1,6 +1,8 @@
 import styles from './Help.module.css';
+import { useFooterSettings } from '../../hooks/useFooterSettings';
 
 const SupportResources: React.FC = () => {
+  const { iosAppUrl, androidAppUrl } = useFooterSettings();
   // Resources data
   const resources = [
     {
@@ -85,7 +87,7 @@ const SupportResources: React.FC = () => {
             Get quick access to customer support, product manuals, and order tracking on your mobile device
           </p>
           <div className={styles.appButtons}>
-            <a href="#" className={styles.appButton}>
+            <a href={iosAppUrl || "#"} className={styles.appButton} target={iosAppUrl ? "_blank" : undefined} rel={iosAppUrl ? "noopener noreferrer" : undefined}>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20.94c1.5 0 6-6.33 6-11.94a6 6 0 0 0-12 0c0 5.61 4.5 11.94 6 11.94z"></path>
               </svg>
@@ -94,7 +96,7 @@ const SupportResources: React.FC = () => {
                 <span className={styles.appButtonStore}>App Store</span>
               </div>
             </a>
-            <a href="#" className={styles.appButton}>
+            <a href={androidAppUrl || "#"} className={styles.appButton} target={androidAppUrl ? "_blank" : undefined} rel={androidAppUrl ? "noopener noreferrer" : undefined}>
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
               </svg>

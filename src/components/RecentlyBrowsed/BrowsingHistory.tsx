@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaShoppingCart } from 'react-icons/fa';
-import { productAPI } from '../../services/api';
+import { FaShoppingCart, FaHeart } from 'react-icons/fa';
+import { productAPI, wishlistAPI } from '../../services/api';
+import { useApp } from '../../context/AppContext';
 import styles from './RecentlyBrowsed.module.css';
 
 interface BrowsingHistoryItem {
@@ -30,11 +31,53 @@ interface BrowsingHistoryItem {
 const BrowsingHistory = () => {
   const [historyItems, setHistoryItems] = useState<BrowsingHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [wishlistItemIds, setWishlistItemIds] = useState<Set<number>>(new Set());
+  const [wishlistMap, setWishlistMap] = useState<Map<number, number>>(new Map()); // productId -> wishlistItemId
+  const [cartLoading, setCartLoading] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { state, addToCart } = useApp();
 
   useEffect(() => {
     fetchBrowsingHistory();
-  }, []);
+    if (state.isAuthenticated) {
+      fetchWishlistStatus();
+    }
+  }, [state.isAuthenticated]);
+
+  // Listen for browsing history updates
+  useEffect(() => {
+    const handleBrowsingHistoryUpdate = () => {
+      fetchBrowsingHistory();
+      if (state.isAuthenticated) {
+        fetchWishlistStatus();
+      }
+    };
+    
+    window.addEventListener('browsingHistoryUpdated', handleBrowsingHistoryUpdate);
+    return () => {
+      window.removeEventListener('browsingHistoryUpdated', handleBrowsingHistoryUpdate);
+    };
+  }, [state.isAuthenticated]);
+
+  const fetchWishlistStatus = async () => {
+    try {
+      const response = await wishlistAPI.getWishlist();
+      if (response.data && response.data.results) {
+        const itemIds = new Set<number>();
+        const map = new Map<number, number>();
+        response.data.results.forEach((item: any) => {
+          if (item.product?.id) {
+            itemIds.add(item.product.id);
+            map.set(item.product.id, item.id);
+          }
+        });
+        setWishlistItemIds(itemIds);
+        setWishlistMap(map);
+      }
+    } catch (error) {
+      // Silently fail
+    }
+  };
 
   const fetchBrowsingHistory = async () => {
     try {
@@ -75,16 +118,6 @@ const BrowsingHistory = () => {
     return `₹${parseFloat(price).toLocaleString('en-IN')}`;
   };
 
-  const handleClearHistory = async () => {
-    if (window.confirm('Are you sure you want to clear all browsing history?')) {
-      try {
-        await productAPI.clearBrowsingHistory();
-        setHistoryItems([]);
-      } catch (error) {
-        console.error('Error clearing browsing history:', error);
-      }
-    }
-  };
 
   // const handleRemoveItem = async (productId: number) => {
   //   try {
@@ -97,6 +130,50 @@ const BrowsingHistory = () => {
 
   const handleProductClick = (slug: string) => {
     navigate(`/products-details/${slug}`);
+  };
+
+  const handleWishlistToggle = async (productId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!state.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    const isInWishlist = wishlistItemIds.has(productId);
+    const wishlistItemId = wishlistMap.get(productId);
+
+    try {
+      if (isInWishlist && wishlistItemId) {
+        // Remove from wishlist
+        await wishlistAPI.removeFromWishlist(wishlistItemId);
+        const newItemIds = new Set(wishlistItemIds);
+        newItemIds.delete(productId);
+        setWishlistItemIds(newItemIds);
+        const newMap = new Map(wishlistMap);
+        newMap.delete(productId);
+        setWishlistMap(newMap);
+        // Trigger wishlist update event
+        window.dispatchEvent(new Event('wishlistUpdated'));
+      } else {
+        // Add to wishlist
+        const response = await wishlistAPI.addToWishlist(productId);
+        if (response.data && response.data.data) {
+          const newItemIds = new Set(wishlistItemIds);
+          newItemIds.add(productId);
+          setWishlistItemIds(newItemIds);
+          const newMap = new Map(wishlistMap);
+          newMap.set(productId, response.data.data.id);
+          setWishlistMap(newMap);
+          // Trigger wishlist update event
+          window.dispatchEvent(new Event('wishlistUpdated'));
+        }
+      }
+    } catch (error: any) {
+      console.error('Wishlist error:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to update wishlist';
+      alert(errorMsg);
+    }
   };
 
   if (loading) {
@@ -129,21 +206,11 @@ const BrowsingHistory = () => {
 
   return (
     <div className={styles.browsingHistorySection}>
-      <div className={styles.sectionHeaderWithClear}>
         <div className={styles.headerContent}>
           <h2 className={styles.sectionTitle}>
             <span className={styles.highlightTitle}>Recently</span> Viewed
           </h2>
           <p className={styles.sectionSubtitle}>Your recently browsed products</p>
-        </div>
-        <div className={styles.headerActions}>
-          <button 
-            className={styles.clearButton}
-            onClick={handleClearHistory}
-          >
-            Clear History
-          </button>
-        </div>
       </div>
 
       <div className={styles.productsGrid}>
@@ -170,6 +237,13 @@ const BrowsingHistory = () => {
                 {discount && (
                   <div className={styles.discountBadge}>{discount}</div>
                 )}
+                <button
+                  className={styles.wishlistBtn}
+                  onClick={(e) => handleWishlistToggle(item.product.id, e)}
+                  title={wishlistItemIds.has(item.product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                >
+                  <FaHeart style={{ color: wishlistItemIds.has(item.product.id) ? '#ff6f00' : '#999' }} />
+                </button>
               </div>
               <div className={styles.productInfo}>
                 <h3 className={styles.productName}>{item.product.title}</h3>
@@ -184,20 +258,52 @@ const BrowsingHistory = () => {
                 <div className={styles.productActionRow}>
                   <button 
                     className={styles.buyNowBtn}
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
+                      if (state.isAuthenticated && item.product.id) {
+                        try {
+                          await addToCart(item.product.id, 1);
+                          navigate('/checkout');
+                        } catch (error: any) {
+                          console.error('Error adding to cart:', error);
+                          handleProductClick(item.product.slug);
+                        }
+                      } else {
                       handleProductClick(item.product.slug);
+                      }
                     }}
+                    disabled={cartLoading === item.product.id}
                   >
-                    Buy Now
+                    {cartLoading === item.product.id ? 'Loading...' : 'Buy Now'}
                   </button>
                   <button 
                     className={styles.cartIconBtn}
-                    onClick={(e) => {
+                    onClick={async (e) => {
                       e.stopPropagation();
-                      // TODO: Add to cart logic
+                      if (!state.isAuthenticated) {
+                        navigate('/login');
+                        return;
+                      }
+                      if (!item.product.id) {
+                        alert('Product ID is missing');
+                        return;
+                      }
+                      setCartLoading(item.product.id);
+                      try {
+                        await addToCart(item.product.id, 1);
+                      } catch (error: any) {
+                        console.error('Add to cart error:', error);
+                        alert(error.response?.data?.error || 'Failed to add to cart');
+                      } finally {
+                        setCartLoading(null);
+                      }
                     }}
                     title="Add to Cart"
+                    disabled={cartLoading === item.product.id}
+                    style={{ 
+                      cursor: cartLoading === item.product.id ? 'wait' : 'pointer',
+                      opacity: cartLoading === item.product.id ? 0.6 : 1
+                    }}
                   >
                     <FaShoppingCart />
                   </button>

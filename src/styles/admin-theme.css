@@ -144,7 +144,7 @@
 .admin-modern-header {
   height: var(--admin-header-height);
   background: var(--admin-dark);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
@@ -152,7 +152,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--spacing-lg);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
 }
 
 .admin-header-left {
@@ -176,7 +176,7 @@
 .admin-logo-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-primary-dark) 100%);
+  background: var(--admin-primary);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
@@ -184,7 +184,7 @@
   font-weight: 700;
   font-size: 20px;
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(26, 59, 169, 0.2);
 }
 
 .admin-logo-text h1 {
@@ -247,14 +247,16 @@
   align-items: center;
   gap: var(--spacing-sm);
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .admin-header-user:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 
@@ -275,6 +277,21 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
+.admin-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--admin-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(26, 59, 169, 0.3);
+}
+
 .admin-header-actions {
   display: flex;
   gap: var(--spacing-sm);
@@ -284,8 +301,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
   display: flex;
   align-items: center;
@@ -296,8 +313,9 @@
 }
 
 .admin-header-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .admin-header-btn .badge {
@@ -1081,8 +1099,8 @@
 
 .category-header > div:first-child {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
+  align-items: center;
+  gap: var(--spacing-sm);
   flex: 1;
 }
 
@@ -1094,17 +1112,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-}
-
-.category-slug {
-  font-size: 13px;
-  color: var(--admin-text-light);
-  font-family: 'Courier New', monospace;
-  background: var(--admin-bg);
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  display: inline-block;
-  margin-left: var(--spacing-xs);
 }
 
 .category-actions {
@@ -1228,7 +1235,7 @@
 .subcategory-item > div:first-child {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   flex: 1;
 }
 
@@ -4550,12 +4557,14 @@
   font-weight: 600;
   color: var(--admin-dark);
   margin-bottom: 6px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
 .admin-form-group input[type="text"],
+.admin-form-group input[type="email"],
 .admin-form-group input[type="number"],
 .admin-form-group input[type="url"],
 .admin-form-group input[type="date"],
@@ -4580,6 +4589,13 @@
   border-color: var(--admin-primary);
   box-shadow: 0 0 0 4px rgba(var(--admin-primary-rgb), 0.1);
   background: var(--admin-card-bg);
+}
+
+/* Ensure email inputs match text inputs exactly */
+.admin-form-group input[type="email"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .admin-form-group input:disabled,

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
-import styles from './Trending.module.css';
 import { homepageAPI } from '../../services/api';
+import { useApp } from '../../context/AppContext';
+import styles from './Trending.module.css';
 
 const defaultProducts = [
   {
@@ -51,11 +53,14 @@ const defaultProducts = [
 ];
 
 const TrendingProducts = () => {
+  const navigate = useNavigate();
+  const { state, addToCart } = useApp();
   const [trendingProducts, setTrendingProducts] = useState(defaultProducts);
   const [, setSectionTitle] = useState('Trending Right Now');
   const [sectionSubtitle, setSectionSubtitle] = useState('Discover what customers are loving this week');
   const [viewAllButtonText, setViewAllButtonText] = useState('View All Trending Products');
   const [loading, setLoading] = useState(true);
+  const [cartLoading, setCartLoading] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProductsData = async () => {
@@ -119,7 +124,45 @@ const TrendingProducts = () => {
         {trendingProducts.map(product => {
           const handleCardClick = () => {
             if (product.navigateUrl && product.navigateUrl !== '#') {
-              window.location.href = product.navigateUrl;
+              navigate(product.navigateUrl);
+            }
+          };
+
+          const handleBuyNow = async (e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (state.isAuthenticated && product.id) {
+              try {
+                await addToCart(product.id, 1);
+                navigate('/checkout');
+              } catch (error: any) {
+                console.error('Error adding to cart:', error);
+                handleCardClick();
+              }
+            } else if (product.navigateUrl && product.navigateUrl !== '#') {
+              navigate(product.navigateUrl);
+            } else if (!state.isAuthenticated) {
+              navigate('/login');
+            }
+          };
+
+          const handleAddToCart = async (e: React.MouseEvent) => {
+            e.stopPropagation();
+            if (!state.isAuthenticated) {
+              navigate('/login');
+              return;
+            }
+            if (!product.id) {
+              alert('Product ID is missing');
+              return;
+            }
+            setCartLoading(product.id);
+            try {
+              await addToCart(product.id, 1);
+            } catch (error: any) {
+              console.error('Add to cart error:', error);
+              alert(error.response?.data?.error || 'Failed to add to cart');
+            } finally {
+              setCartLoading(null);
             }
           };
           
@@ -148,20 +191,20 @@ const TrendingProducts = () => {
                 <div className={styles.productActionRow}>
                   <button 
                     className={styles.buyNowBtn}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCardClick();
-                    }}
+                    onClick={handleBuyNow}
+                    disabled={cartLoading === product.id}
                   >
-                    Buy Now
+                    {cartLoading === product.id ? 'Loading...' : 'Buy Now'}
                   </button>
                   <button 
                     className={styles.cartIconBtn}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // TODO: Add to cart logic
-                    }}
+                    onClick={handleAddToCart}
                     title="Add to Cart"
+                    disabled={cartLoading === product.id}
+                    style={{ 
+                      cursor: cartLoading === product.id ? 'wait' : 'pointer',
+                      opacity: cartLoading === product.id ? 0.6 : 1
+                    }}
                   >
                     <FaShoppingCart />
                   </button>

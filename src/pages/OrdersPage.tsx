@@ -6,6 +6,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import OrderDetailsModal from '../components/OrderDetailsModal.tsx';
 import Productdetails_Slider1 from '../components/Products_Details/productdetails_slider1';
+import ReturnsList from '../components/Returns/ReturnsList';
+import ReturnRequestModal from '../components/Returns/ReturnRequestModal';
 import '../styles/orders.css';
 import SubNav from '../components/SubNav.tsx';
 import CategoryTabs from '../components/CategoryTabs.tsx';
@@ -19,6 +21,9 @@ interface Product {
   reviews: number;
   oldPrice: string;
   newPrice: string;
+  id?: number;
+  productId?: number;
+  slug?: string;
 }
 
 interface OrderItem {
@@ -60,12 +65,12 @@ interface Order {
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { state } = useApp();
+  const { state, addToCart } = useApp();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'orders' | 'buyAgain' | 'notShipped' | 'cancelled'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'buyAgain' | 'notShipped' | 'cancelled' | 'returns'>('orders');
   const [timeFilter, setTimeFilter] = useState('past 3 months');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -73,6 +78,10 @@ const OrdersPage: React.FC = () => {
   const [frequentlyViewedProducts, setFrequentlyViewedProducts] = useState<Product[]>([]);
   const [inspiredProducts, setInspiredProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [buyAgainLoading, setBuyAgainLoading] = useState<string | null>(null);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [selectedOrderForReturn, setSelectedOrderForReturn] = useState<Order | null>(null);
+  const [selectedOrderItemForReturn, setSelectedOrderItemForReturn] = useState<OrderItem | null>(null);
 
   const handleViewDetails = (orderId: string) => {
     setSelectedOrderId(orderId);
@@ -200,6 +209,35 @@ const OrdersPage: React.FC = () => {
     handleViewDetails(order.order_id);
   };
 
+  const handleBuyAgain = async (order: Order, navigateToCheckout: boolean = false) => {
+    if (!order.items || order.items.length === 0) {
+      alert('No items found in this order');
+      return;
+    }
+
+    setBuyAgainLoading(order.order_id);
+
+    try {
+      // Add all items from the order to cart
+      for (const item of order.items) {
+        if (item.product?.id) {
+          const variantId = item.variant?.id || undefined;
+          await addToCart(item.product.id, item.quantity, variantId);
+        }
+      }
+
+      if (navigateToCheckout) {
+        navigate('/checkout');
+      }
+    } catch (error: any) {
+      console.error('Error adding items to cart:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to add items to cart';
+      alert(errorMsg);
+    } finally {
+      setBuyAgainLoading(null);
+    }
+  };
+
   useEffect(() => {
     if (!state.isAuthenticated) {
       navigate('/login');
@@ -211,8 +249,8 @@ const OrdersPage: React.FC = () => {
     // Check URL params for tab selection
     const params = new URLSearchParams(location.search);
     const tabParam = params.get('tab');
-    if (tabParam === 'buyAgain' || tabParam === 'notShipped' || tabParam === 'cancelled' || tabParam === 'orders') {
-      setActiveTab(tabParam as 'orders' | 'buyAgain' | 'notShipped' | 'cancelled');
+    if (tabParam === 'buyAgain' || tabParam === 'notShipped' || tabParam === 'cancelled' || tabParam === 'orders' || tabParam === 'returns') {
+      setActiveTab(tabParam as 'orders' | 'buyAgain' | 'notShipped' | 'cancelled' | 'returns');
     }
 
     fetchOrders();
@@ -238,6 +276,11 @@ const OrdersPage: React.FC = () => {
           reviews: product.reviews || product.review_count || 0,
           oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
           newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,  // Use slug or productSlug
+          variantCount: product.variant_count || product.variants_count || 0,
+          variants_count: product.variant_count || product.variants_count || 0,
         }));
         setFrequentlyViewedProducts(transformedFrequentlyViewed);
       }
@@ -252,6 +295,11 @@ const OrdersPage: React.FC = () => {
           reviews: product.reviews || product.review_count || 0,
           oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
           newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,  // Use slug or productSlug
+          variantCount: product.variant_count || product.variants_count || 0,
+          variants_count: product.variant_count || product.variants_count || 0,
         }));
         setInspiredProducts(transformedInspired);
       }
@@ -295,11 +343,55 @@ const OrdersPage: React.FC = () => {
       case 'cancelled':
         // Show cancelled orders
         return orders.filter(order => order.status === 'cancelled');
+      case 'returns':
+        // Returns tab will show return requests, not orders
+        return [];
       case 'orders':
       default:
         // Show all orders
         return orders;
     }
+  };
+
+  const handleRequestReturn = (order: Order | any, orderItem: OrderItem | any) => {
+    // Handle both Order type and OrderDetails type from modal
+    const orderData: Order = {
+      order_id: order.order_id || order.orderId || order.id,
+      status: order.status,
+      payment_status: order.payment_status || order.paymentStatus,
+      payment_method: order.payment_method || order.paymentMethod,
+      total_amount: order.total_amount || order.totalAmount || 0,
+      items_count: order.items_count || order.itemsCount || 0,
+      created_at: order.created_at || order.createdAt || '',
+      estimated_delivery: order.estimated_delivery || order.estimatedDelivery,
+      shipping_address: order.shipping_address || order.shippingAddress,
+      items: order.items || []
+    };
+    
+    // Handle order item structure from different sources
+    const itemData: OrderItem = {
+      id: orderItem.id || orderItem.order_item_id,
+      product: {
+        id: orderItem.product?.id || orderItem.product_id,
+        title: orderItem.product?.title || orderItem.product_name || orderItem.name || '',
+        main_image: orderItem.product?.main_image || orderItem.product_image || orderItem.image || ''
+      },
+      variant: orderItem.variant,
+      variant_color: orderItem.variant_color || orderItem.variantColor,
+      variant_size: orderItem.variant_size || orderItem.variantSize,
+      variant_pattern: orderItem.variant_pattern || orderItem.variantPattern,
+      quantity: orderItem.quantity || orderItem.qty || 1,
+      price: orderItem.price || orderItem.unitPrice || 0
+    };
+    
+    setSelectedOrderForReturn(orderData);
+    setSelectedOrderItemForReturn(itemData);
+    setShowReturnModal(true);
+  };
+
+  const handleReturnRequestSuccess = () => {
+    // Refresh orders to show updated status
+    fetchOrders();
   };
 
   const filteredOrders = getFilteredOrders();
@@ -378,6 +470,12 @@ const OrdersPage: React.FC = () => {
             >
               Cancelled Order
             </button>
+            <button
+              className={`tab-button ${activeTab === 'returns' ? 'active' : ''}`}
+              onClick={() => setActiveTab('returns')}
+            >
+              Returns
+            </button>
           </div>
 
           {/* Time Filter */}
@@ -404,6 +502,11 @@ const OrdersPage: React.FC = () => {
                 <span className="visually-hidden">Loading...</span>
               </div>
             </div>
+          ) : activeTab === 'returns' ? (
+            <ReturnsList onRequestReturn={() => {
+              // Navigate to orders tab to select an order for return
+              setActiveTab('orders');
+            }} />
           ) : filteredOrders.length === 0 ? (
             <div className="text-center py-5">
               <h4>No Orders Found</h4>
@@ -525,16 +628,6 @@ const OrdersPage: React.FC = () => {
                               )}
                             </>
                           )}
-                            <div className="item-rating">
-                              <div className="stars">
-                                <span className="star filled">★</span>
-                                <span className="star filled">★</span>
-                                <span className="star filled">★</span>
-                                <span className="star half">★</span>
-                                <span className="star empty">★</span>
-                              </div>
-                              <span className="review-count">(120 reviews)</span>
-                            </div>
                             <div className="item-pricing">
                               <span className="item-price">₹{order.items[0].price.toLocaleString()}</span>
                               {order.items[0].product.old_price && Number(order.items[0].product.old_price) > Number(order.items[0].price) && (
@@ -545,9 +638,19 @@ const OrdersPage: React.FC = () => {
                             {/* Show Buy Now and Add to Cart only in Buy Again tab */}
                             {activeTab === 'buyAgain' && (
                               <div className="item-actions">
-                                <button className="btn btn-warning btn-buy-now">Buy Now</button>
-                                <button className="btn btn-outline-secondary btn-add-cart">
-                                  <i className="bi bi-cart"></i> Add to Cart
+                                <button 
+                                  className="btn btn-warning btn-buy-now"
+                                  onClick={() => handleBuyAgain(order, true)}
+                                  disabled={buyAgainLoading === order.order_id}
+                                >
+                                  {buyAgainLoading === order.order_id ? 'Adding...' : 'Buy Now'}
+                                </button>
+                                <button 
+                                  className="btn btn-outline-secondary btn-add-cart"
+                                  onClick={() => handleBuyAgain(order, false)}
+                                  disabled={buyAgainLoading === order.order_id}
+                                >
+                                  <i className="bi bi-cart"></i> {buyAgainLoading === order.order_id ? 'Adding...' : 'Add to Cart'}
                                 </button>
                               </div>
                             )}
@@ -591,7 +694,13 @@ const OrdersPage: React.FC = () => {
                                 <p className="text-muted small">
                                   Refund will be processed within 5-7 business days
                                 </p>
-                                <button className="btn btn-warning btn-buy-now mt-2">Buy Again</button>
+                                <button 
+                                  className="btn btn-warning btn-buy-now mt-2"
+                                  onClick={() => handleBuyAgain(order, true)}
+                                  disabled={buyAgainLoading === order.order_id}
+                                >
+                                  {buyAgainLoading === order.order_id ? 'Adding...' : 'Buy Again'}
+                                </button>
                               </div>
                             )}
 
@@ -679,7 +788,31 @@ const OrdersPage: React.FC = () => {
                                 )} */}
                                 
                                 {order.status === 'delivered' && (
-                                  <button className="btn btn-warning btn-buy-now mt-2">Buy Again</button>
+                                  <div className="d-flex gap-2 mt-2">
+                                    <button 
+                                      className="btn btn-warning btn-buy-now"
+                                      onClick={() => handleBuyAgain(order, true)}
+                                      disabled={buyAgainLoading === order.order_id}
+                                    >
+                                      {buyAgainLoading === order.order_id ? 'Adding...' : 'Buy Again'}
+                                    </button>
+                                    {order.items && order.items.length > 0 && (
+                                      <button 
+                                        className="btn btn-outline-primary"
+                                        onClick={() => {
+                                          // Show return options for delivered orders
+                                          if (order.items && order.items.length === 1) {
+                                            handleRequestReturn(order, order.items[0]);
+                                          } else {
+                                            // If multiple items, show order details to select item
+                                            handleViewDetails(order.order_id);
+                                          }
+                                        }}
+                                      >
+                                        Return/Replace
+                                      </button>
+                                    )}
+                                  </div>
                                 )}
                                 {['pending', 'confirmed', 'processing', 'shipped'].includes(order.status) && order.payment_status === 'paid' && (
                                   <button 
@@ -731,7 +864,27 @@ const OrdersPage: React.FC = () => {
 
         {/* Order Details Modal */}
         {selectedOrderId && (
-          <OrderDetailsModal orderId={selectedOrderId} show={showModal} onHide={handleCloseModal} />
+          <OrderDetailsModal 
+            orderId={selectedOrderId} 
+            show={showModal} 
+            onHide={handleCloseModal}
+            onRequestReturn={handleRequestReturn}
+          />
+        )}
+
+        {/* Return Request Modal */}
+        {selectedOrderForReturn && selectedOrderItemForReturn && (
+          <ReturnRequestModal
+            orderId={selectedOrderForReturn.order_id}
+            orderItem={selectedOrderItemForReturn}
+            show={showReturnModal}
+            onHide={() => {
+              setShowReturnModal(false);
+              setSelectedOrderForReturn(null);
+              setSelectedOrderItemForReturn(null);
+            }}
+            onSuccess={handleReturnRequestSuccess}
+          />
         )}
       </div>
       <div className="footer-wrapper">

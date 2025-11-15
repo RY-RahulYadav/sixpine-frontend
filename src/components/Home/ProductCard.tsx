@@ -1,4 +1,8 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import { wishlistAPI } from "../../services/api";
+import { useApp } from "../../context/AppContext";
 import styles from "./bannerCards.module.css";
 
 interface ProductCardProps {
@@ -15,6 +19,8 @@ interface ProductCardProps {
   newPrice?: string;
   productSlug?: string;
   productId?: number;
+  navigateUrl?: string;
+  variantCount?: number;
   onImageError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
   onBuyNow?: (e: React.MouseEvent) => void;
   onWishlist?: (e: React.MouseEvent) => void;
@@ -22,7 +28,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({
-  id,
+  id: _id,
   title,
   subtitle,
   desc,
@@ -34,41 +40,159 @@ const ProductCard = ({
   oldPrice,
   newPrice,
   productSlug,
+  productId,
+  navigateUrl,
+  variantCount,
   onImageError,
   onBuyNow,
   onWishlist,
   onAddToCart,
 }: ProductCardProps) => {
-  const handleProductClick = () => {
-    if (productSlug) {
-      window.location.href = `/products-details/${productSlug}`;
+  const navigate = useNavigate();
+  const { state, addToCart } = useApp();
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistItemId, setWishlistItemId] = useState<number | null>(null);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const [isCartLoading, setIsCartLoading] = useState(false);
+
+  // Check if product is in wishlist
+  useEffect(() => {
+    if (state.isAuthenticated && productId) {
+      checkWishlistStatus();
+    }
+  }, [state.isAuthenticated, productId]);
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await wishlistAPI.getWishlist();
+      if (response.data && response.data.results) {
+        const wishlistItem = response.data.results.find(
+          (item: any) => item.product?.id === productId
+        );
+        if (wishlistItem) {
+          setIsInWishlist(true);
+          setWishlistItemId(wishlistItem.id);
+        }
+      }
+    } catch (error) {
+      // Silently fail - user might not be authenticated
     }
   };
 
-  const handleBuyNow = (e: React.MouseEvent) => {
+  const handleProductClick = () => {
+    const url = navigateUrl || (productSlug ? `/products-details/${productSlug}` : null);
+    if (url) {
+      navigate(url);
+    }
+  };
+
+  const handleBuyNow = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onBuyNow) {
       onBuyNow(e);
+      return;
+    }
+    
+    // If user is authenticated and productId exists, add to cart and navigate to checkout
+    if (state.isAuthenticated && productId) {
+      try {
+        await addToCart(productId, 1);
+        navigate('/checkout');
+      } catch (error: any) {
+        console.error('Error adding to cart:', error);
+        // If add to cart fails, just navigate to product details
+        if (productSlug) {
+          navigate(`/products-details/${productSlug}`);
+        } else if (navigateUrl) {
+          navigate(navigateUrl);
+        }
+      }
     } else if (productSlug) {
-      window.location.href = `/products-details/${productSlug}`;
+      // Not authenticated or no productId, just navigate to product details
+      navigate(`/products-details/${productSlug}`);
+    } else if (navigateUrl) {
+      navigate(navigateUrl);
+    } else if (!state.isAuthenticated) {
+      // Not authenticated, redirect to login
+      navigate('/login');
     }
   };
 
-  const handleWishlist = (e: React.MouseEvent) => {
+  const handleWishlist = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
     if (onWishlist) {
       onWishlist(e);
-    } else {
-      console.log('Add to wishlist:', id);
+      return;
+    }
+
+    if (!state.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (!productId) {
+      console.error('Product ID is required for wishlist');
+      return;
+    }
+
+    setIsWishlistLoading(true);
+    try {
+      if (isInWishlist && wishlistItemId) {
+        // Remove from wishlist
+        await wishlistAPI.removeFromWishlist(wishlistItemId);
+        setIsInWishlist(false);
+        setWishlistItemId(null);
+        // Trigger wishlist update event
+        window.dispatchEvent(new Event('wishlistUpdated'));
+      } else {
+        // Add to wishlist
+        const response = await wishlistAPI.addToWishlist(productId);
+        if (response.data && response.data.data) {
+          setIsInWishlist(true);
+          setWishlistItemId(response.data.data.id);
+          // Trigger wishlist update event
+          window.dispatchEvent(new Event('wishlistUpdated'));
+        }
+      }
+    } catch (error: any) {
+      console.error('Wishlist error:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to update wishlist';
+      alert(errorMsg);
+    } finally {
+      setIsWishlistLoading(false);
     }
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
     if (onAddToCart) {
       onAddToCart(e);
-    } else {
-      console.log('Add to cart:', id);
+      return;
+    }
+
+    if (!state.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    if (!productId) {
+      console.error('Product ID is required for adding to cart');
+      alert('Product ID is missing. Please try again.');
+      return;
+    }
+
+    setIsCartLoading(true);
+    try {
+      await addToCart(productId, 1);
+      // Cart sidebar will open automatically via AppContext
+    } catch (error: any) {
+      console.error('Add to cart error:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
+      alert(errorMsg);
+    } finally {
+      setIsCartLoading(false);
     }
   };
 
@@ -133,9 +257,11 @@ const ProductCard = ({
       <div className={styles.productRating}>
         {renderStars(rating)}
         <span> ({reviews} reviews)</span>
-        <div className={styles.colorSwatches} aria-hidden>
-          <span className={styles.moreCount}>+3 color</span>
-        </div>
+        {variantCount !== undefined && variantCount > 0 && (
+          <div className={styles.colorSwatches} aria-hidden>
+            <span className={styles.moreCount}>{variantCount} variant{variantCount !== 1 ? 's' : ''}</span>
+          </div>
+        )}
       </div>
       
       <div className={styles.productPrices}>
@@ -149,17 +275,27 @@ const ProductCard = ({
         <button 
           className={styles.buyBtn}
           onClick={handleBuyNow}
+          disabled={isCartLoading}
         >
-          Buy Now
+          {isCartLoading ? 'Loading...' : 'Buy Now'}
         </button>
         <div className={styles.productIcons}>
           <FaHeart 
             onClick={handleWishlist}
-            title="Add to Wishlist"
+            title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+            style={{ 
+              color: isInWishlist ? '#ff6f00' : '#999',
+              cursor: isWishlistLoading ? 'wait' : 'pointer',
+              opacity: isWishlistLoading ? 0.6 : 1
+            }}
           />
           <FaShoppingCart 
             onClick={handleAddToCart}
             title="Add to Cart"
+            style={{ 
+              cursor: isCartLoading ? 'wait' : 'pointer',
+              opacity: isCartLoading ? 0.6 : 1
+            }}
           />
         </div>
       </div>

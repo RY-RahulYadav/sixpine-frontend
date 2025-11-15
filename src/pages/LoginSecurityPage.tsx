@@ -17,6 +17,9 @@ interface Product {
   reviews: number;
   oldPrice: string;
   newPrice: string;
+  id?: number;
+  productId?: number;
+  slug?: string;
 }
 
 const LoginSecurityPage: React.FC = () => {
@@ -44,6 +47,11 @@ const LoginSecurityPage: React.FC = () => {
           reviews: product.reviews || product.review_count || 0,
           oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
           newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,  // Use slug or productSlug
+          variantCount: product.variant_count || product.variants_count || 0,
+          variants_count: product.variant_count || product.variants_count || 0,
         }));
         setFrequentlyViewedProducts(transformedFrequentlyViewed);
       }
@@ -58,6 +66,11 @@ const LoginSecurityPage: React.FC = () => {
           reviews: product.reviews || product.review_count || 0,
           oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
           newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,  // Use slug or productSlug
+          variantCount: product.variant_count || product.variants_count || 0,
+          variants_count: product.variant_count || product.variants_count || 0,
         }));
         setInspiredProducts(transformedInspired);
       }

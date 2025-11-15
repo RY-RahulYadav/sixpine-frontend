@@ -49,21 +49,24 @@ const AdminLayout: React.FC = () => {
     { path: '/admin', icon: 'dashboard', label: 'Dashboard', exact: true, section: 'main' },
     { path: '/admin/customers', icon: 'people', label: 'Customer Management', section: 'main' },
     { path: '/admin/brands', icon: 'store', label: 'Brand Management', section: 'main' },
+    { path: '/admin/brand-analytics', icon: 'analytics', label: 'Brand Analytics', section: 'main' },
     { path: '/admin/orders', icon: 'shopping_cart', label: 'Brand Order Management', section: 'main' },
     // Sixpine Seller Section
     { path: '/admin/sixpine-orders', icon: 'shopping_bag', label: 'Sixpine Orders', section: 'sixpine_seller' },
     { path: '/admin/sixpine-products', icon: 'inventory_2', label: 'Sixpine Products', section: 'sixpine_seller' },
     // Page Management Section
     { path: '/admin/homepage', icon: 'home', label: 'Home Management', section: 'page_management' },
-    { path: '/admin/trending', icon: 'trending_up', label: 'Trending Page Management', section: 'page_management' },
-    { path: '/admin/best-deals', icon: 'local_offer', label: 'Best Deal Management', section: 'page_management' },
-    { path: '/admin/bulk-order-page', icon: 'inventory_2', label: 'Bulk Order Page Management', section: 'page_management' },
+    // { path: '/admin/trending', icon: 'trending_up', label: 'Trending Page Management', section: 'page_management' },
+    // { path: '/admin/best-deals', icon: 'local_offer', label: 'Best Deal Management', section: 'page_management' },
+    // { path: '/admin/bulk-order-page', icon: 'inventory_2', label: 'Bulk Order Page Management', section: 'page_management' },
     // Management Section
     { path: '/admin/logs', icon: 'list_alt', label: 'Activity Logs', section: 'management' },
     { path: '/admin/contact-queries', icon: 'contact_support', label: 'Contact Queries', section: 'management' },
     { path: '/admin/bulk-orders', icon: 'local_shipping', label: 'Bulk Order Queries', section: 'management' },
     { path: '/admin/data-requests', icon: 'description', label: 'Data Requests', section: 'management' },
     { path: '/admin/communication', icon: 'mail', label: 'Communication', section: 'management' },
+    { path: '/admin/media', icon: 'image', label: 'Media Library', section: 'management' },
+    { path: '/admin/packaging-feedback', icon: 'feedback', label: 'Packaging Feedback', section: 'management' },
     // Settings Section
     { path: '/admin/payment-charges', icon: 'payments', label: 'Payment Settings', section: 'settings' },
     { path: '/admin/filter-options', icon: 'tune', label: 'Filter Options', section: 'settings' },
@@ -190,7 +193,7 @@ const AdminLayout: React.FC = () => {
             )}
             
             {/* Page Management Section */}
-            {/* {groupedMenuItems.page_management.length > 0 && (
+            {groupedMenuItems.page_management.length > 0 && (
               <div className="admin-menu-section">
                 <div className="admin-menu-title">Page Management</div>
                 {groupedMenuItems.page_management.map((item) => {
@@ -207,7 +210,7 @@ const AdminLayout: React.FC = () => {
                   );
                 })}
               </div>
-            )} */}
+            )}
             
             {/* Analytics Section */}
             {groupedMenuItems.analytics.length > 0 && (

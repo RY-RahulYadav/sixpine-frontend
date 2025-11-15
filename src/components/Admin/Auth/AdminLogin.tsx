@@ -72,7 +72,35 @@ const AdminLogin: React.FC = () => {
       console.error('Admin login error:', err);
       console.error('Error response:', err.response);
       
-      const errorMessage = err.response?.data?.error || 'Login failed. Please verify your credentials.';
+      // Enhanced error handling to extract backend validation messages
+      let errorMessage = 'Login failed. Please verify your credentials.';
+      
+      if (err.response?.data) {
+        const errorData = err.response.data;
+        
+        // Backend returns error in 'error' field
+        if (errorData.error) {
+          if (typeof errorData.error === 'string') {
+            errorMessage = errorData.error;
+          } else if (Array.isArray(errorData.error)) {
+            errorMessage = errorData.error.join(', ');
+          } else {
+            errorMessage = JSON.stringify(errorData.error);
+          }
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.details) {
+          errorMessage = typeof errorData.details === 'string' 
+            ? errorData.details 
+            : JSON.stringify(errorData.details);
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      // Display the error message (backend will return messages like:
+      // "Access denied. Admin privileges required. Please use the regular login page."
+      // "Vendor users must login through the seller login page.")
       setError(errorMessage);
       
       // Clear any partial auth data

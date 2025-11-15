@@ -1,7 +1,9 @@
 import styles from "../styles/purchaseProtection.module.css";
 import { Shield, CreditCard, Package, RefreshCw, Headphones } from "lucide-react";
+import { useFooterSettings } from "../hooks/useFooterSettings";
 
 export default function PurchaseProtection() {
+  const { whatsAppNumber, displayPhoneNumber } = useFooterSettings();
   return (
     <div className={styles.container}>
       <h1 className={styles.heading}>100% Purchase Protection </h1>  {/*✅ */}
@@ -59,7 +61,7 @@ export default function PurchaseProtection() {
         </p>
         <p className={styles.contact}>
           📧 <a href="mailto:skwoodcity@gmail.com">skwoodcity@gmail.com</a><br />
-          📞 <a href="https://wa.me/919897268972" target="_blank" rel="noopener noreferrer">+91 9897268972 (WhatsApp)</a><br />
+          📞 <a href={`https://wa.me/${whatsAppNumber}`} target="_blank" rel="noopener noreferrer">{displayPhoneNumber} (WhatsApp)</a><br />
           🌐 <a href="https://www.sixpine.in" target="_blank" rel="noopener noreferrer">www.sixpine.in</a>
         </p>
       </section>

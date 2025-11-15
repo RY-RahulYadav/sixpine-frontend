@@ -7,10 +7,12 @@ import '../../../styles/admin-theme.css';
 interface AnalyticsData {
   order_stats: {
     total_orders: number;
-    total_revenue: number;
+    total_revenue: number;  // Keep for backward compatibility
+    total_order_value: number;
+    total_net_revenue: number;
     average_order_value: number;
     orders_by_status: { status: string; count: number }[];
-    orders_by_month: { month: string; count: number; revenue: number }[];
+    orders_by_month: { month: string; count: number; revenue: number; order_value: number; net_revenue: number }[];
     payment_methods: { method: string; count: number; revenue: number }[];
   };
   product_stats: {
@@ -52,7 +54,9 @@ const SellerBrandAnalytics: React.FC = () => {
           const analyticsData: AnalyticsData = {
             order_stats: {
               total_orders: response.data.order_stats?.total_orders || 0,
-              total_revenue: response.data.order_stats?.total_revenue || 0,
+              total_revenue: response.data.order_stats?.total_revenue || 0,  // Keep for backward compatibility
+              total_order_value: response.data.order_stats?.total_order_value || 0,
+              total_net_revenue: response.data.order_stats?.total_net_revenue || 0,
               average_order_value: response.data.order_stats?.average_order_value || 0,
               orders_by_status: response.data.order_stats?.orders_by_status || [],
               orders_by_month: response.data.order_stats?.orders_by_month || [],
@@ -214,27 +218,71 @@ const SellerBrandAnalytics: React.FC = () => {
           }}>
             <div className="admin-modern-card" style={{ 
               padding: '24px',
-              background: 'linear-gradient(135deg, #ff6f00 0%, #ff9e40 100%)',
+              background: 'linear-gradient(135deg, #357abd 0%, #5a9ed6 100%)',
               color: 'white',
               border: 'none'
             }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px' }}>Total Revenue</div>
+                  <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px' }}>Total Order Value</div>
                   <div style={{ fontSize: '32px', fontWeight: '700' }}>
-                    {formatCurrency(analytics.order_stats.total_revenue)}
+                    {formatCurrency(analytics.order_stats.total_order_value)}
                   </div>
                   <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '8px' }}>
                     Avg: {formatCurrency(analytics.order_stats.average_order_value)} per order
                   </div>
                 </div>
-                
+                <div style={{ 
+                  width: '56px', 
+                  height: '56px', 
+                  background: 'rgba(255,255,255,0.2)', 
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>
+                    shopping_cart
+                  </span>
+                </div>
               </div>
             </div>
 
             <div className="admin-modern-card" style={{ 
               padding: '24px',
               background: 'linear-gradient(135deg, #067d62 0%, #0a9e7e 100%)',
+              color: 'white',
+              border: 'none'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px' }}>Net Revenue</div>
+                  <div style={{ fontSize: '32px', fontWeight: '700' }}>
+                    {formatCurrency(analytics.order_stats.total_net_revenue)}
+                  </div>
+                  <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '8px' }}>
+                    After fees & taxes
+                  </div>
+                </div>
+                <div style={{ 
+                  width: '56px', 
+                  height: '56px', 
+                  background: 'rgba(255,255,255,0.2)', 
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>
+                    account_balance_wallet
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-modern-card" style={{ 
+              padding: '24px',
+              background: 'linear-gradient(135deg, #ff6f00 0%, #ff9e40 100%)',
               color: 'white',
               border: 'none'
             }}>
@@ -296,51 +344,24 @@ const SellerBrandAnalytics: React.FC = () => {
               </div>
             </div>
 
-            <div className="admin-modern-card" style={{ 
-              padding: '24px',
-              background: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
-              color: 'white',
-              border: 'none'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px' }}>Active Products</div>
-                  <div style={{ fontSize: '32px', fontWeight: '700' }}>
-                    {analytics.product_stats.active_products}
-                  </div>
-                  <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '8px' }}>
-                    {analytics.product_stats.low_stock_products} low stock items
-                  </div>
-                </div>
-                <div style={{ 
-                  width: '56px', 
-                  height: '56px', 
-                  background: 'rgba(255,255,255,0.2)', 
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '32px' }}>
-                    inventory_2
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Charts Row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))', gap: '24px', marginBottom: '24px' }}>
             <div className="admin-modern-card">
               <h3 style={{ marginBottom: '20px', fontSize: '18px', fontWeight: '700' }}>
-                Revenue Trend
+                Order Value & Net Revenue Trend
               </h3>
               <ResponsiveContainer width="100%" height={320}>
                 <AreaChart data={analytics.order_stats.orders_by_month}>
                   <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#ff6f00" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#ff6f00" stopOpacity={0}/>
+                    <linearGradient id="colorOrderValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#357abd" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#357abd" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorNetRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#067d62" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#067d62" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -355,7 +376,7 @@ const SellerBrandAnalytics: React.FC = () => {
                     tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}k`}
                   />
                   <Tooltip 
-                    formatter={(value: number) => [formatCurrency(value), 'Revenue']}
+                    formatter={(value: number, name: string) => [formatCurrency(value), name === 'order_value' ? 'Order Value' : 'Net Revenue']}
                     contentStyle={{ 
                       background: 'white', 
                       border: '1px solid #f0f0f0',
@@ -365,10 +386,19 @@ const SellerBrandAnalytics: React.FC = () => {
                   />
                   <Area 
                     type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#ff6f00" 
+                    dataKey="order_value" 
+                    stroke="#357abd" 
                     strokeWidth={3}
-                    fill="url(#colorRevenue)" 
+                    fill="url(#colorOrderValue)"
+                    name="order_value"
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="net_revenue" 
+                    stroke="#067d62" 
+                    strokeWidth={3}
+                    fill="url(#colorNetRevenue)"
+                    name="net_revenue"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -407,7 +437,8 @@ const SellerBrandAnalytics: React.FC = () => {
                 Payment Methods
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {analytics.order_stats.payment_methods.map((method, index) => (
+                {analytics.order_stats.payment_methods && analytics.order_stats.payment_methods.length > 0 ? (
+                  analytics.order_stats.payment_methods.map((method, index) => (
                   <div key={index} style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -427,14 +458,19 @@ const SellerBrandAnalytics: React.FC = () => {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontWeight: '600', color: '#ff6f00' }}>
-                        {formatCurrency(method.revenue)}
+                        {formatCurrency(method.order_value || method.revenue || 0)}
                       </div>
                       <div style={{ fontSize: '12px', color: '#888' }}>
-                        {method.count} orders
+                        {method.count} {method.count === 1 ? 'order' : 'orders'}
                       </div>
                     </div>
                   </div>
-                ))}
+                  ))
+                ) : (
+                  <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+                    No payment methods data available
+                  </div>
+                )}
               </div>
             </div>
 
@@ -443,7 +479,8 @@ const SellerBrandAnalytics: React.FC = () => {
                 Top Selling Products
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {analytics.product_stats.top_selling.slice(0, 5).map((product, index) => (
+                {analytics.product_stats.top_selling && analytics.product_stats.top_selling.length > 0 ? (
+                  analytics.product_stats.top_selling.slice(0, 5).map((product, index) => (
                   <div key={product.id} style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -477,10 +514,15 @@ const SellerBrandAnalytics: React.FC = () => {
                       </div>
                     </div>
                     <div style={{ fontWeight: '600', color: '#067d62' }}>
-                      {formatCurrency(product.revenue || 0)}
+                      {formatCurrency(product.revenue || product.order_value || 0)}
                     </div>
                   </div>
-                ))}
+                  ))
+                ) : (
+                  <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+                    No products sold yet
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -533,9 +575,9 @@ const SellerBrandAnalytics: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '13px', color: '#888' }}>Total Revenue</div>
+                  <div style={{ fontSize: '13px', color: '#888' }}>Total Order Value</div>
                   <div style={{ fontSize: '28px', fontWeight: '700', color: '#333' }}>
-                    {formatCurrency(analytics.order_stats.total_revenue)}
+                    {formatCurrency(analytics.order_stats.total_order_value)}
                   </div>
                 </div>
               </div>
@@ -648,15 +690,22 @@ const SellerBrandAnalytics: React.FC = () => {
               </h3>
               <ResponsiveContainer width="100%" height={320}>
                 <BarChart
-                  data={Object.entries(analytics.product_stats.products_by_category).map(([category, count]) => ({
-                    category,
-                    count: Number(count),
-                  }))}
+                  data={Array.isArray(analytics.product_stats.products_by_category) 
+                    ? analytics.product_stats.products_by_category.map((item: any) => ({
+                        category: item.category || item.category__name || 'Uncategorized',
+                        count: typeof item.count === 'number' ? item.count : Number(item.count) || 0,
+                      }))
+                    : Object.entries(analytics.product_stats.products_by_category || {}).map(([category, count]) => ({
+                        category: category || 'Uncategorized',
+                        count: typeof count === 'number' ? count : Number(count) || 0,
+                      }))
+                  }
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="category" style={{ fontSize: '12px' }} stroke="#888" />
                   <YAxis style={{ fontSize: '12px' }} stroke="#888" />
                   <Tooltip 
+                    formatter={(value: any) => [typeof value === 'number' ? value : Number(value) || 0, 'Count']}
                     contentStyle={{ 
                       background: 'white', 
                       border: '1px solid #f0f0f0',

@@ -59,9 +59,37 @@ const RelatedCategories = () => {
     );
   }
 
+  const handleClearAll = async () => {
+    if (window.confirm('Are you sure you want to clear all categories, wishlist, and browsing history? This action cannot be undone.')) {
+      try {
+        await productAPI.clearAllUserData();
+        setCategories([]);
+        // Trigger refresh for other components
+        window.dispatchEvent(new Event('wishlistUpdated'));
+        window.dispatchEvent(new Event('browsingHistoryUpdated'));
+        alert('All data cleared successfully');
+      } catch (error) {
+        console.error('Error clearing all data:', error);
+        alert('Failed to clear all data');
+      }
+    }
+  };
+
   return (
     <div className={styles.relatedCategoriesSection}>
-      <h2 className={styles.sectionTitle}>Categories You've Browsed</h2>
+      <div className={styles.sectionHeaderWithClear}>
+        <div className={styles.headerContent}>
+          <h2 className={styles.sectionTitle}>Categories You've Browsed</h2>
+        </div>
+        <div className={styles.headerActions}>
+          <button 
+            className={styles.clearButton}
+            onClick={handleClearAll}
+          >
+            Clear All
+          </button>
+        </div>
+      </div>
       
       <div className={styles.categoriesGrid}>
         {categories.map(category => (
