@@ -78,6 +78,7 @@ interface Product {
   id: number;
   title: string;
   slug: string;
+  sku: string | null;
   short_description: string;
   long_description: string;
   main_image: string;
@@ -138,6 +139,7 @@ const AdminProductDetail: React.FC = () => {
   const [formData, setFormData] = useState<{
     title: string;
     slug: string;
+    sku: string;
     short_description: string;
     long_description: string;
     main_image: string;
@@ -161,6 +163,7 @@ const AdminProductDetail: React.FC = () => {
   }>({
     title: '',
     slug: '',
+    sku: '',
     short_description: '',
     long_description: '',
     main_image: '',
@@ -239,6 +242,7 @@ const AdminProductDetail: React.FC = () => {
           setFormData({
             title: productData.title || '',
             slug: productData.slug || '',
+            sku: productData.sku || '',
             short_description: productData.short_description || '',
             long_description: productData.long_description || '',
             main_image: productData.main_image || '',
@@ -562,6 +566,7 @@ const AdminProductDetail: React.FC = () => {
       const payload: any = {
         title: formData.title,
         slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        sku: formData.sku || null,
         short_description: formData.short_description,
         long_description: formData.long_description,
         main_image: formData.main_image,
@@ -843,6 +848,18 @@ const AdminProductDetail: React.FC = () => {
                     onChange={handleChange}
                     required
                   className="tw-w-full"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="sku">SKU</label>
+                  <input
+                    type="text"
+                    id="sku"
+                    name="sku"
+                    value={formData.sku}
+                    onChange={handleChange}
+                    placeholder="Stock Keeping Unit"
+                    className="tw-w-full"
                   />
                 </div>
               </div>
