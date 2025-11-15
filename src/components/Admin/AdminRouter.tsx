@@ -27,6 +27,7 @@ import AdminCommunication from './Communication/AdminCommunication';
 import AdminSixpineProducts from './Products/AdminSixpineProducts';
 import AdminProductDetail from './Products/AdminProductDetail';
 import AdminSixpineOrders from './Orders/AdminSixpineOrders';
+import AdminDataRequests from './DataRequests/AdminDataRequests';
 
 const AdminRouter = () => {
   const { state } = useApp();
@@ -84,6 +85,7 @@ const AdminRouter = () => {
         } />
         <Route path="contact-queries" element={<AdminContactQueries />} />
         <Route path="bulk-orders" element={<AdminBulkOrders />} />
+        <Route path="data-requests" element={<AdminDataRequests />} />
         <Route path="communication" element={<AdminCommunication />} />
         {/* Settings Section */}
         <Route path="payment-charges" element={<AdminPaymentCharges />} />

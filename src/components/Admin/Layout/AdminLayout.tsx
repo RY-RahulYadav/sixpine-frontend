@@ -62,6 +62,7 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/logs', icon: 'list_alt', label: 'Activity Logs', section: 'management' },
     { path: '/admin/contact-queries', icon: 'contact_support', label: 'Contact Queries', section: 'management' },
     { path: '/admin/bulk-orders', icon: 'local_shipping', label: 'Bulk Order Queries', section: 'management' },
+    { path: '/admin/data-requests', icon: 'description', label: 'Data Requests', section: 'management' },
     { path: '/admin/communication', icon: 'mail', label: 'Communication', section: 'management' },
     // Settings Section
     { path: '/admin/payment-charges', icon: 'payments', label: 'Payment Settings', section: 'settings' },

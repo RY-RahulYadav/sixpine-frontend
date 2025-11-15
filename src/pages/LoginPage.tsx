@@ -5,6 +5,8 @@ import '../styles/auth.css';
 import Navbar from '../components/Navbar';
 import SubNav from '../components/SubNav';
 import Footer from '../components/Footer';
+import CategoryTabs from "../components/CategoryTabs";
+
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -36,9 +38,10 @@ const LoginPage: React.FC = () => {
   return (
     <>
     <Navbar />
-     <div className="page-content">
+    <div className="page-content">
         <SubNav />
-        </div>
+        <CategoryTabs />
+      </div>
     <div className="sixpine-auth-page">
       <div className="sixpine-auth-container">
         <div className="sixpine-auth-card">

@@ -5,7 +5,7 @@ import styles from "../styles/yourAccount.module.css";
 import {
   FaBoxOpen,
   FaLock,
-  FaUserShield,
+  FaHistory,
   FaMapMarkerAlt,
   FaCreditCard,
   FaHeadset,
@@ -37,10 +37,10 @@ const YourAccount: React.FC<YourAccountProps> = ({ logoutButton }) => {
           <p>Edit login, name, and mobile number</p>
         </Link>
 
-        <Link to="/membership" className={styles.card} style={{ textDecoration: 'none', color: 'inherit' }}>
-          <FaUserShield className={styles.icon} />
-          <h3>Membership</h3>
-          <p>View benefits and payment settings</p>
+        <Link to="/recently-browsed" className={styles.card} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <FaHistory className={styles.icon} />
+          <h3>Recently Browsed</h3>
+          <p>View your recently viewed products</p>
         </Link>
 
         <Link to="/your-addresses" className={styles.card} style={{ textDecoration: 'none', color: 'inherit' }}>

@@ -23,6 +23,7 @@ const AdminLogs: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [filters, setFilters] = useState({
     action_type: '',
     model_name: '',
@@ -35,10 +36,22 @@ const AdminLogs: React.FC = () => {
     const fetchLogs = async () => {
       try {
         setLoading(true);
-        const params = {
+        const params: any = {
           page: currentPage,
           ...filters
         };
+        
+        // Add search parameter if search term exists
+        if (searchTerm.trim()) {
+          params.search = searchTerm.trim();
+        }
+        
+        // Remove empty filter values
+        Object.keys(params).forEach(key => {
+          if (params[key] === '' || params[key] === null || params[key] === undefined) {
+            delete params[key];
+          }
+        });
         
         const response = await adminAPI.getLogs(params);
         const results = response.data.results || [];
@@ -56,7 +69,7 @@ const AdminLogs: React.FC = () => {
     };
     
     fetchLogs();
-  }, [currentPage, filters]);
+  }, [currentPage, filters, searchTerm]);
   
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -149,11 +162,14 @@ const AdminLogs: React.FC = () => {
           
           <input
             type="text"
-            name="user"
-            placeholder="Filter by user"
-            value={filters.user}
-            onChange={handleFilterChange}
+            placeholder="Search by user, model, object..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="admin-form-input"
+            style={{ minWidth: '250px' }}
           />
           
           <div className="date-range-filter">
@@ -182,6 +198,7 @@ const AdminLogs: React.FC = () => {
             type="button"
             className="admin-modern-btn secondary"
             onClick={() => {
+              setSearchTerm('');
               setFilters({
                 action_type: '',
                 model_name: '',
