@@ -72,7 +72,7 @@ const faqItems = [
 ];
 
 const FAQs = () => {
-  const { whatsAppNumber } = useFooterSettings();
+  const { whatsAppNumber: _whatsAppNumber } = useFooterSettings();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 

@@ -75,7 +75,7 @@ const SellerReturnRequests: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: string, sellerApproval: boolean | null) => {
+  const getStatusBadge = (_status: string, sellerApproval: boolean | null) => {
     if (sellerApproval === true) {
       return <span className="badge bg-success">Approved</span>;
     } else if (sellerApproval === false) {

@@ -374,7 +374,9 @@ const OrdersPage: React.FC = () => {
       product: {
         id: orderItem.product?.id || orderItem.product_id,
         title: orderItem.product?.title || orderItem.product_name || orderItem.name || '',
-        main_image: orderItem.product?.main_image || orderItem.product_image || orderItem.image || ''
+        main_image: orderItem.product?.main_image || orderItem.product_image || orderItem.image || '',
+        price: orderItem.product?.price || orderItem.price || orderItem.unitPrice || 0,
+        old_price: orderItem.product?.old_price || orderItem.old_price || null
       },
       variant: orderItem.variant,
       variant_color: orderItem.variant_color || orderItem.variantColor,

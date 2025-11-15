@@ -13,13 +13,13 @@ interface AnalyticsData {
     average_order_value: number;
     orders_by_status: { status: string; count: number }[];
     orders_by_month: { month: string; count: number; revenue: number; order_value: number; net_revenue: number }[];
-    payment_methods: { method: string; count: number; revenue: number }[];
+    payment_methods: { method: string; count: number; revenue: number; order_value?: number }[];
   };
   product_stats: {
     total_products: number;
     active_products: number;
     low_stock_products: number;
-    top_selling: { id: number; title: string; sold: number; revenue: number }[];
+    top_selling: { id: number; title: string; sold: number; revenue: number; order_value?: number }[];
     products_by_category: { category: string; count: number }[];
   };
   customer_stats: {
@@ -94,6 +94,8 @@ const SellerBrandAnalytics: React.FC = () => {
           order_stats: {
             total_orders: 0,
             total_revenue: 0,
+            total_order_value: 0,
+            total_net_revenue: 0,
             average_order_value: 0,
             orders_by_status: [],
             orders_by_month: [],
@@ -458,7 +460,7 @@ const SellerBrandAnalytics: React.FC = () => {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontWeight: '600', color: '#ff6f00' }}>
-                        {formatCurrency(method.order_value || method.revenue || 0)}
+                        {formatCurrency((method as any).order_value || method.revenue || 0)}
                       </div>
                       <div style={{ fontSize: '12px', color: '#888' }}>
                         {method.count} {method.count === 1 ? 'order' : 'orders'}
@@ -514,7 +516,7 @@ const SellerBrandAnalytics: React.FC = () => {
                       </div>
                     </div>
                     <div style={{ fontWeight: '600', color: '#067d62' }}>
-                      {formatCurrency(product.revenue || product.order_value || 0)}
+                      {formatCurrency(product.revenue || (product as any).order_value || 0)}
                     </div>
                   </div>
                   ))

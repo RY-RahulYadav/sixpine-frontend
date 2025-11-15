@@ -598,12 +598,12 @@ const AdminBrandAnalytics: React.FC = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ status, count, percent }) => `${status}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ status, percent }: any) => `${status}: ${((percent as number) * 100).toFixed(0)}%`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="count"
                 >
-                  {analytics.order_stats.orders_by_status.map((entry, index) => (
+                  {analytics.order_stats.orders_by_status.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

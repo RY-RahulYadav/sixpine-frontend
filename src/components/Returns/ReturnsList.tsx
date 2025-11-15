@@ -45,7 +45,7 @@ const ReturnsList: React.FC<ReturnsListProps> = ({ onRequestReturn }) => {
     }
   };
 
-  const getStatusBadge = (status: string, sellerApproval: boolean | null) => {
+  const getStatusBadge = (_status: string, sellerApproval: boolean | null) => {
     if (sellerApproval === true) {
       return <span className="badge bg-success">Refund Approved</span>;
     } else if (sellerApproval === false) {

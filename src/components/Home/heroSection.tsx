@@ -22,7 +22,7 @@ const HeroSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpertOpen, setIsExpertOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { whatsAppNumber, displayPhoneNumber, phoneNumber } = useFooterSettings();
+  const { whatsAppNumber, displayPhoneNumber } = useFooterSettings();
   const [slides, setSlides] = useState<HeroSlide[]>([
     {
       id: 1,
