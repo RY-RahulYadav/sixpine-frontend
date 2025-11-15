@@ -54,7 +54,7 @@ const BestDealsPage: React.FC = () => {
         <CategoryTabs />
       </div>
 
-      <div className="bestdeals_container py-10 px-10">
+      <div className="bestdeals_container">
         {/* Best Deals Hero Section */}
                 <DealsBanner />
 

@@ -907,6 +907,14 @@
   vertical-align: middle;
 }
 
+/* Action Buttons Container */
+.admin-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
 .admin-table td[colspan] {
   text-align: center;
   padding: var(--spacing-3xl) var(--spacing-lg);

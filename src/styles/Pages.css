@@ -23,6 +23,7 @@
   width: 100%;
   margin-bottom: 60px;
   max-width: 1500px; 
+  padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -39,7 +40,9 @@
 .sixpineapp_container , .bestdeals_container {
    max-width: 1500px; 
   margin: 0 auto;
-  padding-bottom: 60px;
+  width: 100%;
+  margin-bottom: 60px;
+  padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 /* Ensure all direct children align properly */
