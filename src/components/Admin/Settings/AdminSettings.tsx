@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../../context/AppContext';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
