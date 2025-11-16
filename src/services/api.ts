@@ -161,6 +161,7 @@ export const sellerAPI = {
   changePassword: (data: { current_password: string; new_password: string }) => API.post('/seller/settings/change-password/', data),
   // Communication
   getCustomersList: () => API.get('/seller/communication/customers/'),
+  getAdminEmail: () => API.get('/seller/communication/admin-email/'),
   sendEmail: (data: { recipient_type: 'customer' | 'admin'; recipient_id?: number; subject: string; message: string }) => 
     API.post('/seller/communication/send-email/', data),
   // Payment

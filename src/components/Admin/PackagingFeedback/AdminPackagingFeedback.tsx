@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface PackagingFeedback {
@@ -28,6 +29,7 @@ interface PackagingFeedback {
 }
 
 const AdminPackagingFeedback: React.FC = () => {
+  const { showConfirmation } = useNotification();
   const [feedback, setFeedback] = useState<PackagingFeedback[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +104,15 @@ const AdminPackagingFeedback: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this feedback?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Feedback',
+      message: 'Are you sure you want to delete this feedback?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 

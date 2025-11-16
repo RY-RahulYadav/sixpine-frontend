@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface Material {
   id: number;
@@ -12,6 +13,7 @@ interface Material {
 }
 
 const AdminMaterials: React.FC = () => {
+  const { showConfirmation } = useNotification();
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,15 @@ const AdminMaterials: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this material?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Material',
+      message: 'Are you sure you want to delete this material?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {

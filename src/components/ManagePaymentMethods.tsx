@@ -193,17 +193,10 @@ const ManagePaymentMethods: React.FC<ManagePaymentMethodsProps> = ({
         </div>
       </div>
 
-      <div className={styles.savedCardsSection}>
-        <div className={styles.savedCardsTitle}>Your saved credit and debit cards</div>
-        {(!savedCards || savedCards.length === 0) ? (
-          <div style={{ padding: '20px', textAlign: 'center', color: '#565959', border: '1px solid #d5d9d9', borderRadius: '8px' }}>
-            <p>No saved cards yet.</p>
-            <p style={{ fontSize: '13px', marginTop: '8px' }}>
-              Cards will be saved when you make a payment and choose to save your card during checkout.
-            </p>
-          </div>
-        ) : (
-          (savedCards || []).map(card => (
+      {savedCards && savedCards.length > 0 && (
+        <div className={styles.savedCardsSection}>
+          <div className={styles.savedCardsTitle}>Your saved credit and debit cards</div>
+          {(savedCards || []).map(card => (
             <div key={card.token_id} className={styles.cardRow}>
               <div style={{ 
                 width: '38px', 
@@ -240,9 +233,9 @@ const ManagePaymentMethods: React.FC<ManagePaymentMethodsProps> = ({
                 </button>
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

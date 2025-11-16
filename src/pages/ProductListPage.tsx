@@ -88,7 +88,7 @@ interface Product {
 }
 
 const ProductListPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useApp();
   const navigate = useNavigate();
   const { showError } = useNotification();
@@ -148,26 +148,124 @@ const ProductListPage: React.FC = () => {
     fetchFilterOptions();
   }, [selectedFilters.brand]);
 
-  // Sync URL category param to selectedFilters when component mounts or category param changes
-  useEffect(() => {
-    const categoryParam = searchParams.get('category');
-    if (categoryParam && categoryParam !== selectedFilters.category) {
-      setSelectedFilters((prev) => ({
-        ...prev,
-        category: categoryParam,
-        subcategory: '', // Reset subcategory when category changes from URL
-      }));
-      // Fetch subcategories for the selected category
-      if (categoryParam) {
-        fetchSubcategories(categoryParam);
-      }
+  // Function to update URL params based on current filter state
+  const updateURLParams = () => {
+    const newParams = new URLSearchParams();
+    
+    // Preserve search query if present
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      newParams.set('search', searchQuery);
     }
-  }, [searchParams]);
+    
+    // Add filters to URL
+    if (selectedFilters.brand) {
+      newParams.set('brand', selectedFilters.brand);
+    }
+    if (selectedFilters.category) {
+      newParams.set('category', selectedFilters.category);
+    }
+    if (selectedFilters.subcategory) {
+      newParams.set('subcategory', selectedFilters.subcategory);
+    }
+    if (selectedFilters.colors.length > 0) {
+      newParams.set('colors', selectedFilters.colors.join(','));
+    }
+    if (selectedFilters.materials.length > 0) {
+      newParams.set('materials', selectedFilters.materials.join(','));
+    }
+    if (selectedFilters.priceRange[0] > 135 || selectedFilters.priceRange[1] < 25000) {
+      newParams.set('min_price', selectedFilters.priceRange[0].toString());
+      newParams.set('max_price', selectedFilters.priceRange[1].toString());
+    }
+    if (selectedFilters.rating) {
+      newParams.set('rating', selectedFilters.rating.toString());
+    }
+    if (selectedFilters.discount) {
+      newParams.set('discount', selectedFilters.discount.toString());
+    }
+    if (sortBy && sortBy !== 'relevance') {
+      newParams.set('sort', sortBy);
+    }
+    if (currentPage > 1) {
+      newParams.set('page', currentPage.toString());
+    }
+    
+    // Update URL without page reload
+    setSearchParams(newParams, { replace: true });
+  };
 
-  // Reset to page 1 when filters, search, or sort changes
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize filters from URL params on mount
   useEffect(() => {
+    const brandParam = searchParams.get('brand');
+    const categoryParam = searchParams.get('category');
+    const subcategoryParam = searchParams.get('subcategory');
+    const colorsParam = searchParams.get('colors');
+    const materialsParam = searchParams.get('materials');
+    const minPriceParam = searchParams.get('min_price');
+    const maxPriceParam = searchParams.get('max_price');
+    const ratingParam = searchParams.get('rating');
+    const discountParam = searchParams.get('discount');
+    const sortParam = searchParams.get('sort');
+    const pageParam = searchParams.get('page');
+    
+    const initialFilters: any = {
+      brand: brandParam || '',
+      category: categoryParam || '',
+      subcategory: subcategoryParam || '',
+      colors: colorsParam ? colorsParam.split(',') : [],
+      materials: materialsParam ? materialsParam.split(',') : [],
+      priceRange: [
+        minPriceParam ? parseInt(minPriceParam) : 135,
+        maxPriceParam ? parseInt(maxPriceParam) : 25000
+      ],
+      rating: ratingParam ? parseFloat(ratingParam) : null,
+      discount: discountParam ? parseInt(discountParam) : null,
+    };
+    
+    setSelectedFilters(initialFilters);
+    
+    if (sortParam) {
+      setSortBy(sortParam);
+    }
+    
+    if (pageParam) {
+      setCurrentPage(parseInt(pageParam));
+    }
+    
+    // Fetch subcategories if category is in URL
+    if (categoryParam) {
+      fetchSubcategories(categoryParam);
+    }
+    
+    setIsInitialized(true);
+  }, []); // Only run on mount
+
+  // Update URL when filters, sort, or page changes (but not on initial mount)
+  useEffect(() => {
+    if (!isInitialized) return;
+    updateURLParams();
+  }, [selectedFilters, sortBy, currentPage]);
+
+  // Reset to page 1 when filters or sort changes (but not when page changes from URL)
+  useEffect(() => {
+    if (!isInitialized) return;
+    // Only reset page when filters actually change, not on initial load
     setCurrentPage(1);
-  }, [searchParams, sortBy, selectedFilters]);
+  }, [
+    selectedFilters.brand, 
+    selectedFilters.category, 
+    selectedFilters.subcategory, 
+    selectedFilters.colors.join(','), 
+    selectedFilters.materials.join(','), 
+    selectedFilters.priceRange[0], 
+    selectedFilters.priceRange[1], 
+    selectedFilters.rating, 
+    selectedFilters.discount, 
+    sortBy
+  ]);
 
   // Fetch products when filters, search, sort, or page changes
   useEffect(() => {
@@ -778,6 +876,14 @@ const ProductListPage: React.FC = () => {
                             discount: null,
                           });
                           setAvailableSubcategories([]);
+                          setCurrentPage(1);
+                          // Clear URL params except search
+                          const newParams = new URLSearchParams();
+                          const searchQuery = searchParams.get('search');
+                          if (searchQuery) {
+                            newParams.set('search', searchQuery);
+                          }
+                          setSearchParams(newParams, { replace: true });
                         }}
                       >
                         <i className="bi bi-arrow-counterclockwise me-2"></i>
@@ -810,6 +916,14 @@ const ProductListPage: React.FC = () => {
                             discount: null,
                           });
                           setAvailableSubcategories([]);
+                          setCurrentPage(1);
+                          // Clear URL params except search
+                          const newParams = new URLSearchParams();
+                          const searchQuery = searchParams.get('search');
+                          if (searchQuery) {
+                            newParams.set('search', searchQuery);
+                          }
+                          setSearchParams(newParams, { replace: true });
                         }}
                       >
                         Reset Filters

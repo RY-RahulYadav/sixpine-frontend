@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface Discount {
   id: number;
@@ -11,6 +12,7 @@ interface Discount {
 }
 
 const AdminDiscounts: React.FC = () => {
+  const { showConfirmation } = useNotification();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +72,15 @@ const AdminDiscounts: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this discount?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Discount',
+      message: 'Are you sure you want to delete this discount?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {

@@ -801,7 +801,7 @@ const AdminBrands: React.FC = () => {
                             <div>
                               <label className="tw-text-sm tw-font-semibold tw-text-gray-600">Coordinates</label>
                               <p className="tw-text-base tw-text-gray-800 tw-font-mono">
-                                Lat: {brandDetail.shipment_latitude.toFixed(6)}, Lng: {brandDetail.shipment_longitude.toFixed(6)}
+                                Lat: {Number(brandDetail.shipment_latitude).toFixed(6)}, Lng: {Number(brandDetail.shipment_longitude).toFixed(6)}
                               </p>
                             </div>
                           )}

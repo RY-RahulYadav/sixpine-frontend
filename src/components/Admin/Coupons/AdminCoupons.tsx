@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface Coupon {
@@ -27,6 +28,7 @@ interface Coupon {
 
 const AdminCoupons: React.FC = () => {
   const api = useAdminAPI();
+  const { showConfirmation } = useNotification();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,7 +123,15 @@ const AdminCoupons: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this coupon?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Coupon',
+      message: 'Are you sure you want to delete this coupon?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {

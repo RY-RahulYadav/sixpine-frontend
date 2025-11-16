@@ -127,14 +127,20 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
   const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
     const productId = product.id || product.productId;
+    const slug = product.slug || product.productSlug;
     
     if (!state.isAuthenticated) {
       navigate('/login');
       return;
     }
 
+    // If no product ID but has slug, navigate to product detail page
     if (!productId) {
-      showError('Product ID is missing. Please try again.');
+      if (slug) {
+        navigate(`/products-details/${slug}`);
+      } else {
+        showError('Product information is missing. Please try again.');
+      }
       return;
     }
 
@@ -143,8 +149,13 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
       await addToCart(productId, 1);
     } catch (error: any) {
       console.error('Add to cart error:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
-      showError(errorMsg);
+      // If error and we have slug, navigate to product detail page
+      if (slug) {
+        navigate(`/products-details/${slug}`);
+      } else {
+        const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
+        showError(errorMsg);
+      }
     } finally {
       setCartLoading(null);
     }
@@ -153,14 +164,20 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
   const handleWishlist = async (e: React.MouseEvent, product: Product, idx: number) => {
     e.stopPropagation();
     const productId = product.id || product.productId;
+    const slug = product.slug || product.productSlug;
     
     if (!state.isAuthenticated) {
       navigate('/login');
       return;
     }
 
+    // If no product ID but has slug, navigate to product detail page
     if (!productId) {
-      showError('Product ID is missing. Please try again.');
+      if (slug) {
+        navigate(`/products-details/${slug}`);
+      } else {
+        showError('Product information is missing. Please try again.');
+      }
       return;
     }
 
@@ -298,6 +315,15 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
               {isCartLoadingForThis ? 'Loading...' : 'Buy Now'}
             </button>
             <div className={styles.productIcons}>
+              <FaHeart 
+                onClick={(e) => handleWishlist(e, p, idx)}
+                title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                style={{ 
+                  color: isInWishlist ? '#ff6f00' : '#999',
+                  cursor: isWishlistLoadingForThis ? 'wait' : 'pointer',
+                  opacity: isWishlistLoadingForThis ? 0.6 : 1
+                }}
+              />
               <FaShoppingCart 
                 onClick={(e) => handleAddToCart(e, p)}
                 style={{ 

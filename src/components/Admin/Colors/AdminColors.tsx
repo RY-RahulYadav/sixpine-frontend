@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface Color {
   id: number;
@@ -12,6 +13,7 @@ interface Color {
 }
 
 const AdminColors: React.FC = () => {
+  const { showConfirmation } = useNotification();
   const [colors, setColors] = useState<Color[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,15 @@ const AdminColors: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this color?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Color',
+      message: 'Are you sure you want to delete this color?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {

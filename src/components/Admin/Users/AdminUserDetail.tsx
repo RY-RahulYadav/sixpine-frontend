@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface UserDetails {
   id: number;
@@ -38,6 +39,7 @@ interface UserDetails {
 const AdminUserDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showConfirmation } = useNotification();
   const [user, setUser] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,18 +113,26 @@ const AdminUserDetail: React.FC = () => {
                 showToast('Cannot delete superuser accounts', 'error');
                 return;
               }
-              if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-                adminAPI.deleteUser(parseInt(id!))
-                  .then(() => {
-                    showToast('User deleted successfully', 'success');
-                    navigate('/admin/customers');
-                  })
-                  .catch((err: any) => {
-                    console.error('Error deleting user:', err);
-                    const errorMessage = err.response?.data?.error || err.response?.data?.detail || err.response?.data?.message || 'Failed to delete user';
-                    showToast(errorMessage, 'error');
-                  });
-              }
+              showConfirmation({
+                title: 'Delete User',
+                message: 'Are you sure you want to delete this user? This action cannot be undone.',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmButtonStyle: 'danger',
+              }).then((confirmed) => {
+                if (confirmed) {
+                  adminAPI.deleteUser(parseInt(id!))
+                    .then(() => {
+                      showToast('User deleted successfully', 'success');
+                      navigate('/admin/customers');
+                    })
+                    .catch((err: any) => {
+                      console.error('Error deleting user:', err);
+                      const errorMessage = err.response?.data?.error || err.response?.data?.detail || err.response?.data?.message || 'Failed to delete user';
+                      showToast(errorMessage, 'error');
+                    });
+                }
+              });
             }}
             disabled={user?.is_superuser}
             style={{

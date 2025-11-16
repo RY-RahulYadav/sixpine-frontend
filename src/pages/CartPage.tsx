@@ -145,6 +145,13 @@ const CartPage: React.FC = () => {
     <>
       <Navbar />
       <div className="page-content">
+        <SubNav />
+        <CategoryTabs />
+      
+
+       
+      </div>
+      <div className="page-content">
         <div className="container my-5">
         <div className="row">
           <div className="col-md-8">

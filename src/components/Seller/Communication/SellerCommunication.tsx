@@ -165,20 +165,25 @@ const SellerCommunication: React.FC = () => {
           </>
         )}
 
-        {/* Admin Email Display (when admin is selected) */}
+        {/* Admin Info (when admin is selected) */}
         {recipientType === 'admin' && (
           <div className="form-group">
-            <label>Recipient Email</label>
-            <input
-              type="email"
-              className="admin-input"
-              value="admin@sixpine.com"
-              disabled
-              style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
-            />
-            <small style={{ color: '#666', marginTop: '4px', display: 'block' }}>
+            <div style={{ 
+              padding: '12px 16px', 
+              backgroundColor: '#f0f7ff', 
+              borderRadius: '8px', 
+              border: '1px solid #b3d9ff',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span className="material-symbols-outlined" style={{ color: '#0066cc', fontSize: '20px' }}>
+                info
+              </span>
+              <span style={{ color: '#0066cc', fontSize: '14px', fontWeight: '500' }}>
               Your message will be sent to the admin team
-            </small>
+              </span>
+            </div>
           </div>
         )}
 

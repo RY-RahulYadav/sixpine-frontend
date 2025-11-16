@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { sellerAPI } from '../../../services/api';
 import { showToast } from '../../Admin/utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface MediaItem {
@@ -21,6 +22,7 @@ interface MediaItem {
 }
 
 const SellerMedia: React.FC = () => {
+  const { showConfirmation } = useNotification();
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [uploading, setUploading] = useState<boolean>(false);
@@ -123,7 +125,15 @@ const SellerMedia: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Image',
+      message: 'Are you sure you want to delete this image?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 

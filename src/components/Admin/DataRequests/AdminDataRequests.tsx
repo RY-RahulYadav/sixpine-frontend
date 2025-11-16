@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface DataRequest {
@@ -22,6 +23,7 @@ interface DataRequest {
 }
 
 const AdminDataRequests: React.FC = () => {
+  const { showConfirmation } = useNotification();
   const [requests, setRequests] = useState<DataRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,7 +128,15 @@ const AdminDataRequests: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this data request? This action cannot be undone.')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Data Request',
+      message: 'Are you sure you want to delete this data request? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -150,7 +160,15 @@ const AdminDataRequests: React.FC = () => {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete ${selectedRequests.length} data request(s)? This action cannot be undone.`)) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Data Requests',
+      message: `Are you sure you want to delete ${selectedRequests.length} data request(s)? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 

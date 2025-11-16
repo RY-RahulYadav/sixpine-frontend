@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface Category {
@@ -49,6 +50,7 @@ type FilterSection = 'categories' | 'colors' | 'materials' | 'discounts';
 
 const AdminFilterOptions: React.FC = () => {
   const api = useAdminAPI();
+  const { showConfirmation } = useNotification();
   const [activeSection, setActiveSection] = useState<FilterSection>('categories');
   
   // Data states
@@ -227,7 +229,15 @@ const AdminFilterOptions: React.FC = () => {
   };
 
   const handleDeleteCategory = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this category? This will also delete all subcategories.')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete this category? This will also delete all subcategories.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {
@@ -283,7 +293,15 @@ const AdminFilterOptions: React.FC = () => {
   };
 
   const handleDeleteSubcategory = async (id: number, categoryId: number) => {
-    if (!window.confirm('Are you sure you want to delete this subcategory?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Subcategory',
+      message: 'Are you sure you want to delete this subcategory?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {
@@ -333,7 +351,15 @@ const AdminFilterOptions: React.FC = () => {
   };
 
   const handleDeleteColor = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this color?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Color',
+      message: 'Are you sure you want to delete this color?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {
@@ -383,7 +409,15 @@ const AdminFilterOptions: React.FC = () => {
   };
 
   const handleDeleteMaterial = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this material?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Material',
+      message: 'Are you sure you want to delete this material?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {
@@ -433,7 +467,15 @@ const AdminFilterOptions: React.FC = () => {
   };
 
   const handleDeleteDiscount = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this discount?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Discount',
+      message: 'Are you sure you want to delete this discount?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     try {

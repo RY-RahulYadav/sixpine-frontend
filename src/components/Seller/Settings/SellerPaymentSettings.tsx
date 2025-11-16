@@ -431,7 +431,7 @@ const SellerPaymentSettings: React.FC = () => {
               <div className="tw-p-4 tw-bg-blue-50 tw-rounded-lg tw-border tw-border-blue-200 tw-mt-4">
                 <p className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-1">Location Coordinates</p>
                 <p className="tw-text-sm tw-text-gray-600 tw-font-mono">
-                  Lat: {shipmentForm.shipment_latitude.toFixed(6)}, Lng: {shipmentForm.shipment_longitude.toFixed(6)}
+                  Lat: {Number(shipmentForm.shipment_latitude).toFixed(6)}, Lng: {Number(shipmentForm.shipment_longitude).toFixed(6)}
                 </p>
               </div>
             )}

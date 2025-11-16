@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
 import { showToast } from '../../Admin/utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface ProductImage {
   id?: number;
@@ -111,6 +112,7 @@ const SellerProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const api = useAdminAPI();
+  const { showConfirmation } = useNotification();
   const isSellerPanel = location.pathname.startsWith('/seller');
   const basePath = isSellerPanel ? '/seller' : '/admin';
   const isNew = id === 'new' || !id;
@@ -149,8 +151,6 @@ const SellerProductDetail: React.FC = () => {
     meta_description: string;
     is_featured: boolean;
     is_active: boolean;
-    price?: string | number;
-    old_price?: string | number | null;
   }>({
     title: '',
     slug: '',
@@ -172,8 +172,6 @@ const SellerProductDetail: React.FC = () => {
     meta_description: '',
     is_featured: false,
     is_active: true,
-    price: '',
-    old_price: null,
   });
   
   // Variants
@@ -657,7 +655,17 @@ const SellerProductDetail: React.FC = () => {
   };
   
   const handleDelete = async () => {
-    if (!product || !window.confirm('Are you sure you want to delete this product?')) {
+    if (!product) return;
+    
+    const confirmed = await showConfirmation({
+      title: 'Delete Product',
+      message: 'Are you sure you want to delete this product?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     
@@ -868,36 +876,6 @@ const SellerProductDetail: React.FC = () => {
                   ))}
                 </select>
               </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="price">Price*</label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={formData.price ?? ''}
-                    onChange={handleChange}
-                    step="0.01"
-                    min="0"
-                    required
-                  className="tw-w-full"
-                  />
-                </div>
-                <div className="form-group">
-                <label htmlFor="old_price">Old Price (for discount)</label>
-                  <input
-                    type="number"
-                    id="old_price"
-                    name="old_price"
-                    value={formData.old_price ?? ''}
-                    onChange={handleChange}
-                    step="0.01"
-                    min="0"
-                  className="tw-w-full"
-                  />
-                </div>
               </div>
               
               <div className="form-row">

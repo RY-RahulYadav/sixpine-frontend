@@ -22,6 +22,11 @@ const AdminSettings: React.FC = () => {
     android_app_url: ''
   });
   
+  const [adminEmail, setAdminEmail] = useState<string>('');
+  const [savingEmail, setSavingEmail] = useState<boolean>(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+  
   const [saving, setSaving] = useState<boolean>(false);
   const [savingFooter, setSavingFooter] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +58,8 @@ const AdminSettings: React.FC = () => {
         ios_app_url: settingsMap['ios_app_url'] || '',
         android_app_url: settingsMap['android_app_url'] || ''
       });
+      
+      setAdminEmail(settingsMap['admin_email'] || '');
     } catch (error) {
       console.error('Error fetching footer settings:', error);
     }
@@ -154,6 +161,41 @@ const AdminSettings: React.FC = () => {
       showToast(errorMessage, 'error');
     } finally {
       setSavingFooter(false);
+    }
+  };
+  
+  const handleAdminEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!adminEmail.trim()) {
+      setEmailError('Admin email is required');
+      return;
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(adminEmail.trim())) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+    
+    try {
+      setSavingEmail(true);
+      setEmailError(null);
+      
+      await adminAPI.updateGlobalSetting('admin_email', adminEmail.trim(), 'Admin email for seller communication');
+      
+      setEmailSuccess('Admin email updated successfully');
+      showToast('Admin email updated successfully', 'success');
+      
+      setTimeout(() => setEmailSuccess(null), 5000);
+    } catch (err: any) {
+      console.error('Error updating admin email:', err);
+      const errorMessage = err.response?.data?.error || 'Failed to update admin email';
+      setEmailError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setSavingEmail(false);
     }
   };
   
@@ -508,6 +550,84 @@ const AdminSettings: React.FC = () => {
                   <>
                     <span className="material-symbols-outlined">save</span>
                     Save Footer Settings
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        {/* Admin Email Settings Card */}
+        <div className="tw-bg-white tw-rounded-xl tw-shadow-lg tw-border-2 tw-border-orange-100 tw-overflow-hidden hover:tw-shadow-xl tw-transition-all">
+          <div className="tw-bg-gradient-to-r tw-from-orange-50 tw-via-orange-100 tw-to-orange-50 tw-px-6 tw-py-4 tw-border-b-2 tw-border-orange-200">
+            <h3 className="tw-flex tw-items-center tw-gap-3 tw-text-xl tw-font-bold tw-text-gray-800">
+              <span className="material-symbols-outlined tw-text-orange-600 tw-text-2xl">email</span>
+              Admin Email Settings
+            </h3>
+          </div>
+          
+          {/* Email success message */}
+          {emailSuccess && (
+            <div className="tw-mx-6 tw-mt-4 tw-p-4 tw-bg-green-50 tw-border-l-4 tw-border-green-500 tw-rounded-lg tw-flex tw-items-center tw-gap-3 tw-shadow-md">
+              <span className="material-symbols-outlined tw-text-green-600 tw-text-2xl">check_circle</span>
+              <span className="tw-text-green-800 tw-font-medium">{emailSuccess}</span>
+            </div>
+          )}
+          
+          {/* Email error message */}
+          {emailError && (
+            <div className="tw-mx-6 tw-mt-4 tw-p-4 tw-bg-red-50 tw-border-l-4 tw-border-red-500 tw-rounded-lg tw-flex tw-items-center tw-gap-3 tw-shadow-md">
+              <span className="material-symbols-outlined tw-text-red-600 tw-text-2xl">error</span>
+              <span className="tw-text-red-800 tw-font-medium">{emailError}</span>
+            </div>
+          )}
+          
+          <form onSubmit={handleAdminEmailSubmit} className="tw-p-6">
+            <div className="tw-space-y-4">
+              <div className="tw-space-y-2">
+                <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
+                  <span className="material-symbols-outlined tw-text-orange-600">email</span>
+                  <label htmlFor="admin_email" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Admin Email Address
+                  </label>
+                </div>
+                <input
+                  type="email"
+                  id="admin_email"
+                  name="admin_email"
+                  value={adminEmail}
+                  onChange={(e) => {
+                    setAdminEmail(e.target.value);
+                    setEmailError(null);
+                    setEmailSuccess(null);
+                  }}
+                  placeholder="admin@sixpine.com"
+                  required
+                  disabled={savingEmail}
+                  className="tw-w-full tw-px-4 tw-py-3 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-orange-500 focus:tw-border-transparent disabled:tw-bg-gray-100 disabled:tw-cursor-not-allowed"
+                />
+                <small className="tw-text-xs tw-text-gray-500 tw-flex tw-items-center tw-gap-1">
+                  <span className="material-symbols-outlined tw-text-xs">info</span>
+                  This email will be used when sellers send messages to admin. It will not be visible to sellers.
+                </small>
+              </div>
+            </div>
+            
+            <div className="tw-flex tw-gap-4 tw-mt-6">
+              <button
+                type="submit"
+                className="tw-flex-1 tw-px-6 tw-py-3 tw-bg-orange-600 tw-text-white tw-rounded-lg hover:tw-bg-orange-700 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-base tw-flex tw-items-center tw-justify-center tw-gap-2 disabled:tw-bg-gray-400 disabled:tw-cursor-not-allowed hover:tw-scale-[1.02] active:tw-scale-95"
+                disabled={savingEmail || !adminEmail.trim()}
+              >
+                {savingEmail ? (
+                  <>
+                    <span className="spinner-small"></span>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined">save</span>
+                    Save Admin Email
                   </>
                 )}
               </button>

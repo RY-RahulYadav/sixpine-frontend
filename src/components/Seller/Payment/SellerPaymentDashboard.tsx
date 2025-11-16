@@ -13,6 +13,8 @@ interface PaymentStats {
   total_orders: number;
   this_month_value: number;
   last_month_value: number;
+  this_month_net_revenue?: number;
+  last_month_net_revenue?: number;
   orders_by_status: Array<{ status: string; count: number }>;
   recent_orders: Array<{
     id: number;
@@ -87,8 +89,12 @@ const SellerPaymentDashboard: React.FC = () => {
     );
   }
 
-  const monthGrowth = stats.last_month_value > 0
-    ? ((stats.this_month_value - stats.last_month_value) / stats.last_month_value * 100).toFixed(1)
+  // Use net revenue for monthly comparison if available, otherwise fallback to order value
+  const thisMonthNetRevenue = stats.this_month_net_revenue ?? stats.this_month_value;
+  const lastMonthNetRevenue = stats.last_month_net_revenue ?? stats.last_month_value;
+  
+  const monthGrowth = lastMonthNetRevenue > 0
+    ? ((thisMonthNetRevenue - lastMonthNetRevenue) / lastMonthNetRevenue * 100).toFixed(1)
     : '0.0';
 
   return (
@@ -161,11 +167,13 @@ const SellerPaymentDashboard: React.FC = () => {
           <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
             <div className="tw-text-center tw-p-4 tw-bg-blue-50 tw-rounded-lg">
               <p className="tw-text-sm tw-font-medium tw-text-gray-600 tw-mb-2">This Month</p>
-              <p className="tw-text-2xl tw-font-bold tw-text-blue-600">{formatCurrency(stats.this_month_value)}</p>
+              <p className="tw-text-2xl tw-font-bold tw-text-blue-600">{formatCurrency(thisMonthNetRevenue)}</p>
+              <p className="tw-text-xs tw-text-gray-500 tw-mt-1">Net Revenue</p>
             </div>
             <div className="tw-text-center tw-p-4 tw-bg-gray-50 tw-rounded-lg">
               <p className="tw-text-sm tw-font-medium tw-text-gray-600 tw-mb-2">Last Month</p>
-              <p className="tw-text-2xl tw-font-bold tw-text-gray-600">{formatCurrency(stats.last_month_value)}</p>
+              <p className="tw-text-2xl tw-font-bold tw-text-gray-600">{formatCurrency(lastMonthNetRevenue)}</p>
+              <p className="tw-text-xs tw-text-gray-500 tw-mt-1">Net Revenue</p>
             </div>
             <div className="tw-text-center tw-p-4 tw-bg-green-50 tw-rounded-lg">
               <p className="tw-text-sm tw-font-medium tw-text-gray-600 tw-mb-2">Growth</p>

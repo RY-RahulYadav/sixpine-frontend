@@ -182,11 +182,34 @@ const SellerReturnRequests: React.FC = () => {
                 <tr key={request.id}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <img
-                        src={request.product_image || 'https://via.placeholder.com/50'}
-                        alt={request.product_title}
-                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
-                      />
+                      {request.product_image ? (
+                        <img
+                          src={request.product_image}
+                          alt={request.product_title}
+                          style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            const placeholder = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                            if (placeholder) placeholder.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        style={{
+                          display: request.product_image ? 'none' : 'flex',
+                          width: '50px',
+                          height: '50px',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#f9f9f9',
+                          borderRadius: '4px',
+                          border: '1px solid #f0f0f0'
+                        }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#ccc' }}>
+                          image_not_supported
+                        </span>
+                      </div>
                       <div>
                         <div style={{ fontWeight: '500' }}>{request.product_title}</div>
                         <small className="text-muted">Order #{request.order_id.slice(0, 8)}</small>

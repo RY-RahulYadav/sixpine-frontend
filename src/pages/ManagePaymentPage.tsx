@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useNotification } from '../context/NotificationContext';
-import { paymentPreferencesAPI, addressAPI } from '../services/api';
+import { paymentPreferencesAPI, addressAPI, homepageAPI } from '../services/api';
 import ManagePaymentMethods from '../components/ManagePaymentMethods';
 import PaymentPreferenceModal from '../components/PaymentPreferenceModal';
 import Navbar from '../components/Navbar';
@@ -10,8 +10,24 @@ import Footer from '../components/Footer';
 import SubNav from '../components/SubNav';
 import CategoryTabs from '../components/CategoryTabs';
 import Productdetails_Slider1 from '../components/Products_Details/productdetails_slider1';
-import { frequentlyViewedProducts, recommendedProducts } from '../data/productSliderData';
 import '../styles/Pages.css';
+
+// Product interface matching the slider component
+interface Product {
+  img: string;
+  title: string;
+  desc: string;
+  rating: number;
+  reviews: number;
+  oldPrice: string;
+  newPrice: string;
+  id?: number;
+  productId?: number;
+  slug?: string;
+  productSlug?: string;
+  variantCount?: number;
+  variants_count?: number;
+}
 
 interface PaymentPreference {
   id: number;
@@ -57,6 +73,8 @@ const ManagePaymentPage: React.FC = () => {
   const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [frequentlyViewedProducts, setFrequentlyViewedProducts] = useState<Product[]>([]);
+  const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     if (state.loading) return;
@@ -75,12 +93,62 @@ const ManagePaymentPage: React.FC = () => {
       await Promise.all([
         fetchPaymentPreference(),
         fetchSavedCards(),
-        fetchAddresses()
+        fetchAddresses(),
+        fetchHomepageData()
       ]);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHomepageData = async () => {
+    try {
+      const response = await homepageAPI.getHomepageContent('banner-cards');
+      const content = response.data.content || response.data;
+      
+      // Transform slider1Products (frequently viewed)
+      if (content.slider1Products && Array.isArray(content.slider1Products)) {
+        const transformedFrequentlyViewed = content.slider1Products.map((product: any) => ({
+          img: product.img || product.image || product.main_image || '/images/placeholder.jpg',
+          title: product.title || product.name || '',
+          desc: product.desc || product.short_description || product.description || '',
+          rating: product.rating || product.average_rating || 4.5,
+          reviews: product.reviews || product.review_count || 0,
+          oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
+          newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,
+          variantCount: product.variant_count || product.variants_count || 0,
+          variants_count: product.variant_count || product.variants_count || 0,
+        }));
+        setFrequentlyViewedProducts(transformedFrequentlyViewed);
+      }
+      
+      // Transform slider2Products (inspired by browsing history)
+      if (content.slider2Products && Array.isArray(content.slider2Products)) {
+        const transformedRecommended = content.slider2Products.map((product: any) => ({
+          img: product.img || product.image || product.main_image || '/images/placeholder.jpg',
+          title: product.title || product.name || '',
+          desc: product.desc || product.short_description || product.description || '',
+          rating: product.rating || product.average_rating || 4.5,
+          reviews: product.reviews || product.review_count || 0,
+          oldPrice: product.oldPrice || (product.old_price ? `₹${parseInt(String(product.old_price)).toLocaleString()}` : ''),
+          newPrice: product.newPrice || product.price || '',
+          id: product.id || product.productId,
+          productId: product.id || product.productId,
+          slug: product.slug || product.productSlug,
+          variantCount: product.variant_count || product.variants_count || 0,
+          variants_count: product.variant_count || product.variants_count || 0,
+        }));
+        setRecommendedProducts(transformedRecommended);
+      }
+    } catch (error) {
+      console.error('Error fetching homepage data:', error);
+      setFrequentlyViewedProducts([]);
+      setRecommendedProducts([]);
     }
   };
 
@@ -203,15 +271,19 @@ const ManagePaymentPage: React.FC = () => {
         />
         
         {/* Product Suggestions */}
-        <Productdetails_Slider1 
-          title="Buy with it"
-          products={frequentlyViewedProducts}
-        />
+        {!loading && frequentlyViewedProducts.length > 0 && (
+          <Productdetails_Slider1 
+            title="Buy with it"
+            products={frequentlyViewedProducts}
+          />
+        )}
         
-        <Productdetails_Slider1 
-          title="Inspired by your browsing history"
-          products={recommendedProducts}
-        />
+        {!loading && recommendedProducts.length > 0 && (
+          <Productdetails_Slider1 
+            title="Inspired by your browsing history"
+            products={recommendedProducts}
+          />
+        )}
       </div>
       
       {showModal && (

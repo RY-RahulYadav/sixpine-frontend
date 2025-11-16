@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
 import { formatCurrency, showToast } from '../../Admin/utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface Variant {
@@ -40,6 +41,7 @@ interface Product {
 
 const SellerProducts: React.FC = () => {
   const api = useAdminAPI();
+  const { showConfirmation } = useNotification();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const isSellerPanel = location.pathname.startsWith('/seller');
@@ -151,15 +153,25 @@ const SellerProducts: React.FC = () => {
   };
   
   const handleDeleteProduct = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await api.deleteProduct(id);
-        setProducts(products.filter(product => product.id !== id));
-        showToast('Product deleted successfully', 'success');
-      } catch (err) {
-        console.error('Error deleting product:', err);
-        showToast('Failed to delete product', 'error');
-      }
+    const confirmed = await showConfirmation({
+      title: 'Delete Product',
+      message: 'Are you sure you want to delete this product?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await api.deleteProduct(id);
+      setProducts(products.filter(product => product.id !== id));
+      showToast('Product deleted successfully', 'success');
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      showToast('Failed to delete product', 'error');
     }
   };
   
@@ -281,34 +293,45 @@ const SellerProducts: React.FC = () => {
               {products.map((product) => (
                 <tr key={product.id}>
                   <td>
-                    {product.main_image ? (
-                      <img 
-                        src={product.main_image} 
-                        alt={product.title} 
-                        style={{
+                    {(() => {
+                      // Try main_image first, then first variant image, then product images
+                      const imageUrl = product.main_image || 
+                                     (product.variants && product.variants.length > 0 && product.variants[0].image) || 
+                                     null;
+                      
+                      return imageUrl ? (
+                        <img 
+                          src={imageUrl} 
+                          alt={product.title} 
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            border: '1px solid #f0f0f0'
+                          }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('tw-hidden');
+                          }}
+                        />
+                      ) : (
+                        <div style={{
                           width: '50px',
                           height: '50px',
-                          objectFit: 'cover',
                           borderRadius: '8px',
-                          border: '1px solid #f0f0f0'
-                        }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: '50px',
-                        height: '50px',
-                        borderRadius: '8px',
-                        border: '1px solid #f0f0f0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: '#f9f9f9'
-                      }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#ccc' }}>
-                          image_not_supported
-                        </span>
-                      </div>
-                    )}
+                          border: '1px solid #f0f0f0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: '#f9f9f9'
+                        }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '24px', color: '#ccc' }}>
+                            image_not_supported
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td>
                     <div>

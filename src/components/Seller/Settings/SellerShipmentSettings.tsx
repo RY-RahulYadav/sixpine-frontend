@@ -334,7 +334,7 @@ const SellerShipmentSettings: React.FC = () => {
                       borderRadius: 'var(--radius-sm)',
                       display: 'inline-block'
                     }}>
-                      Lat: {formData.shipment_latitude.toFixed(6)}, Lng: {formData.shipment_longitude.toFixed(6)}
+                      Lat: {Number(formData.shipment_latitude).toFixed(6)}, Lng: {Number(formData.shipment_longitude).toFixed(6)}
                     </div>
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface ProductImage {
   id?: number;
@@ -112,6 +113,7 @@ const AdminProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const api = useAdminAPI();
+  const { showConfirmation } = useNotification();
   const isSellerPanel = location.pathname.startsWith('/seller');
   const basePath = isSellerPanel ? '/seller' : '/admin';
   const isNew = id === 'new' || !id;
@@ -639,7 +641,17 @@ const AdminProductDetail: React.FC = () => {
   };
   
   const handleDelete = async () => {
-    if (!product || !window.confirm('Are you sure you want to delete this product?')) {
+    if (!product) return;
+    
+    const confirmed = await showConfirmation({
+      title: 'Delete Product',
+      message: 'Are you sure you want to delete this product?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
     
