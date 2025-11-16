@@ -6,6 +6,8 @@ import '../../../styles/admin-theme.css';
 interface Coupon {
   id: number;
   code: string;
+  coupon_type: 'sixpine' | 'common' | 'seller';
+  coupon_type_display?: string;
   description: string;
   discount_type: 'percentage' | 'fixed';
   discount_value: string;
@@ -32,6 +34,7 @@ const AdminCoupons: React.FC = () => {
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
   const [formData, setFormData] = useState({
     code: '',
+    coupon_type: 'sixpine' as 'sixpine' | 'seller',
     description: '',
     discount_type: 'percentage' as 'percentage' | 'fixed',
     discount_value: '',
@@ -98,8 +101,11 @@ const AdminCoupons: React.FC = () => {
     setEditingCoupon(coupon);
     const validFrom = new Date(coupon.valid_from).toISOString().slice(0, 16);
     const validUntil = new Date(coupon.valid_until).toISOString().slice(0, 16);
+    // If coupon type is 'common', default to 'sixpine' as admin cannot edit common coupons
+    const couponType = coupon.coupon_type === 'common' ? 'sixpine' : (coupon.coupon_type || 'sixpine');
     setFormData({
       code: coupon.code,
+      coupon_type: couponType as 'sixpine' | 'seller',
       description: coupon.description || '',
       discount_type: coupon.discount_type,
       discount_value: coupon.discount_value,
@@ -130,6 +136,7 @@ const AdminCoupons: React.FC = () => {
   const resetForm = () => {
     setFormData({
       code: '',
+      coupon_type: 'sixpine',
       description: '',
       discount_type: 'percentage',
       discount_value: '',
@@ -207,6 +214,13 @@ const AdminCoupons: React.FC = () => {
               <tr key={coupon.id}>
                 <td>
                   <strong>{coupon.code}</strong>
+                  <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>
+                    {coupon.coupon_type_display || 
+                      (coupon.coupon_type === 'sixpine' ? 'Sixpine Products Only - Reduces prices' :
+                       coupon.coupon_type === 'seller' ? 'Platform Fee & Tax Only - Does NOT reduce seller prices' :
+                       coupon.coupon_type === 'common' ? 'All Products (Common) - Not available for admin' :
+                       'Unknown type')}
+                  </div>
                   {coupon.description && (
                     <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
                       {coupon.description}
@@ -313,6 +327,22 @@ const AdminCoupons: React.FC = () => {
                   required
                   placeholder="SUMMER2024"
                 />
+              </div>
+              <div className="form-group">
+                <label>Coupon Type *</label>
+                <select
+                  value={formData.coupon_type}
+                  onChange={(e) => setFormData({ ...formData, coupon_type: e.target.value as 'sixpine' | 'seller' })}
+                  required
+                >
+                  <option value="sixpine">Sixpine Products Only - Reduces Sixpine product prices</option>
+                  <option value="seller">Platform Fee & Tax Only - Does NOT reduce seller product prices</option>
+                </select>
+                <small style={{ color: '#666', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+                  {formData.coupon_type === 'seller' 
+                    ? '⚠️ This coupon will ONLY reduce platform fee and tax. It will NOT reduce the price of seller products.'
+                    : 'This coupon applies only to Sixpine products and reduces their prices. Admin cannot reduce prices of other sellers\' products.'}
+                </small>
               </div>
               <div className="form-group">
                 <label>Description</label>

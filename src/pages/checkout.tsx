@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { useNotification } from "../context/NotificationContext";
 import { orderAPI, addressAPI, cartAPI, paymentPreferencesAPI } from "../services/api";
 import OrderConfirmation from '../components/OrderConfirmation';
 import ReviewItems from '../components/ReviewItems';
@@ -38,6 +39,7 @@ interface Address {
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { state, fetchCart } = useApp();
+  const { showError, showWarning } = useNotification();
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
@@ -221,7 +223,7 @@ const CheckoutPage: React.FC = () => {
   const handlePayment = async () => {
     // Check authentication first
     if (!state.isAuthenticated) {
-      alert('Please login to continue');
+      showWarning('Please login to continue');
       navigate('/login');
       return;
     }
@@ -229,18 +231,18 @@ const CheckoutPage: React.FC = () => {
     // Check if token exists
     const token = localStorage.getItem('authToken');
     if (!token) {
-      alert('Session expired. Please login again');
+      showError('Session expired. Please login again');
       navigate('/login');
       return;
     }
 
     if (!selectedAddressId) {
-      alert('Please select a delivery address');
+      showWarning('Please select a delivery address');
       return;
     }
 
     if (!selectedPaymentMethod) {
-      alert('Please select a payment method');
+      showWarning('Please select a payment method');
       return;
     }
 
@@ -251,7 +253,7 @@ const CheckoutPage: React.FC = () => {
         // Validate token before making API call
         const currentToken = localStorage.getItem('authToken');
         if (!currentToken) {
-          alert('Session expired. Please login again.');
+          showError('Session expired. Please login again.');
           navigate('/login');
           setProcessing(false);
           return;
@@ -277,7 +279,7 @@ const CheckoutPage: React.FC = () => {
         } catch (apiError: any) {
           // Handle API errors
           if (apiError.response?.status === 401 || apiError.response?.status === 403) {
-            alert('Authentication failed. Please login again.');
+            showError('Authentication failed. Please login again.');
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             navigate('/login');
@@ -305,14 +307,14 @@ const CheckoutPage: React.FC = () => {
 
         // Validate totals
         if (total <= 0) {
-          alert('Invalid order total. Please check your cart.');
+          showError('Invalid order total. Please check your cart.');
           setProcessing(false);
           return;
         }
 
         // Validate selected address ID
         if (!selectedAddressId || selectedAddressId <= 0) {
-          alert('Please select a valid delivery address.');
+          showWarning('Please select a valid delivery address.');
           setProcessing(false);
           return;
         }
@@ -362,7 +364,7 @@ const CheckoutPage: React.FC = () => {
         // Validate token before making API call
         const currentToken = localStorage.getItem('authToken');
         if (!currentToken) {
-          alert('Session expired. Please login again.');
+          showError('Session expired. Please login again.');
           navigate('/login');
           setProcessing(false);
           return;
@@ -379,7 +381,7 @@ const CheckoutPage: React.FC = () => {
         } catch (apiError: any) {
           // Handle API errors before opening Razorpay
           if (apiError.response?.status === 401 || apiError.response?.status === 403) {
-            alert('Authentication failed. Please login again.');
+            showError('Authentication failed. Please login again.');
             localStorage.removeItem('authToken');
             localStorage.removeItem('user');
             navigate('/login');
@@ -390,7 +392,7 @@ const CheckoutPage: React.FC = () => {
           // Handle 400 Bad Request with detailed error message
           if (apiError.response?.status === 400) {
             const errorMsg = apiError.response?.data?.error || 'Invalid request. Please check your order details.';
-            alert(errorMsg);
+            showError(errorMsg);
             setProcessing(false);
             return;
           }
@@ -525,7 +527,7 @@ const CheckoutPage: React.FC = () => {
       
       // Handle authentication errors specifically
       if (error.response?.status === 401 || error.response?.status === 403) {
-        alert('Authentication failed. Please login again.');
+        showError('Authentication failed. Please login again.');
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
         navigate('/login');
@@ -534,7 +536,7 @@ const CheckoutPage: React.FC = () => {
       
       // Handle other errors
       const errorMessage = error.response?.data?.error || error.message || 'Failed to process payment. Please try again.';
-      alert(errorMessage);
+      showError(errorMessage);
       setProcessing(false);
     }
   };

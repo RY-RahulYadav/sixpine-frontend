@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useNotification } from '../context/NotificationContext';
 
 const SubNav: React.FC = () => {
+  const { showInfo } = useNotification();
   // Top-level sub navigation items (matching screenshot)
   const items = [
     { to: '/', label: 'Home', isActive: true },
@@ -19,7 +21,7 @@ const SubNav: React.FC = () => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, item: typeof items[0]) => {
     if (!item.isActive) {
       e.preventDefault();
-      alert('🚧 Under Development\n\nThis feature is coming soon!');
+      showInfo('🚧 Under Development\n\nThis feature is coming soon!');
     }
   };
 

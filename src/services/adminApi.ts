@@ -140,6 +140,22 @@ export const adminAPI = {
   patchBulkOrderPageContent: (id: number, contentData: any) => API.patch(`/admin/bulk-order-page-content/${id}/`, contentData),
   deleteBulkOrderPageContent: (id: number) => API.delete(`/admin/bulk-order-page-content/${id}/`),
   
+  // FAQ Page Content
+  getFAQPageContent: (params?: any) => API.get('/admin/faq-page-content/', { params }),
+  getFAQPageContentItem: (id: number) => API.get(`/admin/faq-page-content/${id}/`),
+  createFAQPageContent: (contentData: any) => API.post('/admin/faq-page-content/', contentData),
+  updateFAQPageContent: (id: number, contentData: any) => API.put(`/admin/faq-page-content/${id}/`, contentData),
+  patchFAQPageContent: (id: number, contentData: any) => API.patch(`/admin/faq-page-content/${id}/`, contentData),
+  deleteFAQPageContent: (id: number) => API.delete(`/admin/faq-page-content/${id}/`),
+  
+  // Advertisement Management
+  getAdvertisements: (params?: any) => API.get('/admin/advertisements/', { params }),
+  getAdvertisement: (id: number) => API.get(`/admin/advertisements/${id}/`),
+  createAdvertisement: (adData: any) => API.post('/admin/advertisements/', adData),
+  updateAdvertisement: (id: number, adData: any) => API.put(`/admin/advertisements/${id}/`, adData),
+  patchAdvertisement: (id: number, adData: any) => API.patch(`/admin/advertisements/${id}/`, adData),
+  deleteAdvertisement: (id: number) => API.delete(`/admin/advertisements/${id}/`),
+  
   // Data Requests
   getDataRequests: (params?: any) => API.get('/admin/data-requests/', { params }),
   getDataRequest: (id: number) => API.get(`/admin/data-requests/${id}/`),

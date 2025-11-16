@@ -4,9 +4,11 @@ import styles from "../styles/CloseYourSixpineAccount.module.css";
 import { AlertTriangle } from "lucide-react";
 import { accountClosureAPI } from "../services/api";
 import { useApp } from "../context/AppContext";
+import { useNotification } from "../context/NotificationContext";
 
 export default function CloseYourSixpineAccount() {
   const { state, logout } = useApp();
+  const { showWarning, showError, showSuccess, showConfirmation } = useNotification();
   const navigate = useNavigate();
   const [reason, setReason] = useState("");
   const [confirm, setConfirm] = useState(false);
@@ -53,16 +55,24 @@ export default function CloseYourSixpineAccount() {
     e.preventDefault();
     
     if (!confirm) {
-      alert("⚠️ Please check the confirmation box before proceeding.");
+      showWarning("⚠️ Please check the confirmation box before proceeding.");
       return;
     }
     
     if (!canDelete) {
-      alert("⚠️ You cannot close your account because you have ongoing or pending orders. Please complete or cancel them first.");
+      showWarning("⚠️ You cannot close your account because you have ongoing or pending orders. Please complete or cancel them first.");
       return;
     }
     
-    if (!window.confirm("⚠️ Are you absolutely sure you want to permanently close your account? This action cannot be undone.")) {
+    const confirmed = await showConfirmation({
+      title: '⚠️ Close Account',
+      message: 'Are you absolutely sure you want to permanently close your account? This action cannot be undone.',
+      confirmText: 'Yes, Close Account',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+    
+    if (!confirmed) {
       return;
     }
     
@@ -71,16 +81,16 @@ export default function CloseYourSixpineAccount() {
       const response = await accountClosureAPI.closeAccount(reason);
       
       if (response.data.success) {
-        alert(response.data.message || 'Your account has been closed successfully.');
+        showSuccess(response.data.message || 'Your account has been closed successfully.');
         // Logout and redirect to home
         logout();
         navigate('/');
       } else {
-        alert(response.data.error || 'Failed to close account. Please try again.');
+        showError(response.data.error || 'Failed to close account. Please try again.');
       }
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Failed to close account. Please try again.';
-      alert(errorMsg);
+      showError(errorMsg);
       console.error('Error closing account:', error);
     } finally {
       setLoading(false);

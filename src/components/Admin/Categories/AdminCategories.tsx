@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import adminAPI from '../../../services/adminApi';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface Category {
@@ -22,6 +23,7 @@ interface HierarchicalCategory extends Category {
 }
 
 const AdminCategories: React.FC = () => {
+  const { showError, showConfirmation } = useNotification();
   const [categories, setCategories] = useState<Category[]>([]);
   const [hierarchicalCategories, setHierarchicalCategories] = useState<HierarchicalCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -100,36 +102,46 @@ const AdminCategories: React.FC = () => {
       }
     } catch (err) {
       console.error('Error toggling category status:', err);
-      alert('Failed to update category status');
+      showError('Failed to update category status');
     }
   };
   
   const handleDeleteCategory = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this category? This may affect products associated with it.')) {
-      try {
-        await adminAPI.deleteCategory(id);
+    const confirmed = await showConfirmation({
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete this category? This may affect products associated with it.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await adminAPI.deleteCategory(id);
+      
+      // Remove the category from the local state
+      if (viewMode === 'flat') {
+        setCategories(categories.filter(category => category.id !== id));
+      } else {
+        // For hierarchical view, we'd need a more complex delete function
+        const removeCategoryFromTree = (cats: HierarchicalCategory[]): HierarchicalCategory[] => {
+          return cats.filter(cat => {
+            if (cat.id === id) return false;
+            if (cat.children.length > 0) {
+              cat.children = removeCategoryFromTree(cat.children);
+            }
+            return true;
+          });
+        };
         
-        // Remove the category from the local state
-        if (viewMode === 'flat') {
-          setCategories(categories.filter(category => category.id !== id));
-        } else {
-          // For hierarchical view, we'd need a more complex delete function
-          const removeCategoryFromTree = (cats: HierarchicalCategory[]): HierarchicalCategory[] => {
-            return cats.filter(cat => {
-              if (cat.id === id) return false;
-              if (cat.children.length > 0) {
-                cat.children = removeCategoryFromTree(cat.children);
-              }
-              return true;
-            });
-          };
-          
-          setHierarchicalCategories(removeCategoryFromTree(hierarchicalCategories));
-        }
-      } catch (err) {
-        console.error('Error deleting category:', err);
-        alert('Failed to delete category');
+        setHierarchicalCategories(removeCategoryFromTree(hierarchicalCategories));
       }
+    } catch (err) {
+      console.error('Error deleting category:', err);
+      showError('Failed to delete category');
     }
   };
   

@@ -74,6 +74,17 @@ const NewProductDetails: React.FC = () => {
         // Fetch product details (includes recommendations)
         const productResponse = await productAPI.getProductDetail(slug);
         const productData = productResponse.data;
+        
+        // If product has variants and no variant is selected in URL, redirect to first variant
+        if (productData.variants && productData.variants.length > 0) {
+          const firstVariant = productData.variants.find((v: any) => v.is_active) || productData.variants[0];
+          const urlParams = new URLSearchParams(window.location.search);
+          if (!urlParams.get('variant') && firstVariant) {
+            // Redirect to first variant
+            window.history.replaceState({}, '', `${window.location.pathname}?variant=${firstVariant.id}`);
+          }
+        }
+        
         setProduct(productData);
         
         // Transform recommendation data to match slider component format
@@ -85,8 +96,8 @@ const NewProductDetails: React.FC = () => {
             desc: product.short_description,
             rating: parseFloat(product.average_rating) || 0,
             reviews: product.review_count || 0,
-            oldPrice: product.old_price ? `₹${product.old_price}` : '',
-            newPrice: product.price ? `₹${product.price}` : '',
+            oldPrice: product.variants && product.variants[0]?.old_price ? `₹${product.variants[0].old_price}` : '',
+            newPrice: product.variants && product.variants[0]?.price ? `₹${product.variants[0].price}` : '',
             slug: product.slug,
             id: product.id
           }));

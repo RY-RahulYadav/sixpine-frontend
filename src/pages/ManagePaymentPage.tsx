@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 import { paymentPreferencesAPI, addressAPI } from '../services/api';
 import ManagePaymentMethods from '../components/ManagePaymentMethods';
 import PaymentPreferenceModal from '../components/PaymentPreferenceModal';
@@ -50,6 +51,7 @@ interface Address {
 const ManagePaymentPage: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useApp();
+  const { showSuccess, showError, showConfirmation } = useNotification();
   const [loading, setLoading] = useState(true);
   const [preference, setPreference] = useState<PaymentPreference | null>(null);
   const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
@@ -126,15 +128,23 @@ const ManagePaymentPage: React.FC = () => {
       await paymentPreferencesAPI.updatePaymentPreference(data);
       await fetchPaymentPreference();
       setShowModal(false);
-      alert('Payment preference updated successfully');
+      showSuccess('Payment preference updated successfully');
     } catch (error: any) {
       console.error('Error updating preference:', error);
-      alert(error.response?.data?.error || 'Failed to update preference');
+      showError(error.response?.data?.error || 'Failed to update preference');
     }
   };
 
   const handleDeleteCard = async (tokenId: string) => {
-    if (!window.confirm('Are you sure you want to remove this card?')) {
+    const confirmed = await showConfirmation({
+      title: 'Remove Card',
+      message: 'Are you sure you want to remove this card?',
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -149,10 +159,10 @@ const ManagePaymentPage: React.FC = () => {
         });
         await fetchPaymentPreference();
       }
-      alert('Card removed successfully');
+      showSuccess('Card removed successfully');
     } catch (error: any) {
       console.error('Error deleting card:', error);
-      alert(error.response?.data?.error || 'Failed to delete card');
+      showError(error.response?.data?.error || 'Failed to delete card');
     }
   };
 

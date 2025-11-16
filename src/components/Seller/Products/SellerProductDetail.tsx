@@ -81,12 +81,9 @@ interface Product {
   sku: string | null;
   short_description: string;
   long_description: string;
-  main_image: string;
   category: { id: number; name: string };
   subcategory?: { id: number; name: string } | null;
   material?: { id: number; name: string } | null;
-  price: number;
-  old_price: number | null;
   brand: string;
   dimensions: string;
   weight: string;
@@ -127,7 +124,7 @@ const SellerProductDetail: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'images' | 'variants' | 'details' | 'seo'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'variants' | 'details' | 'seo'>('basic');
   const [activeDetailSection, setActiveDetailSection] = useState<'specifications' | 'features' | 'screen_offer' | 'user_guide' | 'care_instructions' | 'recommendations' | 'offers' | null>('specifications');
   
   // Form data
@@ -137,12 +134,9 @@ const SellerProductDetail: React.FC = () => {
     sku: string;
     short_description: string;
     long_description: string;
-    main_image: string;
     category_id: string;
     subcategory_id: string;
     material_id: string;
-    price: string;
-    old_price: string;
     brand: string;
     dimensions: string;
     weight: string;
@@ -155,18 +149,17 @@ const SellerProductDetail: React.FC = () => {
     meta_description: string;
     is_featured: boolean;
     is_active: boolean;
+    price?: string | number;
+    old_price?: string | number | null;
   }>({
     title: '',
     slug: '',
     sku: '',
     short_description: '',
     long_description: '',
-    main_image: '',
     category_id: '',
     subcategory_id: '',
     material_id: '',
-    price: '',
-    old_price: '',
     brand: 'Sixpine',
     dimensions: '',
     weight: '',
@@ -179,10 +172,9 @@ const SellerProductDetail: React.FC = () => {
     meta_description: '',
     is_featured: false,
     is_active: true,
+    price: '',
+    old_price: null,
   });
-  
-  // Images
-  const [productImages, setProductImages] = useState<ProductImage[]>([]);
   
   // Variants
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -234,12 +226,9 @@ const SellerProductDetail: React.FC = () => {
             sku: productData.sku || '',
             short_description: productData.short_description || '',
             long_description: productData.long_description || '',
-            main_image: productData.main_image || '',
             category_id: productData.category?.id?.toString() || '',
             subcategory_id: productData.subcategory?.id?.toString() || '',
             material_id: productData.material?.id?.toString() || '',
-            price: productData.price?.toString() || '',
-            old_price: productData.old_price?.toString() || '',
             brand: productData.brand || 'Sixpine',
             dimensions: productData.dimensions || '',
             weight: productData.weight || '',
@@ -254,7 +243,6 @@ const SellerProductDetail: React.FC = () => {
             is_active: productData.is_active ?? true,
           });
           
-          setProductImages(productData.images || []);
           // Normalize variants: ensure color_id is set from color.id if needed
           const normalizedVariants = (productData.variants || []).map((v: any) => {
             // Extract color_id - it should now come from backend, but fallback to color.id if needed
@@ -351,25 +339,6 @@ const SellerProductDetail: React.FC = () => {
   };
   
   // Image management
-  const handleAddImage = () => {
-    setProductImages([...productImages, {
-      image: '',
-      alt_text: '',
-      sort_order: productImages.length,
-      is_active: true
-    }]);
-  };
-  
-  const handleRemoveImage = (index: number) => {
-    setProductImages(productImages.filter((_, i) => i !== index));
-  };
-  
-  const handleImageChange = (index: number, field: string, value: any) => {
-    const updated = [...productImages];
-    updated[index] = { ...updated[index], [field]: value };
-    setProductImages(updated);
-  };
-  
   // Variant management
   const handleAddVariant = () => {
     // Use last selected color, or first color, or 0 if no colors available
@@ -553,12 +522,9 @@ const SellerProductDetail: React.FC = () => {
         sku: formData.sku || null,
         short_description: formData.short_description,
         long_description: formData.long_description,
-        main_image: formData.main_image,
         category_id: categoryId,
         subcategory_id: formData.subcategory_id ? parseInt(formData.subcategory_id) : null,
         material_id: formData.material_id ? parseInt(formData.material_id) : null,
-        price: parseFloat(formData.price) || 0,
-        old_price: formData.old_price ? parseFloat(formData.old_price) : null,
         brand: formData.brand,
         dimensions: formData.dimensions,
         weight: formData.weight,
@@ -571,12 +537,6 @@ const SellerProductDetail: React.FC = () => {
         meta_description: formData.meta_description,
         is_featured: formData.is_featured,
         is_active: formData.is_active,
-        images: productImages.map(img => ({
-          image: img.image,
-          alt_text: img.alt_text,
-          sort_order: img.sort_order,
-          is_active: img.is_active !== false
-        })),
         variants: variants.map(v => {
           // Ensure color_id is always set (from v.color_id or v.color.id)
           const colorId = v.color_id || v.color?.id;
@@ -768,13 +728,6 @@ const SellerProductDetail: React.FC = () => {
           </button>
           <button
             type="button"
-            className={activeTab === 'images' ? 'active' : ''}
-            onClick={() => setActiveTab('images')}
-          >
-            Images ({productImages.length})
-          </button>
-          <button
-            type="button"
             className={activeTab === 'variants' ? 'active' : ''}
             onClick={() => setActiveTab('variants')}
           >
@@ -924,7 +877,7 @@ const SellerProductDetail: React.FC = () => {
                     type="number"
                     id="price"
                     name="price"
-                    value={formData.price}
+                    value={formData.price ?? ''}
                     onChange={handleChange}
                     step="0.01"
                     min="0"
@@ -938,7 +891,7 @@ const SellerProductDetail: React.FC = () => {
                     type="number"
                     id="old_price"
                     name="old_price"
-                    value={formData.old_price}
+                    value={formData.old_price ?? ''}
                     onChange={handleChange}
                     step="0.01"
                     min="0"
@@ -1033,83 +986,6 @@ const SellerProductDetail: React.FC = () => {
                   />
                   <label htmlFor="is_featured">Featured</label>
                 </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Images Tab */}
-        {activeTab === 'images' && (
-          <div className="admin-card">
-            <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
-              <h3>Product Images</h3>
-              <button type="button" className="admin-btn secondary" onClick={handleAddImage}>
-                <span className="material-symbols-outlined">add</span>
-                Add Image
-              </button>
-            </div>
-            
-            <div className="form-group tw-mb-4">
-              <label htmlFor="main_image">Main Image URL*</label>
-                  <input
-                type="url"
-                id="main_image"
-                name="main_image"
-                value={formData.main_image}
-                    onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                className="tw-w-full"
-                  />
-              {formData.main_image && (
-                <img src={formData.main_image} alt="Main" className="tw-mt-2 tw-h-32 tw-object-contain tw-border tw-rounded" />
-              )}
-              </div>
-              
-            <div className="tw-space-y-4">
-              {productImages.map((img, index) => (
-                <div key={index} className="tw-p-4 tw-border tw-rounded-lg">
-                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-2">
-                    <h4 className="tw-font-semibold">Image {index + 1}</h4>
-                  <button
-                    type="button"
-                      className="tw-text-red-600 hover:tw-text-red-700"
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <span className="material-symbols-outlined">delete</span>
-                  </button>
-                </div>
-                  <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
-                    <div>
-                      <label>Image URL</label>
-                      <input
-                        type="url"
-                        value={img.image}
-                        onChange={(e) => handleImageChange(index, 'image', e.target.value)}
-                        placeholder="https://example.com/image.jpg"
-                        className="tw-w-full"
-                      />
-                      {img.image && (
-                        <img src={img.image} alt="Preview" className="tw-mt-2 tw-h-32 tw-object-contain tw-border tw-rounded" />
-                      )}
-                    </div>
-                    <div>
-                      <label>Alt Text</label>
-                      <input
-                        type="text"
-                        value={img.alt_text}
-                        onChange={(e) => handleImageChange(index, 'alt_text', e.target.value)}
-                        className="tw-w-full"
-                      />
-                      <label className="tw-mt-2 tw-block">Sort Order</label>
-                      <input
-                        type="number"
-                        value={img.sort_order}
-                        onChange={(e) => handleImageChange(index, 'sort_order', parseInt(e.target.value) || 0)}
-                        className="tw-w-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         )}

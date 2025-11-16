@@ -307,7 +307,11 @@ export const orderAPI = {
   getOrders: () => API.get('/orders/'),
   
   getOrder: (orderId: string) => API.get(`/orders/${orderId}/`),
-  
+
+  downloadInvoice: (orderId: string) => API.get(`/orders/${orderId}/invoice/`, {
+    responseType: 'blob',
+  }),
+
   createOrder: (data: any) => API.post('/orders/create/', data),
   
   checkoutFromCart: (data: { shipping_address_id: number; order_notes?: string }) =>
@@ -376,6 +380,19 @@ export const bulkOrderPageAPI = {
     const params = sectionKey ? { section_key: sectionKey } : {};
     return API.get('/bulk-order-page-content/', { params });
   },
+};
+
+// FAQ Page Content API calls (public)
+export const faqPageAPI = {
+  getFAQPageContent: (sectionKey?: string) => {
+    const params = sectionKey ? { section_key: sectionKey } : {};
+    return API.get('/faq-page-content/', { params });
+  },
+};
+
+// Advertisement API calls (public)
+export const advertisementAPI = {
+  getActiveAdvertisements: () => API.get('/advertisements/'),
 };
 
 // Data Request API calls

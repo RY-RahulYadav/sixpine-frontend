@@ -3,11 +3,13 @@ import styles from "../styles/data-request.module.css";
 import { FaBoxOpen, FaMapMarkerAlt, FaCreditCard } from "react-icons/fa";
 import { dataRequestAPI } from "../services/api";
 import { useApp } from "../context/AppContext";
+import { useNotification } from "../context/NotificationContext";
 import { useNavigate } from "react-router-dom";
 
 export default function DataRequest() {
   const { state } = useApp();
   const navigate = useNavigate();
+  const { showError, showSuccess, showWarning } = useNotification();
   const [loading, setLoading] = useState<{ [key: number]: boolean }>({});
   const [userRequests, setUserRequests] = useState<any[]>([]);
 
@@ -65,7 +67,7 @@ export default function DataRequest() {
 
   const handleSubmitRequest = async (requestType: 'orders' | 'addresses' | 'payment_options', itemId: number) => {
     if (!state.isAuthenticated) {
-      alert('Please login to request your data');
+      showWarning('Please login to request your data');
       navigate('/login');
       return;
     }
@@ -75,14 +77,14 @@ export default function DataRequest() {
       const response = await dataRequestAPI.createRequest(requestType);
       
       if (response.data.success) {
-        alert('Request submitted successfully! You will be notified once it is approved.');
+        showSuccess('Request submitted successfully! You will be notified once it is approved.');
         fetchUserRequests();
       } else {
-        alert(response.data.error || 'Failed to submit request');
+        showError(response.data.error || 'Failed to submit request');
       }
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Failed to submit request';
-      alert(errorMsg);
+      showError(errorMsg);
     } finally {
       setLoading({ ...loading, [itemId]: false });
     }
@@ -165,7 +167,7 @@ export default function DataRequest() {
                           console.error('Error refreshing requests:', err);
                         }
                       } catch (error: any) {
-                        alert(error.response?.data?.error || 'Failed to download file');
+                        showError(error.response?.data?.error || 'Failed to download file');
                       }
                     }
                   }}

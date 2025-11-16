@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { orderAPI } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
 
 // Safe formatter for amounts: handles undefined/null/string inputs
 const formatAmount = (value: any) => {
@@ -86,9 +87,11 @@ interface OrderDetailsModalProps {
 }
 
 const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, onHide, onRequestReturn }) => {
+  const { showConfirmation, showSuccess, showError } = useNotification();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   useEffect(() => {
     if (show && orderId) {
@@ -109,19 +112,53 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
   };
 
   const handleCancelOrder = async () => {
-    if (!window.confirm('Are you sure you want to cancel this order?')) {
+    const confirmed = await showConfirmation({
+      title: 'Cancel Order',
+      message: 'Are you sure you want to cancel this order?',
+      confirmText: 'Cancel Order',
+      cancelText: 'Keep Order',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
     setCancelling(true);
     try {
       await orderAPI.cancelOrder(orderId);
-      alert('Order cancelled successfully');
+      showSuccess('Order cancelled successfully');
       fetchOrderDetails(); // Refresh order details
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to cancel order');
+      showError(error.response?.data?.error || 'Failed to cancel order');
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleDownloadInvoice = async () => {
+    if (!order) return;
+    
+    setDownloadingInvoice(true);
+    try {
+      const response = await orderAPI.downloadInvoice(orderId);
+      
+      // Create blob from response
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice_${order.order_id.slice(0, 8)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      showSuccess('Invoice downloaded successfully');
+    } catch (error: any) {
+      showError(error.response?.data?.error || 'Failed to download invoice');
+    } finally {
+      setDownloadingInvoice(false);
     }
   };
 
@@ -545,6 +582,25 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
               )}
             </div>
             <div className="modal-footer">
+              {order && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleDownloadInvoice}
+                  disabled={downloadingInvoice}
+                >
+                  {downloadingInvoice ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-download me-2"></i>
+                      Download Invoice
+                    </>
+                  )}
+                </button>
+              )}
               {order && order.status === 'pending' && (
                 <button
                   className="btn btn-danger"

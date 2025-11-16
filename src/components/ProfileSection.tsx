@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './ProfileSection.module.css';
 import { authAPI, productAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 
 interface Category {
   id: number;
@@ -30,6 +31,7 @@ interface UserProfile {
 const ProfileSection: React.FC = () => {
   const { state } = useApp();
   const navigate = useNavigate();
+  const { showSuccess, showError, showWarning } = useNotification();
   const [userProfile, setUserProfile] = useState<UserProfile>({});
   const [categories, setCategories] = useState<Category[]>([]);
   const [, setSubcategories] = useState<Subcategory[]>([]);
@@ -172,31 +174,31 @@ const ProfileSection: React.FC = () => {
       }
       await fetchUserProfile();
       setShowEditProfile(false);
-      alert('Profile updated successfully');
+      showSuccess('Profile updated successfully');
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Error updating profile';
-      alert(errorMsg);
+      showError(errorMsg);
       console.error('Update profile error:', error);
     }
   };
 
   const handleChangePassword = async () => {
     if (passwordFormData.new_password !== passwordFormData.new_password_confirm) {
-      alert('New passwords do not match');
+      showWarning('New passwords do not match');
       return;
     }
     if (passwordFormData.new_password.length < 8) {
-      alert('Password must be at least 8 characters long');
+      showWarning('Password must be at least 8 characters long');
       return;
     }
     try {
       await authAPI.changePassword(passwordFormData);
       setShowChangePassword(false);
       setPasswordFormData({ old_password: '', new_password: '', new_password_confirm: '' });
-      alert('Password changed successfully');
+      showSuccess('Password changed successfully');
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.response?.data?.error || error.response?.data?.old_password?.[0] || 'Error changing password';
-      alert(errorMsg);
+      showError(errorMsg);
       console.error('Change password error:', error);
     }
   };
@@ -238,7 +240,7 @@ const ProfileSection: React.FC = () => {
       await fetchUserProfile(); // Refresh profile data
     } catch (error: any) {
       console.error('Error saving categories:', error);
-      alert('Error saving categories. Please try again.');
+      showError('Error saving categories. Please try again.');
     }
   };
 
@@ -255,7 +257,7 @@ const ProfileSection: React.FC = () => {
       await fetchUserProfile(); // Refresh profile data
     } catch (error: any) {
       console.error('Error removing interest:', error);
-      alert('Error removing interest. Please try again.');
+      showError('Error removing interest. Please try again.');
     }
   };
 
@@ -268,10 +270,10 @@ const ProfileSection: React.FC = () => {
       
       await authAPI.updateProfile(updateData);
       await fetchUserProfile(); // Refresh profile data
-      alert('Preferences saved successfully');
+      showSuccess('Preferences saved successfully');
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Error saving preferences';
-      alert(errorMsg);
+      showError(errorMsg);
       console.error('Save preferences error:', error);
     }
   };

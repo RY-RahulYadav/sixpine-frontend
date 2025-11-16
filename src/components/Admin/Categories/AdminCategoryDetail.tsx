@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import adminAPI from '../../../services/adminApi';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface Category {
   id: number;
@@ -26,6 +27,7 @@ interface ParentOption {
 const AdminCategoryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showSuccess, showError, showConfirmation } = useNotification();
   const isNewCategory = id === 'new';
   
   const [category, setCategory] = useState<Category | null>(null);
@@ -147,7 +149,7 @@ const AdminCategoryDetail: React.FC = () => {
         response = await adminAPI.updateCategory(parseInt(id!), categoryData);
       }
       
-      alert(`Category ${isNewCategory ? 'created' : 'updated'} successfully!`);
+      showSuccess(`Category ${isNewCategory ? 'created' : 'updated'} successfully!`);
       
       // Navigate to the category detail page if it was a new category
       if (isNewCategory) {
@@ -187,17 +189,26 @@ const AdminCategoryDetail: React.FC = () => {
         {!isNewCategory && (
           <button 
             className="admin-btn danger"
-            onClick={() => {
-              if (window.confirm('Are you sure you want to delete this category? This will affect any associated products.')) {
-                adminAPI.deleteCategory(parseInt(id!))
-                  .then(() => {
-                    alert('Category deleted successfully');
-                    navigate('/admin/categories');
-                  })
-                  .catch(err => {
-                    console.error('Error deleting category:', err);
-                    alert('Failed to delete category');
-                  });
+            onClick={async () => {
+              const confirmed = await showConfirmation({
+                title: 'Delete Category',
+                message: 'Are you sure you want to delete this category? This will affect any associated products.',
+                confirmText: 'Delete',
+                cancelText: 'Cancel',
+                confirmButtonStyle: 'danger',
+              });
+
+              if (!confirmed) {
+                return;
+              }
+
+              try {
+                await adminAPI.deleteCategory(parseInt(id!));
+                showSuccess('Category deleted successfully');
+                navigate('/admin/categories');
+              } catch (err) {
+                console.error('Error deleting category:', err);
+                showError('Failed to delete category');
               }
             }}
           >

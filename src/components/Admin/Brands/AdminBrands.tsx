@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminAPI from '../../../services/adminApi';
 import { showToast, formatCurrency } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface Brand {
@@ -59,6 +60,7 @@ interface BrandDetail extends Brand {
 
 const AdminBrands: React.FC = () => {
   const navigate = useNavigate();
+  const { showConfirmation } = useNotification();
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +118,15 @@ const AdminBrands: React.FC = () => {
   };
 
   const handleSuspend = async (id: number) => {
-    if (!window.confirm('Are you sure you want to suspend this brand? This will prevent them from accessing the seller panel.')) {
+    const confirmed = await showConfirmation({
+      title: 'Suspend Brand',
+      message: 'Are you sure you want to suspend this brand? This will prevent them from accessing the seller panel.',
+      confirmText: 'Suspend',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 

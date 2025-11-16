@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface BulkOrder {
   id: number;
@@ -28,6 +29,7 @@ interface BulkOrder {
 }
 
 const AdminBulkOrders: React.FC = () => {
+  const { showError } = useNotification();
   const [orders, setOrders] = useState<BulkOrder[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,7 +73,7 @@ const AdminBulkOrders: React.FC = () => {
       setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('Failed to update status');
+      showError('Failed to update status');
     }
   };
 

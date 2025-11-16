@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import styles from "../styles/communication-preferences.module.css";
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 
 export default function CommunicationPreferences() {
   const { state } = useApp();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useNotification();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   
@@ -88,10 +90,10 @@ export default function CommunicationPreferences() {
         emailPromotional,
       });
       
-      alert('Communication preferences updated successfully');
+      showSuccess('Communication preferences updated successfully');
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Error updating preferences';
-      alert(errorMsg);
+      showError(errorMsg);
       console.error('Update preferences error:', error);
     } finally {
       setSaving(false);

@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
+import { useNotification } from "../../context/NotificationContext";
 import { wishlistAPI } from "../../services/api";
 import styles from "./productdetails_slider1.module.css";
 import {
@@ -36,6 +37,7 @@ interface ProductDetailsSliderProps {
 const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
+  const { showError } = useNotification();
   const slider1 = useRef<HTMLDivElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [hearts, setHearts] = useState(() => products.map(() => false));
@@ -132,7 +134,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
     }
 
     if (!productId) {
-      alert('Product ID is missing. Please try again.');
+      showError('Product ID is missing. Please try again.');
       return;
     }
 
@@ -142,7 +144,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
     } catch (error: any) {
       console.error('Add to cart error:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
-      alert(errorMsg);
+      showError(errorMsg);
     } finally {
       setCartLoading(null);
     }
@@ -158,7 +160,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
     }
 
     if (!productId) {
-      alert('Product ID is missing. Please try again.');
+      showError('Product ID is missing. Please try again.');
       return;
     }
 
@@ -201,7 +203,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
     } catch (error: any) {
       console.error('Wishlist error:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to update wishlist';
-      alert(errorMsg);
+      showError(errorMsg);
     } finally {
       setWishlistLoading(null);
     }

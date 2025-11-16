@@ -3,9 +3,11 @@ import styles from "../styles/global_selling.module.css";
 import { FaBullhorn, FaCheck, FaCog } from "react-icons/fa";
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 
 function AdvertisingPreferences() {
   const { state } = useApp();
+  const { showSuccess, showError } = useNotification();
   const [advertisingEnabled, setAdvertisingEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -49,10 +51,10 @@ function AdvertisingPreferences() {
       setSaving(true);
       await authAPI.updateProfile({ advertising_enabled: enabled });
       setAdvertisingEnabled(enabled);
-      alert('Advertising preferences updated successfully');
+      showSuccess('Advertising preferences updated successfully');
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Error updating preferences';
-      alert(errorMsg);
+      showError(errorMsg);
       console.error('Update preferences error:', error);
     } finally {
       setSaving(false);

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { homepageAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
+import { useNotification } from '../../context/NotificationContext';
 import styles from './BestDeals.module.css';
 
 interface DailyDeal {
@@ -21,6 +22,7 @@ interface DailyDeal {
 const DailyDeals = () => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
+  const { showError } = useNotification();
   const [visibleCount, setVisibleCount] = useState(4);
   const [dailyDeals, setDailyDeals] = useState<DailyDeal[]>([]);
   const [sectionTitle, setSectionTitle] = useState('Deals of the Day');
@@ -205,7 +207,7 @@ const DailyDeals = () => {
       return;
     }
     if (!deal.id) {
-      alert('Product ID is missing');
+      showError('Product ID is missing');
       return;
     }
     setCartLoading(deal.id);
@@ -213,7 +215,7 @@ const DailyDeals = () => {
       await addToCart(deal.id, 1);
     } catch (error: any) {
       console.error('Add to cart error:', error);
-      alert(error.response?.data?.error || 'Failed to add to cart');
+      showError(error.response?.data?.error || 'Failed to add to cart');
     } finally {
       setCartLoading(null);
     }

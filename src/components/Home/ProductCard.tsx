@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { wishlistAPI } from "../../services/api";
 import { useApp } from "../../context/AppContext";
+import { useNotification } from "../../context/NotificationContext";
 import styles from "./bannerCards.module.css";
 
 interface ProductCardProps {
@@ -50,6 +51,7 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
+  const { showError } = useNotification();
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistItemId, setWishlistItemId] = useState<number | null>(null);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
@@ -158,7 +160,7 @@ const ProductCard = ({
     } catch (error: any) {
       console.error('Wishlist error:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to update wishlist';
-      alert(errorMsg);
+      showError(errorMsg);
     } finally {
       setIsWishlistLoading(false);
     }
@@ -179,7 +181,7 @@ const ProductCard = ({
 
     if (!productId) {
       console.error('Product ID is required for adding to cart');
-      alert('Product ID is missing. Please try again.');
+      showError('Product ID is missing. Please try again.');
       return;
     }
 
@@ -190,7 +192,7 @@ const ProductCard = ({
     } catch (error: any) {
       console.error('Add to cart error:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
-      alert(errorMsg);
+      showError(errorMsg);
     } finally {
       setIsCartLoading(false);
     }

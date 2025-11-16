@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 import { cartAPI, orderAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -29,6 +30,7 @@ interface CartItem {
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { state, fetchCart } = useApp();
+  const { showWarning, showConfirmation } = useNotification();
   const [loading, setLoading] = useState(false);
   const [taxRate, setTaxRate] = useState<number>(5); // Default to 5%
 
@@ -54,7 +56,7 @@ const CartPage: React.FC = () => {
 
   const handleCheckout = () => {
     if (!state.cart || state.cart.items.length === 0) {
-      alert('Your cart is empty!');
+      showWarning('Your cart is empty!');
       return;
     }
 
@@ -89,7 +91,15 @@ const CartPage: React.FC = () => {
   };
 
   const clearCart = async () => {
-    if (window.confirm('Are you sure you want to clear your cart?')) {
+    const confirmed = await showConfirmation({
+      title: 'Clear Cart',
+      message: 'Are you sure you want to clear your cart?',
+      confirmText: 'Clear',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+    
+    if (confirmed) {
       setLoading(true);
       try {
         await cartAPI.clearCart();

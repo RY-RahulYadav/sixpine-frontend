@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 import { orderAPI, homepageAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -66,6 +67,7 @@ const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { state, addToCart } = useApp();
+  const { showError, showSuccess } = useNotification();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -82,10 +84,35 @@ const OrdersPage: React.FC = () => {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [selectedOrderForReturn, setSelectedOrderForReturn] = useState<Order | null>(null);
   const [selectedOrderItemForReturn, setSelectedOrderItemForReturn] = useState<OrderItem | null>(null);
+  const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
 
   const handleViewDetails = (orderId: string) => {
     setSelectedOrderId(orderId);
     setShowModal(true);
+  };
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    setDownloadingInvoice(orderId);
+    try {
+      const response = await orderAPI.downloadInvoice(orderId);
+      
+      // Create blob from response
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice_${orderId.slice(0, 8)}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      showSuccess('Invoice downloaded successfully');
+    } catch (error: any) {
+      showError(error.response?.data?.error || 'Failed to download invoice');
+    } finally {
+      setDownloadingInvoice(null);
+    }
   };
 
   const handleCloseModal = () => {
@@ -97,7 +124,7 @@ const OrdersPage: React.FC = () => {
 
   const handleCompletePayment = async (order: Order) => {
     if (!order.shipping_address?.id) {
-      alert('Shipping address not found. Please contact support.');
+      showError('Shipping address not found. Please contact support.');
       return;
     }
 
@@ -167,10 +194,10 @@ const OrdersPage: React.FC = () => {
               payment_method: order.payment_method || 'RAZORPAY'
             });
 
-            alert('Payment completed successfully! Order confirmed.');
+            showSuccess('Payment completed successfully! Order confirmed.');
             fetchOrders();
           } catch (error: any) {
-            alert(error.response?.data?.error || 'Payment verification failed');
+            showError(error.response?.data?.error || 'Payment verification failed');
           } finally {
             setCompletingPayment(null);
           }
@@ -194,12 +221,12 @@ const OrdersPage: React.FC = () => {
 
       const razorpay = new window.Razorpay(options);
       razorpay.on('payment.failed', function () {
-        alert('Payment failed. Please try again.');
+        showError('Payment failed. Please try again.');
         setCompletingPayment(null);
       });
       razorpay.open();
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to initiate payment. Please try again.');
+      showError(error.response?.data?.error || 'Failed to initiate payment. Please try again.');
       setCompletingPayment(null);
     }
   };
@@ -211,7 +238,7 @@ const OrdersPage: React.FC = () => {
 
   const handleBuyAgain = async (order: Order, navigateToCheckout: boolean = false) => {
     if (!order.items || order.items.length === 0) {
-      alert('No items found in this order');
+      showError('No items found in this order');
       return;
     }
 
@@ -232,7 +259,7 @@ const OrdersPage: React.FC = () => {
     } catch (error: any) {
       console.error('Error adding items to cart:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to add items to cart';
-      alert(errorMsg);
+      showError(errorMsg);
     } finally {
       setBuyAgainLoading(null);
     }
@@ -594,8 +621,14 @@ const OrdersPage: React.FC = () => {
                           >
                             View order details
                           </button>
-                          <span className="separator">|</span>
-                          <button className="btn-link-custom">Invoice</button>
+                          <span style={{ margin: '0 1px', color: '#ccc' }}>|</span>
+                          <button
+                            className="btn-link-custom"
+                            onClick={() => handleDownloadInvoice(order.order_id)}
+                            disabled={downloadingInvoice === order.order_id}
+                          >
+                            {downloadingInvoice === order.order_id ? 'Downloading...' : 'Invoice'}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -631,10 +664,10 @@ const OrdersPage: React.FC = () => {
                             </>
                           )}
                             <div className="item-pricing">
-                              <span className="item-price">₹{order.items[0].price.toLocaleString()}</span>
-                              {order.items[0].product.old_price && Number(order.items[0].product.old_price) > Number(order.items[0].price) && (
-                                <span className="item-strike">₹{Number(order.items[0] .product.old_price).toLocaleString()}</span>
-                              )}
+                              <span className="item-price">₹{order.total_amount.toLocaleString()}</span>
+                              <span className="text-muted small d-block mt-1">
+                                {order.items.length} item{order.items.length > 1 ? 's' : ''} • Total paid
+                              </span>
                             </div>
                             
                             {/* Show Buy Now and Add to Cart only in Buy Again tab */}

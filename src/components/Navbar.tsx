@@ -26,7 +26,9 @@ const Navbar: React.FC = () => {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showLoginDropdown, setShowLoginDropdown] = useState(false);
   const searchRef = useRef<HTMLFormElement>(null);
+  const loginDropdownRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<number | null>(null);
 
   // Fetch categories from backend
@@ -57,6 +59,9 @@ const Navbar: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSuggestions(false);
+      }
+      if (loginDropdownRef.current && !loginDropdownRef.current.contains(event.target as Node)) {
+        setShowLoginDropdown(false);
       }
     };
 
@@ -163,15 +168,57 @@ const Navbar: React.FC = () => {
         {/* Right Icons for mobile */}
         <ul className="navbar-nav align-items-center d-lg-none order-lg-2 mb-2 mb-lg-0">
           <li className="nav-item">
-            <Link className="nav-link text-light" to={state.isAuthenticated ? "/your-account" : "/login"}>
-              <i className="bi bi-person"></i>
-              <span className="d-none d-md-inline ms-1">
-                {state.isAuthenticated ? 
-                  (state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username) 
-                  : "Login"
-                }
-              </span>
-            </Link>
+            {state.isAuthenticated ? (
+              <Link className="nav-link text-light" to="/your-account">
+                <i className="bi bi-person"></i>
+                <span className="d-none d-md-inline ms-1">
+                  {state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username}
+                </span>
+              </Link>
+            ) : (
+              <div className="position-relative" ref={loginDropdownRef}>
+                <button
+                  className="nav-link text-light d-flex align-items-center"
+                  onClick={() => setShowLoginDropdown(!showLoginDropdown)}
+                  style={{ background: 'none', border: 'none', padding: '0.5rem 1rem' }}
+                >
+                  <i className="bi bi-person me-1"></i>
+                  <span className="d-none d-md-inline">Login</span>
+                  <i className="bi bi-chevron-down ms-1" style={{ fontSize: '0.7rem', lineHeight: '1' }}></i>
+                </button>
+                {showLoginDropdown && (
+                  <div className="position-absolute bg-white border rounded shadow-sm mt-1" style={{ 
+                    zIndex: 1000, 
+                    top: '100%', 
+                    right: 0,
+                    minWidth: '200px'
+                  }}>
+                    <Link
+                      to="/login"
+                      className="d-block px-3 py-2 text-dark text-decoration-none"
+                      onClick={() => setShowLoginDropdown(false)}
+                      style={{ fontSize: '0.9rem' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-person me-2"></i>
+                      Login/Signup as Customer
+                    </Link>
+                    <Link
+                      to="/seller/login"
+                      className="d-block px-3 py-2 text-dark text-decoration-none border-top"
+                      onClick={() => setShowLoginDropdown(false)}
+                      style={{ fontSize: '0.9rem' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-shop me-2"></i>
+                      Login/Signup as Seller
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </li>
           <li className="nav-item">
             <Link className="nav-link text-light" to="/orders">
@@ -256,12 +303,54 @@ const Navbar: React.FC = () => {
         {/* Right Icons for desktop */}
         <ul className="navbar-nav align-items-center d-none d-lg-flex order-lg-3">
           <li className="nav-item mx-2">
-            <Link className="nav-link text-light" to={state.isAuthenticated ? "/your-account" : "/login"}>
-              <i className="bi bi-person"></i> {state.isAuthenticated ? 
-                (state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username) 
-                : "Login"
-              }
-            </Link>
+            {state.isAuthenticated ? (
+              <Link className="nav-link text-light" to="/your-account">
+                <i className="bi bi-person"></i> {state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username}
+              </Link>
+            ) : (
+              <div className="position-relative" ref={loginDropdownRef}>
+                <button
+                  className="nav-link text-light d-flex align-items-center"
+                  onClick={() => setShowLoginDropdown(!showLoginDropdown)}
+                  style={{ background: 'none', border: 'none', padding: '0.5rem 0' }}
+                >
+                  <i className="bi bi-person me-1"></i>
+                  <span>Login</span>
+                  <i className="bi bi-chevron-down ms-1" style={{ fontSize: '0.7rem', lineHeight: '1' }}></i>
+                </button>
+                {showLoginDropdown && (
+                  <div className="position-absolute bg-white border rounded shadow-sm mt-1" style={{ 
+                    zIndex: 1000, 
+                    top: '100%', 
+                    right: 0,
+                    minWidth: '200px'
+                  }}>
+                    <Link
+                      to="/login"
+                      className="d-block px-3 py-2 text-dark text-decoration-none"
+                      onClick={() => setShowLoginDropdown(false)}
+                      style={{ fontSize: '0.9rem' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-person me-2"></i>
+                      Login/Signup as Customer
+                    </Link>
+                    <Link
+                      to="/seller/login"
+                      className="d-block px-3 py-2 text-dark text-decoration-none border-top"
+                      onClick={() => setShowLoginDropdown(false)}
+                      style={{ fontSize: '0.9rem' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-shop me-2"></i>
+                      Login/Signup as Seller
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </li>
           <li className="nav-item mx-2">
             <Link className="nav-link text-light" to="/orders">

@@ -17,6 +17,8 @@ import AdminHomePageManagement from './HomePageManagement/AdminHomePageManagemen
 import AdminTrendingPageManagement from './TrendingPageManagement/AdminTrendingPageManagement';
 import AdminBestDealsPageManagement from './BestDealsPageManagement/AdminBestDealsPageManagement';
 import AdminBulkOrderPageManagement from './BulkOrderPageManagement/AdminBulkOrderPageManagement';
+import AdminFAQPageManagement from './FAQPageManagement/AdminFAQPageManagement';
+import AdminAdvertisementManagement from './AdvertisementManagement/AdminAdvertisementManagement';
 import AdminUsers from './Users/AdminUsers';
 import AdminUserDetail from './Users/AdminUserDetail';
 import AdminBrands from './Brands/AdminBrands';
@@ -31,6 +33,7 @@ import AdminDataRequests from './DataRequests/AdminDataRequests';
 import AdminMedia from './Media/AdminMedia';
 import AdminPackagingFeedback from './PackagingFeedback/AdminPackagingFeedback';
 import AdminBrandAnalytics from './Analytics/AdminBrandAnalytics';
+import AdminCoupons from './Coupons/AdminCoupons';
 
 const AdminRouter = () => {
   const { state } = useApp();
@@ -81,6 +84,8 @@ const AdminRouter = () => {
         <Route path="trending" element={<AdminTrendingPageManagement />} />
         <Route path="best-deals" element={<AdminBestDealsPageManagement />} />
         <Route path="bulk-order-page" element={<AdminBulkOrderPageManagement />} />
+        <Route path="faq-page" element={<AdminFAQPageManagement />} />
+        <Route path="advertisements" element={<AdminAdvertisementManagement />} />
         {/* Management Section */}
         <Route path="logs" element={
           <Suspense fallback={<div className="admin-loading-state"><div className="admin-loader"></div><p>Loading...</p></div>}>
@@ -93,6 +98,7 @@ const AdminRouter = () => {
         <Route path="communication" element={<AdminCommunication />} />
         <Route path="media" element={<AdminMedia />} />
         <Route path="packaging-feedback" element={<AdminPackagingFeedback />} />
+        <Route path="coupons" element={<AdminCoupons />} />
         {/* Settings Section */}
         <Route path="payment-charges" element={<AdminPaymentCharges />} />
         <Route path="filter-options" element={<AdminFilterOptions />} />

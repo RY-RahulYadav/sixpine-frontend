@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { orderAPI } from '../../services/api';
+import { useNotification } from '../../context/NotificationContext';
 
 interface OrderItem {
   id: number;
@@ -27,6 +28,7 @@ const ReturnRequestModal: React.FC<ReturnRequestModalProps> = ({
   onHide,
   onSuccess
 }) => {
+  const { showSuccess } = useNotification();
   const [reason, setReason] = useState('');
   const [reasonDescription, setReasonDescription] = useState('');
   const [pickupDate, setPickupDate] = useState('');
@@ -59,7 +61,7 @@ const ReturnRequestModal: React.FC<ReturnRequestModalProps> = ({
         pickup_date: pickupDate
       });
 
-      alert('Return request submitted successfully!');
+      showSuccess('Return request submitted successfully!');
       onSuccess();
       onHide();
       // Reset form

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart } from 'react-icons/fa';
 import { homepageAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
+import { useNotification } from '../../context/NotificationContext';
 import styles from './Trending.module.css';
 
 const defaultProducts = [
@@ -55,6 +56,7 @@ const defaultProducts = [
 const TrendingProducts = () => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
+  const { showError } = useNotification();
   const [trendingProducts, setTrendingProducts] = useState(defaultProducts);
   const [, setSectionTitle] = useState('Trending Right Now');
   const [sectionSubtitle, setSectionSubtitle] = useState('Discover what customers are loving this week');
@@ -152,7 +154,7 @@ const TrendingProducts = () => {
               return;
             }
             if (!product.id) {
-              alert('Product ID is missing');
+              showError('Product ID is missing');
               return;
             }
             setCartLoading(product.id);
@@ -160,7 +162,7 @@ const TrendingProducts = () => {
               await addToCart(product.id, 1);
             } catch (error: any) {
               console.error('Add to cart error:', error);
-              alert(error.response?.data?.error || 'Failed to add to cart');
+              showError(error.response?.data?.error || 'Failed to add to cart');
             } finally {
               setCartLoading(null);
             }

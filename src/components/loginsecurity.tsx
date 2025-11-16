@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import styles from '../styles/loginsecurity.module.css';
 import { authAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 
 const LoginSecurity = () => {
     const { state } = useApp();
+    const { showSuccess, showError, showWarning } = useNotification();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -95,33 +97,33 @@ const LoginSecurity = () => {
             }
             
             await fetchUserProfile();
-            alert('Profile updated successfully');
+            showSuccess('Profile updated successfully');
         setEditingField(null);
         setInputValue('');
         } catch (error: any) {
             const errorMsg = error.response?.data?.message || error.response?.data?.error || 'Error updating profile';
-            alert(errorMsg);
+            showError(errorMsg);
             console.error('Update profile error:', error);
         }
     };
 
     const handleChangePassword = async () => {
         if (passwordForm.new_password !== passwordForm.new_password_confirm) {
-            alert('New passwords do not match');
+            showWarning('New passwords do not match');
             return;
         }
         if (passwordForm.new_password.length < 8) {
-            alert('Password must be at least 8 characters long');
+            showWarning('Password must be at least 8 characters long');
             return;
         }
         try {
             await authAPI.changePassword(passwordForm);
             setShowPasswordForm(false);
             setPasswordForm({ old_password: '', new_password: '', new_password_confirm: '' });
-            alert('Password changed successfully');
+            showSuccess('Password changed successfully');
         } catch (error: any) {
             const errorMsg = error.response?.data?.message || error.response?.data?.error || error.response?.data?.old_password?.[0] || 'Error changing password';
-            alert(errorMsg);
+            showError(errorMsg);
             console.error('Change password error:', error);
         }
     };

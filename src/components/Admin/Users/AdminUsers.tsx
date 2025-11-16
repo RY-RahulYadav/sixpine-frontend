@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface User {
@@ -26,6 +27,7 @@ interface User {
 
 const AdminUsers: React.FC = () => {
   const navigate = useNavigate();
+  const { showConfirmation } = useNotification();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +94,15 @@ const AdminUsers: React.FC = () => {
       return;
     }
     
-    if (!window.confirm(`Are you sure you want to delete user "${username}"? This action cannot be undone.`)) {
+    const confirmed = await showConfirmation({
+      title: 'Delete User',
+      message: `Are you sure you want to delete user "${username}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 

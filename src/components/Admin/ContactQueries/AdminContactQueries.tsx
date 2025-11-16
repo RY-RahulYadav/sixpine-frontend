@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface ContactQuery {
   id: number;
@@ -16,6 +17,7 @@ interface ContactQuery {
 }
 
 const AdminContactQueries: React.FC = () => {
+  const { showError } = useNotification();
   const [queries, setQueries] = useState<ContactQuery[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,7 +61,7 @@ const AdminContactQueries: React.FC = () => {
       setQueries(queries.map(q => q.id === id ? { ...q, status } : q));
     } catch (err) {
       console.error('Error updating status:', err);
-      alert('Failed to update status');
+      showError('Failed to update status');
     }
   };
 

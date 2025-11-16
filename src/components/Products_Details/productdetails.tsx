@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
-import { offersAPI } from "../../services/api";
+import { useNotification } from "../../context/NotificationContext";
+import { advertisementAPI } from "../../services/api";
 import styles from "./productdetails.module.css";
 import {
   FaStar,
@@ -21,38 +22,25 @@ interface ProductDetailsProps {
 const ProductDetails = ({ product }: ProductDetailsProps) => {
   const navigate = useNavigate();
   const { addToCart, state } = useApp();
-  const [activeOffer, setActiveOffer] = useState<any>(null);
-
-  // Get images from product data or use fallback
-  const images = product?.images?.length > 0 
-    ? product.images.map((img: any) => img.image)
-    : product?.main_image 
-    ? [product.main_image]
-    : [
-    "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
-    "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
-   "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
-    "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
-    "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
-  ];
+  const { showError, showWarning } = useNotification();
+  const [activeAdvertisement, setActiveAdvertisement] = useState<any>(null);
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [mainImage, setMainImage] = useState(images[0]);
 
-  // Fetch all active offers
+  // Fetch active advertisements
   useEffect(() => {
-    const fetchOffers = async () => {
+    const fetchAdvertisements = async () => {
       try {
-        const response = await offersAPI.getActiveOffers();
+        const response = await advertisementAPI.getActiveAdvertisements();
         if (response.data && response.data.results && response.data.results.length > 0) {
-          setActiveOffer(response.data.results[0]); // Get the first active offer
+          setActiveAdvertisement(response.data.results[0]); // Get the first active advertisement
         }
       } catch (error) {
-        console.error('Error fetching offers:', error);
+        console.error('Error fetching advertisements:', error);
       }
     };
 
-    fetchOffers();
+    fetchAdvertisements();
   }, []);
 
   // Modal open/close with scroll control
@@ -100,7 +88,16 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
         };
       }
     }
-    // Default to first available
+    // Default to first active variant
+    const firstActiveVariant = variants.find((v: any) => v.is_active) || variants[0];
+    if (firstActiveVariant) {
+      return {
+        color: firstActiveVariant.color?.name || colors[0] || "",
+        size: firstActiveVariant.size || sizes[0] || "",
+        pattern: firstActiveVariant.pattern || patterns[0] || ""
+      };
+    }
+    // Fallback to first available
     return {
       color: colors[0] || "",
       size: sizes[0] || "",
@@ -130,8 +127,41 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
   const selectedVariant = findSelectedVariant();
   
-  // Use variant price if available, otherwise product price
-  const cartPrice = selectedVariant?.price || product?.price || 29999;
+  // Use variant price (required - variants are the actual products)
+  const cartPrice = selectedVariant?.price || 0;
+  
+  // Get images from selected variant or first variant, then fallback
+  const images = selectedVariant?.images?.length > 0
+    ? selectedVariant.images.map((img: any) => img.image)
+    : selectedVariant?.image
+    ? [selectedVariant.image]
+    : product?.variants?.[0]?.image
+    ? [product.variants[0].image]
+    : product?.main_image
+    ? [product.main_image]
+    : [
+    "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
+    "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
+   "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
+    "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
+    "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
+  ];
+  
+  const [mainImage, setMainImage] = useState(images[0] || '');
+  
+  // Update main image when variant changes
+  useEffect(() => {
+    if (selectedVariant) {
+      const variantImages = selectedVariant.images?.length > 0
+        ? selectedVariant.images.map((img: any) => img.image)
+        : selectedVariant.image
+        ? [selectedVariant.image]
+        : [];
+      if (variantImages.length > 0) {
+        setMainImage(variantImages[0]);
+      }
+    }
+  }, [selectedVariant]);
 
   // Cart Summary
   const [cartQty, setCartQty] = useState(1);
@@ -181,7 +211,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       try {
         // If product has variants, variant_id is required
         if (variants.length > 0 && !selectedVariant) {
-          alert('Please select a variant (color, size, or pattern)');
+          showWarning('Please select a variant (color, size, or pattern)');
           return;
         }
 
@@ -190,7 +220,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       } catch (error: any) {
         console.error('Error adding to cart:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
-        alert(errorMsg);
+        showError(errorMsg);
       }
     }
   };
@@ -205,7 +235,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       try {
         // If product has variants, variant_id is required
         if (variants.length > 0 && !selectedVariant) {
-          alert('Please select a variant (color, size, or pattern)');
+          showWarning('Please select a variant (color, size, or pattern)');
           return;
         }
 
@@ -214,7 +244,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       } catch (error: any) {
         console.error('Error adding to cart:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
-        alert(errorMsg);
+        showError(errorMsg);
       }
     }
   };
@@ -322,7 +352,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
         <div className={styles.priceBox}>
   {/* EMI Price */}
   <p className={styles.emiPrice}>
-    ₹{Math.round((product?.price || 0) / 3).toLocaleString()} <span>/month (3 months)</span>
+    ₹{Math.round((selectedVariant?.price || 0) / 3).toLocaleString()} <span>/month (3 months)</span>
   </p>
 
   {/* EMI Info */}
@@ -335,16 +365,16 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
   {/* Discount & Final Price */}
   <div className={styles.priceRow}>
-    {product?.is_on_sale && product?.discount_percentage > 0 && (
-      <span className={styles.discountBadge}>-{product.discount_percentage}%</span>
+    {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
+      <span className={styles.discountBadge}>-{Math.round(((selectedVariant.old_price - selectedVariant.price) / selectedVariant.old_price) * 100)}%</span>
     )}
-    <span className={styles.finalPrice}>₹{(product?.price || 0).toLocaleString()}</span>
+    <span className={styles.finalPrice}>₹{(selectedVariant?.price || 0).toLocaleString()}</span>
   </div>
 
   {/* MRP */}
-  {product?.old_price && product.old_price > product.price && (
+  {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
   <p className={styles.mrp}>
-      M.R.P.: <span className={styles.strike}>₹{product.old_price.toLocaleString()}</span>
+      M.R.P.: <span className={styles.strike}>₹{selectedVariant.old_price.toLocaleString()}</span>
   </p>
   )}
 </div>
@@ -524,28 +554,40 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
             <button className={styles.buyNow} onClick={handleBuyNow}>Buy Now</button>
           </div>
 
-          {/* SPECIAL OFFER */}
-          {activeOffer ? (
+          {/* ADVERTISEMENT */}
+          {activeAdvertisement ? (
             <div className={styles.specialOffer}>
               <img
-                src={activeOffer.product?.main_image || "https://ochaka.vercel.app/images/products/fashion/product-1.jpg"}
-                alt="Special Offer"
+                src={activeAdvertisement.image || "https://ochaka.vercel.app/images/products/fashion/product-1.jpg"}
+                alt={activeAdvertisement.title}
               />
               <p>
-                <strong>{activeOffer.title}</strong>
+                <strong>
+                  {activeAdvertisement.discount_percentage 
+                    ? `Special Offer: ${activeAdvertisement.discount_percentage}% Off`
+                    : activeAdvertisement.title}
+                </strong>
               </p>
               <button 
                 className={styles.buyNow} 
-                onClick={() => navigate(`/products-details/${activeOffer.product?.slug}`)}
+                onClick={() => {
+                  if (activeAdvertisement.button_link) {
+                    if (activeAdvertisement.button_link.startsWith('http')) {
+                      window.open(activeAdvertisement.button_link, '_blank');
+                    } else {
+                      navigate(`/products-details/${activeAdvertisement.button_link}`);
+                    }
+                  }
+                }}
               >
-                Check Now
+                {activeAdvertisement.button_text || 'Check Now'}
               </button>
             </div>
           ) : (
             <div className={styles.specialOffer}>
               <img
                 src="https://ochaka.vercel.app/images/products/fashion/product-1.jpg"
-                alt="Offer"
+                alt="Advertisement"
               />
               <p>
                 <strong>Special Offer: 20% Off</strong>

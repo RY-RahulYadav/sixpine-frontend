@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { wishlistAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
+import { useNotification } from '../../context/NotificationContext';
 import styles from './RecentlyBrowsed.module.css';
 
 interface WishlistItem {
@@ -34,6 +35,7 @@ const Wishlist = () => {
   const [cartLoading, setCartLoading] = useState<number | null>(null);
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
+  const { showError } = useNotification();
 
   useEffect(() => {
     if (state.isAuthenticated) {
@@ -100,7 +102,7 @@ const Wishlist = () => {
       window.dispatchEvent(new Event('wishlistUpdated'));
     } catch (error) {
       console.error('Error removing from wishlist:', error);
-      alert('Failed to remove item from wishlist');
+      showError('Failed to remove item from wishlist');
     }
   };
 
@@ -230,7 +232,7 @@ const Wishlist = () => {
                         return;
                       }
                       if (!item.product.id) {
-                        alert('Product ID is missing');
+                        showError('Product ID is missing');
                         return;
                       }
                       setCartLoading(item.product.id);
@@ -238,7 +240,7 @@ const Wishlist = () => {
                         await addToCart(item.product.id, 1);
                       } catch (error: any) {
                         console.error('Add to cart error:', error);
-                        alert(error.response?.data?.error || 'Failed to add to cart');
+                        showError(error.response?.data?.error || 'Failed to add to cart');
                       } finally {
                         setCartLoading(null);
                       }

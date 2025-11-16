@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { productAPI } from '../../services/api';
+import { useNotification } from '../../context/NotificationContext';
 import styles from './RecentlyBrowsed.module.css';
 
 interface BrowsedCategory {
@@ -14,6 +15,7 @@ interface BrowsedCategory {
 }
 
 const RelatedCategories = () => {
+  const { showSuccess, showError, showConfirmation } = useNotification();
   const [categories, setCategories] = useState<BrowsedCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -60,18 +62,28 @@ const RelatedCategories = () => {
   }
 
   const handleClearAll = async () => {
-    if (window.confirm('Are you sure you want to clear all categories, wishlist, and browsing history? This action cannot be undone.')) {
-      try {
-        await productAPI.clearAllUserData();
-        setCategories([]);
-        // Trigger refresh for other components
-        window.dispatchEvent(new Event('wishlistUpdated'));
-        window.dispatchEvent(new Event('browsingHistoryUpdated'));
-        alert('All data cleared successfully');
-      } catch (error) {
-        console.error('Error clearing all data:', error);
-        alert('Failed to clear all data');
-      }
+    const confirmed = await showConfirmation({
+      title: 'Clear All Data',
+      message: 'Are you sure you want to clear all categories, wishlist, and browsing history? This action cannot be undone.',
+      confirmText: 'Clear All',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await productAPI.clearAllUserData();
+      setCategories([]);
+      // Trigger refresh for other components
+      window.dispatchEvent(new Event('wishlistUpdated'));
+      window.dispatchEvent(new Event('browsingHistoryUpdated'));
+      showSuccess('All data cleared successfully');
+    } catch (error) {
+      console.error('Error clearing all data:', error);
+      showError('Failed to clear all data');
     }
   };
 

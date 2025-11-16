@@ -56,6 +56,8 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/sixpine-products', icon: 'inventory_2', label: 'Sixpine Products', section: 'sixpine_seller' },
     // Page Management Section
     { path: '/admin/homepage', icon: 'home', label: 'Home Management', section: 'page_management' },
+    { path: '/admin/faq-page', icon: 'help', label: 'FAQ Page Management', section: 'page_management' },
+    { path: '/admin/advertisements', icon: 'campaign', label: 'Advertisement Management', section: 'page_management' },
     // { path: '/admin/trending', icon: 'trending_up', label: 'Trending Page Management', section: 'page_management' },
     // { path: '/admin/best-deals', icon: 'local_offer', label: 'Best Deal Management', section: 'page_management' },
     // { path: '/admin/bulk-order-page', icon: 'inventory_2', label: 'Bulk Order Page Management', section: 'page_management' },
@@ -67,6 +69,7 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/communication', icon: 'mail', label: 'Communication', section: 'management' },
     { path: '/admin/media', icon: 'image', label: 'Media Library', section: 'management' },
     { path: '/admin/packaging-feedback', icon: 'feedback', label: 'Packaging Feedback', section: 'management' },
+    { path: '/admin/coupons', icon: 'local_offer', label: 'Coupons', section: 'management' },
     // Settings Section
     { path: '/admin/payment-charges', icon: 'payments', label: 'Payment Settings', section: 'settings' },
     { path: '/admin/filter-options', icon: 'tune', label: 'Filter Options', section: 'settings' },

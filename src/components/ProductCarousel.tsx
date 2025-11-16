@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 
 interface Product {
   id?: number;
@@ -25,6 +26,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products, caro
   const uniqueClass = carouselId || carouselClass;
   const navigate = useNavigate();
   const { addToCart, state } = useApp();
+  const { showError } = useNotification();
 
   const handleBuyNow = async (product: Product) => {
     if (!state.isAuthenticated) {
@@ -47,7 +49,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products, caro
       } catch (error: any) {
         console.error('Error adding to cart:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to add item to cart';
-        alert(errorMsg);
+        showError(errorMsg);
       }
     }
   };
@@ -73,7 +75,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products, caro
       } catch (error: any) {
         console.error('Error adding to cart:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to add item to cart';
-        alert(errorMsg);
+        showError(errorMsg);
       }
     }
   };

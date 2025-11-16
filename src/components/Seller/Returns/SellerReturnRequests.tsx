@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { orderAPI } from '../../../services/api';
+import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface ReturnRequest {
@@ -22,6 +23,7 @@ interface ReturnRequest {
 }
 
 const SellerReturnRequests: React.FC = () => {
+  const { showSuccess, showError } = useNotification();
   const [returnRequests, setReturnRequests] = useState<ReturnRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
@@ -64,12 +66,12 @@ const SellerReturnRequests: React.FC = () => {
         approval: approvalStatus,
         seller_notes: sellerNotes
       });
-      alert(`Return request ${approvalStatus ? 'approved' : 'rejected'} successfully!`);
+      showSuccess(`Return request ${approvalStatus ? 'approved' : 'rejected'} successfully!`);
       setShowModal(false);
       setSelectedRequest(null);
       fetchReturnRequests();
     } catch (error: any) {
-      alert(error.response?.data?.error || 'Failed to update return request');
+      showError(error.response?.data?.error || 'Failed to update return request');
     } finally {
       setProcessing(false);
     }

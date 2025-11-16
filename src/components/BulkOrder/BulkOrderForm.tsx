@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import styles from './BulkOrderForm.module.css';
 import API from '../../services/api';
+import { useNotification } from '../../context/NotificationContext';
 
 const BulkOrderForm = () => {
+  const { showError } = useNotification();
   const [formData, setFormData] = useState({
     company_name: '',
     contact_person: '',
@@ -92,7 +94,7 @@ const BulkOrderForm = () => {
         const errorMsg = result?.error || result?.detail || 
                         (result?.errors ? JSON.stringify(result.errors) : 'Failed to submit. Please try again.');
         console.error('Bulk order error:', result);
-        alert(errorMsg);
+        showError(errorMsg);
       }
     } catch (error: any) {
       console.error('Bulk order submission error:', error);
@@ -100,7 +102,7 @@ const BulkOrderForm = () => {
                            error?.response?.data?.detail ||
                            error?.message || 
                            'Network error. Please try again later.';
-      alert(`Failed to submit: ${errorMessage}`);
+      showError(`Failed to submit: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

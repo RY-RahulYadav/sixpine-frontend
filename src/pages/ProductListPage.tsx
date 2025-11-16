@@ -6,6 +6,7 @@ import CategoryTabs from '../components/CategoryTabs';
 import Footer from '../components/Footer';
 import { productAPI } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 import '../styles/productList.css';
 import '../styles/productListModern.css';
 import '../styles/filterDropdowns.css';
@@ -90,6 +91,7 @@ const ProductListPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { addToCart } = useApp();
   const navigate = useNavigate();
+  const { showError } = useNotification();
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -353,7 +355,7 @@ const ProductListPage: React.FC = () => {
       // Sidebar will open automatically via context
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
-      alert(errorMsg);
+      showError(errorMsg);
     }
   };
 
@@ -380,7 +382,7 @@ const ProductListPage: React.FC = () => {
       navigate('/cart');
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
-      alert(errorMsg);
+      showError(errorMsg);
     }
   };
 

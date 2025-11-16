@@ -4,6 +4,7 @@ import styles from './heroSection.module.css';
 import API from '../../services/api';
 import { homepageAPI } from '../../services/api';
 import { useFooterSettings } from '../../hooks/useFooterSettings';
+import { useNotification } from '../../context/NotificationContext';
 
 interface HeroSlide {
   id: number;
@@ -18,6 +19,7 @@ interface HeroSlide {
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { showSuccess, showError } = useNotification();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpertOpen, setIsExpertOpen] = useState(false);
@@ -417,9 +419,9 @@ const HeroSection = () => {
                       contactFormRef.current.reset();
                     }
                     
-                    alert(successMessage);
+                    showSuccess(successMessage);
                     
-                    // Small delay before closing to ensure alert is processed
+                    // Small delay before closing to ensure toast is processed
                     setTimeout(() => {
                       setIsExpertOpen(false);
                     }, 100);
@@ -427,7 +429,7 @@ const HeroSection = () => {
                     const errorMsg = result?.error || result?.detail || 
                                     (result?.errors ? JSON.stringify(result.errors) : 'Failed to submit. Please try again.');
                     console.error('Contact form error:', result);
-                    alert(errorMsg);
+                    showError(errorMsg);
                     setIsSubmitting(false);
                   }
                 } catch (error: any) {
@@ -436,7 +438,7 @@ const HeroSection = () => {
                                      error?.response?.data?.detail ||
                                      error?.message || 
                                      'Network error. Please try again later.';
-                  alert(`Failed to submit: ${errorMessage}`);
+                  showError(`Failed to submit: ${errorMessage}`);
                   setIsSubmitting(false);
                 }
               }}

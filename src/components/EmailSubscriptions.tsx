@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import styles from '../styles/EmailSubscriptions.module.css';
+import { useNotification } from '../context/NotificationContext';
 
 interface Subscription {
   name: string;
@@ -8,6 +8,7 @@ interface Subscription {
 }
 
 const EmailSubscriptions = () => {
+  const { showSuccess } = useNotification();
   const [activeTab, setActiveTab] = useState('current'); 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,7 +33,7 @@ const EmailSubscriptions = () => {
   const handleSubscribe = (subscriptionName: string) => {
     console.log(`Subscribing to: ${subscriptionName}`);
    
-    alert(`You've subscribed to the ${subscriptionName}!`);
+    showSuccess(`You've subscribed to the ${subscriptionName}!`);
   };
 
   return (

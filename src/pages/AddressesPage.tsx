@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useApp } from '../context/AppContext';
+import { useNotification } from '../context/NotificationContext';
 import { addressAPI, homepageAPI } from '../services/api';
 import styles from '../styles/AddressesPage.module.css';
 import Productdetails_Slider1 from "../components/Products_Details/productdetails_slider1";
@@ -39,6 +40,7 @@ interface Address {
 const AddressesPage: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useApp();
+  const { showError, showConfirmation } = useNotification();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -196,14 +198,22 @@ const AddressesPage: React.FC = () => {
       setShowAddForm(false);
       setEditingAddress(null);
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save address');
+      showError(err.response?.data?.error || 'Failed to save address');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (addressId: number) => {
-    if (!window.confirm('Are you sure you want to delete this address?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Address',
+      message: 'Are you sure you want to delete this address?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -214,7 +224,7 @@ const AddressesPage: React.FC = () => {
     } catch (err: any) {
       // Show user-friendly error message if address is protected
       const errorMessage = err.response?.data?.error || 'Failed to delete address. This address may be associated with an existing order.';
-      alert(errorMessage);
+      showError(errorMessage);
       console.error('Failed to delete address:', err);
       // Don't update the UI - address remains in list
     }
@@ -228,7 +238,7 @@ const AddressesPage: React.FC = () => {
         await fetchAddresses();
       }
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to set default address');
+      showError(err.response?.data?.error || 'Failed to set default address');
     }
   };
 

@@ -1,14 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from '../styles/FAQs.module.css';
 import { useFooterSettings } from '../hooks/useFooterSettings';
+import { faqPageAPI } from '../services/api';
 
-const faqCategories = [
-  { name: 'Orders', icon: '📦', count: 5 },
-  { name: 'Shipping', icon: '🚚', count: 4 },
-  { name: 'Payments', icon: '💳', count: 3 },
+interface FAQCategory {
+  name: string;
+  icon: string;
+  count: number;
+}
+
+interface FAQItem {
+  id: number;
+  category: string;
+  q: string;
+  a: string;
+}
+
+interface FAQContent {
+  header: {
+    title: string;
+    subtitle: string;
+    lastUpdated: string;
+  };
+  categories: FAQCategory[];
+  faqItems: FAQItem[];
+}
+
+// Default fallback data
+const defaultFAQCategories: FAQCategory[] = [
+  { name: 'Orders', icon: '📦', count: 3 },
+  { name: 'Shipping', icon: '🚚', count: 3 },
+  { name: 'Payments', icon: '💳', count: 2 },
+  { name: 'Returns', icon: '↩️', count: 2 },
 ];
 
-const faqItems = [
+const defaultFAQItems: FAQItem[] = [
   {
     id: 1,
     category: 'Orders',
@@ -75,24 +101,74 @@ const FAQs = () => {
   const { whatsAppNumber: _whatsAppNumber } = useFooterSettings();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [faqContent, setFAQContent] = useState<FAQContent | null>(null);
 
+  useEffect(() => {
+    fetchFAQContent();
+  }, []);
+
+  const fetchFAQContent = async () => {
+    try {
+      setLoading(true);
+      const response = await faqPageAPI.getFAQPageContent('main');
+      
+      if (response.data && response.data.content) {
+        setFAQContent(response.data.content);
+      } else if (response.data && response.data.section_key === 'main') {
+        setFAQContent(response.data.content);
+      }
+    } catch (error) {
+      console.error('Error fetching FAQ content:', error);
+      // Use defaults on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Use fetched content or defaults
+  const faqCategories = faqContent?.categories || defaultFAQCategories;
+  const faqItems = faqContent?.faqItems || defaultFAQItems;
+  const header = faqContent?.header || {
+    title: 'Frequently Asked Questions',
+    subtitle: 'Find answers to common questions about our furniture, ordering process, shipping, and more.',
+    lastUpdated: 'October 13, 2025'
+  };
+
+  // Filter FAQs based on search query and selected category
   const filteredFAQs = faqItems.filter(item => {
-    const matchesSearch = item.q.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.a.toLowerCase().includes(searchQuery.toLowerCase());
+    // Search functionality - check both question and answer
+    const searchTerm = searchQuery.trim().toLowerCase();
+    const matchesSearch = searchTerm === '' || 
+                         item.q.toLowerCase().includes(searchTerm) ||
+                         item.a.toLowerCase().includes(searchTerm);
+    
+    // Category filter
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+    
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className={styles.faqPageContainer}>
+        <div className={styles.faqWrapper} style={{ textAlign: 'center', padding: '40px' }}>
+          <div>Loading FAQs...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.faqPageContainer}>
       <div className={styles.faqWrapper}>
         {/* Header Section */}
         <div className={styles.headerSection}>
-          <h1 className={styles.mainTitle}>Frequently Asked Questions</h1>
+          <h1 className={styles.mainTitle}>{header.title}</h1>
           <p className={styles.subtitle}>
-            Find answers to common questions about our furniture, ordering process, shipping, and more.
+            {header.subtitle}
           </p>
-          <span className={styles.lastUpdated}>Last updated: October 13, 2025</span>
+          <span className={styles.lastUpdated}>Last updated: {header.lastUpdated}</span>
         </div>
 
         {/* Search Bar */}
@@ -103,6 +179,11 @@ const FAQs = () => {
             placeholder="Search for answers..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setSearchQuery('');
+              }
+            }}
           />
           <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" 
@@ -154,7 +235,19 @@ const FAQs = () => {
             ))
           ) : (
             <div style={{textAlign: 'center', padding: '40px', color: '#7f8c8d', fontSize: '1.1rem'}}>
-              No questions found matching your search. Try different keywords.
+              {searchQuery.trim() ? (
+                <>
+                  <p style={{ marginBottom: '8px', fontWeight: '500' }}>No questions found matching "{searchQuery}"</p>
+                  <p style={{ fontSize: '0.9rem', color: '#95a5a6' }}>
+                    {selectedCategory !== 'All' 
+                      ? `Try searching in a different category or clearing the search.`
+                      : `Try different keywords or check your spelling.`
+                    }
+                  </p>
+                </>
+              ) : (
+                <p>No questions available in this category.</p>
+              )}
             </div>
           )}
         </div>

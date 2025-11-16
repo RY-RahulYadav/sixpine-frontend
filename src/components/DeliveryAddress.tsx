@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { addressAPI } from '../services/api';
+import { useNotification } from '../context/NotificationContext';
 import styles from './DeliveryAddress.module.css';
 
 interface Address {
@@ -21,6 +22,7 @@ interface DeliveryAddressProps {
 }
 
 const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ selectedAddressId, onAddressChange }) => {
+  const { showError, showConfirmation } = useNotification();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -140,7 +142,7 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ selectedAddressId, on
       setShowAddForm(false);
       setEditingAddress(null);
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save address');
+      showError(err.response?.data?.error || 'Failed to save address');
     } finally {
       setSubmitting(false);
     }
@@ -161,12 +163,20 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ selectedAddressId, on
         await fetchAddresses();
       }
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to set default address');
+      showError(err.response?.data?.error || 'Failed to set default address');
     }
   };
 
   const handleDeleteAddress = async (addressId: number) => {
-    if (!window.confirm('Are you sure you want to delete this address?')) {
+    const confirmed = await showConfirmation({
+      title: 'Delete Address',
+      message: 'Are you sure you want to delete this address?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -183,7 +193,7 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ selectedAddressId, on
     } catch (err: any) {
       // Show user-friendly error message if address is protected
       const errorMessage = err.response?.data?.error || 'Failed to delete address. This address may be associated with an existing order.';
-      alert(errorMessage);
+      showError(errorMessage);
       console.error('Failed to delete address:', err);
       // Don't update the UI - address remains in list
     }

@@ -85,8 +85,6 @@ interface Product {
   category: { id: number; name: string };
   subcategory?: { id: number; name: string } | null;
   material?: { id: number; name: string } | null;
-  price: number;
-  old_price: number | null;
   brand: string;
   dimensions: string;
   weight: string;
@@ -132,8 +130,8 @@ const AdminProductDetail: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'images' | 'variants' | 'details' | 'seo'>('basic');
-  const [activeDetailSection, setActiveDetailSection] = useState<'specifications' | 'features' | 'screen_offer' | 'user_guide' | 'care_instructions' | 'recommendations' | 'offers' | null>('specifications');
+  const [activeTab, setActiveTab] = useState<'basic' | 'variants' | 'details' | 'seo'>('basic');
+  const [activeDetailSection, setActiveDetailSection] = useState<'specifications' | 'features' | 'screen_offer' | 'user_guide' | 'care_instructions' | 'recommendations' | null>('specifications');
   
   // Form data
   const [formData, setFormData] = useState<{
@@ -142,12 +140,9 @@ const AdminProductDetail: React.FC = () => {
     sku: string;
     short_description: string;
     long_description: string;
-    main_image: string;
     category_id: string;
     subcategory_id: string;
     material_id: string;
-    price: string;
-    old_price: string;
     brand: string;
     dimensions: string;
     weight: string;
@@ -166,12 +161,9 @@ const AdminProductDetail: React.FC = () => {
     sku: '',
     short_description: '',
     long_description: '',
-    main_image: '',
     category_id: '',
     subcategory_id: '',
     material_id: '',
-    price: '',
-    old_price: '',
     brand: 'Sixpine',
     dimensions: '',
     weight: '',
@@ -186,9 +178,6 @@ const AdminProductDetail: React.FC = () => {
     is_active: true,
   });
   
-  // Images
-  const [productImages, setProductImages] = useState<ProductImage[]>([]);
-  
   // Variants
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [lastSelectedColorId, setLastSelectedColorId] = useState<number | null>(null);
@@ -198,9 +187,6 @@ const AdminProductDetail: React.FC = () => {
   
   // Features
   const [features, setFeatures] = useState<Feature[]>([]);
-  
-  // Offers
-  const [offers, setOffers] = useState<Offer[]>([]);
   
   // Recommendations
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -245,12 +231,9 @@ const AdminProductDetail: React.FC = () => {
             sku: productData.sku || '',
             short_description: productData.short_description || '',
             long_description: productData.long_description || '',
-            main_image: productData.main_image || '',
             category_id: productData.category?.id?.toString() || '',
             subcategory_id: productData.subcategory?.id?.toString() || '',
             material_id: productData.material?.id?.toString() || '',
-            price: productData.price?.toString() || '',
-            old_price: productData.old_price?.toString() || '',
             brand: productData.brand || 'Sixpine',
             dimensions: productData.dimensions || '',
             weight: productData.weight || '',
@@ -265,7 +248,6 @@ const AdminProductDetail: React.FC = () => {
             is_active: productData.is_active ?? true,
           });
           
-          setProductImages(productData.images || []);
           // Normalize variants: ensure color_id is set from color.id if needed
           const normalizedVariants = (productData.variants || []).map((v: any) => {
             // Extract color_id - it should now come from backend, but fallback to color.id if needed
@@ -283,7 +265,6 @@ const AdminProductDetail: React.FC = () => {
           }
           setSpecifications(productData.specifications || []);
           setFeatures(productData.features || []);
-          setOffers(productData.offers || []);
           // Normalize recommendations: ensure recommended_product_id is set
           const normalizedRecommendations = (productData.recommendations || []).map((rec: any) => {
             // Extract recommended_product_id from various possible sources
@@ -367,25 +348,6 @@ const AdminProductDetail: React.FC = () => {
   };
   
   // Image management
-  const handleAddImage = () => {
-    setProductImages([...productImages, {
-      image: '',
-      alt_text: '',
-      sort_order: productImages.length,
-      is_active: true
-    }]);
-  };
-  
-  const handleRemoveImage = (index: number) => {
-    setProductImages(productImages.filter((_, i) => i !== index));
-  };
-  
-  const handleImageChange = (index: number, field: string, value: any) => {
-    const updated = [...productImages];
-    updated[index] = { ...updated[index], [field]: value };
-    setProductImages(updated);
-  };
-  
   // Variant management
   const handleAddVariant = () => {
     // Use last selected color, or first color, or 0 if no colors available
@@ -484,29 +446,6 @@ const AdminProductDetail: React.FC = () => {
     setFeatures(updated);
   };
   
-  // Offer management
-  const handleAddOffer = () => {
-    setOffers([...offers, {
-      title: '',
-      description: '',
-      discount_percentage: null,
-      discount_amount: null,
-      is_active: true,
-      valid_from: null,
-      valid_until: null
-    }]);
-  };
-  
-  const handleRemoveOffer = (index: number) => {
-    setOffers(offers.filter((_, i) => i !== index));
-  };
-  
-  const handleOfferChange = (index: number, field: string, value: any) => {
-    const updated = [...offers];
-    updated[index] = { ...updated[index], [field]: value };
-    setOffers(updated);
-  };
-  
   // Recommendation management
   const handleAddRecommendation = (type: Recommendation['recommendation_type']) => {
     setRecommendations([...recommendations, {
@@ -569,12 +508,9 @@ const AdminProductDetail: React.FC = () => {
         sku: formData.sku || null,
         short_description: formData.short_description,
         long_description: formData.long_description,
-        main_image: formData.main_image,
         category_id: categoryId,
         subcategory_id: formData.subcategory_id ? parseInt(formData.subcategory_id) : null,
         material_id: formData.material_id ? parseInt(formData.material_id) : null,
-        price: parseFloat(formData.price) || 0,
-        old_price: formData.old_price ? parseFloat(formData.old_price) : null,
         brand: isSixpineProduct ? 'Sixpine' : formData.brand,
         dimensions: formData.dimensions,
         weight: formData.weight,
@@ -587,12 +523,6 @@ const AdminProductDetail: React.FC = () => {
         meta_description: formData.meta_description,
         is_featured: formData.is_featured,
         is_active: formData.is_active,
-        images: productImages.map(img => ({
-          image: img.image,
-          alt_text: img.alt_text,
-          sort_order: img.sort_order,
-          is_active: img.is_active !== false
-        })),
         variants: variants.map(v => {
           // Ensure color_id is always set (from v.color_id or v.color.id)
           const colorId = v.color_id || v.color?.id;
@@ -629,15 +559,6 @@ const AdminProductDetail: React.FC = () => {
           feature: f.feature,
           sort_order: f.sort_order,
           is_active: f.is_active !== false
-        })),
-        offers: offers.map(o => ({
-          title: o.title,
-          description: o.description,
-          discount_percentage: o.discount_percentage,
-          discount_amount: o.discount_amount ? parseFloat(o.discount_amount.toString()) : null,
-          is_active: o.is_active !== false,
-          valid_from: o.valid_from || null,
-          valid_until: o.valid_until || null
         })),
         recommendations: recommendations.map(r => ({
           id: r.id,
@@ -792,13 +713,6 @@ const AdminProductDetail: React.FC = () => {
           </button>
           <button
             type="button"
-            className={activeTab === 'images' ? 'active' : ''}
-            onClick={() => setActiveTab('images')}
-          >
-            Images ({productImages.length})
-          </button>
-          <button
-            type="button"
             className={activeTab === 'variants' ? 'active' : ''}
             onClick={() => setActiveTab('variants')}
           >
@@ -943,36 +857,6 @@ const AdminProductDetail: React.FC = () => {
               
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="price">Price*</label>
-                  <input
-                    type="number"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    step="0.01"
-                    min="0"
-                    required
-                  className="tw-w-full"
-                  />
-                </div>
-                <div className="form-group">
-                <label htmlFor="old_price">Old Price (for discount)</label>
-                  <input
-                    type="number"
-                    id="old_price"
-                    name="old_price"
-                    value={formData.old_price}
-                    onChange={handleChange}
-                    step="0.01"
-                    min="0"
-                  className="tw-w-full"
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
                 <label htmlFor="brand">Brand</label>
                   <input
                   type="text"
@@ -1065,83 +949,6 @@ const AdminProductDetail: React.FC = () => {
                   />
                   <label htmlFor="is_featured">Featured</label>
                 </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Images Tab */}
-        {activeTab === 'images' && (
-          <div className="admin-card">
-            <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
-              <h3>Product Images</h3>
-              <button type="button" className="admin-btn secondary" onClick={handleAddImage}>
-                <span className="material-symbols-outlined">add</span>
-                Add Image
-              </button>
-            </div>
-            
-            <div className="form-group tw-mb-4">
-              <label htmlFor="main_image">Main Image URL*</label>
-                  <input
-                type="url"
-                id="main_image"
-                name="main_image"
-                value={formData.main_image}
-                    onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
-                className="tw-w-full"
-                  />
-              {formData.main_image && (
-                <img src={formData.main_image} alt="Main" className="tw-mt-2 tw-h-32 tw-object-contain tw-border tw-rounded" />
-              )}
-              </div>
-              
-            <div className="tw-space-y-4">
-              {productImages.map((img, index) => (
-                <div key={index} className="tw-p-4 tw-border tw-rounded-lg">
-                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-2">
-                    <h4 className="tw-font-semibold">Image {index + 1}</h4>
-                  <button
-                    type="button"
-                      className="tw-text-red-600 hover:tw-text-red-700"
-                      onClick={() => handleRemoveImage(index)}
-                    >
-                      <span className="material-symbols-outlined">delete</span>
-                  </button>
-                </div>
-                  <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
-                    <div>
-                      <label>Image URL</label>
-                      <input
-                        type="url"
-                        value={img.image}
-                        onChange={(e) => handleImageChange(index, 'image', e.target.value)}
-                        placeholder="https://example.com/image.jpg"
-                        className="tw-w-full"
-                      />
-                      {img.image && (
-                        <img src={img.image} alt="Preview" className="tw-mt-2 tw-h-32 tw-object-contain tw-border tw-rounded" />
-                      )}
-                    </div>
-                    <div>
-                      <label>Alt Text</label>
-                      <input
-                        type="text"
-                        value={img.alt_text}
-                        onChange={(e) => handleImageChange(index, 'alt_text', e.target.value)}
-                        className="tw-w-full"
-                      />
-                      <label className="tw-mt-2 tw-block">Sort Order</label>
-                      <input
-                        type="number"
-                        value={img.sort_order}
-                        onChange={(e) => handleImageChange(index, 'sort_order', parseInt(e.target.value) || 0)}
-                        className="tw-w-full"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         )}
@@ -1898,136 +1705,6 @@ const AdminProductDetail: React.FC = () => {
               )}
             </div>
             
-            {/* Offers Section */}
-            <div className="tw-border-2 tw-border-pink-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-pink-50 tw-via-pink-100 tw-to-pink-50">
-                <button
-                  type="button"
-                  className="btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform"
-                  onClick={() => setActiveDetailSection(activeDetailSection === 'offers' ? null : 'offers')}
-                >
-                  <span 
-                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-pink-600 tw-font-bold tw-text-2xl" 
-                    style={{ transform: activeDetailSection === 'offers' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  >
-                    expand_more
-                  </span>
-                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">Offers</h3>
-                </button>
-                <button 
-                  type="button" 
-                  className="tw-flex tw-items-center tw-gap-2 tw-px-5 tw-py-2.5 tw-bg-pink-600 tw-text-white tw-rounded-lg hover:tw-bg-pink-700 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-sm hover:tw-scale-105 active:tw-scale-95"
-                  onClick={handleAddOffer}
-                >
-                  <span className="material-symbols-outlined tw-text-lg tw-font-bold">add</span>
-                  Add Offer
-                </button>
-              </div>
-              {activeDetailSection === 'offers' && (
-                <div className="tw-p-5 tw-bg-white tw-space-y-4">
-                  {offers.map((offer, index) => (
-                    <div key={index} className="tw-p-5 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg hover:tw-shadow-md tw-transition-shadow">
-                      <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
-                        <h4 className="tw-font-semibold tw-text-md tw-text-gray-700 tw-flex tw-items-center tw-gap-2">
-                          <span className="material-symbols-outlined tw-text-pink-600">local_offer</span>
-                          Offer {index + 1}
-                        </h4>
-                        <button
-                          type="button"
-                          className="tw-px-3 tw-py-1.5 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-gap-1"
-                          onClick={() => handleRemoveOffer(index)}
-                        >
-                          <span className="material-symbols-outlined tw-text-base">delete</span>
-                          <span className="tw-text-sm tw-font-medium">Remove</span>
-                        </button>
-                      </div>
-                      <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
-                        <div>
-                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Title*</label>
-                          <input
-                            type="text"
-                            value={offer.title}
-                            onChange={(e) => handleOfferChange(index, 'title', e.target.value)}
-                            className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-pink-500 focus:tw-border-transparent tw-text-sm"
-                            placeholder="e.g., Summer Sale"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Description*</label>
-                          <textarea
-                            value={offer.description}
-                            onChange={(e) => handleOfferChange(index, 'description', e.target.value)}
-                            rows={2}
-                            className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-pink-500 focus:tw-border-transparent tw-text-sm tw-resize-none"
-                            placeholder="Offer description..."
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Discount Percentage</label>
-                          <input
-                            type="number"
-                            value={offer.discount_percentage || ''}
-                            onChange={(e) => handleOfferChange(index, 'discount_percentage', e.target.value ? parseInt(e.target.value) : null)}
-                            min="0"
-                            max="100"
-                            className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-pink-500 focus:tw-border-transparent tw-text-sm"
-                            placeholder="e.g., 20"
-                          />
-                        </div>
-                        <div>
-                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Discount Amount</label>
-                          <input
-                            type="number"
-                            value={offer.discount_amount || ''}
-                            onChange={(e) => handleOfferChange(index, 'discount_amount', e.target.value || null)}
-                            step="0.01"
-                            className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-pink-500 focus:tw-border-transparent tw-text-sm"
-                            placeholder="e.g., 100.00"
-                          />
-                        </div>
-                        <div>
-                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Valid From</label>
-                          <input
-                            type="datetime-local"
-                            value={offer.valid_from || ''}
-                            onChange={(e) => handleOfferChange(index, 'valid_from', e.target.value || null)}
-                            className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-pink-500 focus:tw-border-transparent tw-text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Valid Until</label>
-                          <input
-                            type="datetime-local"
-                            value={offer.valid_until || ''}
-                            onChange={(e) => handleOfferChange(index, 'valid_until', e.target.value || null)}
-                            className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-pink-500 focus:tw-border-transparent tw-text-sm"
-                          />
-                        </div>
-                        <div className="tw-flex tw-items-end">
-                          <label className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-bg-white tw-border tw-border-gray-300 tw-rounded-md tw-cursor-pointer hover:tw-bg-gray-50">
-                            <input
-                              type="checkbox"
-                              checked={offer.is_active !== false}
-                              onChange={(e) => handleOfferChange(index, 'is_active', e.target.checked)}
-                              className="tw-w-4 tw-h-4 tw-text-pink-600 tw-rounded focus:tw-ring-2 focus:tw-ring-pink-500"
-                            />
-                            <span className="tw-text-sm tw-font-medium tw-text-gray-700">Active</span>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {offers.length === 0 && (
-                    <div className="tw-text-center tw-py-8 tw-text-gray-400">
-                      <span className="material-symbols-outlined tw-text-5xl tw-mb-2">sell</span>
-                      <p className="tw-text-sm">No offers added yet. Click "Add" to create one.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
         )}
         
