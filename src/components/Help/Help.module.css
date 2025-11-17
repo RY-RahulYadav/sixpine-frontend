@@ -7,10 +7,10 @@
   max-width: 1500px;
   margin: 0 auto;
   text-align: center;
-padding-left: 1.5rem;
-padding-right: 1.5rem;
-padding-top: 3.7rem;
-padding-bottom: 5rem;
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 3.7rem;
+  padding-bottom: 5rem;
   background-color: #f8f9fa;
 
 }
@@ -83,7 +83,7 @@ padding-bottom: 5rem;
 }
 
 .helpCategories {
-  padding: 4rem 1.5rem;
+  padding: 4rem 0;
 }
 
 .containerFluid {
@@ -192,7 +192,7 @@ padding-bottom: 5rem;
 }
 
 .frequentQuestionsSection {
-  padding: 4rem 1.5rem;
+  padding: 4rem 0;
   background-color: #f8f9fa;
 }
 
@@ -267,7 +267,7 @@ padding-bottom: 5rem;
 }
 
 .contactSection {
-  padding: 4rem 1.5rem;
+  padding: 4rem 0;
 }
 
 .contactCards {
@@ -417,9 +417,9 @@ padding-bottom: 5rem;
 }
 
 .resourcesSection {
-  width: 1500px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
+  padding: 4rem 0;
   background-color: #f8f9fa;
 }
 

@@ -4,7 +4,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.7;
   color: #333;
-  padding: 30px 10px;
+  padding: 30px 0;
   max-width: 100%;
   margin: 0 auto;   
   /* text-align: center; */
@@ -60,7 +60,7 @@
 /* Laptops / medium screens */
 @media (max-width: 1024px) {
   .main {
-    padding: 30px 20px;
+    padding: 30px 0;
   }
   .heading {
     font-size: 2rem;
@@ -79,7 +79,7 @@
 /* Tablets / small screens */
 @media (max-width: 768px) {
   .main {
-    padding:20px ;
+    padding: 20px 0;
   }
   .heading {
     font-size: 1.8rem;
@@ -98,7 +98,7 @@
 /* Mobile / extra small screens */
 @media (max-width: 480px) {
   .main {
-    padding:20px ;
+    padding: 20px 0;
   }
   .heading {
     font-size: 1.3rem;

@@ -1,5 +1,5 @@
 .advertisePage {
-  padding: 2rem 0.8rem;
+  padding: 2rem 0;
   /* max-width: 900px; */
   margin: auto;
   line-height: 1.6;
@@ -45,7 +45,7 @@ a:hover {
 /* 📱 Responsive */
 @media (max-width: 768px) {
   .advertisePage {
-    padding: 1.2rem;
+    padding: 1.2rem 0;
   }
 
   .title {

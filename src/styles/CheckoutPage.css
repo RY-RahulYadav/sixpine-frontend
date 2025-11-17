@@ -1,7 +1,7 @@
 .checkout-page {
     display: flex;
     justify-content: center;
-    padding: 20px;
+    padding: 0;
     background-color: #f7f7f7;
 }
 

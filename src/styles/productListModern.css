@@ -44,7 +44,7 @@
 .product-list-modern-container {
   background-color: var(--sixpine-bg-light);
   max-width: 1500px !important;
-  padding: 20px 0 !important;
+  padding: 0 !important;
   margin: 0 auto !important;
   min-height: 70vh;
 }

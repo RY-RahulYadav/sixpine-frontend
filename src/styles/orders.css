@@ -6,6 +6,13 @@
   width: 100%;
   margin: 0 auto;
   max-width: 1500px;
+  padding: 0;
+}
+
+/* Remove padding from container-fluid inside orders-page */
+.orders-page .container-fluid {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /* Breadcrumb */
@@ -559,7 +566,12 @@
 
 @media (max-width: 480px) {
   .orders-page {
-    padding: 0 15px 40px 15px;
+    padding: 0 0 40px 0;
+  }
+  
+  .orders-page .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
   }
 
   .search-box-orders {
