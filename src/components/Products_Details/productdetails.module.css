@@ -12,18 +12,128 @@
 .breadcrumb {
   font-size: 14px;
   color: #565959;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
   line-height: 1.6;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
 }
 
 .breadcrumb a {
   color: #007185;
   text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .breadcrumb a:hover {
   color: #c7511f;
   text-decoration: underline;
+}
+
+.breadcrumb > span:not(:last-child)::after,
+.breadcrumb > a:not(:last-child)::after {
+  content: '/';
+  margin: 0 4px;
+  color: #999;
+  font-weight: normal;
+}
+
+.breadcrumb > span {
+  color: #565959;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Responsive Breadcrumb */
+@media (max-width: 770px) {
+  .breadcrumb {
+    font-size: 13px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    gap: 0;
+    justify-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .breadcrumb a,
+  .breadcrumb span {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  .breadcrumb > span:not(:last-child)::after,
+  .breadcrumb > a:not(:last-child)::after {
+    margin: 0 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb {
+    font-size: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    line-height: 1.5;
+    gap: 0;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+  }
+
+  .breadcrumb a,
+  .breadcrumb span {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  .breadcrumb a {
+    font-size: 12px;
+  }
+
+  .breadcrumb > span:not(:last-child)::after,
+  .breadcrumb > a:not(:last-child)::after {
+    margin: 0 2px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 375px) {
+  .breadcrumb {
+    font-size: 11px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    gap: 0;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+  }
+
+  .breadcrumb a,
+  .breadcrumb span {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+
+  .breadcrumb a {
+    font-size: 11px;
+  }
+
+  .breadcrumb > span:not(:last-child)::after,
+  .breadcrumb > a:not(:last-child)::after {
+    margin: 0 2px;
+  }
 }
 
 /* Main Layout */
@@ -280,12 +390,14 @@
 }
 
 .ratings {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 16px;
-  color: #ffa41c;
-  margin-bottom: 15px;
+ display: flex;
+    align-items: center;
+    /* gap: 5px; */
+    font-size: 16px;
+    color: #ffa41c;
+    /* margin-bottom: -5px; */
+    margin-top: 0;
+    margin-left: -8px;
 }
 
 .ratings span {
@@ -845,8 +957,53 @@
 
 
 
-/* Responsive Design */
-@media (max-width: 1200px) {
+/* ============================================
+   RESPONSIVE DESIGN - PRESERVING LAPTOP DESIGN
+   ============================================ */
+
+/* Large Desktops (above 1400px) - Enhanced layout */
+@media (min-width: 1400px) {
+  .productPage {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+
+  .mainLayout {
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 30px;
+  }
+
+  .imageWrapper {
+    min-height: 550px;
+    max-height: 650px;
+  }
+
+  .mainImage {
+    min-height: 550px;
+    max-height: 650px;
+  }
+
+  .modalLayout {
+    max-width: 1400px;
+  }
+
+  .modalThumbnail {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* Extra Large Desktops (1200px - 1399px) - Current laptop design preserved */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .mainLayout {
+    grid-template-columns: 1fr 1.8fr 0.9fr;
+    gap: 20px;
+  }
+}
+
+/* Large Tablets and Small Laptops (992px - 1199px) - Current laptop design preserved */
+@media (min-width: 992px) and (max-width: 1199px) {
   .mainLayout {
     grid-template-columns: 1fr 1.5fr 1fr;
   }
@@ -909,32 +1066,106 @@
   }
 }
 
-@media (max-width: 768px) {
+/* Tablets (768px - 991px) - Improved responsive layout */
+@media (max-width: 991px) and (min-width: 769px) {
   .productPage {
-    padding: 20px;
+    padding: 20px 15px;
   }
-  
+
   .mainLayout {
-    grid-template-columns: 1fr;
-    gap: 15px;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 20px;
   }
-  
-  
+
+  .sidebar {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
   .imageSection {
     position: static;
   }
 
+  .imageWrapper {
+    min-height: 400px;
+    max-height: 500px;
+  }
+
   .mainImage {
-  width: 100%;
-  object-fit: contain;
-  max-width: 100%;
-  /* padding: 100px; */
-  
+    min-height: 400px;
+    max-height: 500px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .priceBox {
+    margin: 15px 0;
+  }
+
+  .emiPrice {
+    font-size: 20px;
+  }
+
+  .finalPrice {
+    font-size: 18px;
+  }
+
+  .keyDetailsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modalLayout {
+    gap: 20px;
+  }
+
+  .modalThumbnail {
+    width: 80px;
+    height: 80px;
+  }
 }
 
+/* Mobile Landscape and Tablets Portrait (below 768px) */
+@media (max-width: 768px) {
+  .productPage {
+    padding: 15px 12px;
+  }
+  
+  .mainLayout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .imageSection {
+    position: static;
+    order: 1;
+  }
+
+  .imageWrapper {
+    min-height: 350px;
+    max-height: 450px;
+    margin-bottom: 15px;
+  }
+
+  .mainImage {
+    width: 100%;
+    object-fit: contain;
+    max-width: 100%;
+    min-height: 350px;
+    max-height: 450px;
+  }
+
+  .details {
+    order: 2;
+    padding: 0;
+  }
   
   .sidebar {
     position: static;
+    order: 3;
   }
   
   .mainLayout > div:last-child {
@@ -945,39 +1176,135 @@
   
   .title {
     font-size: 20px;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+
+  .brand {
+    font-size: 13px;
+    margin-bottom: 8px;
   }
   
-  .price {
-    font-size: 24px;
+  .ratings {
+    font-size: 14px;
+    margin-bottom: 12px;
   }
+
+  .priceBox {
+    margin: 12px 0;
+  }
+
+  .emiPrice {
+    font-size: 20px;
+  }
+
+  .finalPrice {
+    font-size: 18px;
+  }
+
+  .offersTitle {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .offers li {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
   .options strong {
-    min-width: 50px;   /* label chhota */
-    font-size: 12px;
+    min-width: 50px;
+    font-size: 13px;
   }
 
- .options button {
-    flex: initial;      /* buttons apne content ke hisaab se width lenge */
-    min-width: auto;    /* minimum width remove */
-    padding: 4px 8px;   /* thoda space */
-    font-size: 12px;
+  .options button {
+    flex: initial;
+    min-width: auto;
+    padding: 6px 10px;
+    font-size: 13px;
   }
+
   .keyDetailsGrid {
-   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* ek row me 2 column */
-  gap: 12px;
-
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
-    .subTotal, .goCart, .specialOffer2, .handmade {
+  .detailCard {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .productDetailsContent {
+    margin-top: 20px;
+    padding-top: 20px;
+  }
+
+  .productDetailsContent h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .aboutItemList li {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .subTotal, .goCart, .specialOffer2, .handmade {
     display: none;
   }
 
   .thumbnails {
     justify-content: center;
+    gap: 8px;
   }
-  
+
+  .thumbnail {
+    width: 55px;
+    height: 55px;
+  }
+
+  .cartSummary {
+    text-align: center;
+    padding: 15px;
+  }
+
+  .cartSummary h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .cartSummary p {
+    font-size: 13px;
+  }
+
+  .cartControls {
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .cartControls .qtyBtn {
+    max-width: 35%;
+    min-width: 40px;
+  }
+
+  .addCart,
+  .buyNow {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .specialOffer {
+    padding: 15px;
+  }
+
+  .specialOffer img {
+    height: 180px;
+  }
+
   .modal {
-    max-width: 90%;
+    max-width: 95%;
     padding: 20px;
   }
   
@@ -986,11 +1313,31 @@
   }
 
   .imageModal {
-    padding: 20px;
+    padding: 15px;
+  }
+
+  .imageModalOverlay {
+    width: 95%;
+    height: 90%;
   }
 
   .modalLayout {
+    flex-direction: column;
     gap: 15px;
+    height: auto;
+  }
+
+  .modalImageContainer {
+    max-height: 60vh;
+  }
+
+  .modalThumbnailsContainer {
+    flex-direction: row;
+    max-height: none;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px;
   }
 
   .zoomedImage {
@@ -1001,112 +1348,302 @@
     width: 70px;
     height: 70px;
   }
-
-  
-.addCart,
-.buyNow {
-  width: 70%;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 10px;
-  gap: 10px;
-}
- .cartControls .qtyBtn,
-  .cartControls2 .qtyBtn {
-    /* flex: 0 0 70%;   */
-    max-width: 30%;
-  }
-   .cartControls,
-  .cartControls2 {
-    justify-content: center;
-  }
-
-
-  .cartSummary
-  {
-    text-align: center;
-  }
-
 }
 
+/* Small Mobile Devices (below 480px) */
 @media (max-width: 480px) {
-
-  
-  .mainImage {
-  width: 100%;
-  object-fit: contain;
-  max-width: 100%;
-  /* padding: 100px; */
-margin: 0 auto;  
-}
-
-  .breadcrumb {
-    font-size: 11px;
+  .productPage {
+    padding: 12px 10px;
   }
-  
+
+
+  .mainImage {
+    width: 100%;
+    object-fit: contain;
+    max-width: 100%;
+    margin: 0 auto;
+    min-height: 300px;
+    max-height: 400px;
+  }
+
+  .imageWrapper {
+    min-height: 300px;
+    max-height: 400px;
+    margin-bottom: 12px;
+  }
+
   .title {
     font-size: 18px;
+    line-height: 1.3;
+    margin-bottom: 8px;
   }
-  
-  .price {
-    font-size: 20px;
-  }
-  
-   .keyDetailsGrid {
-   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* ek row me 2 column */
-  gap: 12px;
 
+  .brand {
+    font-size: 12px;
+    margin-bottom: 6px;
   }
-  
+
+  .ratings {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .ratings span {
+    font-size: 12px;
+  }
+
+  .priceBox {
+    margin: 10px 0;
+  }
+
+  .emiPrice {
+    font-size: 18px;
+  }
+
+  .emiPrice span {
+    font-size: 12px;
+  }
+
+  .finalPrice {
+    font-size: 16px;
+  }
+
+  .discountBadge {
+    font-size: 12px;
+    padding: 2px 5px;
+  }
+
+  .mrp {
+    font-size: 12px;
+  }
+
+  .offersTitle {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .offers li {
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  .greenIcon {
+    font-size: 14px;
+  }
+
+  .options strong {
+    min-width: 45px;
+    font-size: 12px;
+  }
+
+  .options button {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  .keyDetailsGrid {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px;
+  }
+
+  .detailCard {
+    padding: 10px;
+    font-size: 12px;
+    min-width: auto;
+  }
+
+  .productDetailsContent {
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+
+  .productDetailsContent h3 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .aboutItemList {
+    padding-left: 18px;
+  }
+
+  .aboutItemList li {
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+
+  .seeMoreBtn {
+    font-size: 13px;
+  }
+
   .thumbnail {
     width: 50px;
     height: 50px;
   }
-  
-  .cartSummary,
-  .specialOffer,
-  .subTotal {
-    padding: 15px;
+
+  .thumbnails {
+    gap: 6px;
   }
 
-   .subTotal, .goCart, .specialOffer2, .handmade {
+  .cartSummary {
+    padding: 12px;
+  }
+
+  .cartSummary h3 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .cartSummary p {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .cartControls {
+    gap: 10px;
+  }
+
+  .cartControls .qtyBtn {
+    max-width: 30%;
+    min-width: 35px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .qty {
+    font-size: 14px;
+  }
+
+  .addCart,
+  .buyNow {
+    padding: 11px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .specialOffer {
+    padding: 12px;
+  }
+
+  .specialOffer img {
+    height: 150px;
+    margin-bottom: 8px;
+  }
+
+  .specialOffer p {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .subTotal, .goCart, .specialOffer2, .handmade {
     display: none;
   }
-  
+
   .imageModal {
-    padding: 15px;
+    padding: 10px;
   }
-  
+
+  .imageModalOverlay {
+    width: 98%;
+    height: 95%;
+    padding: 0;
+  }
+
+  .modalLayout {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .modalImageContainer {
+    max-height: 55vh;
+  }
+
+  .modalThumbnailsContainer {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .zoomedImage {
+    max-height: 45vh;
+  }
+
   .modalThumbnail {
     width: 60px;
     height: 60px;
   }
 
   .closeBtn {
-    width: 36px;
-    height: 36px;
-    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    top: 5px;
+    right: 5px;
   }
 
+  .modal {
+    max-width: 98%;
+    padding: 15px;
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .modal p {
+    font-size: 13px;
+    margin-bottom: 15px;
+  }
+
+  .modalButtons button {
+    padding: 10px 15px;
+    font-size: 13px;
+  }
 }
 
-
-  @media (max-width: 480px) {
-    .mainImage
-    {
-     
-      height: 100%;
-
-    }
- .keyDetailsGrid {
-   display: grid;
-  grid-template-columns: repeat(1, 1fr); /* ek row me 2 column */
-  gap: 12px;
-
+/* Extra Small Mobile Devices (below 375px) */
+@media (max-width: 375px) {
+  .productPage {
+    padding: 10px 8px;
   }
+
+  .breadcrumb {
+    font-size: 10px;
   }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .imageWrapper {
+    min-height: 280px;
+    max-height: 350px;
+  }
+
+  .mainImage {
+    min-height: 280px;
+    max-height: 350px;
+  }
+
+  .emiPrice {
+    font-size: 16px;
+  }
+
+  .finalPrice {
+    font-size: 15px;
+  }
+
+  .options button {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+
+  .cartSummary {
+    padding: 10px;
+  }
+
+  .addCart,
+  .buyNow {
+    padding: 10px;
+    font-size: 12px;
+  }
+}

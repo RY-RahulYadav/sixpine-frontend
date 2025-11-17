@@ -157,6 +157,39 @@
 }
 
 /* Responsive Design */
+
+/* Large Desktops (1500px and above) - Maintain current design */
+@media (min-width: 1500px) {
+  .contact-page-container {
+    max-width: 1500px;
+    padding: 60px 0;
+  }
+  
+  .contact-content {
+    max-width: 1000px;
+  }
+}
+
+/* Medium Desktops (1000px - 1499px) - Add padding for better spacing */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .contact-page-container {
+    max-width: 1500px;
+    padding: 60px 30px;
+  }
+  
+  .contact-content {
+    max-width: 1000px;
+  }
+}
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
+  .contact-page-container {
+    padding: 40px 20px;
+  }
+}
+
+/* Tablets Portrait (768px and below) */
 @media (max-width: 768px) {
   .contact-page-container {
     padding: 40px 0;
@@ -201,17 +234,61 @@
   }
 }
 
+/* Mobile Landscape (480px - 767px) */
 @media (max-width: 480px) {
+  .contact-page-container {
+    padding: 30px 0;
+  }
+
   .contact-title {
     font-size: 20px;
+    margin-bottom: 24px;
   }
 
   .contact-card {
     padding: 20px 16px;
   }
 
+  .contact-card-title {
+    font-size: 15px;
+  }
+
+  .contact-card-description,
+  .contact-card-note {
+    font-size: 12px;
+  }
+
   .whatsapp-section {
     padding: 20px 0;
+  }
+
+  .whatsapp-text {
+    font-size: 13px;
+  }
+}
+
+/* Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .contact-page-container {
+    padding: 25px 0;
+  }
+
+  .contact-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .contact-card {
+    padding: 16px 12px;
+  }
+
+  .contact-card-title {
+    font-size: 14px;
+  }
+
+  .contact-card-description,
+  .contact-card-note {
+    font-size: 11px;
   }
 }
 

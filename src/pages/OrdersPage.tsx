@@ -670,24 +670,56 @@ const OrdersPage: React.FC = () => {
                               </span>
                             </div>
                             
-                            {/* Show Buy Now and Add to Cart only in Buy Again tab */}
+                            {/* Show status and Buy Now/Add to Cart in Buy Again tab */}
                             {activeTab === 'buyAgain' && (
-                              <div className="item-actions">
-                                <button 
-                                  className="btn btn-warning btn-buy-now"
-                                  onClick={() => handleBuyAgain(order, true)}
-                                  disabled={buyAgainLoading === order.order_id}
-                                >
-                                  {buyAgainLoading === order.order_id ? 'Adding...' : 'Buy Now'}
-                                </button>
-                                <button 
-                                  className="btn btn-outline-secondary btn-add-cart"
-                                  onClick={() => handleBuyAgain(order, false)}
-                                  disabled={buyAgainLoading === order.order_id}
-                                >
-                                  <i className="bi bi-cart"></i> {buyAgainLoading === order.order_id ? 'Adding...' : 'Add to Cart'}
-                                </button>
-                              </div>
+                              <>
+                                <div className="item-status">
+                                  <div className="status-badge-container">
+                                    <div className="status-icon-wrapper">
+                                      {/* Show status icon based on order status */}
+                                      {order.status === 'cancelled' ? (
+                                        <i className="bi bi-x-circle-fill status-icon-cancelled"></i>
+                                      ) : order.status === 'delivered' ? (
+                                        <i className="bi bi-check-circle-fill status-icon-delivered"></i>
+                                      ) : order.status === 'shipped' ? (
+                                        <i className="bi bi-truck status-icon-shipped"></i>
+                                      ) : (order.payment_method === 'COD' && order.payment_status === 'pending') || order.status === 'confirmed' ? (
+                                        <i className="bi bi-check-circle-fill status-icon-delivered"></i>
+                                      ) : ['pending', 'processing'].includes(order.status) ? (
+                                        <i className="bi bi-clock status-icon-pending"></i>
+                                      ) : null}
+                                    </div>
+                                    <p className="status-text-inline mb-0">
+                                      <strong>Status:</strong>
+                                      <span className={`status-label ms-2 ${
+                                        order.status === 'delivered' ? 'text-success' :
+                                        order.status === 'cancelled' ? 'text-danger' :
+                                        order.status === 'shipped' ? 'text-info' :
+                                        (order.payment_method === 'COD' && order.payment_status === 'pending') ? 'text-success' :
+                                        'text-warning'
+                                      }`}>
+                                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                                      </span>
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="item-actions">
+                                  <button 
+                                    className="btn btn-warning btn-buy-now"
+                                    onClick={() => handleBuyAgain(order, true)}
+                                    disabled={buyAgainLoading === order.order_id}
+                                  >
+                                    {buyAgainLoading === order.order_id ? 'Adding...' : 'Buy Now'}
+                                  </button>
+                                  <button 
+                                    className="btn btn-outline-secondary btn-add-cart"
+                                    onClick={() => handleBuyAgain(order, false)}
+                                    disabled={buyAgainLoading === order.order_id}
+                                  >
+                                    <i className="bi bi-cart"></i> {buyAgainLoading === order.order_id ? 'Adding...' : 'Add to Cart'}
+                                  </button>
+                                </div>
+                              </>
                             )}
 
                             {/* Show status-specific information for other tabs */}

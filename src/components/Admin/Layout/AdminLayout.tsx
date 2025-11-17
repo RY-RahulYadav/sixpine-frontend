@@ -58,9 +58,9 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/homepage', icon: 'home', label: 'Home Management', section: 'page_management' },
     { path: '/admin/faq-page', icon: 'help', label: 'FAQ Page Management', section: 'page_management' },
     { path: '/admin/advertisements', icon: 'campaign', label: 'Advertisement Management', section: 'page_management' },
-    // { path: '/admin/trending', icon: 'trending_up', label: 'Trending Page Management', section: 'page_management' },
-    // { path: '/admin/best-deals', icon: 'local_offer', label: 'Best Deal Management', section: 'page_management' },
-    // { path: '/admin/bulk-order-page', icon: 'inventory_2', label: 'Bulk Order Page Management', section: 'page_management' },
+    { path: '/admin/trending', icon: 'trending_up', label: 'Trending Page Management', section: 'page_management' },
+    { path: '/admin/best-deals', icon: 'local_offer', label: 'Best Deal Management', section: 'page_management' },
+    { path: '/admin/bulk-order-page', icon: 'inventory_2', label: 'Bulk Order Page Management', section: 'page_management' },
     // Management Section
     { path: '/admin/logs', icon: 'list_alt', label: 'Activity Logs', section: 'management' },
     { path: '/admin/contact-queries', icon: 'contact_support', label: 'Contact Queries', section: 'management' },

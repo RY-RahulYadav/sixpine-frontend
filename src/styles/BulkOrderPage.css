@@ -22,14 +22,53 @@ html {
 }
 
 /* Responsive adjustments - matching homepage container */
-@media (max-width: 768px) {
+
+/* Large Desktops (1500px and above) - Maintain current design */
+@media (min-width: 1500px) {
   .bulkorder_container {
-    margin: 0 15px !important;
+    max-width: 1500px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
   }
 }
 
+/* Medium Desktops (1000px - 1499px) - Add padding for better spacing */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .bulkorder_container {
+    max-width: 1500px !important;
+    padding: 0 30px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
+  .bulkorder_container {
+    padding: 0 20px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Tablets Portrait (768px and below) */
+@media (max-width: 768px) {
+  .bulkorder_container {
+    padding: 0 15px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Mobile Landscape (480px - 767px) */
 @media (max-width: 480px) {
   .bulkorder_container {
-    margin: 0 10px !important;
+    padding: 0 12px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .bulkorder_container {
+    padding: 0 10px !important;
+    margin: 0 auto !important;
   }
 }

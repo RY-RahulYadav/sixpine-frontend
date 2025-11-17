@@ -319,6 +319,17 @@ padding: 7px 10px;
   right: 0px;
 }
 }
+/* 📱 Hide Arrows Below 500px */
+@media (max-width: 500px) {
+  .sliderArrow {
+    display: none !important;
+  }
+
+  .sliderWrapper {
+    padding: 0 !important;
+  }
+}
+
 /* 📱 Mobile Large (≤425px) */
 @media(max-width: 425px) {
   

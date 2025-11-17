@@ -655,6 +655,8 @@
   overflow: hidden;
   height: 300px;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .bannerContent {
@@ -663,6 +665,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .bannerLabel {
@@ -682,6 +686,8 @@
   color: #333;
   margin-bottom: 10px;
   line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .accentText {
@@ -692,6 +698,8 @@
   font-size: 18px;
   color: #666;
   margin-bottom: 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .promoCode {
@@ -986,7 +994,39 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 1024px) {
+
+/* Large Desktops (1500px and above) - Maintain current design */
+@media (min-width: 1500px) {
+  .dealsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .categoryGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .flashCardsContainer {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Medium Desktops (1000px - 1499px) - Same as large desktop */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .dealsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .categoryGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .flashCardsContainer {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
   .dealsGrid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -996,6 +1036,7 @@
   }
 }
 
+/* Tablets Portrait (768px - 1023px) */
 @media (max-width: 768px) {
   .dealCountdown {
     flex-direction: column;
@@ -1005,7 +1046,7 @@
 
   .mainCarousel {
     height: auto;
-    padding: 30px 20px;
+    padding: 20px 15px;
   }
 
   .slideContent {
@@ -1014,8 +1055,9 @@
 
   .dealText {
     max-width: 100%;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     text-align: center;
+    font-size: 14px;
   }
 
   .dealImage {
@@ -1024,7 +1066,7 @@
 
   .dealStats {
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 15px;
     padding: 15px;
   }
 
@@ -1038,43 +1080,88 @@
 
   .dealsGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
   .categoryGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 
   .bannerContainer {
     flex-direction: column;
     height: auto;
+    min-height: auto;
   }
 
   .bannerContent {
-    padding: 30px;
+    padding: 20px;
     text-align: center;
     align-items: center;
   }
 
+  .bannerLabel {
+    font-size: 12px;
+    padding: 4px 8px;
+    margin-bottom: 12px;
+  }
+
   .bannerHeading {
-    font-size: 28px;
+    font-size: 24px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .bannerDescription {
+    font-size: 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .promoCode {
+    font-size: 14px;
+    padding: 4px 8px;
+  }
+
+  .shopNowButton {
+    padding: 10px 24px;
+    font-size: 14px;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .termsText {
+    font-size: 11px;
+    margin-top: 8px;
   }
 
   .bannerImageContainer {
     height: 200px;
+    min-height: 200px;
+  }
+
+  .bannerNavArrow {
+    display: none;
+  }
+
+  .bannerIndicators {
+    display: none;
   }
 
   .flashCardsContainer {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 }
 
+/* Mobile Landscape (480px - 767px) */
 @media (max-width: 480px) {
   .dealTitle {
-    font-size: 32px;
+    font-size: 28px;
   }
 
   .discountBadge {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .priceSection {
@@ -1085,6 +1172,7 @@
 
   .dealStats {
     flex-direction: column;
+    gap: 12px;
   }
 
   .dealStat {
@@ -1093,13 +1181,190 @@
 
   .dealsGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .categoryGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .bannerContainer {
+    border-radius: 8px;
+  }
+
+  .bannerContent {
+    padding: 16px;
+    text-align: center;
+  }
+
+  .bannerLabel {
+    font-size: 11px;
+    padding: 3px 6px;
+    margin-bottom: 10px;
   }
 
   .bannerHeading {
+    font-size: 20px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .bannerDescription {
+    font-size: 13px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  .promoCode {
+    font-size: 13px;
+    padding: 3px 6px;
+    display: inline-block;
+  }
+
+  .bannerCta {
+    width: 100%;
+    align-items: center;
+  }
+
+  .shopNowButton {
+    padding: 10px 20px;
+    font-size: 13px;
+    width: 100%;
+    max-width: 180px;
+    margin-bottom: 8px;
+  }
+
+  .termsText {
+    font-size: 10px;
+  }
+
+  .bannerImageContainer {
+    height: 180px;
+    min-height: 180px;
+  }
+
+  .bannerNavArrow {
+    display: none;
+  }
+
+  .bannerIndicators {
+    display: none;
+  }
+}
+
+/* Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .dealTitle {
     font-size: 24px;
+  }
+
+  .discountBadge {
+    font-size: 16px;
+  }
+
+  .bannerContainer {
+    border-radius: 6px;
+  }
+
+  .bannerContent {
+    padding: 14px;
+  }
+
+  .bannerLabel {
+    font-size: 10px;
+    padding: 3px 5px;
+    margin-bottom: 8px;
+  }
+
+  .bannerHeading {
+    font-size: 18px;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+
+  .bannerDescription {
+    font-size: 12px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .promoCode {
+    font-size: 12px;
+    padding: 3px 5px;
+  }
+
+  .shopNowButton {
+    padding: 9px 18px;
+    font-size: 12px;
+    max-width: 160px;
+  }
+
+  .termsText {
+    font-size: 9px;
+  }
+
+  .bannerImageContainer {
+    height: 160px;
+    min-height: 160px;
+  }
+
+  .bannerNavArrow {
+    display: none;
+  }
+
+  .bannerIndicators {
+    display: none;
+  }
+}
+
+/* Extra Small Mobile Devices (320px and below) */
+@media (max-width: 320px) {
+  .bannerContent {
+    padding: 12px;
+  }
+
+  .bannerLabel {
+    font-size: 9px;
+    padding: 2px 4px;
+    margin-bottom: 6px;
+  }
+
+  .bannerHeading {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .bannerDescription {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  .promoCode {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+
+  .shopNowButton {
+    padding: 8px 16px;
+    font-size: 11px;
+    max-width: 140px;
+  }
+
+  .termsText {
+    font-size: 8px;
+  }
+
+  .bannerImageContainer {
+    height: 140px;
+    min-height: 140px;
+  }
+
+  .bannerNavArrow {
+    display: none;
+  }
+
+  .bannerIndicators {
+    display: none;
   }
 }

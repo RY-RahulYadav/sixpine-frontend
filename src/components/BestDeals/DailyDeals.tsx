@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaShoppingCart } from 'react-icons/fa';
-import { homepageAPI } from '../../services/api';
+import { FaShoppingCart, FaHeart } from 'react-icons/fa';
+import { homepageAPI, wishlistAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { useNotification } from '../../context/NotificationContext';
 import styles from './BestDeals.module.css';
+import cardStyles from '../Products_Details/productdetails_slider1.module.css';
 
 interface DailyDeal {
   id: number;
@@ -17,6 +18,9 @@ interface DailyDeal {
   reviewCount: number;
   soldCount: number;
   navigateUrl?: string;
+  productId?: number;
+  description?: string;
+  variantCount?: number;
 }
 
 const DailyDeals = () => {
@@ -28,6 +32,8 @@ const DailyDeals = () => {
   const [sectionTitle, setSectionTitle] = useState('Deals of the Day');
   const [loading, setLoading] = useState(true);
   const [cartLoading, setCartLoading] = useState<number | null>(null);
+  const [wishlistItems, setWishlistItems] = useState<Set<number>>(new Set());
+  const [wishlistLoading, setWishlistLoading] = useState<number | null>(null);
 
   // Default data for daily deals
   const defaultDeals: DailyDeal[] = [
@@ -131,7 +137,26 @@ const DailyDeals = () => {
 
   useEffect(() => {
     fetchDailyDealsData();
-  }, []);
+    if (state.isAuthenticated) {
+      checkWishlistStatus();
+    }
+  }, [state.isAuthenticated]);
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await wishlistAPI.getWishlist();
+      if (response.data && response.data.results) {
+        const wishlistIds = new Set<number>(
+          response.data.results
+            .map((item: any) => item.product?.id)
+            .filter((id: any): id is number => typeof id === 'number' && !isNaN(id))
+        );
+        setWishlistItems(wishlistIds);
+      }
+    } catch (error) {
+      // Silently fail - user might not be authenticated
+    }
+  };
 
   const fetchDailyDealsData = async () => {
     try {
@@ -144,7 +169,13 @@ const DailyDeals = () => {
         // Only use admin products if they exist and are valid
         if (productsData && Array.isArray(productsData) && productsData.length > 0) {
           console.log('Using admin daily deals data:', productsData);
-          setDailyDeals(productsData);
+          // Map products to ensure description and variantCount are included
+          const mappedProducts = productsData.map((deal: any) => ({
+            ...deal,
+            description: deal.description || deal.short_description || '',
+            variantCount: deal.variantCount || deal.variant_count || 0
+          }));
+          setDailyDeals(mappedProducts);
         } else {
           console.log('Admin data exists but products array is empty or invalid, using defaults');
           // No valid products in admin data, use defaults
@@ -185,9 +216,10 @@ const DailyDeals = () => {
 
   const handleBuyNow = async (deal: DailyDeal, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (state.isAuthenticated && deal.id) {
+    const productId = deal.productId || deal.id;
+    if (state.isAuthenticated && productId) {
       try {
-        await addToCart(deal.id, 1);
+        await addToCart(productId, 1);
         navigate('/checkout');
       } catch (error: any) {
         console.error('Error adding to cart:', error);
@@ -206,18 +238,64 @@ const DailyDeals = () => {
       navigate('/login');
       return;
     }
-    if (!deal.id) {
+    const productId = deal.productId || deal.id;
+    if (!productId) {
       showError('Product ID is missing');
       return;
     }
-    setCartLoading(deal.id);
+    setCartLoading(productId);
     try {
-      await addToCart(deal.id, 1);
+      await addToCart(productId, 1);
     } catch (error: any) {
       console.error('Add to cart error:', error);
       showError(error.response?.data?.error || 'Failed to add to cart');
     } finally {
       setCartLoading(null);
+    }
+  };
+
+  const handleWishlist = async (e: React.MouseEvent, deal: DailyDeal) => {
+    e.stopPropagation();
+    if (!state.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    const productId = deal.productId || deal.id;
+    if (!productId) {
+      showError('Product ID is missing');
+      return;
+    }
+
+    setWishlistLoading(productId);
+    try {
+      const isInWishlist = wishlistItems.has(productId);
+      
+      if (isInWishlist) {
+        // Remove from wishlist
+        const response = await wishlistAPI.getWishlist();
+        const wishlistItem = response.data.results.find(
+          (item: any) => item.product?.id === productId
+        );
+        if (wishlistItem) {
+          await wishlistAPI.removeFromWishlist(wishlistItem.id);
+          setWishlistItems(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(productId);
+            return newSet;
+          });
+        }
+      } else {
+        // Add to wishlist
+        await wishlistAPI.addToWishlist(productId);
+        setWishlistItems(prev => new Set(prev).add(productId));
+      }
+      
+      window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+    } catch (error: any) {
+      console.error('Wishlist error:', error);
+      showError(error.response?.data?.error || error.message || 'Failed to update wishlist');
+    } finally {
+      setWishlistLoading(null);
     }
   };
 
@@ -243,74 +321,114 @@ const DailyDeals = () => {
       </div>
 
       <div className={styles.dealsGrid}>
-        {visibleDeals.map(deal => (
-          <div 
-            key={deal.id} 
-            className={styles.dealCard}
-            onClick={() => handleDealClick(deal)}
-            style={{ cursor: deal.navigateUrl && deal.navigateUrl !== '#' ? 'pointer' : 'default' }}
-          >
-            <div className={styles.dealImageContainer}>
-              <img src={deal.image} alt={deal.name} className={styles.dealImage} />
-              <span className={styles.discountTag}>-{deal.discount}</span>
-              <div className={styles.dealOverlay}>
-                <button className={styles.quickViewBtn}>Quick View</button>
-              </div>
-            </div>
-            
-            <div className={styles.dealInfo}>
-              <h3 className={styles.dealName}>{deal.name}</h3>
-              
-              <div className={styles.dealPricing}>
-                <span className={styles.salePrice}>{deal.salePrice}</span>
-                <span className={styles.originalPrice}>{deal.originalPrice}</span>
-              </div>
-              
-              <div className={styles.dealRating}>
-                <div className={styles.stars}>
-                  <span className={styles.ratingValue}>{deal.rating}</span>
-                  <span className={styles.star}>★</span>
-                </div>
-                <span className={styles.reviewCount}>({deal.reviewCount})</span>
+        {visibleDeals.map(deal => {
+          const productId = deal.productId || deal.id;
+          const isInWishlist = wishlistItems.has(productId);
+          const isCartLoadingForThis = cartLoading === productId;
+          const isWishlistLoadingForThis = wishlistLoading === productId;
+          const fullStars = Math.floor(deal.rating);
+          const emptyStars = 5 - Math.ceil(deal.rating);
+
+          return (
+            <div 
+              key={deal.id} 
+              className={cardStyles.craftedProductCard}
+              onClick={() => handleDealClick(deal)}
+              style={{ cursor: deal.navigateUrl && deal.navigateUrl !== '#' ? 'pointer' : 'default' }}
+            >
+              <div className={cardStyles.imageWrapper}>
+                <img 
+                  src={deal.image} 
+                  alt={deal.name} 
+                  className={cardStyles.productImg1}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDealClick(deal);
+                  }}
+                />
+                <FaHeart
+                  className={`${cardStyles.heartIcon} ${isInWishlist ? cardStyles.heartActive : ""}`}
+                  onClick={(e) => handleWishlist(e, deal)}
+                  style={{ 
+                    cursor: isWishlistLoadingForThis ? 'wait' : 'pointer',
+                    opacity: isWishlistLoadingForThis ? 0.6 : 1
+                  }}
+                />
               </div>
 
-              <div className={styles.dealProgress}>
-                <div className={styles.progressLabel}>
-                  <span>Already Sold: {deal.soldCount}</span>
-                  <span>Available: {500 - deal.soldCount}</span>
-                </div>
-                <div className={styles.progressBar}>
-                  <div 
-                    className={styles.progressFill} 
-                    style={{ width: `${(deal.soldCount / 500) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
+              <h4 
+                className={cardStyles.productTitle}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDealClick(deal);
+                }}
+              >
+                {deal.name}
+              </h4>
               
-              <div className={styles.dealActions}>
-                <button 
-                  className={styles.buyNowBtn}
-                  onClick={(e) => handleBuyNow(deal, e)}
-                  disabled={cartLoading === deal.id}
-                >
-                  {cartLoading === deal.id ? 'Loading...' : 'Buy Now'}
-                </button>
-                <button 
-                  className={styles.cartIconBtn}
-                  onClick={(e) => handleAddToCart(deal, e)}
-                  title="Add to Cart"
-                  disabled={cartLoading === deal.id}
-                  style={{ 
-                    cursor: cartLoading === deal.id ? 'wait' : 'pointer',
-                    opacity: cartLoading === deal.id ? 0.6 : 1
+              {deal.description && (
+                <p 
+                  className={cardStyles.productDesc}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDealClick(deal);
                   }}
                 >
-                  <FaShoppingCart />
+                  {deal.description}
+                </p>
+              )}
+              
+              <div className={cardStyles.productRating}>
+                {"★".repeat(fullStars)}
+                {"☆".repeat(emptyStars)}
+                <span> ({deal.reviewCount} reviews)</span>
+                {deal.variantCount !== undefined && deal.variantCount > 0 && (
+                  <div className={cardStyles.colorSwatches} aria-hidden>
+                    <span className={cardStyles.moreCount}>
+                      {deal.variantCount} variant{deal.variantCount !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className={cardStyles.productPrices}>
+                <span className={cardStyles.newPrice}>{deal.salePrice}</span>
+                {deal.originalPrice && (
+                  <span className={cardStyles.oldPrice}>{deal.originalPrice}</span>
+                )}
+              </div>
+
+              <div className={cardStyles.actionRow}>
+                <button 
+                  className={cardStyles.buyBtn}
+                  onClick={(e) => handleBuyNow(deal, e)}
+                  disabled={isCartLoadingForThis}
+                >
+                  {isCartLoadingForThis ? 'Loading...' : 'Buy Now'}
                 </button>
+                <div className={cardStyles.productIcons}>
+                  <FaHeart 
+                    onClick={(e) => handleWishlist(e, deal)}
+                    title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                    style={{ 
+                      color: isInWishlist ? '#ff6f00' : '#999',
+                      cursor: isWishlistLoadingForThis ? 'wait' : 'pointer',
+                      opacity: isWishlistLoadingForThis ? 0.6 : 1
+                    }}
+                  />
+                  <FaShoppingCart 
+                    onClick={(e) => handleAddToCart(deal, e)}
+                    style={{ 
+                      cursor: isCartLoadingForThis ? 'wait' : 'pointer',
+                      opacity: isCartLoadingForThis ? 0.6 : 1
+                    }}
+                    title="Add to Cart"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {hasMore && (

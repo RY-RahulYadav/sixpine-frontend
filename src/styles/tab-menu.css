@@ -169,19 +169,24 @@
     max-width: min(1350px, 92vw);
     left: 0;
     transform: none;
+    right: auto;
 }
 
 /* Default positioning for mega menus */
 .tab-categories .mega-menu {
     left: 0;
     transform: none;
+    right: auto;
 }
 
-/* Center mega menu on larger screens */
+/* Position mega menu on larger screens - ensure it doesn't get cut off */
 @media (min-width: 992px) {
     .tab-categories .mega-menu-all {
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        transform: none;
+        right: auto;
+        /* Ensure menu doesn't overflow viewport on the right */
+        max-width: min(1350px, calc(100vw - 20px));
     }
     
     /* Center other mega menus too */

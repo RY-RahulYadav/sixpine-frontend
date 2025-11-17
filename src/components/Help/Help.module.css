@@ -598,7 +598,39 @@
 }
 
 /* Responsive styles */
-@media (max-width: 992px) {
+
+/* Large Desktops (1500px and above) - Maintain current design */
+@media (min-width: 1500px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .contactCards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .resourcesGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Medium Desktops (1000px - 1499px) - Same as large desktop */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .contactCards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .resourcesGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
   .categoriesGrid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -612,9 +644,30 @@
   }
 }
 
+/* Tablets Portrait (768px - 991px) */
+@media (max-width: 768px) {
+  .categoriesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .contactCards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .resourcesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablets Portrait (768px - 991px) */
 @media (max-width: 768px) {
   .headerTitle {
     font-size: 2rem;
+  }
+  
+  .headerContainer {
+    padding-top: 2.5rem;
+    padding-bottom: 3.5rem;
   }
   
   .formRow {
@@ -625,19 +678,47 @@
     flex-direction: column;
     align-items: center;
   }
+  
+  .categoriesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .contactCards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .resourcesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
 }
 
+/* Mobile Landscape (576px - 767px) */
 @media (max-width: 576px) {
+  .headerTitle {
+    font-size: 1.75rem;
+  }
+  
+  .headerContainer {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+  
   .categoriesGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .contactCards {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .resourcesGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .sectionTitle {
@@ -646,5 +727,46 @@
   
   .quickLinks {
     flex-direction: column;
+  }
+  
+  .helpCategories,
+  .frequentQuestionsSection,
+  .contactSection,
+  .resourcesSection {
+    padding: 3rem 0;
+  }
+}
+
+/* Small Mobile Devices (480px and below) */
+@media (max-width: 480px) {
+  .headerTitle {
+    font-size: 1.5rem;
+  }
+  
+  .headerContainer {
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.3rem;
+  }
+  
+  .helpCategories,
+  .frequentQuestionsSection,
+  .contactSection,
+  .resourcesSection {
+    padding: 2rem 0;
+  }
+}
+
+/* Extra Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .headerTitle {
+    font-size: 1.3rem;
+  }
+  
+  .sectionTitle {
+    font-size: 1.2rem;
   }
 }

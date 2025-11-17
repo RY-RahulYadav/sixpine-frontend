@@ -292,8 +292,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
       {/* Breadcrumb */}
       <div className={styles.breadcrumb}>
-        <a href="#">All</a> / <a href="#">New Arrivals</a> /{" "}
-        <a href="#">{product?.category?.name || "Category"}</a> / {product?.title || "Product Name"}
+        <a href="#">All</a>
+        <a href="#">New Arrivals</a>
+        <a href="#">{product?.category?.name || "Category"}</a>
+        <span>{product?.title || "Product Name"}</span>
       </div>
 
       <div className={styles.mainLayout}>
