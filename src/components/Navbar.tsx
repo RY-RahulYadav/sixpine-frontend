@@ -157,8 +157,8 @@ const Navbar: React.FC = () => {
     <nav className="navbar navbar-expand-lg navbar-light">
       <div className="container-fluid d-flex flex-wrap align-items-center">
         {/* Logo + Pin Code */}
-        <div className="d-flex align-items-center me-3">
-          <Link className="navbar-brand text-light me-3" to="/">Sixpine</Link>
+        <div className="d-flex align-items-center me-2 me-lg-3 flex-shrink-0">
+          <Link className="navbar-brand text-light me-2 me-lg-3" to="/">Sixpine</Link>
           <div className="pin-code d-none d-lg-flex align-items-center border rounded px-2 py-1">
             <i className="bi bi-geo-alt-fill me-1 text-danger"></i>
             <span>110001</span>
@@ -166,12 +166,12 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Right Icons for mobile */}
-        <ul className="navbar-nav align-items-center d-lg-none order-lg-2 mb-2 mb-lg-0">
+        <ul className="navbar-nav align-items-center d-lg-none order-lg-2 mb-2 mb-lg-0 flex-shrink-0">
           <li className="nav-item">
             {state.isAuthenticated ? (
-              <Link className="nav-link text-light" to="/your-account">
+              <Link className="nav-link text-light d-flex align-items-center" to="/your-account" style={{ padding: '0.5rem' }}>
                 <i className="bi bi-person"></i>
-                <span className="d-none d-md-inline ms-1">
+                <span className="d-none d-sm-inline ms-1" style={{ fontSize: '0.85rem' }}>
                   {state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username}
                 </span>
               </Link>
@@ -180,18 +180,19 @@ const Navbar: React.FC = () => {
                 <button
                   className="nav-link text-light d-flex align-items-center"
                   onClick={() => setShowLoginDropdown(!showLoginDropdown)}
-                  style={{ background: 'none', border: 'none', padding: '0.5rem 1rem' }}
+                  style={{ background: 'none', border: 'none', padding: '0.5rem' }}
                 >
-                  <i className="bi bi-person me-1"></i>
-                  <span className="d-none d-md-inline">Login</span>
-                  <i className="bi bi-chevron-down ms-1" style={{ fontSize: '0.7rem', lineHeight: '1' }}></i>
+                  <i className="bi bi-person"></i>
+                  <span className="d-none d-sm-inline ms-1" style={{ fontSize: '0.85rem' }}>Login</span>
+                  <i className="bi bi-chevron-down ms-1 d-none d-sm-inline" style={{ fontSize: '0.7rem', lineHeight: '1' }}></i>
                 </button>
                 {showLoginDropdown && (
                   <div className="position-absolute bg-white border rounded shadow-sm mt-1" style={{ 
                     zIndex: 1000, 
                     top: '100%', 
                     right: 0,
-                    minWidth: '200px'
+                    minWidth: '200px',
+                    maxWidth: '90vw'
                   }}>
                     <Link
                       to="/login"
@@ -221,18 +222,18 @@ const Navbar: React.FC = () => {
             )}
           </li>
           <li className="nav-item">
-            <Link className="nav-link text-light" to="/orders">
+            <Link className="nav-link text-light d-flex align-items-center" to="/orders" style={{ padding: '0.5rem' }}>
               <i className="bi bi-box-arrow-in-left"></i>
             </Link>
           </li>
           <li className="nav-item">
             <button 
-              className="nav-link text-light" 
+              className="nav-link text-light d-flex align-items-center position-relative" 
               onClick={(e) => {
                 e.preventDefault();
                 openCartSidebar();
               }}
-              style={{ background: 'none', border: 'none' }}
+              style={{ background: 'none', border: 'none', padding: '0.5rem' }}
             >
               <i className="bi bi-cart"></i>
               {state.cart && state.cart.items_count > 0 && (
@@ -243,11 +244,12 @@ const Navbar: React.FC = () => {
         </ul>
 
         {/* Search Bar */}
-        <form className="d-flex flex-grow-1 mx-lg-3 search-box order-3 order-lg-2" onSubmit={handleSearch} ref={searchRef}>
+        <form className="d-flex flex-grow-1 mx-lg-3 search-box order-3 order-lg-2 w-100" onSubmit={handleSearch} ref={searchRef} style={{ minWidth: 0 }}>
           <select 
-            className="form-select category-select me-2"
+            className="form-select category-select me-2 d-none d-sm-block"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
+            style={{ flexShrink: 0 }}
           >
             <option value="">All Categories</option>
             {categories.map((category) => (
@@ -256,7 +258,7 @@ const Navbar: React.FC = () => {
               </option>
             ))}
           </select>
-          <div className="position-relative flex-grow-1">
+          <div className="position-relative flex-grow-1" style={{ minWidth: 0 }}>
             <input 
               className="form-control me-2" 
               type="search" 
@@ -265,9 +267,10 @@ const Navbar: React.FC = () => {
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+              style={{ width: '100%' }}
             />
             {showSuggestions && suggestions.length > 0 && (
-              <div className="position-absolute w-100 bg-white border rounded shadow-sm mt-1" style={{ zIndex: 1000, top: '100%' }}>
+              <div className="position-absolute w-100 bg-white border rounded shadow-sm mt-1" style={{ zIndex: 1000, top: '100%', maxHeight: '400px', overflowY: 'auto' }}>
                 {loading && (
                   <div className="px-3 py-2 text-center text-muted">
                     <div className="spinner-border spinner-border-sm me-2" role="status">
@@ -286,22 +289,22 @@ const Navbar: React.FC = () => {
                     onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'white')}
                   >
                     <i className={`${getIconClass(suggestion.type, suggestion.icon)} me-2 text-muted`}></i>
-                    <span className="flex-grow-1">{suggestion.text}</span>
+                    <span className="flex-grow-1 text-truncate">{suggestion.text}</span>
                     {suggestion.type !== 'search' && (
-                      <small className="text-muted text-capitalize">{suggestion.type}</small>
+                      <small className="text-muted text-capitalize ms-2">{suggestion.type}</small>
                     )}
                   </div>
                 ))}
               </div>
             )}
           </div>
-          <button className="btn btn-primary search-btn" type="submit">
+          <button className="btn btn-primary search-btn flex-shrink-0" type="submit">
             <i className="bi bi-search"></i>
           </button>
         </form>
 
         {/* Right Icons for desktop */}
-        <ul className="navbar-nav align-items-center d-none d-lg-flex order-lg-3">
+        <ul className="navbar-nav align-items-center d-none d-lg-flex order-lg-3 flex-shrink-0">
           <li className="nav-item mx-2">
             {state.isAuthenticated ? (
               <Link className="nav-link text-light" to="/your-account">

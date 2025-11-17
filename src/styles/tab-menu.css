@@ -80,8 +80,19 @@
     z-index: 9999;
 }
 
-.tab-categories .dropdown:hover .mega-menu {
+.tab-categories .nav-item.dropdown:hover .mega-menu {
     display: block;
+}
+
+/* Ensure mega menu doesn't overflow on smaller screens */
+.tab-categories .nav-item.dropdown {
+    position: static;
+}
+
+@media (min-width: 992px) {
+    .tab-categories .nav-item.dropdown {
+        position: relative;
+    }
 }
 
 .mega-menu-grid {
@@ -160,6 +171,26 @@
     transform: none;
 }
 
+/* Default positioning for mega menus */
+.tab-categories .mega-menu {
+    left: 0;
+    transform: none;
+}
+
+/* Center mega menu on larger screens */
+@media (min-width: 992px) {
+    .tab-categories .mega-menu-all {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    /* Center other mega menus too */
+    .tab-categories .mega-menu:not(.mega-menu-all) {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
 .tab-categories .mega-menu-all .mega-menu-grid {
     grid-template-columns: repeat(6, 1fr);
     width: 100%;
@@ -198,31 +229,129 @@
 
 .scroll-tabs {
     overflow-x: auto;
+    overflow-y: visible;
     white-space: nowrap;
     border-bottom: 2px solid #eee;
     padding: 8px 10px;
     gap: 10px;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    position: relative;
 }
 
 .scroll-tabs::-webkit-scrollbar {
     display: none;
 }
 
-.scroll-tabs a {
-    display: inline-block;
-    padding: 8px 12px;
+.mobile-category-item {
+    position: relative;
+    flex-shrink: 0;
     margin-right: 8px;
+}
+
+.mobile-category-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
     border-radius: 20px;
     background: #f8f8f8;
     color: #333;
     font-size: 14px;
     text-decoration: none;
-    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+    width: auto;
+    min-width: fit-content;
+    white-space: nowrap;
+    transition: all 0.3s ease;
 }
 
-.scroll-tabs a:hover {
+.mobile-category-link:hover,
+.mobile-category-link:focus {
     background: #ff6600;
     color: #fff;
+    outline: none;
+}
+
+.mobile-category-link i {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.mobile-dropdown-menu {
+    position: fixed;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+    max-height: 60vh;
+    overflow-y: auto;
+    transform: translateY(0);
+}
+
+.mobile-mega-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.mobile-mega-menu-column {
+    min-width: 0;
+}
+
+.mobile-mega-menu-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #ff6600;
+}
+
+.mobile-mega-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-mega-menu-list li {
+    margin-bottom: 6px;
+}
+
+.mobile-mega-menu-list a {
+    color: #555;
+    text-decoration: none;
+    font-size: 12px;
+    display: block;
+    padding: 4px 0;
+    transition: all 0.2s;
+}
+
+.mobile-mega-menu-list a:hover {
+    color: #ff6600;
+    padding-left: 5px;
+}
+
+/* Scrollbar for mobile dropdown */
+.mobile-dropdown-menu::-webkit-scrollbar {
+    width: 4px;
+}
+
+.mobile-dropdown-menu::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.mobile-dropdown-menu::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 2px;
+}
+
+.mobile-dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 /* ============================================ */
@@ -241,10 +370,20 @@
         padding: 7px 12px;
     }
 
+    .tab-categories .mega-menu {
+        left: 0 !important;
+        transform: none !important;
+        width: 95vw;
+        max-width: 95vw;
+        min-width: auto;
+    }
+
     .tab-categories .mega-menu-all {
         min-width: auto;
         width: 95vw;
         max-width: 95vw;
+        left: 0 !important;
+        transform: none !important;
     }
 
     .tab-categories .mega-menu-all .mega-menu-grid {
@@ -295,6 +434,8 @@
 
     .tab-categories .mega-menu {
         display: none !important;
+        left: 0 !important;
+        transform: none !important;
     }
     
     .tab-categories .dropdown:hover .dropdown-menu {
@@ -306,11 +447,29 @@
         gap: 6px;
     }
     
-    .scroll-tabs a {
+    .mobile-category-link {
         padding: 6px 10px;
-        margin-right: 6px;
         font-size: 12px;
         border-radius: 15px;
+    }
+    
+    .mobile-dropdown-menu {
+        padding: 12px;
+        max-height: 55vh;
+    }
+    
+    .mobile-mega-menu-grid {
+        gap: 15px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+    
+    .mobile-mega-menu-title {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+    
+    .mobile-mega-menu-list a {
+        font-size: 11px;
     }
 }
 
@@ -332,10 +491,28 @@
         gap: 5px;
     }
     
-    .scroll-tabs a {
+    .mobile-category-link {
         padding: 5px 8px;
-        margin-right: 5px;
         font-size: 11px;
+    }
+    
+    .mobile-dropdown-menu {
+        padding: 10px;
+        max-height: 50vh;
+    }
+    
+    .mobile-mega-menu-grid {
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+    
+    .mobile-mega-menu-title {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+    
+    .mobile-mega-menu-list a {
+        font-size: 10px;
     }
 }
 

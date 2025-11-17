@@ -93,6 +93,12 @@
 }
 
 /* Responsive adjustments - maintaining spacing consistency */
+@media (max-width: 991px) {
+  .homepage_container {
+    padding: 0 15px;
+  }
+}
+
 @media (max-width: 768px) {
   .homepage_container > section {
     margin-bottom: 35px;
@@ -110,7 +116,7 @@
 
 @media (max-width: 480px) {
   .homepage_container {
-    padding: 0 15px;
+    padding: 0 10px;
   }
   
   .homepage_container > section {
@@ -124,6 +130,17 @@
   .section-title {
     font-size: 24px;
     margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 375px) {
+  .homepage_container {
+    padding: 0 8px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+    margin-bottom: 14px;
   }
 }
 
