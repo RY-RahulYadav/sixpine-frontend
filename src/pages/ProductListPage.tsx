@@ -126,7 +126,7 @@ const ProductListPage: React.FC = () => {
   const [availableSubcategories, setAvailableSubcategories] = useState([] as any[]);
   const [loadingSubcategories, setLoadingSubcategories] = useState(false);
 
-  const [sortBy, setSortBy] = useState('featured');
+  const [sortBy, setSortBy] = useState('relevance');
   // Only list/tile view is supported now — default to 'list'
   const [viewMode] = useState<'grid' | 'list'>('list');
 
@@ -228,7 +228,17 @@ const ProductListPage: React.FC = () => {
     setSelectedFilters(initialFilters);
     
     if (sortParam) {
-      setSortBy(sortParam);
+      // Map backend sort values to frontend values if needed
+      let mappedSort = sortParam;
+      if (sortParam === 'price_low_to_high') {
+        mappedSort = 'price_low';
+      } else if (sortParam === 'price_high_to_low') {
+        mappedSort = 'price_high';
+      }
+      // Only set if it's a valid frontend sort value
+      if (['relevance', 'price_low', 'price_high'].includes(mappedSort)) {
+        setSortBy(mappedSort);
+      }
     }
     
     if (pageParam) {
@@ -401,15 +411,6 @@ const ProductListPage: React.FC = () => {
           break;
         case 'price_high':
           params.sort = 'price_high_to_low';
-          break;
-        case 'newest':
-          params.sort = 'newest';
-          break;
-        case 'rating':
-          params.sort = 'rating';
-          break;
-        case 'popularity':
-          params.sort = 'popularity';
           break;
         case 'relevance':
         default:
@@ -604,9 +605,6 @@ const ProductListPage: React.FC = () => {
                     <option value="relevance">Sort: Relevance</option>
                     <option value="price_low">Price: Low to High</option>
                     <option value="price_high">Price: High to Low</option>
-                    <option value="newest">Newest First</option>
-                    <option value="rating">Customer Rating</option>
-                    <option value="popularity">Most Popular</option>
                   </select>
                 </div>
               </div>
@@ -1101,7 +1099,7 @@ const ProductListPage: React.FC = () => {
                                   </div>
                                   <span className="review-count">({product.review_count} reviews)</span>
                                   {/* More Variants Available Note - Right after reviews text */}
-                                  {product.variant_count && product.variant_count > 1 && (
+                                  {(product.color_count || product.variant_count) && (product.color_count || product.variant_count || 0) > 1 && (
                                     <small className="text-primary" style={{ 
                                       fontSize: '0.8em', 
                                       fontStyle: 'italic',
@@ -1111,7 +1109,7 @@ const ProductListPage: React.FC = () => {
                                       marginLeft: '8px'
                                     }}>
                                       <i className="bi bi-info-circle" style={{ fontSize: '0.85em' }}></i>
-                                      {product.variant_count - 1} more variant{product.variant_count - 1 > 1 ? 's' : ''}
+                                      {(product.color_count || product.variant_count || 0) - 1} more color{((product.color_count || product.variant_count || 0) - 1) > 1 ? 's' : ''}
                                     </small>
                                   )}
                                 </div>

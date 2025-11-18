@@ -99,7 +99,11 @@ const NewProductDetails: React.FC = () => {
             oldPrice: product.variants && product.variants[0]?.old_price ? `₹${product.variants[0].old_price}` : '',
             newPrice: product.variants && product.variants[0]?.price ? `₹${product.variants[0].price}` : '',
             slug: product.slug,
-            id: product.id
+            id: product.id,
+            variantCount: product.variant_count || product.variants_count || 0,
+            variants_count: product.variant_count || product.variants_count || 0,
+            colorCount: product.color_count || product.colorCount || 0,
+            color_count: product.color_count || product.colorCount || 0
           }));
         };
         

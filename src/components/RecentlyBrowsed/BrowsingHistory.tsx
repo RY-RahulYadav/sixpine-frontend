@@ -20,6 +20,8 @@ interface BrowsingHistoryItem {
     average_rating: number;
     review_count: number;
     variant_count?: number;
+    color_count?: number;
+    colorCount?: number;
     available_colors?: string[];
     category: {
       name: string;
@@ -268,10 +270,10 @@ const BrowsingHistory = () => {
                 {"★".repeat(fullStars)}
                 {"☆".repeat(emptyStars)}
                 <span> ({item.product.review_count} reviews)</span>
-                {item.product.variant_count !== undefined && item.product.variant_count > 0 && (
+                {(item.product.color_count !== undefined || item.product.colorCount !== undefined || item.product.variant_count !== undefined) && (item.product.color_count || item.product.colorCount || item.product.variant_count || 0) > 0 && (
                   <div className={cardStyles.colorSwatches} aria-hidden>
                     <span className={cardStyles.moreCount}>
-                      {item.product.variant_count} variant{item.product.variant_count !== 1 ? 's' : ''}
+                      {(item.product.color_count || item.product.colorCount || item.product.variant_count || 0)} color{((item.product.color_count || item.product.colorCount || item.product.variant_count || 0) !== 1) ? 's' : ''}
                     </span>
                   </div>
                 )}

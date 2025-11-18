@@ -19,6 +19,8 @@ interface Product {
   navigateUrl?: string;
   variantCount?: number;
   variant_count?: number;
+  colorCount?: number;
+  color_count?: number;
 }
 
 interface FurnitureSectionsData {
@@ -139,11 +141,12 @@ const defaultData: FurnitureSectionsData = {
 };
 
 
-const Section = ({ title, subtitle, products, extraClass }: { 
+const Section = ({ title, subtitle, products, extraClass, sectionKey }: { 
   title: string; 
   subtitle: string; 
   products: Product[]; 
-  extraClass?: string 
+  extraClass?: string;
+  sectionKey?: string;
 }) => {
   const [viewAll, setViewAll] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
@@ -206,9 +209,9 @@ const Section = ({ title, subtitle, products, extraClass }: {
             viewAll ? styles.grid : styles.scroll
           }`}
         >
-          {products.map((p) => (
+          {products.map((p, idx) => (
             <ProductCard
-              key={p.id}
+              key={`${sectionKey || 'section'}-${p.id || p.productId || idx}`}
               id={p.id}
               title={p.title}
               subtitle={p.subtitle}
@@ -221,6 +224,7 @@ const Section = ({ title, subtitle, products, extraClass }: {
               productId={p.productId}
               navigateUrl={p.navigateUrl}
               variantCount={p.variantCount || p.variant_count}
+              colorCount={p.colorCount || p.color_count}
             />
           ))}
         </div>
@@ -280,6 +284,7 @@ const FurnitureSections = () => {
         subtitle={data.discover.subtitle}
         products={discoverProducts}
         extraClass={styles.discoverSection}
+        sectionKey="discover"
       />
       <div style={{ marginTop: "40px" }}>
       <Section
@@ -287,6 +292,7 @@ const FurnitureSections = () => {
         subtitle={data.topRated.subtitle}
         products={topRatedProducts}
         extraClass={styles.discoverSection}
+        sectionKey="topRated"
       /></div>
     </div>
   );

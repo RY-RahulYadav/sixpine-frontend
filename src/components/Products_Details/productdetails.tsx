@@ -24,7 +24,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const navigate = useNavigate();
   const { addToCart, state } = useApp();
   const { showError, showWarning } = useNotification();
-  const [activeAdvertisement, setActiveAdvertisement] = useState<any>(null);
+  const [advertisements, setAdvertisements] = useState<any[]>([]);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -35,7 +36,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       try {
         const response = await advertisementAPI.getActiveAdvertisements();
         if (response.data && response.data.results && response.data.results.length > 0) {
-          setActiveAdvertisement(response.data.results[0]); // Get the first active advertisement
+          setAdvertisements(response.data.results);
+          setCurrentAdIndex(0);
         }
       } catch (error) {
         console.error('Error fetching advertisements:', error);
@@ -44,6 +46,17 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
     fetchAdvertisements();
   }, []);
+
+  // Rotate advertisements every 3 seconds if there are more than one
+  useEffect(() => {
+    if (advertisements.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentAdIndex((prevIndex) => (prevIndex + 1) % advertisements.length);
+      }, 3000); // Change every 3 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [advertisements.length]);
 
   // Modal open/close with scroll control
   const openImageModal = () => {
@@ -564,32 +577,36 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
           </div>
 
           {/* ADVERTISEMENT */}
-          {activeAdvertisement ? (
+          {advertisements.length > 0 ? (
             <div className={styles.specialOffer}>
               <img
-                src={activeAdvertisement.image || "https://ochaka.vercel.app/images/products/fashion/product-1.jpg"}
-                alt={activeAdvertisement.title}
+                key={currentAdIndex}
+                src={advertisements[currentAdIndex].image || "https://ochaka.vercel.app/images/products/fashion/product-1.jpg"}
+                alt={advertisements[currentAdIndex].title}
+                style={{
+                  transition: 'opacity 0.5s ease-in-out',
+                }}
               />
               <p>
                 <strong>
-                  {activeAdvertisement.discount_percentage 
-                    ? `Special Offer: ${activeAdvertisement.discount_percentage}% Off`
-                    : activeAdvertisement.title}
+                  {advertisements[currentAdIndex].discount_percentage 
+                    ? `Special Offer: ${advertisements[currentAdIndex].discount_percentage}% Off`
+                    : advertisements[currentAdIndex].title}
                 </strong>
               </p>
               <button 
                 className={styles.buyNow} 
                 onClick={() => {
-                  if (activeAdvertisement.button_link) {
-                    if (activeAdvertisement.button_link.startsWith('http')) {
-                      window.open(activeAdvertisement.button_link, '_blank');
+                  if (advertisements[currentAdIndex].button_link) {
+                    if (advertisements[currentAdIndex].button_link.startsWith('http')) {
+                      window.open(advertisements[currentAdIndex].button_link, '_blank');
                     } else {
-                      navigate(`/products-details/${activeAdvertisement.button_link}`);
+                      navigate(`/products-details/${advertisements[currentAdIndex].button_link}`);
                     }
                   }
                 }}
               >
-                {activeAdvertisement.button_text || 'Check Now'}
+                {advertisements[currentAdIndex].button_text || 'Check Now'}
               </button>
             </div>
           ) : (

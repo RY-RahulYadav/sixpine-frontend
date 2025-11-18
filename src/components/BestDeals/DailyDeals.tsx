@@ -21,6 +21,8 @@ interface DailyDeal {
   productId?: number;
   description?: string;
   variantCount?: number;
+  colorCount?: number;
+  color_count?: number;
 }
 
 const DailyDeals = () => {
@@ -173,7 +175,8 @@ const DailyDeals = () => {
           const mappedProducts = productsData.map((deal: any) => ({
             ...deal,
             description: deal.description || deal.short_description || '',
-            variantCount: deal.variantCount || deal.variant_count || 0
+            variantCount: deal.variantCount || deal.variant_count || 0,
+            colorCount: deal.colorCount || deal.color_count || 0
           }));
           setDailyDeals(mappedProducts);
         } else {
@@ -382,10 +385,10 @@ const DailyDeals = () => {
                 {"★".repeat(fullStars)}
                 {"☆".repeat(emptyStars)}
                 <span> ({deal.reviewCount} reviews)</span>
-                {deal.variantCount !== undefined && deal.variantCount > 0 && (
+                {(deal.colorCount !== undefined || deal.color_count !== undefined || deal.variantCount !== undefined) && (deal.colorCount || deal.color_count || deal.variantCount || 0) > 0 && (
                   <div className={cardStyles.colorSwatches} aria-hidden>
                     <span className={cardStyles.moreCount}>
-                      {deal.variantCount} variant{deal.variantCount !== 1 ? 's' : ''}
+                      {(deal.colorCount || deal.color_count || deal.variantCount || 0)} color{((deal.colorCount || deal.color_count || deal.variantCount || 0) !== 1) ? 's' : ''}
                     </span>
                   </div>
                 )}

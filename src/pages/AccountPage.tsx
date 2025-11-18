@@ -54,6 +54,8 @@ const AccountPage: React.FC = () => {
           productId: product.id || product.productId,
           slug: product.slug || product.productSlug,  // Use slug or productSlug
           variantCount: product.variant_count || product.variantCount,
+          colorCount: product.color_count || product.colorCount || 0,
+          color_count: product.color_count || product.colorCount || 0,
         }));
         setFrequentlyViewedProducts(transformedFrequentlyViewed);
       }
@@ -72,6 +74,8 @@ const AccountPage: React.FC = () => {
           productId: product.id || product.productId,
           slug: product.slug || product.productSlug,  // Use slug or productSlug
           variantCount: product.variant_count || product.variantCount,
+          colorCount: product.color_count || product.colorCount || 0,
+          color_count: product.color_count || product.colorCount || 0,
         }));
         setInspiredProducts(transformedInspired);
       }

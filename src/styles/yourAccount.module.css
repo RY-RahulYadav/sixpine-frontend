@@ -185,3 +185,12 @@
     font-size: 1.2rem;
   }
 }
+
+/* Override global min-height for your account page only */
+@media (max-width: 767px) {
+  .card p,
+  .card a {
+    min-height: auto !important;
+    min-width: auto !important;
+  }
+}

@@ -20,6 +20,8 @@ interface WishlistItem {
     average_rating: number;
     review_count: number;
     variant_count?: number;
+    color_count?: number;
+    colorCount?: number;
     available_colors?: string[];
     category: {
       name: string;
@@ -158,7 +160,7 @@ const Wishlist = () => {
           const fullStars = Math.floor(rating);
           const emptyStars = 5 - Math.ceil(rating);
           const isCartLoadingForThis = cartLoading === item.product.id;
-          const variantCount = item.product.variant_count || 0;
+          const colorCount = item.product.color_count || item.product.colorCount || item.product.variant_count || 0;
           const description = item.product.short_description || '';
           
           return (
@@ -217,10 +219,10 @@ const Wishlist = () => {
                 {"★".repeat(fullStars)}
                 {"☆".repeat(emptyStars)}
                 <span> ({item.product.review_count} reviews)</span>
-                {variantCount > 0 && (
+                {colorCount > 0 && (
                   <div className={cardStyles.colorSwatches} aria-hidden>
                     <span className={cardStyles.moreCount}>
-                      {variantCount} variant{variantCount !== 1 ? 's' : ''}
+                      {colorCount} color{colorCount !== 1 ? 's' : ''}
                     </span>
                   </div>
                 )}

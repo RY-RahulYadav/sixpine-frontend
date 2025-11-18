@@ -8,8 +8,9 @@
 }
 
 .lpf-content {
-  max-width: 1480px;
+  max-width: 1500px;
   margin: 0 auto 40px;
+  padding: 0 20px;
 }
 
 /* Title Section */

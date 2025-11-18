@@ -25,6 +25,8 @@ interface Product {
   navigateUrl?: string;
   variantCount?: number;
   variant_count?: number;
+  colorCount?: number;
+  color_count?: number;
 }
 
 // Default Banner Data
@@ -214,10 +216,10 @@ const BannerCards = () => {
     }
   };
 
-  const renderProducts = (products: Product[]) =>
+  const renderProducts = (products: Product[], sliderIndex: number = 0) =>
     products.map((p, idx) => (
       <ProductCard
-        key={idx}
+        key={`slider-${sliderIndex}-${(p as any).id || p.productId || idx}`}
         id={(p as any).id || idx}
         title={p.title}
         desc={p.desc}
@@ -232,6 +234,7 @@ const BannerCards = () => {
         productId={p.productId}
         navigateUrl={(p as any).navigateUrl}
         variantCount={p.variantCount || p.variant_count}
+        colorCount={p.colorCount || p.color_count}
       />
     ));
 
@@ -282,7 +285,7 @@ const BannerCards = () => {
             <FaChevronLeft />
           </button>
           <div className={styles.craftedSlider} ref={slider1}>
-            {renderProducts(slider1Products)}
+            {renderProducts(slider1Products, 1)}
           </div>
           <button className={`${styles.sliderArrow} ${styles.right}`} onClick={() => scroll(slider1, "right")}>
             <FaChevronRight />
@@ -303,7 +306,7 @@ const BannerCards = () => {
             <FaChevronLeft />
           </button>
           <div className={styles.craftedSlider} ref={slider2}>
-            {renderProducts(slider2Products)}
+            {renderProducts(slider2Products, 2)}
           </div>
           <button className={`${styles.sliderArrow} ${styles.right}`} onClick={() => scroll(slider2, "right")}>
             <FaChevronRight />

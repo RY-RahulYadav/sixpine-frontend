@@ -19,6 +19,8 @@ interface TrendingProduct {
   discount?: string | null;
   navigateUrl?: string;
   variantCount?: number;
+  colorCount?: number;
+  color_count?: number;
 }
 
 const defaultProducts: TrendingProduct[] = [
@@ -109,7 +111,8 @@ const TrendingProducts = () => {
               tag: product.tag || 'Trending',
               discount: product.discount || null,
               navigateUrl: product.navigateUrl || '#',
-              variantCount: product.variantCount || product.variant_count || product.variants_count || 0
+              variantCount: product.variantCount || product.variant_count || product.variants_count || 0,
+              colorCount: product.colorCount || product.color_count || 0
             }));
             setTrendingProducts(mappedProducts.length > 0 ? mappedProducts : defaultProducts);
           }
@@ -317,10 +320,10 @@ const TrendingProducts = () => {
                 {"★".repeat(fullStars)}
                 {"☆".repeat(emptyStars)}
                 <span> ({product.reviewCount} reviews)</span>
-                {product.variantCount !== undefined && product.variantCount > 0 && (
+                {(product.colorCount !== undefined || product.color_count !== undefined || product.variantCount !== undefined) && (product.colorCount || product.color_count || product.variantCount || 0) > 0 && (
                   <div className={cardStyles.colorSwatches} aria-hidden>
                     <span className={cardStyles.moreCount}>
-                      {product.variantCount} variant{product.variantCount !== 1 ? 's' : ''}
+                      {(product.colorCount || product.color_count || product.variantCount || 0)} color{((product.colorCount || product.color_count || product.variantCount || 0) !== 1) ? 's' : ''}
                     </span>
                   </div>
                 )}

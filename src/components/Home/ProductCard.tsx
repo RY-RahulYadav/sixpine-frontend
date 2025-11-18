@@ -22,6 +22,8 @@ interface ProductCardProps {
   productId?: number;
   navigateUrl?: string;
   variantCount?: number;
+  colorCount?: number;
+  color_count?: number;
   onImageError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
   onBuyNow?: (e: React.MouseEvent) => void;
   onWishlist?: (e: React.MouseEvent) => void;
@@ -44,6 +46,8 @@ const ProductCard = ({
   productId,
   navigateUrl,
   variantCount,
+  colorCount,
+  color_count,
   onImageError,
   onBuyNow,
   onWishlist,
@@ -259,9 +263,9 @@ const ProductCard = ({
       <div className={styles.productRating}>
         {renderStars(rating)}
         <span> ({reviews} reviews)</span>
-        {variantCount !== undefined && variantCount > 0 && (
+        {(colorCount !== undefined || color_count !== undefined || variantCount !== undefined) && (colorCount || color_count || variantCount || 0) > 0 && (
           <div className={styles.colorSwatches} aria-hidden>
-            <span className={styles.moreCount}>{variantCount} variant{variantCount !== 1 ? 's' : ''}</span>
+            <span className={styles.moreCount}>{(colorCount || color_count || variantCount || 0)} color{((colorCount || color_count || variantCount || 0) !== 1) ? 's' : ''}</span>
           </div>
         )}
       </div>

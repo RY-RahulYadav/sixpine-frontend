@@ -26,6 +26,8 @@ export interface Product {
   productSlug?: string;  // Alternative field name for slug
   variantCount?: number;
   variants_count?: number;
+  colorCount?: number;
+  color_count?: number;
 }
 
 // Component Props Interface
@@ -290,10 +292,10 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
             {"★".repeat(Math.floor(p.rating))}
             {"☆".repeat(5 - Math.floor(p.rating))}
             <span> ({p.reviews} reviews)</span>
-            {(p.variantCount !== undefined || p.variants_count !== undefined) && (
+            {(p.colorCount !== undefined || p.color_count !== undefined || p.variantCount !== undefined || p.variants_count !== undefined) && (
               <div className={styles.colorSwatches} aria-hidden>
                 <span className={styles.moreCount}>
-                  {(p.variantCount || p.variants_count || 0)} variant{(p.variantCount || p.variants_count || 0) !== 1 ? 's' : ''}
+                  {(p.colorCount || p.color_count || p.variantCount || p.variants_count || 0)} color{((p.colorCount || p.color_count || p.variantCount || p.variants_count || 0) !== 1) ? 's' : ''}
                 </span>
               </div>
             )}

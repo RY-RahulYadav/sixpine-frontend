@@ -86,6 +86,8 @@ const AddressesPage: React.FC = () => {
           slug: product.slug || product.productSlug,  // Use slug or productSlug
           variantCount: product.variant_count || product.variants_count || 0,
           variants_count: product.variant_count || product.variants_count || 0,
+          colorCount: product.color_count || product.colorCount || 0,
+          color_count: product.color_count || product.colorCount || 0,
         }));
         setFrequentlyViewedProducts(transformedFrequentlyViewed);
       }
@@ -105,6 +107,8 @@ const AddressesPage: React.FC = () => {
           slug: product.slug || product.productSlug,  // Use slug or productSlug
           variantCount: product.variant_count || product.variants_count || 0,
           variants_count: product.variant_count || product.variants_count || 0,
+          colorCount: product.color_count || product.colorCount || 0,
+          color_count: product.color_count || product.colorCount || 0,
         }));
         setInspiredProducts(transformedInspired);
       }
