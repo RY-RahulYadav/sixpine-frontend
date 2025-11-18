@@ -21,7 +21,7 @@ const AboutPage: React.FC = () => {
        
       </div>
    
-      <div className="aboutpage_container">
+      <div className="sixpineapp_container">
       <About />
       
 </div>

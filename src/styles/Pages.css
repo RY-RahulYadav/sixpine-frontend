@@ -8,7 +8,6 @@
 .feedback_container,
 .login_container,
 .loginsecurity_container,
-.pressrelease_container,
 .trending_container,
 .privacypage_container,
 .bulkorder_container{
@@ -20,7 +19,8 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.homepage_container,.recentlybrowsed_container, .productdetails_container{
+.homepage_container,.recentlybrowsed_container, .productdetails_container,
+.pressrelease_container{
   margin: 0 auto;
   width: 100%;
   margin-bottom: 60px;
@@ -52,6 +52,46 @@
   width: 100%;
   box-sizing: border-box;
   
+}
+
+/* Reduce gap between data request section and product sliders */
+.datarequest-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
+}
+
+/* Reduce gap between close account section and product sliders */
+.close-account-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
+}
+
+/* Reduce gap between login security section and product sliders */
+.login-security-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
+}
+
+/* Reduce gap between advertising preference section and product sliders */
+.advertising-preference-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
+}
+
+/* Reduce gap between communication preferences section and product sliders */
+.communication-preferences-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
+}
+
+/* Reduce gap between your addresses section and product sliders */
+.your-addresses-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
+}
+
+/* Reduce gap between manage payment section and product sliders */
+.manage-payment-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
+}
+
+/* Reduce gap between shopping preferences section and product sliders */
+.shopping-preferences-page > div[class*="craftedContainer"] {
+  margin-top: 60px !important;
 }
 
 /* Section spacing - standardized for consistent layout */

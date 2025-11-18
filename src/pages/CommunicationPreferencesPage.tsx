@@ -85,7 +85,7 @@ const CommunicationPreferencesPage: React.FC = () => {
         <SubNav/>
         <CategoryTabs />
       </div>
-      <div className="communicationpreferences_container">
+      <div className="homepage_container communication-preferences-page">
       <CommunicationPreferences />
       
         {/* Product Sections */}

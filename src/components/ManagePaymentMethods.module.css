@@ -1,11 +1,12 @@
 .container {
-  /* Width controlled by parent productdetails_container */
+  /* Width controlled by parent homepage_container */
   width: 100%;
   background: #fff;
-  padding: 32px 32px 24px 32px;
+  padding: 20px 0;
   border-radius: 12px;
   font-family: 'Amazon Ember', Arial, sans-serif;
   box-sizing: border-box;
+  margin-bottom: 0;
 }
 
 .breadcrumbs {
@@ -302,7 +303,7 @@
 /* Tablets and Small Laptops (768px - 999px) */
 @media (max-width: 999px) {
   .container {
-    padding: 24px 20px 20px 20px;
+    padding: 20px 0;
   }
 
   .heading {
@@ -335,7 +336,7 @@
 /* Tablets Portrait (768px and below) */
 @media (max-width: 768px) {
   .container {
-    padding: 20px 16px 16px 16px;
+    padding: 20px 0;
   }
 
   .breadcrumbs {
@@ -479,7 +480,7 @@
 /* Mobile Landscape (480px - 767px) */
 @media (max-width: 480px) {
   .container {
-    padding: 16px 12px 12px 12px;
+    padding: 20px 0;
   }
 
   .breadcrumbs {
@@ -617,7 +618,7 @@
 /* Small Mobile Devices (375px and below) */
 @media (max-width: 375px) {
   .container {
-    padding: 14px 10px 10px 10px;
+    padding: 20px 0;
   }
 
   .breadcrumbs {

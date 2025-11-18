@@ -261,7 +261,7 @@ const ManagePaymentPage: React.FC = () => {
         <CategoryTabs />
       </div>
 
-      <div className="productdetails_container">
+      <div className="homepage_container manage-payment-page">
         <ManagePaymentMethods
           preference={preference}
           savedCards={savedCards || []}

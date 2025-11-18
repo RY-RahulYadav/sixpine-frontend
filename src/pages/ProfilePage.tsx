@@ -88,7 +88,7 @@ const ProfilePage: React.FC = () => {
         <CategoryTabs />
       </div>
       <ProfileSection />
-         <div className="productdetails_container">
+         <div className="homepage_container shopping-preferences-page">
         
         {/* First Row - Customers frequently viewed */}
         {!loading && frequentlyViewedProducts.length > 0 && (

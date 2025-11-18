@@ -20,7 +20,7 @@ const PressReleasePage  : React.FC = () => {
 
        
       </div>
-      <div className="pressrelease_container">
+      <div className="sixpineapp_container">
       <PressRelease />
       
 

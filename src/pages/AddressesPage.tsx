@@ -265,6 +265,7 @@ const AddressesPage: React.FC = () => {
         <SubNav/>
         <CategoryTabs />
       </div>
+      <div className="homepage_container your-addresses-page">
       <div className={styles.container}>
         {/* Breadcrumb */}
         <div className={styles.breadcrumb}>
@@ -465,28 +466,25 @@ const AddressesPage: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
 
         {/* Product Sections */}
         {!loadingProducts && (
           <>
             {/* First Row - Customers frequently viewed */}
             {frequentlyViewedProducts.length > 0 && (
-              <div className={styles.carouselSection}>
-                <Productdetails_Slider1 
-                  title="Customers frequently viewed | Popular products in the last 7 days"
-                  products={frequentlyViewedProducts}
-                />
-              </div>
+              <Productdetails_Slider1 
+                title="Customers frequently viewed | Popular products in the last 7 days"
+                products={frequentlyViewedProducts}
+              />
             )}
 
             {/* Second Row - Inspired by your browsing history */}
             {inspiredProducts.length > 0 && (
-              <div className={styles.carouselSection}>
-                <Productdetails_Slider1 
-                  title="Inspired by your browsing history"
-                  products={inspiredProducts}
-                />
-              </div>
+              <Productdetails_Slider1 
+                title="Inspired by your browsing history"
+                products={inspiredProducts}
+              />
             )}
           </>
         )}

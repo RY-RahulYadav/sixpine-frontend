@@ -85,7 +85,7 @@ const AdvertisingPreferecePage: React.FC = () => {
         <SubNav/>
         <CategoryTabs />
       </div>
-      <div className="advertisingpreferece_container">
+      <div className="homepage_container advertising-preference-page">
         <Advertising_Preferece/>
         
         {/* Product Sections */}

@@ -3,7 +3,8 @@
   margin: auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #222;
-  padding: 60px 20px;
+  padding: 20px 0;
+  margin-bottom: 0;
 }
 
 .heading {
@@ -139,7 +140,7 @@
 @media (max-width: 768px) {
   .container {
     max-width: 100%;
-   padding: 60px 20px;
+   padding: 20px 0;
   }
   .heading {
     font-size: 20px;
@@ -160,7 +161,7 @@
 /* Mobile Large (≤ 425px) */
 @media (max-width: 425px) {
   .container {
-  padding: 60px 20px;
+  padding: 20px 0;
   }
   .heading {
     font-size: 18px;

@@ -91,7 +91,7 @@ const LoginSecurityPage: React.FC = () => {
         <CategoryTabs />
       </div>
       
-      <div className="loginsecurity_container">
+      <div className="homepage_container login-security-page">
       <Loginsecurity />
 
         {/* First Row - Customers frequently viewed */}
