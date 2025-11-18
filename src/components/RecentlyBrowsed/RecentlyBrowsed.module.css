@@ -881,13 +881,55 @@
 }
 
 /* Responsive Styles */
-@media (max-width: 1024px) {
+
+/* Large Desktops (1500px and above) - Maintain current design */
+@media (min-width: 1500px) {
   .productsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .historyItems {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .recommendedGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .categoriesGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .savedItemsGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 1200px) {
+/* Medium Desktops (1000px - 1499px) - Same as large desktop */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .productsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .historyItems {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .recommendedGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .categoriesGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .savedItemsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablets and Small Laptops (1000px - 1199px) */
+@media (max-width: 999px) {
   .historyItems {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -905,19 +947,45 @@
   }
 }
 
+/* Tablets and Small Laptops (1200px - 1499px) */
+@media (min-width: 1000px) and (max-width: 1200px) {
+  .historyItems {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .recommendedGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .categoriesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .savedItemsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .productsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablets Portrait (768px - 1023px) */
 @media (max-width: 768px) {
   .browsingHistorySection,
   .recommendedSection,
   .relatedCategoriesSection,
   .savedItemsSection {
-    padding: 20px;
+    padding: 20px 15px;
   }
   
   .sectionHeaderWithClear {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
   }
   
   .headerContent {
@@ -936,7 +1004,7 @@
   .sectionHeader {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+    gap: 12px;
   }
   
   .controls {
@@ -946,51 +1014,56 @@
   
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
   
   .recommendedGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
   
   .categoriesGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .historyItems {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .savedItemsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
   }
 }
 
-@media (max-width: 480px) {
-  .productsGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .sectionTitle {
-    font-size: 24px;
-  }
-  
-  .sectionSubtitle {
-    font-size: 14px;
-  }
-}
-
+/* Mobile Landscape (480px - 767px) */
 @media (max-width: 580px) {
   .historyItems {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .recommendedGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .categoriesGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .savedItemsGrid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .craftedProductCard {
     min-width: 200px;
-    width: 280px;
+    width: 100%;
+    max-width: 100%;
     padding: 12px;
   }
   
@@ -1009,5 +1082,53 @@
   .buyBtn {
     font-size: 0.8rem;
     padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .browsingHistorySection,
+  .recommendedSection,
+  .relatedCategoriesSection,
+  .savedItemsSection {
+    padding: 15px 12px;
+  }
+  
+  .productsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 22px;
+  }
+  
+  .sectionSubtitle {
+    font-size: 13px;
+  }
+}
+
+/* Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .browsingHistorySection,
+  .recommendedSection,
+  .relatedCategoriesSection,
+  .savedItemsSection {
+    padding: 12px 10px;
+  }
+  
+  .sectionTitle {
+    font-size: 20px;
+  }
+  
+  .sectionSubtitle {
+    font-size: 12px;
+  }
+  
+  .craftedProductCard {
+    padding: 10px;
+  }
+  
+  .productImg1 {
+    height: 120px;
   }
 }

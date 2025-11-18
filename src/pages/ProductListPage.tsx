@@ -272,6 +272,19 @@ const ProductListPage: React.FC = () => {
     fetchProducts();
   }, [searchParams, sortBy, selectedFilters, currentPage, pageSize]);
 
+  // Prevent body scroll when filters are open on mobile
+  useEffect(() => {
+    if (showFilters && window.innerWidth <= 991) {
+      document.body.classList.add('filters-open');
+    } else {
+      document.body.classList.remove('filters-open');
+    }
+    
+    return () => {
+      document.body.classList.remove('filters-open');
+    };
+  }, [showFilters]);
+
   const fetchFilterOptions = async () => {
     try {
       const params: any = {};
@@ -484,12 +497,19 @@ const ProductListPage: React.FC = () => {
     }
   };
 
-  const handleFilterChange = (filterType: string, value: any) => {
+  const handleFilterChange = (filterType: string, value: any, shouldCloseOnMobile: boolean = true) => {
     console.log('Filter changed:', filterType, value);
     setSelectedFilters((prev) => ({
       ...prev,
       [filterType]: value,
     }));
+    
+    // Close filter sidebar on mobile after filter change (except for price inputs)
+    if (shouldCloseOnMobile && window.innerWidth <= 991 && showFilters) {
+      setTimeout(() => {
+        setShowFilters(false);
+      }, 300); // Small delay to show the change before closing
+    }
   };
 
   const handleCategoryChange = (categorySlug: string) => {
@@ -502,6 +522,13 @@ const ProductListPage: React.FC = () => {
     
     // Fetch subcategories for the selected category
     fetchSubcategories(categorySlug);
+    
+    // Close filter sidebar on mobile after category change
+    if (window.innerWidth <= 991 && showFilters) {
+      setTimeout(() => {
+        setShowFilters(false);
+      }, 300);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -584,6 +611,15 @@ const ProductListPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Mobile Overlay for Filters */}
+              {showFilters && (
+                <div 
+                  className={`filters-overlay ${showFilters ? 'show' : ''}`}
+                  onClick={() => setShowFilters(false)}
+                  aria-label="Close filters"
+                />
+              )}
+
               <div className="row">
                 {/* Left Sidebar - Advanced Filters */}
                 <div className={`col-lg-3 col-md-4 filters-sidebar-modern ${showFilters ? 'show' : ''}`}>
@@ -594,8 +630,10 @@ const ProductListPage: React.FC = () => {
                         Advanced Filters
                       </h5>
                       <button 
-                        className="btn-close-filters d-md-none"
+                        className="btn-close-filters"
                         onClick={() => setShowFilters(false)}
+                        aria-label="Close filters"
+                        title="Close filters"
                       >
                         <i className="bi bi-x-lg"></i>
                       </button>
@@ -695,7 +733,15 @@ const ProductListPage: React.FC = () => {
                             className="price-input"
                             placeholder="₹135"
                             value={selectedFilters.priceRange[0]}
-                            onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value) || 0, selectedFilters.priceRange[1]])}
+                            onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value) || 0, selectedFilters.priceRange[1]], false)}
+                            onBlur={() => {
+                              // Close sidebar on mobile when user finishes typing
+                              if (window.innerWidth <= 991 && showFilters) {
+                                setTimeout(() => {
+                                  setShowFilters(false);
+                                }, 300);
+                              }
+                            }}
                           />
                         </div>
                         <span className="price-separator">to</span>
@@ -706,7 +752,15 @@ const ProductListPage: React.FC = () => {
                             className="price-input"
                             placeholder="₹25,000"
                             value={selectedFilters.priceRange[1]}
-                            onChange={(e) => handleFilterChange('priceRange', [selectedFilters.priceRange[0], parseInt(e.target.value) || 25000])}
+                            onChange={(e) => handleFilterChange('priceRange', [selectedFilters.priceRange[0], parseInt(e.target.value) || 25000], false)}
+                            onBlur={() => {
+                              // Close sidebar on mobile when user finishes typing
+                              if (window.innerWidth <= 991 && showFilters) {
+                                setTimeout(() => {
+                                  setShowFilters(false);
+                                }, 300);
+                              }
+                            }}
                           />
                         </div>
                       </div>
@@ -717,7 +771,23 @@ const ProductListPage: React.FC = () => {
                           max="25000"
                           step="100"
                           value={selectedFilters.priceRange[1]}
-                          onChange={(e) => handleFilterChange('priceRange', [selectedFilters.priceRange[0], parseInt(e.target.value)])}
+                          onChange={(e) => handleFilterChange('priceRange', [selectedFilters.priceRange[0], parseInt(e.target.value)], false)}
+                          onMouseUp={() => {
+                            // Close sidebar on mobile when user releases slider
+                            if (window.innerWidth <= 991 && showFilters) {
+                              setTimeout(() => {
+                                setShowFilters(false);
+                              }, 300);
+                            }
+                          }}
+                          onTouchEnd={() => {
+                            // Close sidebar on mobile when user releases slider (touch devices)
+                            if (window.innerWidth <= 991 && showFilters) {
+                              setTimeout(() => {
+                                setShowFilters(false);
+                              }, 300);
+                            }
+                          }}
                           className="range-slider"
                         />
                       </div>
@@ -894,7 +964,7 @@ const ProductListPage: React.FC = () => {
                 </div>
 
                 {/* Right Side - Product Grid */}
-                <div className="col-lg-9 col-md-8">
+                <div className="col-lg-9 ">
                   {products.length === 0 ? (
                     <div className="no-products-found">
                       <div className="no-products-icon">
@@ -1086,27 +1156,15 @@ const ProductListPage: React.FC = () => {
                   
                   {/* Pagination Component */}
                   {totalPages > 0 && (
-                    <div className="pagination-wrapper" style={{ marginTop: '40px', marginBottom: '20px' }}>
-                      <div className="pagination-container" style={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center',
-                        gap: '10px',
-                        flexWrap: 'wrap'
-                      }}>
+                    <div className="pagination-wrapper">
+                      <div className="pagination-container">
                         {/* Page Size Selector */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: '20px' }}>
-                          <label style={{ fontSize: '14px', color: '#666' }}>Items per page:</label>
+                        <div className="pagination-page-size">
+                          <label className="pagination-label">Items per page:</label>
                           <select
+                            className="pagination-select"
                             value={pageSize}
                             onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                            style={{
-                              padding: '6px 12px',
-                              borderRadius: '6px',
-                              border: '1px solid #ddd',
-                              fontSize: '14px',
-                              cursor: 'pointer'
-                            }}
                           >
                             <option value={12}>12</option>
                             <option value={20}>20</option>
@@ -1116,41 +1174,21 @@ const ProductListPage: React.FC = () => {
                         </div>
 
                         {/* Page Info */}
-                        <div style={{ fontSize: '14px', color: '#666', marginRight: '20px' }}>
+                        <div className="pagination-info">
                           Page {currentPage} of {totalPages} ({totalProducts} total)
                         </div>
 
                         {/* Previous Button */}
                         <button
+                          className={`pagination-btn pagination-btn-prev ${!hasPrevious ? 'disabled' : ''}`}
                           onClick={() => handlePageChange(currentPage - 1)}
                           disabled={!hasPrevious}
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            border: '1px solid #ddd',
-                            backgroundColor: hasPrevious ? '#fff' : '#f5f5f5',
-                            color: hasPrevious ? '#333' : '#999',
-                            cursor: hasPrevious ? 'pointer' : 'not-allowed',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (hasPrevious) {
-                              e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (hasPrevious) {
-                              e.currentTarget.style.backgroundColor = '#fff';
-                            }
-                          }}
                         >
                           <i className="bi bi-chevron-left"></i> Previous
                         </button>
 
                         {/* Page Numbers */}
-                        <div style={{ display: 'flex', gap: '4px' }}>
+                        <div className="pagination-numbers">
                           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                             let pageNum: number;
                             if (totalPages <= 5) {
@@ -1166,29 +1204,8 @@ const ProductListPage: React.FC = () => {
                             return (
                               <button
                                 key={pageNum}
+                                className={`pagination-btn pagination-btn-number ${currentPage === pageNum ? 'active' : ''}`}
                                 onClick={() => handlePageChange(pageNum)}
-                                style={{
-                                  padding: '8px 14px',
-                                  borderRadius: '6px',
-                                  border: currentPage === pageNum ? '2px solid var(--sixpine-primary)' : '1px solid #ddd',
-                                  backgroundColor: currentPage === pageNum ? 'var(--sixpine-primary)' : '#fff',
-                                  color: currentPage === pageNum ? '#fff' : '#333',
-                                  cursor: 'pointer',
-                                  fontSize: '14px',
-                                  fontWeight: currentPage === pageNum ? '600' : '400',
-                                  transition: 'all 0.2s',
-                                  minWidth: '40px'
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (currentPage !== pageNum) {
-                                    e.currentTarget.style.backgroundColor = '#f8f9fa';
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  if (currentPage !== pageNum) {
-                                    e.currentTarget.style.backgroundColor = '#fff';
-                                  }
-                                }}
                               >
                                 {pageNum}
                               </button>
@@ -1198,29 +1215,9 @@ const ProductListPage: React.FC = () => {
 
                         {/* Next Button */}
                         <button
+                          className={`pagination-btn pagination-btn-next ${!hasNext ? 'disabled' : ''}`}
                           onClick={() => handlePageChange(currentPage + 1)}
                           disabled={!hasNext}
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '6px',
-                            border: '1px solid #ddd',
-                            backgroundColor: hasNext ? '#fff' : '#f5f5f5',
-                            color: hasNext ? '#333' : '#999',
-                            cursor: hasNext ? 'pointer' : 'not-allowed',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            transition: 'all 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (hasNext) {
-                              e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (hasNext) {
-                              e.currentTarget.style.backgroundColor = '#fff';
-                            }
-                          }}
                         >
                           Next <i className="bi bi-chevron-right"></i>
                         </button>

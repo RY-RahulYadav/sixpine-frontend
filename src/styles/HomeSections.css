@@ -49,9 +49,23 @@
 }
 
 /* Responsive adjustments - maintaining consistent spacing ratios */
+@media (max-width: 1024px) {
+  .hero-section {
+    margin-top: 25px;
+  }
+  .category-section,
+  .featured-section,
+  .collections-section,
+  .furniture-section,
+  .offers-section {
+    margin-top: 25px;
+  }
+}
+
 @media (max-width: 768px) {
   .hero-section {
-    margin-bottom: 35px;
+    margin-top: 20px;
+    margin-bottom: 30px;
     padding: 0;
   }
   
@@ -60,27 +74,26 @@
   .collections-section,
   .furniture-section,
   .offers-section {
-    margin: 35px 0;
-    padding: 20px 0;
+    margin: 30px 0;
+    padding: 18px 0;
   }
   
   .features-section {
-    margin: 35px 0;
-    padding: 25px 15px 20px;
+    margin: 30px 0;
+    padding: 22px 12px 18px;
   }
   
   .banner-section {
-    margin: 35px 0;
+    margin: 30px 0;
     padding: 0;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .hero-section {
+    margin-top: 15px;
     margin-bottom: 25px;
-    padding: 0;
   }
-  
   .category-section,
   .featured-section,
   .collections-section,
@@ -89,14 +102,57 @@
     margin: 25px 0;
     padding: 15px 0;
   }
-  
   .features-section {
     margin: 25px 0;
     padding: 20px 10px 15px;
   }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    margin-top: 12px;
+    margin-bottom: 20px;
+    padding: 0;
+  }
+  
+  .category-section,
+  .featured-section,
+  .collections-section,
+  .furniture-section,
+  .offers-section {
+    margin: 20px 0;
+    padding: 12px 0;
+  }
+  
+  .features-section {
+    margin: 20px 0;
+    padding: 18px 8px 12px;
+  }
   
   .banner-section {
-    margin: 25px 0;
+    margin: 20px 0;
     padding: 0;
+  }
+}
+
+@media (max-width: 375px) {
+  .hero-section {
+    margin-top: 10px;
+    margin-bottom: 15px;
+  }
+  .category-section,
+  .featured-section,
+  .collections-section,
+  .furniture-section,
+  .offers-section {
+    margin: 15px 0;
+    padding: 10px 0;
+  }
+  .features-section {
+    margin: 15px 0;
+    padding: 15px 6px 10px;
+  }
+  .banner-section {
+    margin: 15px 0;
   }
 }

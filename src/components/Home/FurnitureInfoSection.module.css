@@ -331,22 +331,39 @@
 }
 
 /* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .infoContainer {
+    padding: 30px 20px;
+  }
+  .gridContainer,
+  .roomGrid,
+  .upholsteryGrid,
+  .whyGrid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+}
+
 @media (max-width: 768px) {
   .infoContainer {
-    padding: 20px;
+    padding: 20px 15px;
+    border-width: 4px;
   }
 
   .mainHeading {
     font-size: 1.4rem;
+    margin-bottom: 12px;
   }
 
   .sectionHeading {
     font-size: 1.2rem;
+    margin-bottom: 12px;
   }
 
   .introPara,
   .sectionIntro {
     font-size: 0.95rem;
+    margin-bottom: 15px;
   }
 
   .gridContainer,
@@ -354,32 +371,90 @@
   .upholsteryGrid,
   .whyGrid {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
 
   .section,
   .heroSection,
   .ctaSection,
   .whySection {
+    margin-bottom: 25px;
     padding: 0;
+  }
+
+  .card,
+  .roomCard,
+  .upholsteryCard,
+  .whyCard {
+    padding: 15px;
+  }
+
+  .card h3,
+  .roomCard h3,
+  .upholsteryCard h3,
+  .whyCard h3 {
+    font-size: 1.1rem;
+  }
+
+  .ctaSection {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .infoContainer {
+    padding: 18px 12px;
+    border-width: 3px;
+  }
+  .mainHeading {
+    font-size: 1.3rem;
+  }
+  .sectionHeading {
+    font-size: 1.15rem;
   }
 }
 
 @media (max-width: 480px) {
   .infoContainer {
-    padding: 15px;
+    padding: 15px 10px;
+    border-width: 3px;
   }
 
   .mainHeading {
     font-size: 1.2rem;
+    margin-bottom: 10px;
   }
 
   .sectionHeading {
     font-size: 1.1rem;
+    margin-bottom: 10px;
   }
 
   .introPara,
   .sectionIntro {
     font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+
+  .section,
+  .heroSection,
+  .ctaSection,
+  .whySection {
+    margin-bottom: 20px;
+  }
+
+  .gridContainer,
+  .roomGrid,
+  .upholsteryGrid,
+  .whyGrid {
+    gap: 12px;
+  }
+
+  .card,
+  .roomCard,
+  .upholsteryCard,
+  .whyCard {
+    padding: 12px;
   }
 
   .card h3,
@@ -387,9 +462,70 @@
   .upholsteryCard h3,
   .whyCard h3 {
     font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .card p,
+  .roomCard p,
+  .upholsteryCard p,
+  .whyCard p {
+    font-size: 0.85rem;
+  }
+
+  .featureList li,
+  .tipsList li,
+  .careTips li {
+    font-size: 0.9rem;
+    padding: 10px 0;
+    padding-left: 25px;
+  }
+
+  .ctaSection {
+    padding: 15px;
   }
 
   .ctaHighlight {
     font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .infoContainer {
+    padding: 12px 8px;
+    border-width: 2px;
+  }
+  .mainHeading {
+    font-size: 1.1rem;
+  }
+  .sectionHeading {
+    font-size: 1rem;
+  }
+  .introPara,
+  .sectionIntro {
+    font-size: 0.85rem;
+  }
+  .card h3,
+  .roomCard h3,
+  .upholsteryCard h3,
+  .whyCard h3 {
+    font-size: 0.95rem;
+  }
+  .card p,
+  .roomCard p,
+  .upholsteryCard p,
+  .whyCard p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 325px) {
+  .infoContainer {
+    padding: 10px 6px;
+  }
+  .mainHeading {
+    font-size: 1rem;
+  }
+  .sectionHeading {
+    font-size: 0.95rem;
   }
 }

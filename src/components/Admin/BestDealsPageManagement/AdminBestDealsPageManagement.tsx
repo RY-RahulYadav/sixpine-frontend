@@ -37,6 +37,9 @@ interface DailyDeal {
   reviewCount: number;
   soldCount: number;
   navigateUrl?: string;
+  productId?: number;
+  description?: string;
+  variantCount?: number;
 }
 
 const AdminBestDealsPageManagement: React.FC = () => {
@@ -54,6 +57,10 @@ const AdminBestDealsPageManagement: React.FC = () => {
   const [dailyDeals, setDailyDeals] = useState<DailyDeal[]>([]);
   const [dailyDealsSectionTitle, setDailyDealsSectionTitle] = useState('Deals of the Day');
   const [editingDailyDealsSection, setEditingDailyDealsSection] = useState<HomePageContent | null>(null);
+  
+  // Product selection
+  const [products, setProducts] = useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
 
   // Default values
   const defaultBanners: DealsBanner[] = [
@@ -145,7 +152,21 @@ const AdminBestDealsPageManagement: React.FC = () => {
 
   useEffect(() => {
     fetchSections();
+    fetchProductsForSections();
   }, []);
+
+  const fetchProductsForSections = async () => {
+    try {
+      setLoadingProducts(true);
+      const response = await adminAPI.getProducts({ page_size: 1000, is_active: true });
+      const productsData = response.data.results || response.data || [];
+      setProducts(productsData);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
 
   const fetchSections = async () => {
     try {
@@ -277,30 +298,77 @@ const AdminBestDealsPageManagement: React.FC = () => {
     setBanners(updated);
   };
 
-  const addDailyDeal = () => {
-    const newDeal: DailyDeal = {
-      id: dailyDeals.length + 1,
-      name: 'New Deal',
-      image: '/images/Home/livingroom.jpg',
-      originalPrice: '₹0',
-      salePrice: '₹0',
-      discount: '0%',
-      rating: 4.0,
-      reviewCount: 0,
-      soldCount: 0,
-      navigateUrl: '#'
-    };
-    setDailyDeals([...dailyDeals, newDeal]);
+  const handleAddProductToDeals = async (productId: number) => {
+    try {
+      // Fetch product details
+      const response = await adminAPI.getProduct(productId);
+      const product = response.data;
+      
+      // Get first active variant for price calculation
+      const firstVariant = product.variants && product.variants.length > 0 
+        ? product.variants.find((v: any) => v.is_active) || product.variants[0]
+        : null;
+      
+      // Use product-level price if available, otherwise use variant price
+      const currentPrice = product.price 
+        ? parseFloat(product.price) 
+        : (firstVariant && firstVariant.price ? parseFloat(firstVariant.price) : 0);
+      
+      // Use product-level old_price if available, otherwise use variant old_price
+      const originalPrice = product.old_price 
+        ? parseFloat(product.old_price) 
+        : (firstVariant && firstVariant.old_price ? parseFloat(firstVariant.old_price) : currentPrice);
+      
+      // Calculate discount
+      let discountPercent = product.discount_percentage || 0;
+      if (!discountPercent && originalPrice > currentPrice) {
+        discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+      }
+      
+      // Get image - prefer variant image, then product main_image, then first product image
+      let productImage = '';
+      if (firstVariant && firstVariant.image) {
+        productImage = firstVariant.image;
+      } else if (product.main_image) {
+        productImage = product.main_image;
+      } else if (product.images && product.images.length > 0) {
+        productImage = product.images[0].image || product.images[0].url || '';
+      }
+      
+      // Get actual review count and rating from product
+      const reviewCount = product.review_count || 0;
+      const averageRating = product.average_rating || 0;
+      const variantCount = product.variants ? product.variants.filter((v: any) => v.is_active).length : 0;
+      
+      // Generate navigation URL from slug
+      const navigateUrl = product.slug ? `/products-details/${product.slug}` : '#';
+      
+      const newDeal: DailyDeal = {
+        id: dailyDeals.length + 1,
+        name: product.title || 'Product Title',
+        image: productImage || '/images/Home/livingroom.jpg',
+        originalPrice: originalPrice > currentPrice ? `₹${Math.round(originalPrice).toLocaleString('en-IN')}` : `₹${Math.round(currentPrice).toLocaleString('en-IN')}`,
+        salePrice: `₹${Math.round(currentPrice).toLocaleString('en-IN')}`,
+        discount: discountPercent > 0 ? `${discountPercent}%` : '0%',
+        rating: averageRating || 4.0,
+        reviewCount: reviewCount,
+        soldCount: 0, // Default sold count
+        navigateUrl: navigateUrl,
+        productId: product.id,
+        description: product.short_description || '',
+        variantCount: variantCount
+      };
+      
+      setDailyDeals([...dailyDeals, newDeal]);
+      showToast('Product added successfully', 'success');
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      showToast('Failed to load product details', 'error');
+    }
   };
 
   const removeDailyDeal = (index: number) => {
     setDailyDeals(dailyDeals.filter((_, i) => i !== index));
-  };
-
-  const updateDailyDeal = (index: number, field: keyof DailyDeal, value: any) => {
-    const updated = [...dailyDeals];
-    updated[index] = { ...updated[index], [field]: value };
-    setDailyDeals(updated);
   };
 
   if (loading) {
@@ -450,98 +518,60 @@ const AdminBestDealsPageManagement: React.FC = () => {
 
             <div className="admin-form-group">
               <label>Deals</label>
-              {dailyDeals.map((deal, index) => (
-                <div key={index} className="admin-card" style={{ marginBottom: '20px', padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <h3>Deal {index + 1}</h3>
-                    <button onClick={() => removeDailyDeal(index)} className="admin-btn admin-btn-danger">Remove</button>
-                  </div>
-                  <div className="admin-form-group">
-                    <label>Product Name</label>
-                    <input
-                      type="text"
-                      value={deal.name}
-                      onChange={(e) => updateDailyDeal(index, 'name', e.target.value)}
-                    />
-                  </div>
-                  <div className="admin-form-row">
-                    <div className="admin-form-group">
-                      <label>Original Price</label>
-                      <input
-                        type="text"
-                        value={deal.originalPrice}
-                        onChange={(e) => updateDailyDeal(index, 'originalPrice', e.target.value)}
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label>Sale Price</label>
-                      <input
-                        type="text"
-                        value={deal.salePrice}
-                        onChange={(e) => updateDailyDeal(index, 'salePrice', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="admin-form-row">
-                    <div className="admin-form-group">
-                      <label>Discount</label>
-                      <input
-                        type="text"
-                        value={deal.discount}
-                        onChange={(e) => updateDailyDeal(index, 'discount', e.target.value)}
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label>Rating</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={deal.rating}
-                        onChange={(e) => updateDailyDeal(index, 'rating', parseFloat(e.target.value))}
-                      />
-                    </div>
-                  </div>
-                  <div className="admin-form-row">
-                    <div className="admin-form-group">
-                      <label>Review Count</label>
-                      <input
-                        type="number"
-                        value={deal.reviewCount}
-                        onChange={(e) => updateDailyDeal(index, 'reviewCount', parseInt(e.target.value))}
-                      />
-                    </div>
-                    <div className="admin-form-group">
-                      <label>Sold Count</label>
-                      <input
-                        type="number"
-                        value={deal.soldCount}
-                        onChange={(e) => updateDailyDeal(index, 'soldCount', parseInt(e.target.value))}
-                      />
-                    </div>
-                  </div>
-                  <div className="admin-form-group">
-                    <label>Image URL</label>
-                    <input
-                      type="text"
-                      value={deal.image}
-                      onChange={(e) => updateDailyDeal(index, 'image', e.target.value)}
-                    />
-                  </div>
-                  <div className="admin-form-group">
-                    <label>Navigation URL</label>
-                    <input
-                      type="text"
-                      value={deal.navigateUrl || ''}
-                      onChange={(e) => updateDailyDeal(index, 'navigateUrl', e.target.value)}
-                      placeholder="/products-details/product-slug or custom URL"
-                    />
-                    <small style={{ color: 'var(--admin-text-light)', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                      Enter full URL (e.g., /products-details/product-slug) or leave empty for no link
-                    </small>
-                  </div>
+              <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Add Product from Product List</label>
+                <select
+                  className="admin-form-input"
+                  value=""
+                  onChange={(e) => {
+                    const productId = parseInt(e.target.value);
+                    if (productId) {
+                      handleAddProductToDeals(productId);
+                      e.target.value = '';
+                    }
+                  }}
+                  style={{ padding: '8px', borderRadius: '4px', border: '1px solid var(--admin-border)', width: '100%', maxWidth: '500px' }}
+                  disabled={loadingProducts}
+                >
+                  <option value="">-- Select Product to Add --</option>
+                  {loadingProducts ? (
+                    <option disabled>Loading products...</option>
+                  ) : (
+                    products
+                      .filter((p: any) => !dailyDeals.some((deal) => deal.productId === p.id))
+                      .map((product: any) => (
+                        <option key={product.id} value={product.id}>
+                          {product.title} {product.slug ? `(${product.slug})` : ''}
+                        </option>
+                      ))
+                  )}
+                </select>
+                <small style={{ display: 'block', marginTop: '8px', color: '#666', fontSize: '12px' }}>
+                  Select a product from the list to automatically populate its details
+                </small>
+              </div>
+              {dailyDeals.length === 0 ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666', fontStyle: 'italic', backgroundColor: '#f9f9f9', borderRadius: '4px' }}>
+                  No products added. Select products using the dropdown above.
                 </div>
-              ))}
-              <button onClick={addDailyDeal} className="admin-btn admin-btn-secondary">Add Deal</button>
+              ) : (
+                dailyDeals.map((deal, index) => (
+                  <div key={index} className="admin-card" style={{ marginBottom: '15px', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ margin: 0, marginBottom: '5px' }}>{deal.name}</h4>
+                      <div style={{ fontSize: '13px', color: '#666' }}>
+                        <span style={{ marginRight: '15px' }}>Price: {deal.salePrice}</span>
+                        {deal.originalPrice !== deal.salePrice && (
+                          <span style={{ marginRight: '15px', textDecoration: 'line-through' }}>{deal.originalPrice}</span>
+                        )}
+                        <span style={{ marginRight: '15px' }}>Rating: {deal.rating} ⭐</span>
+                        <span>Reviews: {deal.reviewCount}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => removeDailyDeal(index)} className="admin-btn admin-btn-danger" style={{ marginLeft: '15px' }}>Remove</button>
+                  </div>
+                ))
+              )}
             </div>
 
             <button onClick={handleSaveDailyDealsSection} disabled={saving} className="admin-btn admin-btn-primary">

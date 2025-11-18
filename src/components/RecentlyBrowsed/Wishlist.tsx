@@ -5,6 +5,7 @@ import { wishlistAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { useNotification } from '../../context/NotificationContext';
 import styles from './RecentlyBrowsed.module.css';
+import cardStyles from '../Products_Details/productdetails_slider1.module.css';
 
 interface WishlistItem {
   id: number;
@@ -140,15 +141,6 @@ const Wishlist = () => {
     );
   }
 
-  const calculateDiscount = (oldPrice: string, newPrice: string) => {
-    if (!oldPrice) return null;
-    const old = parseFloat(oldPrice);
-    const newP = parseFloat(newPrice);
-    if (old <= newP) return null;
-    const discount = Math.round(((old - newP) / old) * 100);
-    return `${discount}% OFF`;
-  };
-
   return (
     <div className={styles.browsingHistorySection}>
       <div className={styles.sectionHeaderWithClear}>
@@ -163,68 +155,118 @@ const Wishlist = () => {
       <div className={styles.productsGrid}>
         {wishlistItems.map(item => {
           const rating = item.product.average_rating || 0;
-          const discount = item.product.old_price 
-            ? calculateDiscount(item.product.old_price, item.product.price)
-            : null;
+          const fullStars = Math.floor(rating);
+          const emptyStars = 5 - Math.ceil(rating);
+          const isCartLoadingForThis = cartLoading === item.product.id;
+          const variantCount = item.product.variant_count || 0;
+          const description = item.product.short_description || '';
           
           return (
             <div 
               key={item.id} 
-              className={styles.productCard}
+              className={cardStyles.craftedProductCard}
               onClick={() => handleProductClick(item.product.slug)}
               style={{ cursor: 'pointer' }}
             >
-              <div className={styles.productImageContainer}>
+              <div className={cardStyles.imageWrapper}>
                 <img 
                   src={item.product.main_image || '/images/placeholder.jpg'} 
                   alt={item.product.title} 
-                  className={styles.productImage}
+                  className={cardStyles.productImg1}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProductClick(item.product.slug);
+                  }}
                 />
-                <span className={styles.trendingTag}>Wishlist</span>
-                {discount && (
-                  <div className={styles.discountBadge}>{discount}</div>
-                )}
-                <button
-                  className={styles.wishlistRemoveBtn}
-                  onClick={(e) => handleRemoveFromWishlist(item.id, e)}
+                <FaHeart
+                  className={`${cardStyles.heartIcon} ${cardStyles.heartActive}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveFromWishlist(item.id, e);
+                  }}
+                  style={{ 
+                    cursor: 'pointer'
+                  }}
                   title="Remove from Wishlist"
-                >
-                  <FaHeart style={{ color: '#ff6f00' }} />
-                </button>
+                />
               </div>
-              <div className={styles.productInfo}>
-                <h3 className={styles.productName}>{item.product.title}</h3>
-                <div className={styles.productMeta}>
-                  <span className={styles.productPrice}>{formatPrice(item.product.price)}</span>
-                  <div className={styles.productRating}>
-                    <span className={styles.ratingValue}>{rating.toFixed(1)}</span>
-                    <span className={styles.ratingIcon}>★</span>
-                    <span className={styles.reviewCount}>({item.product.review_count})</span>
+
+              <h4 
+                className={cardStyles.productTitle}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleProductClick(item.product.slug);
+                }}
+              >
+                {item.product.title}
+              </h4>
+              
+              {description && (
+                <p 
+                  className={cardStyles.productDesc}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProductClick(item.product.slug);
+                  }}
+                >
+                  {description}
+                </p>
+              )}
+              
+              <div className={cardStyles.productRating}>
+                {"★".repeat(fullStars)}
+                {"☆".repeat(emptyStars)}
+                <span> ({item.product.review_count} reviews)</span>
+                {variantCount > 0 && (
+                  <div className={cardStyles.colorSwatches} aria-hidden>
+                    <span className={cardStyles.moreCount}>
+                      {variantCount} variant{variantCount !== 1 ? 's' : ''}
+                    </span>
                   </div>
-                </div>
-                <div className={styles.productActionRow}>
-                  <button 
-                    className={styles.buyNowBtn}
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      if (state.isAuthenticated && item.product.id) {
-                        try {
-                          await addToCart(item.product.id, 1);
-                          navigate('/checkout');
-                        } catch (error: any) {
-                          console.error('Error adding to cart:', error);
-                          handleProductClick(item.product.slug);
-                        }
-                      } else {
+                )}
+              </div>
+
+              <div className={cardStyles.productPrices}>
+                <span className={cardStyles.newPrice}>{formatPrice(item.product.price)}</span>
+                {item.product.old_price && (
+                  <span className={cardStyles.oldPrice}>{formatPrice(item.product.old_price)}</span>
+                )}
+              </div>
+
+              <div className={cardStyles.actionRow}>
+                <button 
+                  className={cardStyles.buyBtn}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (state.isAuthenticated && item.product.id) {
+                      try {
+                        await addToCart(item.product.id, 1);
+                        navigate('/checkout');
+                      } catch (error: any) {
+                        console.error('Error adding to cart:', error);
                         handleProductClick(item.product.slug);
                       }
+                    } else {
+                      handleProductClick(item.product.slug);
+                    }
+                  }}
+                  disabled={isCartLoadingForThis}
+                >
+                  {isCartLoadingForThis ? 'Loading...' : 'Buy Now'}
+                </button>
+                <div className={cardStyles.productIcons}>
+                  <FaHeart 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveFromWishlist(item.id, e);
                     }}
-                    disabled={cartLoading === item.product.id}
-                  >
-                    {cartLoading === item.product.id ? 'Loading...' : 'Buy Now'}
-                  </button>
-                  <button 
-                    className={styles.cartIconBtn}
+                    title="Remove from Wishlist"
+                    style={{ 
+                      color: '#ff6f00',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <FaShoppingCart 
                     onClick={async (e) => {
                       e.stopPropagation();
                       if (!state.isAuthenticated) {
@@ -245,15 +287,12 @@ const Wishlist = () => {
                         setCartLoading(null);
                       }
                     }}
-                    title="Add to Cart"
-                    disabled={cartLoading === item.product.id}
                     style={{ 
-                      cursor: cartLoading === item.product.id ? 'wait' : 'pointer',
-                      opacity: cartLoading === item.product.id ? 0.6 : 1
+                      cursor: isCartLoadingForThis ? 'wait' : 'pointer',
+                      opacity: isCartLoadingForThis ? 0.6 : 1
                     }}
-                  >
-                    <FaShoppingCart />
-                  </button>
+                    title="Add to Cart"
+                  />
                 </div>
               </div>
             </div>

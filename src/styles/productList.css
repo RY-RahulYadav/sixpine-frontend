@@ -596,6 +596,47 @@
 }
 
 /* Responsive Design */
+
+/* Large Desktops (1500px and above) - Maintain current design, no padding */
+@media (min-width: 1500px) {
+  .product-list-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0;
+  }
+  
+  .product-grid-container {
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+}
+
+/* Medium Desktops (1000px - 1499px) - No padding, same as homepage */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .product-list-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 0;
+  }
+  
+  .product-grid-container {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 20px 0;
+  }
+}
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
+  .product-list-container {
+    padding: 0 20px;
+  }
+  
+  .product-grid-container {
+    padding: 20px;
+  }
+}
+
 @media (max-width: 991px) {
   .filters-sidebar {
     position: static;

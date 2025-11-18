@@ -575,7 +575,25 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
+
+/* Large Desktops (1500px and above) - Maintain current design */
+@media (min-width: 1500px) {
+  .sl-container {
+    max-width: 1500px;
+    padding: 20px 0;
+  }
+}
+
+/* Medium Desktops (1000px - 1499px) - No padding, same as homepage */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .sl-container {
+    max-width: 1500px;
+    padding: 20px 0;
+  }
+}
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
   .sl-content {
     flex-direction: column;
   }
@@ -595,9 +613,14 @@
   }
 }
 
+/* Tablets Portrait (768px - 1023px) */
 @media (max-width: 768px) {
   .sl-container {
-    padding: 16px;
+    padding: 16px 20px;
+  }
+
+  .sl-page-title {
+    font-size: 24px;
   }
 
   .sl-content-header {
@@ -629,5 +652,73 @@
   .sl-add-to-cart-btn,
   .sl-secondary-btn {
     width: 100%;
+  }
+
+  .sl-product-image {
+    max-width: 100%;
+  }
+}
+
+/* Mobile Landscape (480px - 767px) */
+@media (max-width: 480px) {
+  .sl-container {
+    padding: 12px 15px;
+  }
+
+  .sl-page-title {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  .sl-content-title {
+    font-size: 16px;
+  }
+
+  .sl-product-image {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+  }
+
+  .sl-product-title {
+    font-size: 16px;
+  }
+
+  .sl-product-description {
+    font-size: 13px;
+  }
+
+  .sl-current-price,
+  .sl-original-price {
+    font-size: 16px;
+  }
+}
+
+/* Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .sl-container {
+    padding: 10px 12px;
+  }
+
+  .sl-page-title {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .sl-content-title {
+    font-size: 15px;
+  }
+
+  .sl-product-title {
+    font-size: 15px;
+  }
+
+  .sl-product-description {
+    font-size: 12px;
+  }
+
+  .sl-current-price,
+  .sl-original-price {
+    font-size: 15px;
   }
 }

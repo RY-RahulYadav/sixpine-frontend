@@ -485,17 +485,81 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
+
+/* Large Desktops (1500px and above) - Maintain current design */
+@media (min-width: 1500px) {
+  .orders-page {
+    max-width: 1500px;
+    padding: 0;
+  }
+  
+  .recommended-products {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Medium Desktops (1000px - 1499px) - Add padding for better spacing */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .orders-page {
+    max-width: 1500px;
+    padding: 0;
+  }
+  
+  .orders-page .container-fluid {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  
+  .recommended-products {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablets and Small Laptops (1000px - 1199px) */
+@media (max-width: 999px) {
+  .orders-page .container-fluid {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Tablets and Small Laptops (1000px - 1200px) */
+@media (min-width: 1000px) and (max-width: 1200px) {
   .recommended-products {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
+/* Large Tablets (1024px) */
+@media (max-width: 1024px) {
+  .orders-page .container-fluid {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .order-info-group {
+    gap: 24px;
+  }
+  .recommended-products {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablets Portrait (992px - 1199px) */
 @media (max-width: 992px) {
+  .orders-page .container-fluid {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  
   .orders-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .orders-title {
+    font-size: 26px;
   }
 
   .orders-search-container {
@@ -504,59 +568,258 @@
     margin-left: 0;
   }
 
+  .order-header {
+    padding: 12px 15px;
+  }
+
   .order-header-row {
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .order-info-group {
+    flex-wrap: wrap;
     gap: 16px;
   }
 
   .order-id-group {
     align-items: flex-start;
+    width: 100%;
+  }
+
+  .order-body {
+    padding: 20px;
+  }
+
+  .item-image-container {
+    width: 160px;
+    height: 160px;
   }
 
   .recommended-products {
     grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
   }
 }
 
+/* Tablets and Mobile Landscape (768px - 991px) */
 @media (max-width: 768px) {
+  .orders-page .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  .breadcrumb-custom {
+    font-size: 11px;
+    margin-bottom: 12px;
+  }
+  
   .orders-title {
-    font-size: 24px;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .orders-header {
+    margin-bottom: 18px;
+  }
+
+  .orders-search-container {
+    width: 100%;
+  }
+
+  .search-box-orders {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-input-orders {
+    width: 100%;
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  .search-btn-orders {
+    width: 100%;
+    padding: 7px 20px;
+    font-size: 12px;
   }
 
   .orders-tabs {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    margin-bottom: 16px;
+  }
+
+  .orders-tabs::-webkit-scrollbar {
+    height: 4px;
   }
 
   .tab-button {
-    padding: 12px 16px;
-    font-size: 13px;
+    padding: 10px 14px;
+    font-size: 12px;
     white-space: nowrap;
+    min-width: fit-content;
+  }
+
+  .time-filter {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .filter-select {
+    font-size: 13px;
+    padding: 3px 6px;
+  }
+
+  .order-header {
+    padding: 12px 12px;
+  }
+
+  .order-header-row {
+    flex-direction: column;
+    gap: 10px;
   }
 
   .order-info-group {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .info-item {
+    width: 100%;
+  }
+
+  .info-label {
+    font-size: 10px;
+  }
+
+  .info-value {
+    font-size: 12px;
+  }
+
+  .order-id-group {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .order-id-label {
+    font-size: 11px;
+  }
+
+  .order-actions-header {
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  .btn-link-custom {
+    font-size: 12px;
+  }
+
+  .order-body {
+    padding: 16px;
   }
 
   .order-item {
     flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
   }
 
   .item-image-container {
     width: 100%;
-    max-width: 300px;
+    max-width: 280px;
+    height: 200px;
     margin: 0 auto;
+  }
+
+  .item-title {
+    font-size: 16px;
+  }
+
+  .item-price {
+    font-size: 16px;
   }
 
   .item-actions {
     flex-direction: column;
+    gap: 10px;
+    width: 100%;
   }
 
   .btn-buy-now,
   .btn-add-cart {
     width: 100%;
     justify-content: center;
+    padding: 8px 20px;
+    font-size: 12px;
+  }
+
+  .status-badge-container {
+    padding: 6px 8px;
+    margin-bottom: 6px;
+  }
+
+  .status-text-inline {
+    font-size: 13px;
+  }
+
+  .status-icon-wrapper {
+    width: 20px;
+    height: 20px;
+  }
+
+  .status-icon-pending,
+  .status-icon-delivered,
+  .status-icon-cancelled,
+  .status-icon-shipped {
+    font-size: 18px;
+  }
+
+  .recommended-products {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .recommended-img {
+    height: 120px;
+  }
+
+  /* Improve button spacing on mobile */
+  .d-flex.gap-2 {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+
+  .d-flex.gap-2 .btn {
+    width: 100%;
+  }
+}
+
+/* Medium Tablets (600px) */
+@media (max-width: 600px) {
+  .orders-page .container-fluid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .orders-title {
+    font-size: 20px;
+  }
+
+  .order-header {
+    padding: 10px;
+  }
+
+  .order-body {
+    padding: 12px;
+  }
+
+  .item-image-container {
+    max-width: 240px;
+    height: 180px;
   }
 
   .recommended-products {
@@ -564,30 +827,440 @@
   }
 }
 
+/* Mobile Landscape (480px - 767px) */
 @media (max-width: 480px) {
   .orders-page {
     padding: 0 0 40px 0;
   }
   
   .orders-page .container-fluid {
-    padding-left: 15px;
-    padding-right: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
-  .search-box-orders {
-    flex-direction: column;
+  .breadcrumb-custom {
+    font-size: 10px;
+    margin-bottom: 10px;
+  }
+
+  .breadcrumb-separator {
+    margin: 0 4px;
+  }
+
+  .orders-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .orders-header {
+    margin-bottom: 14px;
+  }
+
+  .search-input-orders {
+    font-size: 12px;
+    padding: 6px 8px;
   }
 
   .search-btn-orders {
     width: 100%;
+    padding: 6px 16px;
+    font-size: 11px;
+  }
+
+  .tab-button {
+    padding: 8px 10px;
+    font-size: 11px;
+    min-width: 80px;
+  }
+
+  .time-filter {
+    font-size: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    font-size: 12px;
+    padding: 2px 5px;
+  }
+
+  .order-header {
+    padding: 10px 8px;
+  }
+
+  .order-info-group {
+    gap: 8px;
+  }
+
+  .info-label {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+
+  .info-value {
+    font-size: 11px;
+  }
+
+  .order-id-label {
+    font-size: 10px;
+  }
+
+  .order-actions-header {
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .btn-link-custom {
+    font-size: 11px;
+  }
+
+  .order-body {
+    padding: 10px;
+  }
+
+  .order-item {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .item-image-container {
+    max-width: 200px;
+    height: 160px;
+  }
+
+  .item-title {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .item-price {
+    font-size: 15px;
+  }
+
+  .item-pricing {
+    margin-bottom: 6px;
+  }
+
+  .btn-buy-now,
+  .btn-add-cart {
+    padding: 7px 16px;
+    font-size: 11px;
+  }
+
+  .status-badge-container {
+    padding: 5px 6px;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+  }
+
+  .status-text-inline {
+    font-size: 12px;
+  }
+
+  .status-icon-wrapper {
+    width: 18px;
+    height: 18px;
+  }
+
+  .status-icon-pending,
+  .status-icon-delivered,
+  .status-icon-cancelled,
+  .status-icon-shipped {
+    font-size: 16px;
+  }
+
+  .status-text,
+  .delivery-text,
+  .cancelled-text {
+    font-size: 12px;
+  }
+
+  .payment-pending-alert {
+    padding: 12px !important;
+    font-size: 12px;
+  }
+
+  .payment-pending-alert p {
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+
+  .btn-outline-primary.btn-sm {
+    padding: 5px 14px;
+    font-size: 11px;
+  }
+
+  .recommended-section {
+    padding: 16px;
+  }
+
+  .recommended-img {
+    height: 100px;
+  }
+
+  .recommended-product-title {
+    font-size: 13px;
+  }
+
+  .recommended-product-desc {
+    font-size: 11px;
+  }
+
+  /* Stack buttons vertically on mobile */
+  .d-flex.gap-2 {
+    flex-direction: column;
+    gap: 6px !important;
+  }
+
+  .d-flex.gap-2 .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Improve spacing for action buttons */
+  .item-actions .btn {
+    min-height: 36px;
+  }
+}
+
+/* Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .orders-page .container-fluid {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .breadcrumb-custom {
+    font-size: 9px;
+  }
+
+  .orders-title {
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+
+  .orders-header {
+    margin-bottom: 12px;
+  }
+
+  .search-input-orders {
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+
+  .search-btn-orders {
+    padding: 5px 12px;
+    font-size: 10px;
+  }
+
+  .tab-button {
+    padding: 7px 8px;
+    font-size: 10px;
+    min-width: 70px;
+  }
+
+  .time-filter {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  .filter-select {
+    font-size: 11px;
+    padding: 2px 4px;
+  }
+
+  .order-header {
+    padding: 8px 6px;
+  }
+
+  .order-info-group {
+    gap: 6px;
+  }
+
+  .info-label {
+    font-size: 8px;
+  }
+
+  .info-value {
+    font-size: 10px;
+  }
+
+  .order-id-label {
+    font-size: 9px;
+  }
+
+  .order-actions-header {
+    font-size: 10px;
+  }
+
+  .btn-link-custom {
+    font-size: 10px;
+  }
+
+  .order-body {
+    padding: 8px;
+  }
+
+  .order-item {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .item-image-container {
+    max-width: 180px;
+    height: 140px;
+  }
+
+  .item-title {
+    font-size: 14px;
+  }
+
+  .item-price {
+    font-size: 14px;
+  }
+
+  .btn-buy-now,
+  .btn-add-cart {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+
+  .status-badge-container {
+    padding: 4px 5px;
+  }
+
+  .status-text-inline {
+    font-size: 11px;
+  }
+
+  .status-icon-wrapper {
+    width: 16px;
+    height: 16px;
+  }
+
+  .status-icon-pending,
+  .status-icon-delivered,
+  .status-icon-cancelled,
+  .status-icon-shipped {
+    font-size: 14px;
+  }
+
+  .status-text,
+  .delivery-text,
+  .cancelled-text {
+    font-size: 11px;
+  }
+
+  .payment-pending-alert {
+    padding: 10px !important;
+  }
+
+  .payment-pending-alert p {
+    font-size: 10px;
+  }
+
+  .btn-outline-primary.btn-sm {
+    padding: 4px 12px;
+    font-size: 10px;
   }
 
   .nav-arrow {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-arrow i {
+    font-size: 16px;
   }
 
   .recommended-title {
+    font-size: 11px;
+  }
+
+  .recommended-section {
+    padding: 12px;
+  }
+
+  .recommended-img {
+    height: 90px;
+  }
+
+  .recommended-product-title {
+    font-size: 12px;
+  }
+
+  .recommended-product-desc {
+    font-size: 10px;
+  }
+
+  /* Ensure buttons are touch-friendly */
+  .d-flex.gap-2 .btn {
+    min-height: 32px;
+    padding: 6px 12px;
+  }
+}
+
+/* Extra Small Mobile (325px and below) */
+@media (max-width: 325px) {
+  .orders-page .container-fluid {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .orders-title {
+    font-size: 16px;
+  }
+
+  .tab-button {
+    padding: 6px 6px;
+    font-size: 9px;
+    min-width: 60px;
+  }
+
+  .order-header {
+    padding: 6px 4px;
+  }
+
+  .order-body {
+    padding: 6px;
+  }
+
+  .item-image-container {
+    max-width: 160px;
+    height: 120px;
+  }
+
+  .item-title {
+    font-size: 13px;
+  }
+
+  .item-price {
+    font-size: 13px;
+  }
+
+  .btn-buy-now,
+  .btn-add-cart {
+    padding: 5px 10px;
+    font-size: 9px;
+  }
+
+  .status-badge-container {
+    padding: 3px 4px;
+  }
+
+  .status-text-inline {
+    font-size: 10px;
+  }
+
+  .status-icon-wrapper {
+    width: 14px;
+    height: 14px;
+  }
+
+  .status-icon-pending,
+  .status-icon-delivered,
+  .status-icon-cancelled,
+  .status-icon-shipped {
     font-size: 12px;
   }
 }
@@ -800,7 +1473,8 @@
 /* Responsive adjustments for status section */
 @media (max-width: 768px) {
   .item-status {
-    padding-top: 16px;
+    padding-top: 12px;
+    margin-top: 12px;
   }
 
   .status-text,
@@ -812,6 +1486,48 @@
   .status-badge-container {
     flex-direction: row;
     padding: 6px 10px;
+    flex-wrap: wrap;
+  }
+
+  .payment-pending-alert {
+    padding: 14px !important;
+    margin-top: 12px;
+  }
+
+  .payment-pending-alert p {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .payment-pending-alert .btn {
+    font-size: 11px;
+    padding: 6px 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .item-status {
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+
+  .status-badge-container {
+    padding: 5px 6px;
+  }
+
+  .payment-pending-alert {
+    padding: 12px !important;
+  }
+}
+
+@media (max-width: 375px) {
+  .item-status {
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+
+  .status-badge-container {
+    padding: 4px 5px;
   }
 }
 

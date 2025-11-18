@@ -293,70 +293,260 @@
 
 /* Large tablets & small desktops (1024px) */
 @media (max-width: 1024px) {
+  .container {
+    padding: 0 15px;
+  }
   .title {
+    font-size: 24px;
+  }
+  .title2 {
     font-size: 24px;
   }
   .subtitle {
     font-size: 15px;
   }
+  .subtitle2 {
+    font-size: 14px;
+  }
+  .filterButtons {
+    gap: 12px;
+    padding: 0 15px;
+  }
+  .filterButtons button {
+    font-size: 12px;
+    padding: 5px 12px;
+  }
+  .gridContainer {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  .card img {
+    height: 160px;
+  }
   .sliderCard {
     min-width: 220px;
     max-width: 260px;
+  }
+  .sliderCard img {
+    height: 160px;
+  }
+  .navBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  .navBtn.left {
+    left: -10px;
+  }
+  .navBtn.right {
+    right: -10px;
   }
 }
 
 /* Tablets (768px) */
 @media (max-width: 768px) {
-  .gridContainer {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  .container {
+    padding: 0 12px;
   }
-  .card img {
-    height: 150px;
-  
+  .title {
+    font-size: 22px;
   }
-  .sliderCard {
-    min-width: 210px;
-    max-width: 220px;
+  .title2 {
+    font-size: 22px;
   }
   .subtitle {
     font-size: 14px;
+  }
+  .subtitle2 {
+    font-size: 13px;
+  }
+  .filterButtons {
+    gap: 10px;
+    padding: 0 12px;
+    margin-bottom: 20px;
+  }
+  .filterButtons button {
+    font-size: 11px;
+    padding: 5px 10px;
+    min-width: 65px;
+  }
+  .gridContainer {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    padding: 8px;
+  }
+  .card img {
+    height: 140px;
+  }
+  .card p {
+    font-size: 13px;
+    padding: 0 8px 8px;
+  }
+  .sliderSection {
+    padding: 20px 15px !important;
+  }
+  .sliderCard {
+    min-width: 200px;
+    max-width: 220px;
+  }
+  .sliderCard img {
+    height: 150px;
+  }
+  .sliderCard p {
+    font-size: 15px;
+  }
+  .navBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  .navBtn.left {
+    left: -5px;
+  }
+  .navBtn.right {
+    right: -5px;
+  }
+}
+
+/* Mobile Landscape (600px) */
+@media (max-width: 600px) {
+  .container {
+    padding: 0 10px;
+  }
+  .title {
+    font-size: 20px;
+  }
+  .title2 {
+    font-size: 20px;
+  }
+  .filterButtons {
+    gap: 8px;
+    padding: 0 10px;
+  }
+  .filterButtons button {
+    min-width: 60px;
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  .gridContainer {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .card img {
+    height: 130px;
+  }
+  .sliderCard {
+    min-width: 180px;
+    max-width: 200px;
   }
 }
 
 /* Mobile Landscape (425px) */
 @media (max-width: 425px) {
-  .filterButtons button {
-    min-width: 70px;
+  .container {
+    padding: 0 8px;
+  }
+  .title {
+    font-size: 18px;
+  }
+  .title2 {
+    font-size: 18px;
+  }
+  .subtitle {
+    font-size: 13px;
+  }
+  .subtitle2 {
     font-size: 12px;
-    padding: 6px 10px;
+  }
+  .filterButtons {
+    gap: 6px;
+    padding: 0 8px;
+    margin-bottom: 15px;
+  }
+  .filterButtons button {
+    min-width: 55px;
+    font-size: 10px;
+    padding: 4px 8px;
   }
   .gridContainer {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 5px;
+  }
+  .card img {
+    height: 120px;
+  }
+  .card p {
+    font-size: 12px;
+    padding: 0 5px 5px;
+  }
+  .sliderSection {
+    padding: 15px 10px !important;
   }
   .sliderCard {
     min-width: 160px;
     max-width: 180px;
   }
   .sliderCard img {
-    height: 150px;
+    height: 140px;
   }
-  .title {
-    font-size: 22px;
+  .sliderCard p {
+    font-size: 14px;
+  }
+  .navBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+  }
+  .navBtn.left {
+    left: 0;
+  }
+  .navBtn.right {
+    right: 0;
   }
 }
 
 /* Small Mobile (375px) */
 @media (max-width: 375px) {
+  .container {
+    padding: 0 6px;
+  }
   .title {
-    font-size: 20px;
+    font-size: 17px;
+  }
+  .title2 {
+    font-size: 17px;
+  }
+  .subtitle {
+    font-size: 12px;
+  }
+  .subtitle2 {
+    font-size: 11px;
+  }
+  .filterButtons {
+    gap: 5px;
+    padding: 0 6px;
+  }
+  .filterButtons button {
+    min-width: 50px;
+    font-size: 9px;
+    padding: 4px 6px;
   }
   .gridContainer {
-   grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 4px;
   }
-   .card img {
-    height: 120px;
-    object-fit: contain;
-  
+  .card img {
+    height: 110px;
+    object-fit: cover;
+  }
+  .card p {
+    font-size: 11px;
+    padding: 0 4px 4px;
+  }
+  .sliderSection {
+    padding: 12px 8px !important;
   }
   .sliderCard {
     min-width: 140px;
@@ -365,30 +555,70 @@
   .sliderCard img {
     height: 110px;
   }
+  .sliderCard p {
+    font-size: 13px;
+  }
+  .navBtn {
+    width: 24px;
+    height: 24px;
+    font-size: 9px;
+  }
 }
 
 /* Extra Small (325px) */
 @media (max-width: 325px) {
+  .container {
+    padding: 0 5px;
+  }
+  .title {
+    font-size: 16px;
+  }
+  .title2 {
+    font-size: 16px;
+  }
+  .subtitle {
+    font-size: 11px;
+  }
+  .subtitle2 {
+    font-size: 10px;
+  }
   .filterButtons {
-    gap: 6px;
+    gap: 4px;
+    padding: 0 5px;
   }
   .filterButtons button {
-    min-width: 55px;
-    font-size: 11px;
-    padding: 5px 8px;
+    min-width: 45px;
+    font-size: 8px;
+    padding: 3px 5px;
   }
-
   .gridContainer {
-   grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+    padding: 3px;
   }
-   .sliderCard {
-    min-width: 230px;
-    max-width: 220px;
+  .card img {
+    height: 100px;
+  }
+  .card p {
+    font-size: 10px;
+    padding: 0 3px 3px;
+  }
+  .sliderSection {
+    padding: 10px 6px !important;
+  }
+  .sliderCard {
+    min-width: 130px;
+    max-width: 150px;
   }
   .sliderCard img {
     height: 100px;
   }
-  .title {
-    font-size: 18px;
+  .sliderCard p {
+    font-size: 12px;
+  }
+  .navBtn {
+    width: 22px;
+    height: 22px;
+    font-size: 8px;
   }
 }

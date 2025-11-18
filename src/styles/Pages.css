@@ -92,14 +92,140 @@
   margin: 12px auto 0;
 }
 
-/* Responsive adjustments - maintaining spacing consistency */
-@media (max-width: 991px) {
-  .homepage_container {
-    padding: 0 15px;
+/* ============================================ */
+/* RESPONSIVE STYLES FOR ALL CONTAINERS */
+/* ============================================ */
+
+/* Large Desktops (1500px and above) - Maintain current design with no padding */
+@media (min-width: 1500px) {
+  .homepage_container,
+  .trending_container,
+  .bestdeals_container,
+  .recentlybrowsed_container,
+  .productdetails_container,
+  .aboutpage_container,
+  .career_container,
+  .accountpage_container,
+  .closeyoursixpineaccount_container,
+  .communicationpreferences_container,
+  .datarequest_container,
+  .emailsubscriptions_container,
+  .feedback_container,
+  .login_container,
+  .loginsecurity_container,
+  .pressrelease_container,
+  .privacypage_container,
+  .bulkorder_container,
+  .global_selling_container,
+  .supply_container,
+  .advertisepage_container,
+  .advertisingpreferece_container,
+  .purchaseprotection_container,
+  .recalls_product_container,
+  .sixpineapp_container {
+    max-width: 1500px;
+    padding: 0;
   }
 }
 
+/* Medium Desktops (1000px - 1499px) - Add padding for better spacing */
+@media (min-width: 1000px) and (max-width: 1499px) {
+  .homepage_container,
+  .trending_container,
+  .bestdeals_container,
+  .recentlybrowsed_container,
+  .productdetails_container,
+  .aboutpage_container,
+  .career_container,
+  .accountpage_container,
+  .closeyoursixpineaccount_container,
+  .communicationpreferences_container,
+  .datarequest_container,
+  .emailsubscriptions_container,
+  .feedback_container,
+  .login_container,
+  .loginsecurity_container,
+  .pressrelease_container,
+  .privacypage_container,
+  .bulkorder_container,
+  .global_selling_container,
+  .supply_container,
+  .advertisepage_container,
+  .advertisingpreferece_container,
+  .purchaseprotection_container,
+  .recalls_product_container,
+  .sixpineapp_container {
+    max-width: 1500px;
+    padding: 0 30px;
+  }
+}
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
+  .homepage_container,
+  .trending_container,
+  .bestdeals_container,
+  .recentlybrowsed_container,
+  .productdetails_container,
+  .aboutpage_container,
+  .career_container,
+  .accountpage_container,
+  .closeyoursixpineaccount_container,
+  .communicationpreferences_container,
+  .datarequest_container,
+  .emailsubscriptions_container,
+  .feedback_container,
+  .login_container,
+  .loginsecurity_container,
+  .pressrelease_container,
+  .privacypage_container,
+  .bulkorder_container,
+  .global_selling_container,
+  .supply_container,
+  .advertisepage_container,
+  .advertisingpreferece_container,
+  .purchaseprotection_container,
+  .recalls_product_container,
+  .sixpineapp_container {
+    padding: 0 20px;
+  }
+  
+  .section-title {
+    font-size: 28px;
+  }
+}
+
+/* Tablets Portrait (768px and below) */
 @media (max-width: 768px) {
+  .homepage_container,
+  .trending_container,
+  .bestdeals_container,
+  .recentlybrowsed_container,
+  .productdetails_container,
+  .aboutpage_container,
+  .career_container,
+  .accountpage_container,
+  .closeyoursixpineaccount_container,
+  .communicationpreferences_container,
+  .datarequest_container,
+  .emailsubscriptions_container,
+  .feedback_container,
+  .login_container,
+  .loginsecurity_container,
+  .pressrelease_container,
+  .privacypage_container,
+  .bulkorder_container,
+  .global_selling_container,
+  .supply_container,
+  .advertisepage_container,
+  .advertisingpreferece_container,
+  .purchaseprotection_container,
+  .recalls_product_container,
+  .sixpineapp_container {
+    padding: 0 15px;
+    margin-bottom: 40px;
+  }
+  
   .homepage_container > section {
     margin-bottom: 35px;
   }
@@ -109,14 +235,40 @@
   }
   
   .section-title {
-    font-size: 28px;
+    font-size: 26px;
     margin-bottom: 20px;
   }
 }
 
+/* Mobile Landscape and Small Tablets (480px - 767px) */
 @media (max-width: 480px) {
-  .homepage_container {
-    padding: 0 10px;
+  .homepage_container,
+  .trending_container,
+  .bestdeals_container,
+  .recentlybrowsed_container,
+  .productdetails_container,
+  .aboutpage_container,
+  .career_container,
+  .accountpage_container,
+  .closeyoursixpineaccount_container,
+  .communicationpreferences_container,
+  .datarequest_container,
+  .emailsubscriptions_container,
+  .feedback_container,
+  .login_container,
+  .loginsecurity_container,
+  .pressrelease_container,
+  .privacypage_container,
+  .bulkorder_container,
+  .global_selling_container,
+  .supply_container,
+  .advertisepage_container,
+  .advertisingpreferece_container,
+  .purchaseprotection_container,
+  .recalls_product_container,
+  .sixpineapp_container {
+    padding: 0 12px;
+    margin-bottom: 30px;
   }
   
   .homepage_container > section {
@@ -128,14 +280,40 @@
   }
   
   .section-title {
-    font-size: 24px;
+    font-size: 22px;
     margin-bottom: 16px;
   }
 }
 
+/* Small Mobile Devices (375px and below) */
 @media (max-width: 375px) {
-  .homepage_container {
-    padding: 0 8px;
+  .homepage_container,
+  .trending_container,
+  .bestdeals_container,
+  .recentlybrowsed_container,
+  .productdetails_container,
+  .aboutpage_container,
+  .career_container,
+  .accountpage_container,
+  .closeyoursixpineaccount_container,
+  .communicationpreferences_container,
+  .datarequest_container,
+  .emailsubscriptions_container,
+  .feedback_container,
+  .login_container,
+  .loginsecurity_container,
+  .pressrelease_container,
+  .privacypage_container,
+  .bulkorder_container,
+  .global_selling_container,
+  .supply_container,
+  .advertisepage_container,
+  .advertisingpreferece_container,
+  .purchaseprotection_container,
+  .recalls_product_container,
+  .sixpineapp_container {
+    padding: 0 10px;
+    margin-bottom: 25px;
   }
   
   .section-title {

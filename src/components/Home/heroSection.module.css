@@ -213,6 +213,13 @@
   gap: 10px;
 }
 
+/* Hide indicators below 800px */
+@media (max-width: 800px) {
+  .slideIndicators {
+    display: none;
+  }
+}
+
 .indicator {
   width: 10px;
   height: 10px;
