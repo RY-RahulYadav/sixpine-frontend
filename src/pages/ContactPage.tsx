@@ -29,14 +29,9 @@ const ContactPage: React.FC = () => {
   return (
     <>
       <Navbar />
-       <div className="page-content">
+      <div className="page-content">
         <SubNav/>
         <CategoryTabs />
-      
-
-       
-      </div>
-      <div className="page-content">
         <div className="contact-page-container">
           <div className="contact-content">
             <h1 className="contact-title">Want to chat now or get a call from us?</h1>

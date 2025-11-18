@@ -359,6 +359,7 @@
   }
   .subtitle2 {
     font-size: 13px;
+    max-width: 100%;
   }
   .filterButtons {
     gap: 10px;
@@ -385,26 +386,39 @@
   .sliderSection {
     padding: 20px 15px !important;
   }
+  /* Hide navigation arrows on mobile/tablet */
+  .navBtn {
+    display: none;
+  }
+  /* Enable horizontal scrolling on mobile/tablet */
+  .sliderWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .sliderTrack {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    padding: 0 10px;
+  }
   .sliderCard {
     min-width: 200px;
     max-width: 220px;
+    flex-shrink: 0;
   }
   .sliderCard img {
     height: 150px;
   }
   .sliderCard p {
     font-size: 15px;
-  }
-  .navBtn {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-  }
-  .navBtn.left {
-    left: -5px;
-  }
-  .navBtn.right {
-    right: -5px;
   }
 }
 
@@ -435,9 +449,33 @@
   .card img {
     height: 130px;
   }
+  /* Hide navigation arrows on mobile */
+  .navBtn {
+    display: none;
+  }
+  /* Enable horizontal scrolling on mobile */
+  .sliderWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+    padding: 0;
+  }
+  .sliderTrack {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    padding: 0 10px;
+  }
   .sliderCard {
     min-width: 180px;
     max-width: 200px;
+    flex-shrink: 0;
   }
 }
 
@@ -457,6 +495,7 @@
   }
   .subtitle2 {
     font-size: 12px;
+    max-width: 100%;
   }
   .filterButtons {
     gap: 6px;
@@ -483,26 +522,40 @@
   .sliderSection {
     padding: 15px 10px !important;
   }
+  /* Hide navigation arrows on mobile */
+  .navBtn {
+    display: none;
+  }
+  /* Enable horizontal scrolling on mobile */
+  .sliderWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+    padding: 0;
+    margin: 0 -10px;
+  }
+  .sliderTrack {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 0 10px;
+  }
   .sliderCard {
     min-width: 160px;
     max-width: 180px;
+    flex-shrink: 0;
   }
   .sliderCard img {
     height: 140px;
   }
   .sliderCard p {
     font-size: 14px;
-  }
-  .navBtn {
-    width: 28px;
-    height: 28px;
-    font-size: 10px;
-  }
-  .navBtn.left {
-    left: 0;
-  }
-  .navBtn.right {
-    right: 0;
   }
 }
 
@@ -522,6 +575,7 @@
   }
   .subtitle2 {
     font-size: 11px;
+    max-width: 100%;
   }
   .filterButtons {
     gap: 5px;
@@ -548,20 +602,40 @@
   .sliderSection {
     padding: 12px 8px !important;
   }
+  /* Hide navigation arrows on mobile */
+  .navBtn {
+    display: none;
+  }
+  /* Enable horizontal scrolling on mobile */
+  .sliderWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+    padding: 0;
+    margin: 0 -8px;
+  }
+  .sliderTrack {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 0 8px;
+  }
   .sliderCard {
     min-width: 140px;
     max-width: 160px;
+    flex-shrink: 0;
   }
   .sliderCard img {
     height: 110px;
   }
   .sliderCard p {
     font-size: 13px;
-  }
-  .navBtn {
-    width: 24px;
-    height: 24px;
-    font-size: 9px;
   }
 }
 
@@ -581,6 +655,7 @@
   }
   .subtitle2 {
     font-size: 10px;
+    max-width: 100%;
   }
   .filterButtons {
     gap: 4px;
@@ -606,19 +681,39 @@
   .sliderSection {
     padding: 10px 6px !important;
   }
+  /* Hide navigation arrows on mobile */
+  .navBtn {
+    display: none;
+  }
+  /* Enable horizontal scrolling on mobile */
+  .sliderWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    justify-content: flex-start;
+    padding: 0;
+    margin: 0 -6px;
+  }
+  .sliderTrack {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 0 6px;
+  }
   .sliderCard {
     min-width: 130px;
     max-width: 150px;
+    flex-shrink: 0;
   }
   .sliderCard img {
     height: 100px;
   }
   .sliderCard p {
     font-size: 12px;
-  }
-  .navBtn {
-    width: 22px;
-    height: 22px;
-    font-size: 8px;
   }
 }

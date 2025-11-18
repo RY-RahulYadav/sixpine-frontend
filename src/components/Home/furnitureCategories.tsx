@@ -68,6 +68,7 @@ export default function FurnitureCategories() {
   const [filter, setFilter] = useState("All");
   const [startIndex, setStartIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,6 +100,18 @@ export default function FurnitureCategories() {
     };
 
     fetchData();
+  }, []);
+
+  // Detect mobile device for horizontal scrolling
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
 
@@ -187,8 +200,7 @@ export default function FurnitureCategories() {
           </button>
 
           <div className={styles.sliderTrack}>
-            {data.sliderItems
-              .slice(startIndex, startIndex + visibleCount)
+            {(isMobile ? data.sliderItems : data.sliderItems.slice(startIndex, startIndex + visibleCount))
               .map((item) => {
                 const handleSliderClick = () => {
                   const url = item.navigateUrl;

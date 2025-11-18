@@ -100,74 +100,30 @@ function AdvertisingPreferences() {
               </p>
 
               {/* Toggle Button */}
-              <div style={{ 
-                margin: '24px 0', 
-                padding: '20px', 
-                border: '1px solid #d5d9d9', 
-                borderRadius: '8px',
-                backgroundColor: '#f7fafa'
-              }}>
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center',
-                  marginBottom: '12px'
-                }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>
+              <div className={styles.toggleCard}>
+                <div className={styles.toggleCardContent}>
+                  <div className={styles.toggleCardText}>
+                    <h3 className={styles.toggleCardTitle}>
                       Personalized Advertising
                     </h3>
-                    <p style={{ margin: '4px 0 0 0', color: '#666', fontSize: '14px' }}>
+                    <p className={styles.toggleCardDescription}>
                       {advertisingEnabled 
                         ? 'You will see personalized ads based on your browsing and shopping activity.'
                         : 'You will see generic ads. Personalized ads are disabled.'}
                     </p>
                   </div>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '60px',
-                    height: '34px',
-                    cursor: saving ? 'not-allowed' : 'pointer'
-                  }}>
+                  <label className={styles.toggleSwitch} style={{ cursor: saving ? 'not-allowed' : 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={advertisingEnabled}
                       onChange={(e) => handleToggle(e.target.checked)}
                       disabled={saving}
-                      style={{
-                        opacity: 0,
-                        width: 0,
-                        height: 0
-                      }}
                     />
-                    <span style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: advertisingEnabled ? '#ffd814' : '#ccc',
-                      borderRadius: '34px',
-                      transition: '0.4s',
-                      opacity: saving ? 0.6 : 1
-                    }}>
-                      <span style={{
-                        position: 'absolute',
-                        height: '26px',
-                        width: '26px',
-                        left: '4px',
-                        bottom: '4px',
-                        backgroundColor: 'white',
-                        borderRadius: '50%',
-                        transition: '0.4s',
-                        transform: advertisingEnabled ? 'translateX(26px)' : 'translateX(0)'
-                      }}></span>
-                    </span>
+                    <span className={`${styles.toggleSlider} ${advertisingEnabled ? styles.active : ''} ${saving ? styles.disabled : ''}`}></span>
                   </label>
                 </div>
                 {saving && (
-                  <p style={{ margin: '8px 0 0 0', color: '#666', fontSize: '12px' }}>
+                  <p className={styles.toggleSaving}>
                     Saving...
                   </p>
                 )}

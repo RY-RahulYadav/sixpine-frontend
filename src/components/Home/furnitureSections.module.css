@@ -23,7 +23,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-   padding: 0 10px;
+  padding: 0 10px;
+  gap: 10px; /* space between title and button */
 }
 
 .sectionHeader h2 {
@@ -50,10 +51,11 @@
   align-items: center;
   justify-content: center;
   transition: all 0.18s ease; /* Smooth transition for hover */
-  padding: 6px 18px; /* wider horizontal padding to increase visual width */
-  gap: 8px; /* space between text and icon */
+  padding: 6px 12px; /* equal padding left and right */
+  gap: 6px; /* space between text and icon */
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  min-width: 140px; /* increase clickable width on desktop */
+  min-width: auto; /* let content determine width */
+  white-space: nowrap; /* prevent text wrapping */
 }
 
 .viewBtn:hover {
@@ -124,6 +126,7 @@
   /* margin-top: 20px; */
   /* padding-bottom: 20px; */
   flex: 1;
+  padding-left: 20px; /* Add left padding for first product to create visual spacing from container edge */
 }
 
 /* Scroll (slider) Mode */
@@ -132,6 +135,8 @@
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory; /* Ensure snapping to cards */
   -webkit-overflow-scrolling: touch; /* For smoother scrolling on iOS */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .scroll::-webkit-scrollbar {
@@ -236,28 +241,40 @@
     flex: 1 1 calc(50% - 10px); /* 2 cards per row */
     max-width: calc(50% - 10px);
   }
+  .sectionHeader {
+    padding: 0 8px;
+    gap: 12px;
+  }
   .sectionHeader h2 {
     font-size: 24px;
   }
   .sectionHeader p {
     font-size: 15px;
   }
+  .viewBtn {
+    padding: 6px 10px; /* equal padding left and right */
+    gap: 5px;
+  }
+  /* Hide navigation arrows on tablet */
   .navBtn {
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
-    border-radius: 6px;
+    display: none;
   }
-  .navBtn:first-of-type {
-    left: 0px;
+  /* Enable horizontal scrolling on tablet */
+  .productList {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding-left: 15px; /* Left padding for first product on tablet */
   }
-  .navBtn:last-of-type {
-    right: 0px;
+  .productList :global(.craftedProductCard) {
+    flex-shrink: 0;
   }
 }
 
-/* Small Tablets & Large Phones (481px to 767px) - 2 cards for grid, better scroll */
-@media (min-width: 481px) and (max-width: 767px) {
+/* Small Tablets & Large Phones (501px to 767px) - 2 cards for grid, better scroll */
+@media (min-width: 501px) and (max-width: 767px) {
   .grid :global(.craftedProductCard) {
     flex: 1 1 calc(50% - 10px); /* 2 cards per row */
     max-width: calc(50% - 10px);
@@ -270,84 +287,116 @@
     padding: 0 10px;
   }
   .viewBtn {
-    min-width: 140px; /* keep wider on tablets */
+    min-width: auto; /* let content determine width */
     margin: 10px 10px 0;
     font-size: 13px;
+    padding: 6px 10px; /* equal padding left and right */
+    gap: 5px;
   }
+  /* Hide navigation arrows on mobile/tablet */
   .navBtn {
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
-    margin: 0 5px;
-    border-radius: 4px;
+    display: none;
   }
-  .navBtn:first-of-type {
-    left: 5px;
-  }
-  .navBtn:last-of-type {
-    right: 5px;
-  }
+  /* Enable horizontal scrolling on mobile/tablet */
   .productList {
     gap: 15px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding-left: 15px; /* Left padding for first product */
+    padding-right: 10px;
+  }
+  .productList :global(.craftedProductCard) {
+    flex-shrink: 0;
+    min-width: 300px;
+    max-width: 300px;
   }
 }
 
-/* Phones (≤480px) - 1 card for grid */
-@media (max-width: 480px) {
+/* Phones (≤500px) - 1 card visible with smooth scrolling */
+@media (max-width: 500px) {
   .grid :global(.craftedProductCard) {
     flex: 1 1 100%;
     max-width: 100%;
   }
   .furnitureContainer {
-    padding: 10px;
+    padding: 10px 0;
+    overflow: hidden;
+  }
+  .section {
+    padding-left: 10px;
+    padding-right: 10px;
   }
   .sectionHeader {
-    flex-direction: row;
+    flex-direction: column;
     align-items: flex-start;
+    justify-content: flex-start;
     margin-bottom: 15px;
+    padding: 0 10px;
+    gap: 8px;
   }
-
 
   .sectionHeader h2 {
-    font-size: 16px;
-    /* padding: 0 10px; */
+    font-size: 18px;
+    flex: 1;
+    margin: 0;
+    width: 100%;
   }
   .sectionHeader p {
-    font-size: 14px;
-    /* padding: 0 10px; */
-    margin-bottom: 0;
+    font-size: 13px;
+    margin-bottom: 8px;
+    width: 100%;
   }
   .viewBtn {
-    width: 70px;
-    /* height: 36px; */
+    min-width: auto;
     font-size: 12px;
-    /* margin: 10px 10px 0; */
-    border: none;
-    justify-content: right;
-    /* background-color: #0077cc; */
     padding: 6px 10px;
+    gap: 4px;
+    align-self: flex-end;
   }
   .productWrapper {
-    /* margin-top: 10px; */
-   
     margin: 0;
-  }
-  .navBtn {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-    margin: 0 0px;
-    border-radius: 4px;
     padding: 0;
+    overflow: hidden;
   }
-  .navBtn:first-of-type {
-    left: 0px;
+  /* HIDE navigation arrows on mobile below 500px */
+  .navBtn {
+    display: none !important;
   }
-  .navBtn:last-of-type {
-    right: 2px;
-  }
+  /* Enable smooth horizontal scrolling - show 1 card at a time */
   .productList {
-    gap: 15px;
-    /* padding-bottom: 15px; */
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding-left: 15px; /* Left padding for first product on mobile */
+    padding-right: 10px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+  }
+  
+  .productList::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  .scroll {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .productList :global(.craftedProductCard) {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    min-width: calc(100% - 20px);
+    max-width: calc(100% - 20px);
+  }
+  
+  .discoverSection {
+    padding: 20px 0;
+    margin-left: 10px;
+    margin-right: 10px;
   }
 }
