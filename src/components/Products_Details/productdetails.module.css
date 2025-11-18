@@ -166,6 +166,7 @@
   justify-content: center;
   min-height: 500px;
   max-height: 600px;
+  position: relative;
 }
 
 .mainImage {
@@ -178,6 +179,34 @@
   object-position: center;
   /* padding: 10px; */
   /* border: 5px solid #9c0b0b; */
+}
+
+.shareButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shareButton:hover {
+  background-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.shareButton i {
+  font-size: 18px;
+  color: #0f1111;
 }
 
 .thumbnails {
@@ -556,7 +585,7 @@
   padding: 8px 10px;
   border: 1px solid #d5d9d9;
   background: #fff;
-  /* border-radius: 8px; */
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   color: #0f1111;
@@ -670,7 +699,7 @@
 }
 
 .detailCard strong {
-  font-weight: normal;  
+  font-weight: 700;  
   color: inherit;      
   display: inline;      
   margin: 0;          
@@ -1098,6 +1127,17 @@
     max-height: 500px;
   }
 
+  .shareButton {
+    width: 36px;
+    height: 36px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .shareButton i {
+    font-size: 16px;
+  }
+
   .title {
     font-size: 20px;
   }
@@ -1156,6 +1196,17 @@
     max-width: 100%;
     min-height: 350px;
     max-height: 450px;
+  }
+
+  .shareButton {
+    width: 36px;
+    height: 36px;
+    top: 6px;
+    right: 6px;
+  }
+
+  .shareButton i {
+    font-size: 16px;
   }
 
   .details {
@@ -1222,6 +1273,7 @@
     min-width: auto;
     padding: 6px 10px;
     font-size: 13px;
+    border-radius: 8px;
   }
 
   .keyDetailsGrid {
@@ -1372,6 +1424,17 @@
     margin-bottom: 12px;
   }
 
+  .shareButton {
+    width: 32px;
+    height: 32px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .shareButton i {
+    font-size: 14px;
+  }
+
   .title {
     font-size: 18px;
     line-height: 1.3;
@@ -1439,6 +1502,7 @@
   .options button {
     padding: 5px 8px;
     font-size: 12px;
+    border-radius: 8px;
   }
 
   .keyDetailsGrid {
@@ -1624,6 +1688,17 @@
     max-height: 350px;
   }
 
+  .shareButton {
+    width: 30px;
+    height: 30px;
+    top: 4px;
+    right: 4px;
+  }
+
+  .shareButton i {
+    font-size: 13px;
+  }
+
   .emiPrice {
     font-size: 16px;
   }
@@ -1635,6 +1710,7 @@
   .options button {
     padding: 4px 6px;
     font-size: 11px;
+    border-radius: 8px;
   }
 
   .cartSummary {
