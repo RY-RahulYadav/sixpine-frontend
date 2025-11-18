@@ -811,6 +811,19 @@
     grid-template-columns: 1fr 1fr;
     gap: 15px;
   }
+
+  .slideIndicators {
+    gap: 8px;
+  }
+
+  .indicator {
+    width: 8px;
+    height: 8px;
+  }
+
+  .indicator.active {
+    transform: scale(1.15);
+  }
   
 }
 /* Mobiles (≤425px) */
@@ -903,6 +916,16 @@
   .slideIndicators {
     right: 10px;
     bottom: 5px;
+    gap: 6px;
+  }
+
+  .indicator {
+    width: 6px;
+    height: 6px;
+  }
+
+  .indicator.active {
+    transform: scale(1.1);
   }
   .supportButtons
   {
