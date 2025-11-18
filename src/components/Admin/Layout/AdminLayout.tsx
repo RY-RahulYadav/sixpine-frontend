@@ -90,43 +90,25 @@ const AdminLayout: React.FC = () => {
       {/* Modern Header */}
       <header className="admin-modern-header">
         <div className="admin-header-left">
-          {/* <button 
+          <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="admin-header-btn"
+            className="admin-header-btn admin-menu-toggle"
             aria-label="Toggle sidebar"
-            style={{ marginRight: '8px' }}
           >
             <span className="material-symbols-outlined">
               {sidebarOpen ? 'menu_open' : 'menu'}
             </span>
-          </button> */}
+          </button>
           <Link to="/admin" className="admin-header-logo">
-            <div className="admin-logo-icon">SP</div>
+            <div className="admin-logo-icon admin-logo-icon-desktop">SP</div>
             <div className="admin-logo-text">
               <h1>Sixpine Admin</h1>
-              <p>E-Commerce Dashboard</p>
+              <p className="admin-logo-subtitle">E-Commerce Dashboard</p>
             </div>
           </Link>
         </div>
         
         <div className="admin-header-right">
-          {/* Search - Hidden on mobile */}
-          {/* <div className="admin-header-search" style={{ display: window.innerWidth < 768 ? 'none' : 'flex' }}>
-            <span className="material-symbols-outlined">search</span>
-            <input 
-              type="text" 
-              placeholder="Search anything..." 
-            />
-          </div> */}
-          
-          {/* Notifications */}
-          {/* <div className="admin-header-actions">
-            <button className="admin-header-btn" title="Notifications">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="badge">3</span>
-            </button>
-          </div> */}
-          
           {/* User Menu */}
           <div className="admin-header-user">
             <div className="admin-user-avatar">
@@ -142,7 +124,7 @@ const AdminLayout: React.FC = () => {
           
           <button 
             onClick={handleLogout}
-            className="admin-header-btn"
+            className="admin-header-btn admin-logout-btn"
             title="Logout"
             aria-label="Logout"
           >
@@ -315,16 +297,14 @@ const AdminLayout: React.FC = () => {
         </aside>
         
         {/* Overlay for mobile */}
-        {sidebarOpen && window.innerWidth < 768 && (
+        {sidebarOpen && (
           <div 
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 'var(--z-dropdown)',
-              top: 'var(--admin-header-height)'
+            className="admin-sidebar-overlay"
+            onClick={() => {
+              if (window.innerWidth < 1024) {
+                setSidebarOpen(false);
+              }
             }}
-            onClick={() => setSidebarOpen(false)}
           />
         )}
         

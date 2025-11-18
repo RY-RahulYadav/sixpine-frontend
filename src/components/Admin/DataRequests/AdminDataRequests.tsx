@@ -226,45 +226,37 @@ const AdminDataRequests: React.FC = () => {
   }
 
   return (
-    <div className="admin-content">
-      <div className="admin-header-actions">
-        <h2>Data Requests</h2>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {selectedRequests.length > 0 && (
+    <div className="admin-page">
+      {/* Page Header */}
+      <div className="admin-page-header">
+        <div className="admin-page-title">
+          <span className="material-symbols-outlined">description</span>
+          <div>
+            <h1>Data Requests</h1>
+            <p className="admin-page-subtitle">Manage customer data export requests</p>
+          </div>
+        </div>
+        {selectedRequests.length > 0 && (
+          <div>
             <button
-              className="admin-btn danger"
+              className="admin-modern-btn danger"
               onClick={handleBulkDelete}
               disabled={processingId === -1}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '10px 20px',
-                fontSize: '14px',
-                fontWeight: 500
-              }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+              <span className="material-symbols-outlined">delete</span>
               Delete Selected ({selectedRequests.length})
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>Status</label>
+      <div className="admin-filters-bar">
+        <div className="admin-filters-group">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '14px',
-              minWidth: '150px'
-            }}
+            className="admin-form-select"
           >
             <option value="">All Status</option>
             <option value="pending">Pending</option>
@@ -272,19 +264,10 @@ const AdminDataRequests: React.FC = () => {
             <option value="rejected">Rejected</option>
             <option value="completed">Completed</option>
           </select>
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 600 }}>Request Type</label>
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '14px',
-              minWidth: '150px'
-            }}
+            className="admin-form-select"
           >
             <option value="">All Types</option>
             <option value="orders">Orders</option>
@@ -294,18 +277,39 @@ const AdminDataRequests: React.FC = () => {
         </div>
       </div>
 
+      {/* Error message */}
       {error && (
-        <div className="admin-error-message" style={{ marginBottom: '20px' }}>
-          {error}
+        <div className="admin-alert error">
+          <span className="material-symbols-outlined">error</span>
+          <div className="admin-alert-content">
+            <strong>Error</strong>
+            <p>{error}</p>
+          </div>
         </div>
       )}
 
+      {/* Data Requests table */}
       {requests.length === 0 ? (
-        <div className="admin-empty-state">
-          <p>No data requests found</p>
+        <div className="admin-modern-card">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '80px 20px',
+            textAlign: 'center'
+          }}>
+            <span className="material-symbols-outlined" style={{ 
+              fontSize: '64px', 
+              color: '#ccc', 
+              marginBottom: '16px' 
+            }}>description</span>
+            <h3 style={{ margin: '0 0 8px 0', color: '#555' }}>No data requests found</h3>
+            <p style={{ margin: 0, color: '#888' }}>Data requests will appear here once customers submit requests</p>
+          </div>
         </div>
       ) : (
-        <div className="admin-card">
+        <div className="admin-modern-card">
           <table className="admin-modern-table">
             <thead>
               <tr>
@@ -328,7 +332,7 @@ const AdminDataRequests: React.FC = () => {
             <tbody>
               {Array.isArray(requests) && requests.map((request) => (
                 <tr key={request.id}>
-                  <td>
+                  <td data-label="">
                     <input
                       type="checkbox"
                       checked={selectedRequests.includes(request.id)}
@@ -336,21 +340,21 @@ const AdminDataRequests: React.FC = () => {
                       style={{ cursor: 'pointer' }}
                     />
                   </td>
-                  <td>
+                  <td data-label="User">
                     <div>
                       <div style={{ fontWeight: 600 }}>{request.user_name}</div>
                       <div style={{ fontSize: '12px', color: '#666' }}>{request.user_email}</div>
                     </div>
                   </td>
-                  <td>{request.request_type_display}</td>
-                  <td>
+                  <td data-label="Request Type">{request.request_type_display}</td>
+                  <td data-label="Status">
                     <span className={getStatusBadgeClass(request.status)}>
                       {request.status_display}
                     </span>
                   </td>
-                  <td>{new Date(request.requested_at).toLocaleString()}</td>
-                  <td>{request.approved_at ? new Date(request.approved_at).toLocaleString() : '-'}</td>
-                  <td>
+                  <td data-label="Requested At">{new Date(request.requested_at).toLocaleString()}</td>
+                  <td data-label="Approved At">{request.approved_at ? new Date(request.approved_at).toLocaleString() : '-'}</td>
+                  <td data-label="Actions">
                     <div className="admin-action-buttons">
                       {request.status === 'pending' && (
                         <>

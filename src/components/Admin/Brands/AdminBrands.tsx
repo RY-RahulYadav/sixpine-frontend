@@ -305,20 +305,18 @@ const AdminBrands: React.FC = () => {
                     <td>{brand.business_email || brand.user_email}</td>
                     <td>
                       <button
-                        className="admin-modern-btn secondary"
+                        className="admin-brand-number-link"
                         onClick={() => handleViewProducts(brand)}
                         title="View products"
-                        style={{ minWidth: 'auto', padding: '4px 12px' }}
                       >
                         {brand.total_products}
                       </button>
                     </td>
                     <td>
                       <button
-                        className="admin-modern-btn secondary"
+                        className="admin-brand-number-link"
                         onClick={() => handleViewOrders(brand)}
                         title="View orders"
-                        style={{ minWidth: 'auto', padding: '4px 12px' }}
                       >
                         {brand.total_orders}
                       </button>

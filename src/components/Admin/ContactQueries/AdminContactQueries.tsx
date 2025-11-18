@@ -143,27 +143,27 @@ const AdminContactQueries: React.FC = () => {
             ) : (
               queries.map((query) => (
                 <tr key={query.id} className="tw-hover:bg-gray-50">
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                  <td data-label="Name" className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
                     <div className="tw-text-sm tw-font-medium tw-text-gray-900">{query.full_name}</div>
                     {query.email && (
                       <div className="tw-text-sm tw-text-gray-500">{query.email}</div>
                     )}
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                  <td data-label="Contact" className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
                     <div className="tw-text-sm tw-text-gray-900">{query.phone_number}</div>
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                  <td data-label="Pincode" className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
                     <div className="tw-text-sm tw-text-gray-900">{query.pincode}</div>
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                  <td data-label="Status" className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
                     <span className={`tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full ${getStatusBadgeClass(query.status)}`}>
                       {query.status.replace('_', ' ').toUpperCase()}
                     </span>
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500">
+                  <td data-label="Date" className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500">
                     {new Date(query.created_at).toLocaleDateString()}
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-right tw-text-sm tw-font-medium">
+                  <td data-label="Actions" className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-right tw-text-sm tw-font-medium">
                     <select
                       value={query.status}
                       onChange={(e) => handleStatusUpdate(query.id, e.target.value)}

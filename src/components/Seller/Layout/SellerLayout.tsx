@@ -91,6 +91,15 @@ const SellerLayout: React.FC = () => {
       {/* Modern Header */}
       <header className="admin-modern-header">
         <div className="admin-header-left">
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="admin-header-btn admin-menu-toggle"
+            aria-label="Toggle sidebar"
+          >
+            <span className="material-symbols-outlined">
+              {sidebarOpen ? 'menu_open' : 'menu'}
+            </span>
+          </button>
           <Link to="/seller" className="admin-header-logo">
             <div className="admin-logo-icon">SP</div>
             <div className="admin-logo-text">
@@ -230,6 +239,18 @@ const SellerLayout: React.FC = () => {
             )}
           </nav>
         </aside>
+        
+        {/* Overlay for mobile */}
+        {sidebarOpen && (
+          <div 
+            className="admin-sidebar-overlay"
+            onClick={() => {
+              if (window.innerWidth < 1024) {
+                setSidebarOpen(false);
+              }
+            }}
+          />
+        )}
         
         {/* Main Content */}
         <main style={{ flex: 1, overflow: 'auto', background: 'var(--admin-bg)' }}>

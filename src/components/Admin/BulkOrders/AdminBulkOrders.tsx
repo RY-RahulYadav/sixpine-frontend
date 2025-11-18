@@ -165,28 +165,28 @@ const AdminBulkOrders: React.FC = () => {
             ) : (
               orders.map((order) => (
                 <tr key={order.id} className="tw-hover:bg-gray-50">
-                  <td className="tw-px-6 tw-py-4">
+                  <td data-label="Company" className="tw-px-6 tw-py-4">
                     <div className="tw-text-sm tw-font-medium tw-text-gray-900">{order.company_name}</div>
                     <div className="tw-text-sm tw-text-gray-500">{order.city}, {order.state}</div>
                   </td>
-                  <td className="tw-px-6 tw-py-4">
+                  <td data-label="Contact" className="tw-px-6 tw-py-4">
                     <div className="tw-text-sm tw-text-gray-900">{order.contact_person}</div>
                     <div className="tw-text-sm tw-text-gray-500">{order.phone_number}</div>
                     <div className="tw-text-sm tw-text-gray-500">{order.email}</div>
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                  <td data-label="Project Type" className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
                     <div className="tw-text-sm tw-text-gray-900">{order.project_type}</div>
                     {order.estimated_quantity && (
                       <div className="tw-text-sm tw-text-gray-500">Qty: {order.estimated_quantity}</div>
                     )}
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                  <td data-label="Budget" className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
                     <div className="tw-text-sm tw-text-gray-900">{formatCurrency(order.estimated_budget)}</div>
                     {order.quoted_price && (
                       <div className="tw-text-sm tw-text-green-600 font-semibold">Quoted: {formatCurrency(order.quoted_price)}</div>
                     )}
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
+                  <td data-label="Status" className="tw-px-6 tw-py-4 tw-whitespace-nowrap">
                     <span className={`tw-inline-flex tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-rounded-full ${getStatusBadgeClass(order.status)}`}>
                       {order.status.replace('_', ' ').toUpperCase()}
                     </span>
@@ -194,10 +194,10 @@ const AdminBulkOrders: React.FC = () => {
                       <div className="tw-text-xs tw-text-gray-500 tw-mt-1">Assigned: {order.assigned_to_name}</div>
                     )}
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500">
+                  <td data-label="Date" className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-sm tw-text-gray-500">
                     {new Date(order.created_at).toLocaleDateString()}
                   </td>
-                  <td className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-right tw-text-sm tw-font-medium">
+                  <td data-label="Actions" className="tw-px-6 tw-py-4 tw-whitespace-nowrap tw-text-right tw-text-sm tw-font-medium">
                     <select
                       value={order.status}
                       onChange={(e) => handleStatusUpdate(order.id, e.target.value)}

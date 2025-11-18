@@ -140,63 +140,63 @@ const AdminPackagingFeedback: React.FC = () => {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-        <h2 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>Packaging Feedback</h2>
-        <p style={{ margin: 0, color: 'var(--admin-text-light)' }}>Manage customer packaging feedback</p>
+    <div className="admin-page">
+      {/* Page Header */}
+      <div className="admin-page-header">
+        <div className="admin-page-title">
+          <span className="material-symbols-outlined">feedback</span>
+          <div>
+            <h1>Packaging Feedback</h1>
+            <p className="admin-page-subtitle">Manage customer packaging feedback</p>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
-      <div className="admin-modern-card" style={{ marginBottom: 'var(--spacing-lg)' }}>
-        <div style={{ display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <div style={{ flex: 1, minWidth: '200px' }}>
-            <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: '14px', fontWeight: '600' }}>Search</label>
+      <div className="admin-filters-bar">
+        <div className="admin-search-form">
+          <div className="admin-search-input">
+            <span className="material-symbols-outlined">search</span>
             <input
               type="text"
               placeholder="Search by message, email, name, or order ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="admin-form-input"
             />
           </div>
-          <div style={{ minWidth: '150px' }}>
-            <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: '14px', fontWeight: '600' }}>Status</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="admin-form-input"
-            >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="reviewed">Reviewed</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
-          <div style={{ minWidth: '150px' }}>
-            <label style={{ display: 'block', marginBottom: 'var(--spacing-xs)', fontSize: '14px', fontWeight: '600' }}>Type</label>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="admin-form-input"
-            >
-              <option value="">All Types</option>
-              <option value="general">General</option>
-              <option value="damaged">Damaged Item</option>
-              <option value="excessive_packaging">Excessive Packaging</option>
-              <option value="insufficient_packaging">Insufficient Packaging</option>
-              <option value="sustainability">Sustainability</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+        </div>
+        <div className="admin-filters-group">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="admin-form-select"
+          >
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="admin-form-select"
+          >
+            <option value="">All Types</option>
+            <option value="general">General</option>
+            <option value="damaged">Damaged Item</option>
+            <option value="excessive_packaging">Excessive Packaging</option>
+            <option value="insufficient_packaging">Insufficient Packaging</option>
+            <option value="sustainability">Sustainability</option>
+            <option value="other">Other</option>
+          </select>
           <button
             onClick={() => {
               setStatusFilter('');
               setTypeFilter('');
               setSearchTerm('');
             }}
-            className="admin-btn admin-btn-secondary"
+            className="admin-modern-btn secondary"
           >
             Reset
           </button>
@@ -278,7 +278,7 @@ const AdminPackagingFeedback: React.FC = () => {
                       {item.message.substring(0, 100)}{item.message.length > 100 ? '...' : ''}
                     </div>
                   </td>
-                  <td data-label="Actions">
+                  <td data-label="Actions" className="actions">
                     <div className="admin-action-buttons">
                       <button
                         onClick={() => handleViewDetail(item.id)}
