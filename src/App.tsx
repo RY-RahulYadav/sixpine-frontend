@@ -54,6 +54,7 @@ import AddressesPage from './pages/AddressesPage';
 import EmailSubscriptionsPage from './pages/EmailSubscriptionsPage';
 import CheckoutPage from './pages/checkout';
 import ManagePaymentPage from './pages/ManagePaymentPage';
+import NotFoundPage from './pages/NotFoundPage';
 import CartSidebar from './components/CartSidebar/CartSidebar';
 
 function AppContent() {
@@ -103,13 +104,13 @@ function AppContent() {
             <Route path="/help" element={<HelpPage />} />
             <Route path="/help-center" element={<HelpCenterPage />} />
             <Route path="/shopping-list" element={<ShoppingListPage />} />
-            <Route path="/membership" element={<MembershipPage />} />
+            {/* <Route path="/membership" element={<MembershipPage />} /> */}
             <Route path="/packaging-feedback" element={<LeavePackagingFeedbackPage />} />
-            <Route path="/subscribe-save" element={<SubscribeSavePage />} />
-            <Route path="/memberships-subscriptions" element={<MembershipsSubscriptionsPage />} />
-            <Route path="/message-centre" element={<MessageCentrePage />} />
+            {/* <Route path="/subscribe-save" element={<SubscribeSavePage />} /> */}
+            {/* <Route path="/memberships-subscriptions" element={<MembershipsSubscriptionsPage />} /> */}
+            {/* <Route path="/message-centre" element={<MessageCentrePage />} /> */}
             <Route path="/your-addresses" element={<AddressesPage />} />
-            <Route path='/email-subscribe' element={<EmailSubscriptionsPage/>}  />
+            {/* <Route path='/email-subscribe' element={<EmailSubscriptionsPage/>}  /> */}
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/shopping-preferences" element={<ProfilePage />} />
             <Route path ='/manage-payment' element={<ManagePaymentPage/>} />
@@ -135,6 +136,9 @@ function AppContent() {
             {/* Admin routes */}
             <Route path="/admin/*" element={<AdminRouter />} />
             <Route path="/seller/*" element={<SellerRouter />} />
+            
+            {/* 404 - Catch all unmatched routes */}
+            <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
     </Router>
