@@ -85,6 +85,7 @@ interface Product {
   product_title?: string;
   available_colors?: string[];
   variant_count?: number; // Number of variants for this product
+  color_count?: number; // Number of distinct colors for this product
 }
 
 const ProductListPage: React.FC = () => {
