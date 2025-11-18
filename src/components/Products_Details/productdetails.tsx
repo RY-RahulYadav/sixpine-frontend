@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 // import { AiOutlineInfoCircle } from "react-icons/ai";
 import { BsTagFill } from "react-icons/bs";
+import ShareModal from "../ShareModal";
 
 interface ProductDetailsProps {
   product: any;
@@ -26,6 +27,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const [activeAdvertisement, setActiveAdvertisement] = useState<any>(null);
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   // Fetch active advertisements
   useEffect(() => {
@@ -302,6 +304,9 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
         {/* Image Section */}
         <div className={styles.imageSection}>
           <div className={styles.imageWrapper}>
+            <div className={styles.shareButton} onClick={(e) => { e.stopPropagation(); setIsShareModalOpen(true); }}>
+              <i className="fa-solid fa-share"></i>
+            </div>
             <img
               src={mainImage}
               alt="Product"
@@ -496,7 +501,9 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               <div className={styles.detailCard}>
                 <strong>Brand:</strong> {product?.brand || "Sixpine"}
               </div>
-              {product?.specifications?.map((spec: any, index: number) => (
+              {product?.specifications
+                ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
+                ?.map((spec: any, index: number) => (
                 <div key={index} className={styles.detailCard}>
                   <strong>{spec.name}:</strong> {spec.value}
               </div>
@@ -598,9 +605,15 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
             </div>
           )}
         </div>
-
        
+        
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        show={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+      />
     </div>
   );
 };
