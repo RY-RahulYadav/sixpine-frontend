@@ -165,10 +165,10 @@ const ManagePaymentMethods: React.FC<ManagePaymentMethodsProps> = ({
           <div className={styles.colPayment}>
             <div className={styles.paymentLabel}>PAYMENT METHOD</div>
             {preference?.preferred_method ? (
-              <div style={{ fontSize: '15px', color: '#222', fontWeight: 500, marginTop: '2px' }}>
+              <div className={styles.paymentMethodDisplay}>
                 {getPreferredMethod()}
                 {preferredCard && (
-                  <div style={{ fontSize: '13px', color: '#565959', marginTop: '4px' }}>
+                  <div className={styles.paymentCardDetails}>
                     {formatCardName(preferredCard)}
                   </div>
                 )}
@@ -198,18 +198,9 @@ const ManagePaymentMethods: React.FC<ManagePaymentMethodsProps> = ({
           <div className={styles.savedCardsTitle}>Your saved credit and debit cards</div>
           {(savedCards || []).map(card => (
             <div key={card.token_id} className={styles.cardRow}>
-              <div style={{ 
-                width: '38px', 
-                height: '24px', 
+              <div className={styles.cardIconContainer} style={{ 
                 background: card.card.network?.toLowerCase().includes('visa') ? '#1a1f71' : 
                            card.card.network?.toLowerCase().includes('master') ? '#eb001b' : '#ddd',
-                borderRadius: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                fontSize: '10px',
-                fontWeight: 'bold'
               }}>
                 {card.card.network?.substring(0, 4) || 'CARD'}
               </div>
@@ -218,7 +209,7 @@ const ManagePaymentMethods: React.FC<ManagePaymentMethodsProps> = ({
                 <div className={styles.cardNickname}>
                   Expires: {card.card.expiry_month}/{card.card.expiry_year}
                   {preference?.preferred_card_token_id === card.token_id && (
-                    <span style={{ marginLeft: '8px', color: '#007185', fontWeight: 500 }}>
+                    <span className={styles.preferredBadge}>
                       (Preferred)
                     </span>
                   )}

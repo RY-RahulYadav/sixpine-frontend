@@ -1059,7 +1059,7 @@ const ProductListPage: React.FC = () => {
                               {/* Variant Information - Show first variant details */}
                               {firstVariant && (
                                 <div className="product-variant-info">
-                                  <small className="text-muted d-flex flex-wrap gap-2 align-items-center">
+                                  <small className="text-muted">
                                     {firstVariant.color && (
                                       <span>
                                         <strong>Color:</strong> {firstVariant.color.name}

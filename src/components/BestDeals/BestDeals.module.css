@@ -1036,8 +1036,8 @@
   }
 }
 
-/* Tablets Portrait (768px - 1023px) */
-@media (max-width: 768px) {
+/* Tablets Portrait (741px - 768px) */
+@media (min-width: 741px) and (max-width: 768px) {
   .dealCountdown {
     flex-direction: column;
     gap: 10px;
@@ -1081,6 +1081,62 @@
   .dealsGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+  }
+}
+
+/* Below 740px - One card per row, centered */
+@media (max-width: 740px) {
+  .dealCountdown {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+  }
+
+  .mainCarousel {
+    height: auto;
+    padding: 20px 15px;
+  }
+
+  .slideContent {
+    flex-direction: column;
+  }
+
+  .dealText {
+    max-width: 100%;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .dealImage {
+    justify-content: center;
+  }
+
+  .dealStats {
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .dealStat {
+    width: 45%;
+  }
+
+  .dealStatDivider {
+    display: none;
+  }
+
+  .dealsGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
+  }
+
+  .dealCard {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .categoryGrid {
@@ -1154,7 +1210,46 @@
   }
 }
 
-/* Mobile Landscape (480px - 767px) */
+/* Mobile Landscape (480px - 740px) */
+@media (min-width: 480px) and (max-width: 740px) {
+  .dealTitle {
+    font-size: 28px;
+  }
+
+  .discountBadge {
+    font-size: 18px;
+  }
+
+  .priceSection {
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .dealStats {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .dealStat {
+    width: 100%;
+  }
+
+  .dealsGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
+  }
+
+  .dealCard {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Mobile Landscape (480px and below) */
 @media (max-width: 480px) {
   .dealTitle {
     font-size: 28px;
@@ -1181,7 +1276,15 @@
 
   .dealsGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
+  }
+
+  .dealCard {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .categoryGrid {

@@ -254,16 +254,6 @@ const LoginSecurity = () => {
                             )}
                         </div>
                     </div>
-
-                <div className={`${styles.securityItem} ${styles.compromisedAccount}`}>
-                    <div className={styles.securityInfo}>
-                        <span className={styles.label}>Compromised Account</span>
-                        <p className={styles.description}>Take steps like changing your password and signing out everywhere.</p>
-                    </div>
-                    <div className={styles.securityActions}>
-                        <button className={styles.manageButton}>Manage</button>
-                    </div>
-                </div>
             </div>
             </div>
         </div>

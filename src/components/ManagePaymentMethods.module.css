@@ -5,6 +5,7 @@
   padding: 32px 32px 24px 32px;
   border-radius: 12px;
   font-family: 'Amazon Ember', Arial, sans-serif;
+  box-sizing: border-box;
 }
 
 .breadcrumbs {
@@ -164,7 +165,8 @@
 .preferenceRow {
   display: flex;
   gap: 20px;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .colNickname {
@@ -201,6 +203,25 @@
   flex: 1 1 0;
 }
 
+.paymentMethodDisplay {
+  font-size: 15px;
+  color: #222;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.paymentCardDetails {
+  font-size: 13px;
+  color: #565959;
+  margin-top: 4px;
+}
+
+.preferredBadge {
+  margin-left: 8px;
+  color: #007185;
+  font-weight: 500;
+}
+
 .savedCardsSection {
   margin-top: 18px;
 }
@@ -225,6 +246,19 @@
   height: 24px;
   object-fit: contain;
   margin-top: 2px;
+}
+
+.cardIconContainer {
+  width: 38px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
 }
 .cardDetails {
   flex: 1;
@@ -263,16 +297,422 @@
   color: #007185;
 }
 
-@media (max-width: 600px) {
+/* Responsive Styles */
+
+/* Tablets and Small Laptops (768px - 999px) */
+@media (max-width: 999px) {
   .container {
-    padding: 10px 2vw;
+    padding: 24px 20px 20px 20px;
   }
-  .preferenceContent {
-    flex-direction: column;
+
+  .heading {
+    font-size: 20px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .infoBox {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .preferenceCard {
+    padding: 16px 18px 10px 18px;
+  }
+
+  .preferenceRow {
+    gap: 16px;
+  }
+
+  .colNickname,
+  .colPayment {
+    min-width: 140px;
+  }
+}
+
+/* Tablets Portrait (768px and below) */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 16px 16px 16px;
+  }
+
+  .breadcrumbs {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .heading {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .description {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .infoBox {
+    padding: 12px 14px;
+    font-size: 13px;
     gap: 10px;
+    margin-bottom: 24px;
   }
+
+  .infoIcon {
+    width: 20px;
+    height: 20px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .preferenceCard {
+    padding: 14px 16px 10px 16px;
+    margin-bottom: 24px;
+  }
+
+  .preferenceHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .preferenceTitle {
+    font-size: 15px;
+  }
+
+  .updateLink {
+    font-size: 12px;
+  }
+
+  .preferenceRow {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .colNickname,
+  .colPayment,
+  .colNote {
+    flex: 1 1 100%;
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .addressLabel {
+    font-size: 12px;
+    margin: 8px 0 8px 0;
+  }
+
+  .nicknameInline {
+    font-size: 14px;
+  }
+
+  .colLabel,
+  .paymentLabel {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .preferenceNote {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .paymentMethodDisplay {
+    font-size: 14px;
+  }
+
+  .paymentCardDetails {
+    font-size: 12px;
+    margin-top: 3px;
+  }
+
+  .preferredBadge {
+    margin-left: 6px;
+    font-size: 12px;
+  }
+
+  .savedCardsTitle {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
   .cardRow {
     flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .cardIconContainer {
+    width: 36px;
+    height: 22px;
+    font-size: 9px;
+  }
+
+  .cardDetails {
+    width: 100%;
+  }
+
+  .cardName {
+    font-size: 14px;
+  }
+
+  .cardNickname {
+    font-size: 12px;
+  }
+
+  .cardActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .removeBtn,
+  .editBtn {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+}
+
+/* Mobile Landscape (480px - 767px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 16px 12px 12px 12px;
+  }
+
+  .breadcrumbs {
+    font-size: 11px;
+    margin-bottom: 12px;
+  }
+
+  .heading {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .description {
+    font-size: 12px;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  .infoBox {
+    padding: 10px 12px;
+    font-size: 12px;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .infoIcon {
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+  }
+
+  .blueLink {
+    font-size: 12px;
+  }
+
+  .preferenceCard {
+    padding: 12px 14px 8px 14px;
+    margin-bottom: 20px;
+  }
+
+  .preferenceHeader {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .preferenceTitle {
+    font-size: 14px;
+  }
+
+  .updateLink {
+    font-size: 11px;
+  }
+
+  .preferenceRow {
+    gap: 12px;
+  }
+
+  .addressLabel {
+    font-size: 11px;
+    margin: 6px 0 6px 0;
+  }
+
+  .colLabel,
+  .paymentLabel {
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+
+  .nicknameInline {
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+
+  .preferenceNote {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .paymentMethodDisplay {
+    font-size: 13px;
+  }
+
+  .paymentCardDetails {
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .preferredBadge {
+    margin-left: 4px;
+    font-size: 11px;
+    display: inline-block;
+  }
+
+  .savedCardsSection {
+    margin-top: 16px;
+  }
+
+  .savedCardsTitle {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .cardRow {
+    padding: 12px 14px;
     gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .cardIconContainer {
+    width: 34px;
+    height: 20px;
+    font-size: 8px;
+  }
+
+  .cardName {
+    font-size: 13px;
+  }
+
+  .cardNickname {
+    font-size: 11px;
+    margin-top: 1px;
+  }
+
+  .removeBtn,
+  .editBtn {
+    padding: 5px 12px;
+    font-size: 11px;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Small Mobile Devices (375px and below) */
+@media (max-width: 375px) {
+  .container {
+    padding: 14px 10px 10px 10px;
+  }
+
+  .breadcrumbs {
+    font-size: 10px;
+    margin-bottom: 10px;
+  }
+
+  .heading {
+    font-size: 15px;
+  }
+
+  .description {
+    font-size: 11px;
+  }
+
+  .infoBox {
+    padding: 8px 10px;
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+
+  .infoIcon {
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+  }
+
+  .preferenceCard {
+    padding: 10px 12px 6px 12px;
+    margin-bottom: 16px;
+  }
+
+  .preferenceTitle {
+    font-size: 13px;
+  }
+
+  .updateLink {
+    font-size: 10px;
+  }
+
+  .addressLabel {
+    font-size: 10px;
+  }
+
+  .colLabel,
+  .paymentLabel {
+    font-size: 10px;
+  }
+
+  .nicknameInline {
+    font-size: 12px;
+  }
+
+  .preferenceNote {
+    font-size: 9px;
+  }
+
+  .paymentMethodDisplay {
+    font-size: 12px;
+  }
+
+  .paymentCardDetails {
+    font-size: 10px;
+  }
+
+  .preferredBadge {
+    margin-left: 4px;
+    font-size: 10px;
+  }
+
+  .savedCardsTitle {
+    font-size: 13px;
+  }
+
+  .cardRow {
+    padding: 10px 12px;
+  }
+
+  .cardIconContainer {
+    width: 32px;
+    height: 18px;
+    font-size: 7px;
+  }
+
+  .cardName {
+    font-size: 12px;
+  }
+
+  .cardNickname {
+    font-size: 10px;
+  }
+
+  .removeBtn,
+  .editBtn {
+    padding: 4px 10px;
+    font-size: 10px;
   }
 }

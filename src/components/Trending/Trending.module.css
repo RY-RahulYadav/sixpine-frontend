@@ -225,7 +225,8 @@
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 20px;
+  width: 100%;
 }
 
 .productCard {
@@ -613,6 +614,7 @@
   
   .productsGrid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
   }
   
   .categoriesGrid {
@@ -628,6 +630,7 @@
   
   .productsGrid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
   }
   
   .categoriesGrid {
@@ -643,7 +646,7 @@
   
   .productsGrid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    gap: 16px;
   }
   
   .categoriesGrid {
@@ -651,8 +654,8 @@
   }
 }
 
-/* Tablets Portrait (768px - 1023px) */
-@media (max-width: 768px) {
+/* Tablets Portrait (741px - 768px) */
+@media (min-width: 741px) and (max-width: 768px) {
   .mainCarousel {
     height: 350px;
     padding: 0 20px;
@@ -669,7 +672,7 @@
 
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 12px;
   }
 
   .categoriesGrid {
@@ -688,7 +691,52 @@
   }
 }
 
-/* Mobile Landscape (480px - 767px) */
+/* Below 740px - One card per row, centered */
+@media (max-width: 740px) {
+  .mainCarousel {
+    height: 350px;
+    padding: 0 20px;
+  }
+
+  .slideTitle {
+    font-size: 28px;
+  }
+
+  .imagePlaceholder {
+    width: 200px;
+    height: 200px;
+  }
+
+  .productsGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
+  }
+  
+  .productCard {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .categoriesGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .collectionsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .analyticGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Mobile Landscape (480px and below) */
 @media (max-width: 480px) {
   .mainCarousel {
     height: auto;
@@ -730,7 +778,15 @@
 
   .productsGrid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
+  }
+  
+  .productCard {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .categoriesGrid {

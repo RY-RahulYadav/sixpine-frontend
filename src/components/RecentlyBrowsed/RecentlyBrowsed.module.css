@@ -127,7 +127,7 @@
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 4px;
 }
 
 .productCard {
@@ -335,7 +335,8 @@
 /* Product Card Styles - Matching Discover Card from Home Page */
 .craftedProductCard {
   min-width: 260px;
-  width: 315px;
+  width: 100%;
+  max-width: 100%;
   background: #fff;
   border-radius: 12px;
   padding: 15px;
@@ -349,6 +350,7 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   border: #e1dcdc solid 4px;
+  box-sizing: border-box;
 }
 
 .craftedProductCard:hover {
@@ -972,8 +974,8 @@
   }
 }
 
-/* Tablets Portrait (768px - 1023px) */
-@media (max-width: 768px) {
+/* Tablets Portrait (741px - 768px) */
+@media (min-width: 741px) and (max-width: 768px) {
   .browsingHistorySection,
   .recommendedSection,
   .relatedCategoriesSection,
@@ -1028,8 +1030,10 @@
   }
   
   .historyItems {
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+    overflow-x: visible;
   }
   
   .savedItemsGrid {
@@ -1038,33 +1042,121 @@
   }
 }
 
-/* Mobile Landscape (480px - 767px) */
-@media (max-width: 580px) {
-  .historyItems {
-    grid-template-columns: 1fr;
+/* Below 740px - One card per row, centered */
+@media (max-width: 740px) {
+  .browsingHistorySection,
+  .recommendedSection,
+  .relatedCategoriesSection,
+  .savedItemsSection {
+    padding: 20px 15px;
+  }
+  
+  .sectionHeaderWithClear {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .headerContent {
+    width: 100%;
+  }
+  
+  .headerActions {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 12px;
+  }
+  
+  .controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .productsGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
   }
   
   .recommendedGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 15px;
+    justify-items: center;
   }
   
   .categoriesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .historyItems {
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    overflow-x: visible;
+    padding: 0;
+  }
+  
+  .craftedProductCard {
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .savedItemsGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+  }
+}
+
+/* Mobile Landscape (480px - 740px) */
+@media (min-width: 480px) and (max-width: 740px) {
+  .historyItems {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    overflow-x: visible;
+    padding: 0;
+  }
+  
+  .recommendedGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+  }
+  
+  .categoriesGrid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
   }
   
   .savedItemsGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 15px;
+    justify-items: center;
   }
   
   .craftedProductCard {
-    min-width: 200px;
+    min-width: auto;
     width: 100%;
     max-width: 100%;
     padding: 12px;
+    box-sizing: border-box;
   }
   
   .productImg1 {
@@ -1095,7 +1187,30 @@
   
   .productsGrid {
     grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
+  }
+  
+  .categoriesGrid {
+    grid-template-columns: 1fr;
     gap: 12px;
+  }
+  
+  .historyItems {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    overflow-x: visible;
+    padding: 0;
+  }
+  
+  .craftedProductCard {
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   
   .sectionTitle {
@@ -1124,8 +1239,33 @@
     font-size: 12px;
   }
   
+  .productsGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    max-width: 100%;
+  }
+  
+  .categoriesGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .historyItems {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    justify-items: center;
+    overflow-x: visible;
+    padding: 0;
+  }
+  
   .craftedProductCard {
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
     padding: 10px;
+    box-sizing: border-box;
   }
   
   .productImg1 {

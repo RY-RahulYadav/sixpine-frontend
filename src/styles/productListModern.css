@@ -558,12 +558,27 @@
 /* Variant Info */
 .product-variant-info {
   margin: 0;
+  margin-bottom: 8px;
 }
 
 .product-variant-info small {
   font-size: 13px;
   color: var(--sixpine-text-light);
   line-height: 1.5;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  text-align: left !important;
+}
+
+.product-variant-info small span {
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Product Description */
@@ -1518,10 +1533,25 @@
 
   .product-variant-info {
     display: block;
+    margin-bottom: 6px;
   }
 
   .product-variant-info small {
     font-size: 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    text-align: left !important;
+  }
+
+  .product-variant-info small span {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
   }
 
   .product-description {
@@ -1708,10 +1738,25 @@
 
   .product-variant-info {
     display: block;
+    margin-bottom: 5px;
   }
 
   .product-variant-info small {
     font-size: 9px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    text-align: left !important;
+  }
+
+  .product-variant-info small span {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
   }
 
   .product-description {
@@ -1876,10 +1921,25 @@
 
   .product-variant-info {
     display: block;
+    margin-bottom: 4px;
   }
 
   .product-variant-info small {
     font-size: 8px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+    text-align: left !important;
+  }
+
+  .product-variant-info small span {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
   }
 
   .product-description {
