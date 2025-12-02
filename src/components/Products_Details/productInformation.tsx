@@ -55,7 +55,7 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
             <Paintbrush size={16} /> <strong>Style</strong>
           </div>
           <div className={styles.descriptionText}>
-            {formatDescription(product?.long_description || product?.short_description) || (
+            {formatDescription(product?.style_description || product?.long_description || product?.short_description) || (
               <p>Contemporary design with smooth edges and minimalist finish, perfect for modern interiors.</p>
             )}
           </div>

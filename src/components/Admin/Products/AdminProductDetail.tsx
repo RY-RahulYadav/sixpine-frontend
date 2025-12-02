@@ -26,7 +26,7 @@ interface ProductVariant {
   color_id: number;
   color?: {
     id: number;
-  name: string;
+    name: string;
     hex_code: string;
   };
   size: string;
@@ -38,6 +38,7 @@ interface ProductVariant {
   is_in_stock: boolean;
   image: string;
   images: VariantImage[];
+  specifications?: Specification[];
   is_active: boolean;
 }
 
@@ -51,7 +52,8 @@ interface Specification {
 
 interface Feature {
   id?: number;
-  feature: string;
+  feature?: string;
+  item?: string; // For about_items
   sort_order: number;
   is_active?: boolean;
 }
@@ -94,6 +96,7 @@ interface Product {
   assembly_required: boolean;
   estimated_delivery_days?: number;
   screen_offer?: (string | { title: string; description: string })[];
+  style_description?: string;
   user_guide?: string;
   care_instructions?: string;
   meta_title: string;
@@ -104,6 +107,7 @@ interface Product {
   variants: ProductVariant[];
   specifications: Specification[];
   features: Feature[];
+  about_items: Feature[];
   offers: Offer[];
   recommendations: Recommendation[];
   created_at: string;
@@ -135,7 +139,7 @@ const AdminProductDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'basic' | 'variants' | 'details' | 'seo'>('basic');
-  const [activeDetailSection, setActiveDetailSection] = useState<'specifications' | 'features' | 'screen_offer' | 'user_guide' | 'care_instructions' | 'recommendations' | null>('specifications');
+  const [activeDetailSection, setActiveDetailSection] = useState<'features' | 'about_items' | 'screen_offer' | 'style_description' | 'user_guide' | 'care_instructions' | 'recommendations' | null>('features');
   
   // Form data
   const [formData, setFormData] = useState<{
@@ -154,6 +158,7 @@ const AdminProductDetail: React.FC = () => {
     assembly_required: boolean;
     estimated_delivery_days: number;
     screen_offer: { title: string; description: string }[];
+    style_description: string;
     user_guide: string;
     care_instructions: string;
     meta_title: string;
@@ -176,6 +181,7 @@ const AdminProductDetail: React.FC = () => {
     assembly_required: false,
     estimated_delivery_days: 4,
     screen_offer: [],
+    style_description: '',
     user_guide: '',
     care_instructions: '',
     meta_title: '',
@@ -188,11 +194,11 @@ const AdminProductDetail: React.FC = () => {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [lastSelectedColorId, setLastSelectedColorId] = useState<number | null>(null);
   
-  // Specifications
-  const [specifications, setSpecifications] = useState<Specification[]>([]);
-  
   // Features
   const [features, setFeatures] = useState<Feature[]>([]);
+  
+  // About Items
+  const [aboutItems, setAboutItems] = useState<Feature[]>([]);
   
   // Recommendations
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -253,6 +259,7 @@ const AdminProductDetail: React.FC = () => {
                     : { title: offer.title || offer.text || '', description: offer.description || '' }
                 )
               : [],
+            style_description: productData.style_description || '',
             user_guide: productData.user_guide || '',
             care_instructions: productData.care_instructions || '',
             meta_title: productData.meta_title || '',
@@ -276,8 +283,17 @@ const AdminProductDetail: React.FC = () => {
           if (normalizedVariants.length > 0 && normalizedVariants[0].color_id && normalizedVariants[0].color_id !== 0) {
             setLastSelectedColorId(normalizedVariants[0].color_id);
           }
-          setSpecifications(productData.specifications || []);
+          // Specifications are now at variant level, not product level
           setFeatures(productData.features || []);
+          // Normalize about_items - convert item field to feature field for consistency with Feature interface
+          const normalizedAboutItems = (productData.about_items || []).map((item: any) => ({
+            id: item.id,
+            item: item.item || '',
+            feature: item.item || '', // For backward compatibility with Feature interface
+            sort_order: item.sort_order || 0,
+            is_active: item.is_active !== false
+          }));
+          setAboutItems(normalizedAboutItems);
           // Normalize recommendations: ensure recommended_product_id is set
           const normalizedRecommendations = (productData.recommendations || []).map((rec: any) => {
             // Extract recommended_product_id from various possible sources
@@ -376,6 +392,7 @@ const AdminProductDetail: React.FC = () => {
       is_in_stock: true,
       image: '',
       images: [],
+      specifications: [],
       is_active: true
     }]);
   };
@@ -421,24 +438,42 @@ const AdminProductDetail: React.FC = () => {
     setVariants(updated);
   };
   
-  // Specification management
-  const handleAddSpecification = () => {
-    setSpecifications([...specifications, {
-      name: '',
-      value: '',
-      sort_order: specifications.length,
-      is_active: true
-    }]);
+  // Variant Specification management
+  const handleAddVariantSpecification = (variantIndex: number) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    updated[variantIndex] = {
+      ...variant,
+      specifications: [...(variant.specifications || []), {
+        name: '',
+        value: '',
+        sort_order: (variant.specifications || []).length,
+        is_active: true
+      }]
+    };
+    setVariants(updated);
   };
   
-  const handleRemoveSpecification = (index: number) => {
-    setSpecifications(specifications.filter((_, i) => i !== index));
+  const handleRemoveVariantSpecification = (variantIndex: number, specIndex: number) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    updated[variantIndex] = {
+      ...variant,
+      specifications: (variant.specifications || []).filter((_, i) => i !== specIndex)
+    };
+    setVariants(updated);
   };
   
-  const handleSpecificationChange = (index: number, field: string, value: any) => {
-    const updated = [...specifications];
-    updated[index] = { ...updated[index], [field]: value };
-    setSpecifications(updated);
+  const handleVariantSpecificationChange = (variantIndex: number, specIndex: number, field: string, value: any) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const specs = [...(variant.specifications || [])];
+    specs[specIndex] = { ...specs[specIndex], [field]: value };
+    updated[variantIndex] = {
+      ...variant,
+      specifications: specs
+    };
+    setVariants(updated);
   };
   
   // Feature management
@@ -458,6 +493,26 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...features];
     updated[index] = { ...updated[index], [field]: value };
     setFeatures(updated);
+  };
+  
+  // About Items management
+  const handleAddAboutItem = () => {
+    setAboutItems([...aboutItems, {
+      item: '',
+      feature: '', // For backward compatibility
+      sort_order: aboutItems.length,
+      is_active: true
+    }]);
+  };
+  
+  const handleRemoveAboutItem = (index: number) => {
+    setAboutItems(aboutItems.filter((_, i) => i !== index));
+  };
+  
+  const handleAboutItemChange = (index: number, field: string, value: any) => {
+    const updated = [...aboutItems];
+    updated[index] = { ...updated[index], [field]: value };
+    setAboutItems(updated);
   };
   
   // Recommendation management
@@ -532,6 +587,7 @@ const AdminProductDetail: React.FC = () => {
         assembly_required: formData.assembly_required,
         estimated_delivery_days: formData.estimated_delivery_days,
         screen_offer: formData.screen_offer,
+        style_description: formData.style_description,
         user_guide: formData.user_guide,
         care_instructions: formData.care_instructions,
         meta_title: formData.meta_title,
@@ -562,19 +618,24 @@ const AdminProductDetail: React.FC = () => {
               alt_text: img.alt_text,
               sort_order: img.sort_order,
               is_active: img.is_active !== false
+            })),
+            specifications: (v.specifications || []).map((s: Specification) => ({
+              name: s.name,
+              value: s.value,
+              sort_order: s.sort_order,
+              is_active: s.is_active !== false
             }))
           };
         }),
-        specifications: specifications.map(s => ({
-          name: s.name,
-          value: s.value,
-          sort_order: s.sort_order,
-          is_active: s.is_active !== false
-        })),
         features: features.map(f => ({
           feature: f.feature,
           sort_order: f.sort_order,
           is_active: f.is_active !== false
+        })),
+        about_items: aboutItems.map(a => ({
+          item: a.item || a.feature, // Support both item and feature field for backward compatibility
+          sort_order: a.sort_order,
+          is_active: a.is_active !== false
         })),
         recommendations: recommendations.map(r => ({
           id: r.id,
@@ -1344,6 +1405,77 @@ const AdminProductDetail: React.FC = () => {
                           )}
                   </div>
                 </div>
+                
+                {/* Variant Specifications */}
+                <div className="tw-pt-6 tw-border-t tw-border-gray-200">
+                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+                    <h5 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-flex tw-items-center tw-gap-2">
+                      <span className="material-symbols-outlined tw-text-base">list</span>
+                      Specifications ({variant.specifications?.length || 0})
+                    </h5>
+                    <button
+                      type="button"
+                      className="admin-modern-btn secondary"
+                      onClick={() => handleAddVariantSpecification(variantIndex)}
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                      Add Specification
+                    </button>
+                  </div>
+                  <div className="tw-space-y-3">
+                    {variant.specifications?.map((spec, specIndex) => (
+                      <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                        <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
+                            <input
+                              type="text"
+                              value={spec.name}
+                              onChange={(e) => handleVariantSpecificationChange(variantIndex, specIndex, 'name', e.target.value)}
+                              placeholder="e.g., Brand, Depth, Style"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                            <input
+                              type="text"
+                              value={spec.value}
+                              onChange={(e) => handleVariantSpecificationChange(variantIndex, specIndex, 'value', e.target.value)}
+                              placeholder="e.g., Atomberg, 12 inch, Modern"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="tw-w-24">
+                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Order</label>
+                          <input
+                            type="number"
+                            value={spec.sort_order}
+                            onChange={(e) => handleVariantSpecificationChange(variantIndex, specIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                            placeholder="0"
+                            className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                          />
+                        </div>
+                        <div className="tw-flex tw-items-end">
+                          <button
+                            type="button"
+                            className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                            onClick={() => handleRemoveVariantSpecification(variantIndex, specIndex)}
+                          >
+                            <span className="material-symbols-outlined tw-text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {(!variant.specifications || variant.specifications.length === 0) && (
+                      <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                        <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">list</span>
+                        <p className="tw-mt-2">No specifications added for this variant</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                     </div>
                   </div>
                 );
@@ -1371,85 +1503,17 @@ const AdminProductDetail: React.FC = () => {
         {/* Details Tab */}
         {activeTab === 'details' && (
           <div className="admin-card tw-space-y-3">
-            {/* Specifications Section */}
-            <div className="tw-border-2 tw-border-blue-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-blue-50 tw-via-blue-100 tw-to-blue-50">
-                <button
-                  type="button"
-                  className="btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform " 
-                  onClick={() => setActiveDetailSection(activeDetailSection === 'specifications' ? null : 'specifications')}
-                >
-                  <span 
-                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-blue-600 tw-font-bold tw-text-2xl" 
-                    style={{ transform: activeDetailSection === 'specifications' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  >
-                    expand_more
-                  </span>
-                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">Specifications</h3>
-                </button>
-                <button 
-                  type="button" 
-                  className="tw-flex tw-items-center tw-gap-2 tw-px-5 tw-py-2.5 tw-bg-orange-600 tw-text-white tw-rounded-lg hover:tw-bg-orange-700 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-sm hover:tw-scale-105 active:tw-scale-95"
-                  onClick={handleAddSpecification}
-                >
-                  <span className="material-symbols-outlined tw-text-lg tw-font-bold">add</span>
-                  Add Specifications
-                </button>
-              </div>
-              {activeDetailSection === 'specifications' && (
-                <div className="tw-p-5 tw-bg-white tw-space-y-3">
-                  {specifications.map((spec, index) => (
-                    <div key={index} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-grid tw-grid-cols-4 tw-gap-3 hover:tw-shadow-md tw-transition-shadow">
-                      <div>
-                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
-                        <input
-                          type="text"
-                          value={spec.name}
-                          onChange={(e) => handleSpecificationChange(index, 'name', e.target.value)}
-                          placeholder="e.g., Brand"
-                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
-                        <input
-                          type="text"
-                          value={spec.value}
-                          onChange={(e) => handleSpecificationChange(index, 'value', e.target.value)}
-                          placeholder="Value"
-                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Order</label>
-                        <input
-                          type="number"
-                          value={spec.sort_order}
-                          onChange={(e) => handleSpecificationChange(index, 'sort_order', parseInt(e.target.value) || 0)}
-                          placeholder="0"
-                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
-                        />
-                      </div>
-                      <div className="tw-flex tw-items-end">
-                        <button
-                          type="button"
-                          className="tw-w-full tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center tw-gap-1"
-                          onClick={() => handleRemoveSpecification(index)}
-                        >
-                          <span className="material-symbols-outlined tw-text-lg">delete</span>
-                          <span className="tw-text-sm tw-font-medium">Remove</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {specifications.length === 0 && (
-                    <div className="tw-text-center tw-py-8 tw-text-gray-400">
-                      <span className="material-symbols-outlined tw-text-5xl tw-mb-2">inventory_2</span>
-                      <p className="tw-text-sm">No specifications added yet. Click "Add" to create one.</p>
-                    </div>
-                  )}
+            <div className="tw-bg-blue-50 tw-border tw-border-blue-200 tw-rounded-lg tw-p-4">
+              <div className="tw-flex tw-items-start tw-gap-3">
+                <span className="material-symbols-outlined tw-text-blue-600">info</span>
+                <div>
+                  <h4 className="tw-font-semibold tw-text-blue-900 tw-mb-1">Specifications Moved to Variants</h4>
+                  <p className="tw-text-sm tw-text-blue-700">
+                    Specifications are now managed at the variant level. Each variant can have its own specifications. 
+                    Go to the <strong>Variants</strong> tab to add specifications for each variant.
+                  </p>
                 </div>
-              )}
+              </div>
             </div>
             
             {/* Features Section */}
@@ -1516,6 +1580,76 @@ const AdminProductDetail: React.FC = () => {
                     <div className="tw-text-center tw-py-8 tw-text-gray-400">
                       <span className="material-symbols-outlined tw-text-5xl tw-mb-2">stars</span>
                       <p className="tw-text-sm">No features added yet. Click "Add" to create one.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            {/* About This Item Section */}
+            <div className="tw-border-2 tw-border-green-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
+              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-green-50 tw-via-green-100 tw-to-green-50">
+                <button
+                  type="button"
+                  className="btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform"
+                  onClick={() => setActiveDetailSection(activeDetailSection === 'about_items' ? null : 'about_items')}
+                >
+                  <span 
+                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-green-600 tw-font-bold tw-text-2xl" 
+                    style={{ transform: activeDetailSection === 'about_items' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  >
+                    expand_more
+                  </span>
+                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">About This Item</h3>
+                </button>
+                <button 
+                  type="button" 
+                  className="tw-flex tw-items-center tw-gap-2 tw-px-5 tw-py-2.5 tw-bg-green-600 tw-text-white tw-rounded-lg hover:tw-bg-green-700 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-sm hover:tw-scale-105 active:tw-scale-95"
+                  onClick={handleAddAboutItem}
+                >
+                  <span className="material-symbols-outlined tw-text-lg tw-font-bold">add</span>
+                  Add Item
+                </button>
+              </div>
+              {activeDetailSection === 'about_items' && (
+                <div className="tw-p-5 tw-bg-white tw-space-y-3">
+                  {aboutItems.map((item, index) => (
+                    <div key={index} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3 hover:tw-shadow-md tw-transition-shadow">
+                      <div className="tw-flex-1">
+                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Item Description</label>
+                        <textarea
+                          value={item.item || item.feature || ''}
+                          onChange={(e) => handleAboutItemChange(index, 'item', e.target.value)}
+                          placeholder="Describe the item point..."
+                          rows={2}
+                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-green-500 focus:tw-border-transparent tw-text-sm tw-resize-none"
+                        />
+                      </div>
+                      <div className="tw-w-24">
+                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Order</label>
+                        <input
+                          type="number"
+                          value={item.sort_order}
+                          onChange={(e) => handleAboutItemChange(index, 'sort_order', parseInt(e.target.value) || 0)}
+                          placeholder="0"
+                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-green-500 focus:tw-border-transparent tw-text-sm"
+                        />
+                      </div>
+                      <div className="tw-flex tw-items-end">
+                        <button
+                          type="button"
+                          className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                          onClick={() => handleRemoveAboutItem(index)}
+                        >
+                          <span className="material-symbols-outlined tw-text-lg">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {aboutItems.length === 0 && (
+                    <div className="tw-text-center tw-py-8 tw-text-gray-400">
+                      <span className="material-symbols-outlined tw-text-5xl tw-mb-2">info</span>
+                      <p className="tw-text-sm">No items added yet. Click "Add Item" to create one.</p>
                     </div>
                   )}
                 </div>
@@ -1604,6 +1738,44 @@ const AdminProductDetail: React.FC = () => {
                       <p className="tw-text-sm">No screen offers added yet. Click "Add" to create one.</p>
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+
+            {/* Style Description Section */}
+            <div className="tw-border-2 tw-border-indigo-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
+              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-indigo-50 tw-via-indigo-100 tw-to-indigo-50">
+                <button
+                  type="button"
+                  className="btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform"
+                  onClick={() => setActiveDetailSection(activeDetailSection === 'style_description' ? null : 'style_description')}
+                >
+                  <span 
+                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-indigo-600 tw-font-bold tw-text-2xl" 
+                    style={{ transform: activeDetailSection === 'style_description' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  >
+                    expand_more
+                  </span>
+                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">Style Description</h3>
+                </button>
+              </div>
+              {activeDetailSection === 'style_description' && (
+                <div className="tw-p-5 tw-bg-white">
+                  <label htmlFor="style_description" className="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+                    Style Description (Large text area for detailed style information)
+                  </label>
+                  <textarea
+                    id="style_description"
+                    name="style_description"
+                    value={formData.style_description}
+                    onChange={(e) => setFormData({ ...formData, style_description: e.target.value })}
+                    rows={12}
+                    placeholder="Enter detailed style description here. This will be displayed in the Style section on the product detail page..."
+                    className="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500 focus:tw-border-transparent tw-text-sm tw-resize-y"
+                  />
+                  <p className="tw-text-xs tw-text-gray-500 tw-mt-2">
+                    This description will appear in the Style section on the product detail page. Use this for detailed narrative descriptions about the product's style, design, and aesthetic features.
+                  </p>
                 </div>
               )}
             </div>

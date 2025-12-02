@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
@@ -160,6 +160,180 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const [selectedSize, setSelectedSize] = useState<string>(initialVariant.size);
   const [selectedPattern, setSelectedPattern] = useState<string>(initialVariant.pattern);
   const [selectedQuality, setSelectedQuality] = useState<string>(initialVariant.quality);
+
+  // Get available options based on current selections (smart filtering)
+  // Show all variants, but filter based on selections to show compatible options
+  const availableOptions = useMemo(() => {
+    if (variants.length === 0) {
+      return {
+        colors: colors,
+        sizes: sizes,
+        patterns: patterns,
+        qualities: qualities
+      };
+    }
+
+    // Always show all colors (all variants)
+    const allAvailableColors = Array.from(new Set(
+      variants.map((v: any) => v.color?.name || v.color_name).filter(Boolean)
+    ));
+
+    // For sizes, patterns, and qualities: filter based on current selections
+    let filteredVariants = variants;
+    
+    // If color is selected, filter by color
+    if (selectedColor) {
+      filteredVariants = filteredVariants.filter((v: any) => 
+        (v.color?.name || v.color_name) === selectedColor
+      );
+    }
+    
+    // Get sizes available in filtered variants
+    const availableSizes = Array.from(new Set(
+      filteredVariants.map((v: any) => v.size).filter(Boolean)
+    ));
+    
+    // Further filter by size if selected
+    if (selectedSize && filteredVariants.length > 0) {
+      filteredVariants = filteredVariants.filter((v: any) => 
+        v.size === selectedSize || (!v.size && !selectedSize)
+      );
+    }
+    
+    // Get patterns available in filtered variants
+    const availablePatterns = Array.from(new Set(
+      filteredVariants.map((v: any) => v.pattern).filter(Boolean)
+    ));
+    
+    // Further filter by pattern if selected
+    if (selectedPattern && filteredVariants.length > 0) {
+      filteredVariants = filteredVariants.filter((v: any) => 
+        v.pattern === selectedPattern || (!v.pattern && !selectedPattern)
+      );
+    }
+    
+    // Get qualities available in filtered variants
+    const availableQualities = Array.from(new Set(
+      filteredVariants.map((v: any) => v.quality).filter(Boolean)
+    ));
+
+    return {
+      colors: allAvailableColors.length > 0 ? allAvailableColors : colors,
+      sizes: availableSizes.length > 0 ? availableSizes : sizes,
+      patterns: availablePatterns.length > 0 ? availablePatterns : patterns,
+      qualities: availableQualities.length > 0 ? availableQualities : qualities
+    };
+  }, [selectedColor, selectedSize, selectedPattern, selectedQuality, variants, colors, sizes, patterns, qualities]);
+
+  // Auto-select compatible options when a selection changes
+  useEffect(() => {
+    if (variants.length === 0) return;
+
+    // Find variants matching current color selection
+    let matchingVariants = variants;
+    
+    if (selectedColor) {
+      matchingVariants = matchingVariants.filter((v: any) => 
+        (v.color?.name || v.color_name) === selectedColor
+      );
+    }
+    
+    if (matchingVariants.length === 0) return;
+    
+    // Auto-select size if current selection is not available in filtered variants
+    const availableSizesInFiltered = Array.from(new Set(
+      matchingVariants.map((v: any) => v.size).filter((s: any): s is string => Boolean(s))
+    ));
+    if (selectedSize && !availableSizesInFiltered.includes(selectedSize)) {
+      const firstSize = availableSizesInFiltered[0];
+      if (firstSize && typeof firstSize === 'string') {
+        setSelectedSize(firstSize);
+      }
+    } else if (!selectedSize && availableSizesInFiltered.length > 0) {
+      const firstSize = availableSizesInFiltered[0];
+      if (firstSize && typeof firstSize === 'string') {
+        setSelectedSize(firstSize);
+      }
+    }
+  }, [selectedColor, variants]);
+
+  // Auto-select pattern when color or size changes
+  useEffect(() => {
+    if (variants.length === 0) return;
+
+    let matchingVariants = variants;
+    
+    if (selectedColor) {
+      matchingVariants = matchingVariants.filter((v: any) => 
+        (v.color?.name || v.color_name) === selectedColor
+      );
+    }
+    
+    if (selectedSize) {
+      matchingVariants = matchingVariants.filter((v: any) => 
+        v.size === selectedSize || (!v.size && !selectedSize)
+      );
+    }
+    
+    if (matchingVariants.length === 0) return;
+    
+    const availablePatternsInFiltered = Array.from(new Set(
+      matchingVariants.map((v: any) => v.pattern).filter((p: any): p is string => Boolean(p))
+    ));
+    if (selectedPattern && !availablePatternsInFiltered.includes(selectedPattern)) {
+      const firstPattern = availablePatternsInFiltered[0];
+      if (firstPattern && typeof firstPattern === 'string') {
+        setSelectedPattern(firstPattern);
+      }
+    } else if (!selectedPattern && availablePatternsInFiltered.length > 0) {
+      const firstPattern = availablePatternsInFiltered[0];
+      if (firstPattern && typeof firstPattern === 'string') {
+        setSelectedPattern(firstPattern);
+      }
+    }
+  }, [selectedColor, selectedSize, variants]);
+
+  // Auto-select quality when color, size, or pattern changes
+  useEffect(() => {
+    if (variants.length === 0) return;
+
+    let matchingVariants = variants;
+    
+    if (selectedColor) {
+      matchingVariants = matchingVariants.filter((v: any) => 
+        (v.color?.name || v.color_name) === selectedColor
+      );
+    }
+    
+    if (selectedSize) {
+      matchingVariants = matchingVariants.filter((v: any) => 
+        v.size === selectedSize || (!v.size && !selectedSize)
+      );
+    }
+    
+    if (selectedPattern) {
+      matchingVariants = matchingVariants.filter((v: any) => 
+        v.pattern === selectedPattern || (!v.pattern && !selectedPattern)
+      );
+    }
+    
+    if (matchingVariants.length === 0) return;
+    
+    const availableQualitiesInFiltered = Array.from(new Set(
+      matchingVariants.map((v: any) => v.quality).filter((q: any): q is string => Boolean(q))
+    ));
+    if (selectedQuality && !availableQualitiesInFiltered.includes(selectedQuality)) {
+      const firstQuality = availableQualitiesInFiltered[0];
+      if (firstQuality && typeof firstQuality === 'string') {
+        setSelectedQuality(firstQuality);
+      }
+    } else if (!selectedQuality && availableQualitiesInFiltered.length > 0) {
+      const firstQuality = availableQualitiesInFiltered[0];
+      if (firstQuality && typeof firstQuality === 'string') {
+        setSelectedQuality(firstQuality);
+      }
+    }
+  }, [selectedColor, selectedSize, selectedPattern, variants]);
 
   // Find selected variant based on selections
   const findSelectedVariant = () => {
@@ -360,8 +534,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       <div className={styles.breadcrumb}>
         <a href="/">Home</a>
         <a href="/products">Product</a>
-        <span title={product?.title || "Product Name"}>
-          {truncateTitle(product?.title || "Product Name", 60)}
+        <span title={selectedVariant?.title || product?.title || "Product Name"}>
+          {truncateTitle(selectedVariant?.title || product?.title || "Product Name", 60)}
         </span>
       </div>
 
@@ -402,7 +576,9 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
         {/* PART 2 - MIDDLE DETAILS */}
         <div className={styles.details}>
-          <h2 className={styles.title}>{product?.title || "PRODUCT TITLE GOES HERE"}</h2>
+          <h2 className={styles.title}>
+            {selectedVariant?.title || product?.title || "PRODUCT TITLE GOES HERE"}
+          </h2>
          <p className={styles.brand}>
   <span className={styles.brandLabel}>Brand:</span> <span className={styles.brandName}>{product?.brand || "Sixpine"}</span>
 </p>
@@ -502,10 +678,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
           {/* Options */}
           <div className={styles.options}>
-            {colors.length > 0 && (
+            {availableOptions.colors.length > 0 && (
               <div>
                 <strong>Color: </strong>
-                {colors.map((color: string, index: number) => (
+                {availableOptions.colors.map((color: string, index: number) => (
                   <button
                     key={`color-${index}-${color}`}
                     className={selectedColor === color ? styles.active : ""}
@@ -516,10 +692,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                 ))}
               </div>
             )}
-            {sizes.length > 0 && (
+            {availableOptions.sizes.length > 0 && (
               <div>
                 <strong>Size: </strong>
-                {sizes.map((size: string, index: number) => (
+                {availableOptions.sizes.map((size: string, index: number) => (
                   <button
                     key={`size-${index}-${size}`}
                     className={selectedSize === size ? styles.active : ""}
@@ -530,10 +706,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                 ))}
               </div>
             )}
-            {patterns.length > 0 && (
+            {availableOptions.patterns.length > 0 && (
               <div>
                 <strong>Pattern: </strong>
-                {patterns.map((pattern: string, index: number) => (
+                {availableOptions.patterns.map((pattern: string, index: number) => (
                   <button
                     key={`pattern-${index}-${pattern}`}
                     className={selectedPattern === pattern ? styles.active : ""}
@@ -544,10 +720,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                 ))}
               </div>
             )}
-            {qualities.length > 0 && (
+            {availableOptions.qualities.length > 0 && (
               <div>
                 <strong>Quality: </strong>
-                {qualities.map((quality: string, index: number) => (
+                {availableOptions.qualities.map((quality: string, index: number) => (
                   <button
                     key={`quality-${index}-${quality}`}
                     className={selectedQuality === quality ? styles.active : ""}
@@ -591,24 +767,41 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
           <div className={styles.productDetailsContent}>
             <h3>Key Details</h3>
-            <div className={styles.keyDetailsGrid}>
+            <div className={styles.keyDetailsGrid} key={`key-details-${selectedVariant?.id || 'default'}`}>
               <div className={styles.detailCard}>
                 <strong>Brand:</strong> {product?.brand || "Sixpine"}
               </div>
-              {product?.specifications
-                ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
-                ?.map((spec: any, index: number) => (
-                <div key={index} className={styles.detailCard}>
-                  <strong>{spec.name}:</strong> {spec.value}
-              </div>
-              ))}
+              {selectedVariant?.specifications && selectedVariant.specifications.length > 0 ? (
+                [...selectedVariant.specifications]
+                  .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+                  .filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
+                  .map((spec: any, index: number) => (
+                    <div key={`variant-spec-${selectedVariant?.id}-${spec.id || index}`} className={styles.detailCard}>
+                      <strong>{spec.name}:</strong> {spec.value}
+                    </div>
+                  ))
+              ) : (
+                product?.specifications
+                  ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
+                  ?.map((spec: any, index: number) => (
+                    <div key={`product-spec-${spec.id || index}`} className={styles.detailCard}>
+                      <strong>{spec.name}:</strong> {spec.value}
+                    </div>
+                  ))
+              )}
             </div>
 
             <h3>About This Item</h3>
             <ul className={styles.aboutItemList}>
-              {product?.features?.map((feature: any, index: number) => (
+              {product?.about_items && product.about_items.length > 0 ? (
+                product.about_items.map((item: any, index: number) => (
+                  <li key={index}>{item.item}</li>
+                ))
+              ) : (
+                product?.features?.map((feature: any, index: number) => (
                 <li key={index}>{feature.feature}</li>
-              ))}
+                ))
+              )}
             </ul>
 
             <button
