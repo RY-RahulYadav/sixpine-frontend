@@ -69,9 +69,13 @@ const AdminMedia: React.FC = () => {
         showToast('Please select an image file', 'error');
         return;
       }
-      // Validate file size (10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        showToast('File size must be less than 10MB', 'error');
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        showToast('File size too large. Maximum size is 10MB.', 'error');
+        e.target.value = ''; // Clear the input
+        setSelectedFile(null);
+        setPreviewUrl(null);
         return;
       }
       setSelectedFile(file);

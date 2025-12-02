@@ -139,7 +139,7 @@
 /* Main Layout */
 .mainLayout {
   display: grid;
-  grid-template-columns: 1fr 1.8fr 0.9fr;
+  grid-template-columns: minmax(420px, 1.4fr) 1.7fr 0.65fr;
   gap: 20px;
   /* margin-bottom: 30px; */
   align-items: start; /* ensure image and details align at the top */
@@ -152,6 +152,8 @@
   height: fit-content;
   display: flex;
   flex-direction: column;
+  min-width: 0; /* Allow grid to control width */
+  width: 100%;
 }
 
 .imageWrapper {
@@ -481,7 +483,7 @@
 .priceRow {
   display: flex;
   align-items: center;
-  margin: 6px 0;
+  /* margin: 6px 0; */
 }
 
 .discountBadge {
@@ -515,7 +517,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
+  /* margin-top: 8px; */
   font-size: 13px;
   color: #555;
   margin-left: -5px;
@@ -553,6 +555,35 @@
     text-rendering: optimizeLegibility;
     font-weight: 400;
     line-height: 1.5;
+}
+
+.offerItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.checkIcon {
+  color: #067d62;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+
+
+.infoIconRight {
+  color: #007185;
+  font-size: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-left: 4px;
+  transition: all 0.2s ease;
+}
+
+.infoIconRight:hover {
+  color: #c7511f;
+  transform: scale(1.1);
 }
 
 .greenIcon {
@@ -679,6 +710,45 @@
   background: #f7ca00;
 }
 
+/* Offer Info Modal */
+.offerModal {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.offerModalTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f1111;
+  margin-bottom: 16px;
+  font-family: 'Roboto', 'Open Sans', 'Noto Sans', sans-serif;
+}
+
+.offerModalDescription {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.6;
+  font-family: 'Roboto', 'Open Sans', 'Noto Sans', sans-serif;
+  margin: 0;
+}
+
 /* Product Details Content */
 .productDetailsContent {
   margin-top: 30px;
@@ -710,13 +780,15 @@
   display: flex;
   align-items: center;            
   cursor: pointer;
+  font-size: 14px;
 }
 
 .detailCard strong {
   font-weight: 700;  
   color: inherit;      
   display: inline;      
-  margin: 0;          
+  margin: 0;
+  font-size: 14px;
 }
 
 /* Hover effect */
@@ -783,6 +855,21 @@
   font-weight: 700;
   margin-bottom: 15px;
   color: #0f1111;
+}
+
+.deliveryInfo {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e7e7e7;
+}
+
+.deliveryText {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f1111;
+  margin: 0;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 
 .cartSummary p {
@@ -1013,7 +1100,7 @@
   }
 
   .mainLayout {
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1.6fr 2fr 0.8fr;
     gap: 30px;
   }
 
@@ -1040,7 +1127,7 @@
 /* Extra Large Desktops (1200px - 1399px) - Current laptop design preserved */
 @media (min-width: 1200px) and (max-width: 1399px) {
   .mainLayout {
-    grid-template-columns: 1fr 1.8fr 0.9fr;
+    grid-template-columns: minmax(420px, 1.4fr) 1.7fr 0.65fr;
     gap: 20px;
   }
 }
@@ -1048,7 +1135,7 @@
 /* Large Tablets and Small Laptops (992px - 1199px) - Current laptop design preserved */
 @media (min-width: 992px) and (max-width: 1199px) {
   .mainLayout {
-    grid-template-columns: 1fr 1.5fr 1fr;
+    grid-template-columns: 1.4fr 1.6fr 0.8fr;
   }
   
   .mainLayout > div:last-child {
@@ -1070,7 +1157,7 @@
 
 @media (max-width: 992px) {
   .mainLayout {
-    grid-template-columns: 1fr 1.5fr .5fr;
+    grid-template-columns: 1.3fr 1.5fr 0.5fr;
   }
   
   .mainLayout > div:nth-child(3),
@@ -1252,7 +1339,7 @@
   
   .ratings {
     font-size: 14px;
-    margin-bottom: 12px;
+    /* margin-bottom: 12px; */
   }
 
   .priceBox {

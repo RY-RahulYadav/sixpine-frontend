@@ -29,7 +29,11 @@ const ManagePaymentPage: React.FC = () => {
         
         {/* First Row - Customers frequently viewed */}
         <Productdetails_Slider1 
-          title="Buy with it"
+          title="Buy it with
+
+
+
+"
           products={frequentlyViewedProducts}
         />
    

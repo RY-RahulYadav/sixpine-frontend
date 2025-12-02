@@ -34,6 +34,7 @@ import AdminMedia from './Media/AdminMedia';
 import AdminPackagingFeedback from './PackagingFeedback/AdminPackagingFeedback';
 import AdminBrandAnalytics from './Analytics/AdminBrandAnalytics';
 import AdminCoupons from './Coupons/AdminCoupons';
+import AdminReviewManagement from './Reviews/AdminReviewManagement';
 
 const AdminRouter = () => {
   const { state } = useApp();
@@ -99,6 +100,7 @@ const AdminRouter = () => {
         <Route path="media" element={<AdminMedia />} />
         <Route path="packaging-feedback" element={<AdminPackagingFeedback />} />
         <Route path="coupons" element={<AdminCoupons />} />
+        <Route path="reviews" element={<AdminReviewManagement />} />
         {/* Settings Section */}
         <Route path="payment-charges" element={<AdminPaymentCharges />} />
         <Route path="filter-options" element={<AdminFilterOptions />} />

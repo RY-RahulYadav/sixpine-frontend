@@ -68,10 +68,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ onPaymentClick, paymentDisa
             <span>₹{totals.platformFee.toFixed(2)}</span>
           </div>
         )}
-        <div className={styles.summaryLine}>
-          <span>Tax ({platformFees?.tax_rate || 5}%):</span>
-          <span>₹{totals.tax.toFixed(2)}</span>
-        </div>
+        {totals.tax > 0 && (
+          <div className={styles.summaryLine}>
+            <span>Tax ({platformFees?.tax_rate || 5}%):</span>
+            <span>₹{totals.tax.toFixed(2)}</span>
+          </div>
+        )}
         <div className={`${styles.summaryLine} ${styles.orderTotal}`}>
           <span>Order Total:</span>
           <span>₹{totals.total.toFixed(2)}</span>

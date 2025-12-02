@@ -252,10 +252,12 @@ const CartPage: React.FC = () => {
                   <span>Shipping</span>
                   <span className="text-success">Free</span>
                 </div>
-                <div className="d-flex justify-content-between mb-2">
-                  <span>Tax ({taxRate}%)</span>
-                  <span>₹{(state.cart.total_price * (taxRate / 100)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
+                {taxRate > 0 && (state.cart.total_price * (taxRate / 100)) > 0 && (
+                  <div className="d-flex justify-content-between mb-2">
+                    <span>Tax ({taxRate}%)</span>
+                    <span>₹{(state.cart.total_price * (taxRate / 100)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                )}
                 <hr />
                 <div className="d-flex justify-content-between mb-3">
                   <strong>Total</strong>

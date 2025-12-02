@@ -81,11 +81,25 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
 
   const scroll = (ref: React.RefObject<HTMLDivElement | null>, dir: 'left' | 'right') => {
     if (ref.current) {
-      const scrollAmount = isMobile ? ref.current.offsetWidth : 300;
-      ref.current.scrollBy({
-        left: dir === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
+      // Get the first visible card to calculate scroll amount
+      const firstCard = ref.current.querySelector(`.${styles.craftedProductCard}`) as HTMLElement;
+      if (firstCard) {
+        const cardWidth = firstCard.offsetWidth;
+        const gap = 20; // Match the gap in CSS
+        const scrollAmount = cardWidth + gap;
+        
+        ref.current.scrollBy({
+          left: dir === "left" ? -scrollAmount : scrollAmount,
+          behavior: "smooth",
+        });
+      } else {
+        // Fallback: use fixed amount
+        const scrollAmount = isMobile ? ref.current.offsetWidth : 360;
+        ref.current.scrollBy({
+          left: dir === "left" ? -scrollAmount : scrollAmount,
+          behavior: "smooth",
+        });
+      }
     }
   };
 

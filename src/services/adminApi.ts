@@ -196,6 +196,13 @@ export const adminAPI = {
   updatePackagingFeedbackStatus: (id: number, status: string, adminNotes?: string) =>
     API.post(`/admin/packaging-feedback/${id}/update-status/`, { status, admin_notes: adminNotes }),
   deletePackagingFeedback: (id: number) => API.delete(`/admin/packaging-feedback/${id}/`),
+  
+  // Product Reviews
+  getReviews: (params?: any) => API.get('/admin/reviews/', { params }),
+  approveReview: (id: number) => API.post(`/admin/reviews/${id}/approve/`),
+  rejectReview: (id: number) => API.post(`/admin/reviews/${id}/reject/`),
+  deleteReview: (id: number) => API.delete(`/admin/reviews/${id}/delete/`),
+  deleteAllReviews: (status?: string) => API.post('/admin/reviews/delete-all/', { status }),
 };
 
 export default adminAPI;

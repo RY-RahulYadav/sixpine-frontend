@@ -93,7 +93,6 @@
   cursor: pointer;
   transition: color 0.3s;
    transition: transform 0.25s ease, color 0.25s ease;
-   
 }
 
 .footerLinks li:hover {

@@ -10,11 +10,11 @@ import {
   FaStarHalfAlt,
   FaRegStar,
   FaTrash,
-  // FaCheckCircle,
+  FaCheckCircle,
 } from "react-icons/fa";
 import { AiOutlineInfoCircle } from "react-icons/ai";
-import { BsTagFill } from "react-icons/bs";
 import ShareModal from "../ShareModal";
+import OfferInfoModal from "./OfferInfoModal";
 
 interface ProductDetailsProps {
   product: any;
@@ -29,6 +29,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<{ title: string; description: string } | null>(null);
 
   // Fetch active advertisements
   useEffect(() => {
@@ -95,6 +96,11 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
     setMainImage(img);
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    return false;
+  };
+
   // Get variant_id from URL params if present
   const [searchParams] = useSearchParams();
   const variantIdFromUrl = searchParams.get('variant') ? parseInt(searchParams.get('variant')!) : null;
@@ -102,27 +108,30 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   // Extract variant options from product.variants
   const variants = product?.variants || [];
   
-  // Get unique colors, sizes, patterns from variants
+  // Get unique colors, sizes, patterns, qualities from variants
   const availableColors = Array.from(new Set(variants.map((v: any) => v.color?.name || v.color_name).filter(Boolean)));
   const availableSizes = Array.from(new Set(variants.map((v: any) => v.size).filter(Boolean)));
   const availablePatterns = Array.from(new Set(variants.map((v: any) => v.pattern).filter(Boolean)));
+  const availableQualities = Array.from(new Set(variants.map((v: any) => v.quality).filter(Boolean)));
 
   // Fallback to available_colors if variants not available (backward compatibility)
   const colors = availableColors.length > 0 ? availableColors : 
     (product?.available_colors?.map((c: any) => c.color__name || c.name) || []);
   const sizes = availableSizes.length > 0 ? availableSizes : (product?.available_sizes || []);
   const patterns = availablePatterns.length > 0 ? availablePatterns : (product?.available_patterns || []);
+  const qualities = availableQualities.length > 0 ? availableQualities : (product?.available_qualities || []);
 
   // Auto-select variant from URL if provided
   const getInitialVariant = () => {
     if (variantIdFromUrl && variants.length > 0) {
       const variantFromUrl = variants.find((v: any) => v.id === variantIdFromUrl);
       if (variantFromUrl) {
-        return {
-          color: variantFromUrl.color?.name || '',
-          size: variantFromUrl.size || '',
-          pattern: variantFromUrl.pattern || ''
-        };
+      return {
+        color: variantFromUrl.color?.name || '',
+        size: variantFromUrl.size || '',
+        pattern: variantFromUrl.pattern || '',
+        quality: variantFromUrl.quality || ''
+      };
       }
     }
     // Default to first active variant
@@ -131,14 +140,16 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       return {
         color: firstActiveVariant.color?.name || colors[0] || "",
         size: firstActiveVariant.size || sizes[0] || "",
-        pattern: firstActiveVariant.pattern || patterns[0] || ""
+        pattern: firstActiveVariant.pattern || patterns[0] || "",
+        quality: firstActiveVariant.quality || qualities[0] || ""
       };
     }
     // Fallback to first available
     return {
       color: colors[0] || "",
       size: sizes[0] || "",
-      pattern: patterns[0] || ""
+      pattern: patterns[0] || "",
+      quality: qualities[0] || ""
     };
   };
 
@@ -148,6 +159,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const [selectedColor, setSelectedColor] = useState<string>(initialVariant.color);
   const [selectedSize, setSelectedSize] = useState<string>(initialVariant.size);
   const [selectedPattern, setSelectedPattern] = useState<string>(initialVariant.pattern);
+  const [selectedQuality, setSelectedQuality] = useState<string>(initialVariant.quality);
 
   // Find selected variant based on selections
   const findSelectedVariant = () => {
@@ -157,8 +169,9 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       const colorMatch = !selectedColor || (v.color?.name || v.color_name) === selectedColor;
       const sizeMatch = !selectedSize || v.size === selectedSize || (!v.size && !selectedSize);
       const patternMatch = !selectedPattern || v.pattern === selectedPattern || (!v.pattern && !selectedPattern);
+      const qualityMatch = !selectedQuality || v.quality === selectedQuality || (!v.quality && !selectedQuality);
       
-      return colorMatch && sizeMatch && patternMatch;
+      return colorMatch && sizeMatch && patternMatch && qualityMatch;
     }) || variants[0]; // Fallback to first variant if exact match not found
   };
 
@@ -305,7 +318,13 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
             <div className={styles.modalLayout}>
               {/* Large Image on Left */}
               <div className={styles.modalImageContainer}>
-                <img src={mainImage} alt="Zoomed" className={styles.zoomedImage} />
+                <img 
+                  src={mainImage} 
+                  alt="Zoomed" 
+                  className={styles.zoomedImage}
+                  onContextMenu={handleContextMenu}
+                  draggable={false}
+                />
               </div>
 
               {/* Thumbnails on Right */}
@@ -319,6 +338,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                       mainImage === img ? styles.modalThumbnailActive : ""
                     }`}
                     onClick={() => handleImageClick(img)}
+                    onContextMenu={handleContextMenu}
+                    draggable={false}
                   />
                 ))}
               </div>
@@ -346,6 +367,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               alt="Product"
               className={styles.mainImage}
               onClick={openImageModal}
+              onContextMenu={handleContextMenu}
+              draggable={false}
             />
           </div>
 
@@ -360,6 +383,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                   mainImage === img ? styles.activeThumb : ""
                 }`}
                 onClick={() => setMainImage(img)}
+                onContextMenu={handleContextMenu}
+                draggable={false}
               />
             ))}
           </div>
@@ -425,12 +450,24 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
             {/* Screen Offers from Product */}
             {product?.screen_offer && Array.isArray(product.screen_offer) && product.screen_offer.length > 0 && (
               <>
-                {product.screen_offer.map((offer: string, index: number) => (
-                  <li key={`screen-offer-${index}`}>
-                    <BsTagFill className={styles.greenIcon} />
-                    {offer}
-                  </li>
-                ))}
+                {product.screen_offer.map((offer: any, index: number) => {
+                  // Handle both string (backward compatibility) and object formats
+                  const offerTitle = typeof offer === 'string' ? offer : (offer.title || offer.text || 'Offer');
+                  const offerDescription = typeof offer === 'string' 
+                    ? 'No additional details available for this offer.' 
+                    : (offer.description || 'No additional details available for this offer.');
+                  
+                  return (
+                    <li key={`screen-offer-${index}`} className={styles.offerItem}>
+                      <FaCheckCircle className={styles.checkIcon} />
+                      <span className={styles.offerText}>{offerTitle}</span>
+                      <AiOutlineInfoCircle 
+                        className={styles.infoIconRight} 
+                        onClick={() => setSelectedOffer({ title: offerTitle, description: offerDescription })}
+                      />
+                    </li>
+                  );
+                })}
               </>
             )}
             
@@ -493,6 +530,20 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                     onClick={() => setSelectedPattern(pattern)}
                   >
                     {pattern}
+                  </button>
+                ))}
+              </div>
+            )}
+            {qualities.length > 0 && (
+              <div>
+                <strong>Quality: </strong>
+                {qualities.map((quality: string, index: number) => (
+                  <button
+                    key={`quality-${index}-${quality}`}
+                    className={selectedQuality === quality ? styles.active : ""}
+                    onClick={() => setSelectedQuality(quality)}
+                  >
+                    {quality}
                   </button>
                 ))}
               </div>
@@ -569,6 +620,27 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
           {/* CART SUMMARY */}
           <div className={styles.cartSummary}>
             <h3>CART SUMMARY</h3>
+            {/* Delivery Date */}
+            {product?.estimated_delivery_days && (
+              <div className={styles.deliveryInfo}>
+                <p className={styles.deliveryText}>
+                  FREE delivery {(() => {
+                    const deliveryDays = product.estimated_delivery_days || 4;
+                    const deliveryDate = new Date();
+                    deliveryDate.setDate(deliveryDate.getDate() + deliveryDays);
+                    
+                    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    
+                    const dayName = days[deliveryDate.getDay()];
+                    const day = deliveryDate.getDate();
+                    const monthName = months[deliveryDate.getMonth()];
+                    
+                    return `${dayName}, ${day} ${monthName}`;
+                  })()}.
+                </p>
+              </div>
+            )}
             <p>
               {cartQty} x Product Title - ₹{cartPrice.toLocaleString()}
             </p>
@@ -606,6 +678,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                 style={{
                   transition: 'opacity 0.5s ease-in-out',
                 }}
+                onContextMenu={handleContextMenu}
+                draggable={false}
               />
               <p>
                 <strong>
@@ -634,6 +708,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               <img
                 src="https://ochaka.vercel.app/images/products/fashion/product-1.jpg"
                 alt="Advertisement"
+                onContextMenu={handleContextMenu}
+                draggable={false}
               />
               <p>
                 <strong>Special Offer: 20% Off</strong>
@@ -650,6 +726,14 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       <ShareModal
         show={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
+      />
+
+      {/* Offer Info Modal */}
+      <OfferInfoModal
+        show={selectedOffer !== null}
+        onClose={() => setSelectedOffer(null)}
+        title={selectedOffer?.title || ''}
+        description={selectedOffer?.description || ''}
       />
     </div>
   );

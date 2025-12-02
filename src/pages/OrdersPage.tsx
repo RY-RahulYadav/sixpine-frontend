@@ -102,15 +102,15 @@ const OrdersPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `invoice_${orderId.slice(0, 8)}.pdf`;
+      link.download = `quotation_${orderId.slice(0, 8)}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      showSuccess('Invoice downloaded successfully');
+      showSuccess('Quotation downloaded successfully');
     } catch (error: any) {
-      showError(error.response?.data?.error || 'Failed to download invoice');
+      showError(error.response?.data?.error || 'Failed to download quotation');
     } finally {
       setDownloadingInvoice(null);
     }
@@ -632,7 +632,7 @@ const OrdersPage: React.FC = () => {
                             onClick={() => handleDownloadInvoice(order.order_id)}
                             disabled={downloadingInvoice === order.order_id}
                           >
-                            {downloadingInvoice === order.order_id ? 'Downloading...' : 'Invoice'}
+                            {downloadingInvoice === order.order_id ? 'Downloading...' : 'Quotation'}
                           </button>
                         </div>
                       </div>

@@ -149,15 +149,15 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `invoice_${order.order_id.slice(0, 8)}.pdf`;
+      link.download = `quotation_${order.order_id.slice(0, 8)}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      showSuccess('Invoice downloaded successfully');
+      showSuccess('Quotation downloaded successfully');
     } catch (error: any) {
-      showError(error.response?.data?.error || 'Failed to download invoice');
+      showError(error.response?.data?.error || 'Failed to download quotation');
     } finally {
       setDownloadingInvoice(false);
     }
@@ -442,14 +442,18 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
                           <strong>₹{formatAmount(order.shipping_cost || 0)}</strong>
                         </div>
                       )}
-                      <div className="d-flex justify-content-between mb-2">
-                        <span>Platform Fee:</span>
-                        <strong>₹{formatAmount(order.platform_fee || 0)}</strong>
-                      </div>
-                      <div className="d-flex justify-content-between mb-2">
-                        <span>Tax{order.tax_rate ? ` (${order.tax_rate}%)` : ''}:</span>
-                        <strong>₹{formatAmount(order.tax_amount)}</strong>
-                      </div>
+                      {(order.platform_fee || 0) > 0 && (
+                        <div className="d-flex justify-content-between mb-2">
+                          <span>Platform Fee:</span>
+                          <strong>₹{formatAmount(order.platform_fee || 0)}</strong>
+                        </div>
+                      )}
+                      {(order.tax_amount || 0) > 0 && (
+                        <div className="d-flex justify-content-between mb-2">
+                          <span>Tax{order.tax_rate ? ` (${order.tax_rate}%)` : ''}:</span>
+                          <strong>₹{formatAmount(order.tax_amount)}</strong>
+                        </div>
+                      )}
                       <hr />
                       <div className="d-flex justify-content-between">
                         <strong>Total Amount Paid:</strong>
@@ -603,7 +607,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
                   ) : (
                     <>
                       <i className="bi bi-download me-2"></i>
-                      Download Invoice
+                      Download Quotation
                     </>
                   )}
                 </button>

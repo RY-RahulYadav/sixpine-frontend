@@ -40,9 +40,13 @@
   display: flex;
   gap: 20px;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none; 
-  scroll-snap-type: x mandatory; 
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .craftedSlider::-webkit-scrollbar {

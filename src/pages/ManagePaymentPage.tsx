@@ -277,7 +277,11 @@ const ManagePaymentPage: React.FC = () => {
         {/* Product Suggestions */}
         {!loading && frequentlyViewedProducts.length > 0 && (
           <Productdetails_Slider1 
-            title="Buy with it"
+            title="Buy it with
+
+
+
+"
             products={frequentlyViewedProducts}
           />
         )}

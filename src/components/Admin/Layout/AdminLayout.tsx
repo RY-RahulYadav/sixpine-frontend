@@ -70,6 +70,7 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/media', icon: 'image', label: 'Media Library', section: 'management' },
     { path: '/admin/packaging-feedback', icon: 'feedback', label: 'Packaging Feedback', section: 'management' },
     { path: '/admin/coupons', icon: 'local_offer', label: 'Coupons', section: 'management' },
+    { path: '/admin/reviews', icon: 'rate_review', label: 'Product Reviews', section: 'management' },
     // Settings Section
     { path: '/admin/payment-charges', icon: 'payments', label: 'Payment Settings', section: 'settings' },
     { path: '/admin/filter-options', icon: 'tune', label: 'Filter Options', section: 'settings' },

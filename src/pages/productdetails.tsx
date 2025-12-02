@@ -228,10 +228,18 @@ const NewProductDetails: React.FC = () => {
       <div className="productdetails_container">
         <Productdetails product={product} />
         
-        {/* First Row - Buy with it */}
+        {/* First Row - Buy it with
+
+
+
+ */}
         {recommendations?.buy_with && recommendations.buy_with.length > 0 && (
           <Productdetails_Slider1 
-            title="Buy with it"
+            title="Buy it with
+
+
+
+"
             products={recommendations.buy_with}
           />
         )}

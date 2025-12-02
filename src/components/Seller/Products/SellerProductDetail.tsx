@@ -31,6 +31,7 @@ interface ProductVariant {
   };
   size: string;
   pattern: string;
+  quality: string;
   price: string | number;
   old_price: string | number | null;
   stock_quantity: number;
@@ -90,7 +91,8 @@ interface Product {
   weight: string;
   warranty: string;
   assembly_required: boolean;
-  screen_offer?: string[];
+  estimated_delivery_days?: number;
+  screen_offer?: (string | { title: string; description: string })[];
   user_guide?: string;
   care_instructions?: string;
   meta_title: string;
@@ -144,7 +146,8 @@ const SellerProductDetail: React.FC = () => {
     weight: string;
     warranty: string;
     assembly_required: boolean;
-    screen_offer: string[];
+    estimated_delivery_days: number;
+    screen_offer: { title: string; description: string }[];
     user_guide: string;
     care_instructions: string;
     meta_title: string;
@@ -165,6 +168,7 @@ const SellerProductDetail: React.FC = () => {
     weight: '',
     warranty: '',
     assembly_required: false,
+    estimated_delivery_days: 4,
     screen_offer: [],
     user_guide: '',
     care_instructions: '',
@@ -232,7 +236,14 @@ const SellerProductDetail: React.FC = () => {
             weight: productData.weight || '',
             warranty: productData.warranty || '',
             assembly_required: productData.assembly_required || false,
-            screen_offer: Array.isArray(productData.screen_offer) ? productData.screen_offer : (productData.screen_offer ? [productData.screen_offer] : []),
+            estimated_delivery_days: productData.estimated_delivery_days || 4,
+            screen_offer: Array.isArray(productData.screen_offer) 
+              ? productData.screen_offer.map((offer: any) => 
+                  typeof offer === 'string' 
+                    ? { title: offer, description: '' }
+                    : { title: offer.title || offer.text || '', description: offer.description || '' }
+                )
+              : [],
             user_guide: productData.user_guide || '',
             care_instructions: productData.care_instructions || '',
             meta_title: productData.meta_title || '',
@@ -345,6 +356,7 @@ const SellerProductDetail: React.FC = () => {
       color_id: defaultColorId,
       size: '',
       pattern: '',
+      quality: '',
       price: '',
       old_price: null,
       stock_quantity: 0,
@@ -528,6 +540,7 @@ const SellerProductDetail: React.FC = () => {
         weight: formData.weight,
         warranty: formData.warranty,
         assembly_required: formData.assembly_required,
+        estimated_delivery_days: formData.estimated_delivery_days,
         screen_offer: formData.screen_offer,
         user_guide: formData.user_guide,
         care_instructions: formData.care_instructions,
@@ -546,6 +559,7 @@ const SellerProductDetail: React.FC = () => {
             color_id: colorId,
             size: v.size || '',
             pattern: v.pattern || '',
+            quality: v.quality || '',
             title: v.title || '',
           price: v.price ? parseFloat(v.price.toString()) : null,
           old_price: v.old_price ? parseFloat(v.old_price.toString()) : null,
@@ -929,6 +943,19 @@ const SellerProductDetail: React.FC = () => {
                   className="tw-w-full"
                   />
                 </div>
+                <div className="form-group">
+                <label htmlFor="estimated_delivery_days">Estimated Delivery Days</label>
+                  <input
+                    type="number"
+                  id="estimated_delivery_days"
+                  name="estimated_delivery_days"
+                  value={formData.estimated_delivery_days}
+                    onChange={handleChange}
+                  placeholder="e.g., 4"
+                  min="1"
+                  className="tw-w-full"
+                  />
+                </div>
               <div className="form-group tw-flex tw-items-end">
                 <label className="tw-flex tw-items-center tw-gap-2">
                   <input
@@ -1077,6 +1104,17 @@ const SellerProductDetail: React.FC = () => {
                         value={variant.pattern}
                         onChange={(e) => handleVariantChange(variantIndex, 'pattern', e.target.value)}
                         placeholder="e.g., Classic, Modern"
+                              className="admin-input"
+                            />
+                          </div>
+                          
+                          <div className="admin-form-group">
+                      <label>Quality</label>
+                            <input
+                              type="text"
+                        value={variant.quality || ''}
+                        onChange={(e) => handleVariantChange(variantIndex, 'quality', e.target.value)}
+                        placeholder="e.g., Premium, Standard, Luxury"
                               className="admin-input"
                             />
                           </div>
@@ -1497,7 +1535,7 @@ const SellerProductDetail: React.FC = () => {
                   onClick={() => {
                     setFormData(prev => ({
                       ...prev,
-                      screen_offer: [...prev.screen_offer, '']
+                      screen_offer: [...prev.screen_offer, { title: '', description: '' }]
                     }));
                   }}
                 >
@@ -1508,22 +1546,36 @@ const SellerProductDetail: React.FC = () => {
               {activeDetailSection === 'screen_offer' && (
                 <div className="tw-p-5 tw-bg-white tw-space-y-3">
                   {formData.screen_offer.map((offer, index) => (
-                    <div key={index} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3 hover:tw-shadow-md tw-transition-shadow">
+                    <div key={index} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-space-y-3 hover:tw-shadow-md tw-transition-shadow">
                       <div className="tw-flex-1">
-                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Offer Text</label>
-                        <textarea
-                          value={offer}
+                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Offer Title</label>
+                        <input
+                          type="text"
+                          value={offer.title}
                           onChange={(e) => {
                             const updated = [...formData.screen_offer];
-                            updated[index] = e.target.value;
+                            updated[index] = { ...updated[index], title: e.target.value };
                             setFormData(prev => ({ ...prev, screen_offer: updated }));
                           }}
-                          placeholder="Enter screen offer text..."
-                          rows={2}
+                          placeholder="e.g., Free Delivery, 7 Days Replacement..."
+                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-purple-500 focus:tw-border-transparent tw-text-sm"
+                        />
+                      </div>
+                      <div className="tw-flex-1">
+                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Offer Description</label>
+                        <textarea
+                          value={offer.description}
+                          onChange={(e) => {
+                            const updated = [...formData.screen_offer];
+                            updated[index] = { ...updated[index], description: e.target.value };
+                            setFormData(prev => ({ ...prev, screen_offer: updated }));
+                          }}
+                          placeholder="Enter detailed description that will show in the info modal..."
+                          rows={3}
                           className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-purple-500 focus:tw-border-transparent tw-text-sm tw-resize-none"
                         />
                       </div>
-                      <div className="tw-flex tw-items-end">
+                      <div className="tw-flex tw-justify-end">
                         <button
                           type="button"
                           className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
@@ -1636,7 +1688,7 @@ const SellerProductDetail: React.FC = () => {
                   {(['buy_with', 'inspired_by', 'frequently_viewed', 'similar', 'recommended'] as const).map((type) => {
                     const typeRecommendations = recommendations.filter(r => r.recommendation_type === type);
                     const typeLabels = {
-                      buy_with: 'Buy with it',
+                      buy_with: 'Buy it with',
                       inspired_by: 'Inspired by browsing history',
                       frequently_viewed: 'Frequently viewed',
                       similar: 'Similar products',

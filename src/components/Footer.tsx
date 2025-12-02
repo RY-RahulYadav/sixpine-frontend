@@ -190,7 +190,7 @@ export default function Footer() {
             <li><Link to="/your-account"> Your Account </Link></li>
             <li> <Link to ="/recalls_product">Recalls & Product Safety Alert </Link> </li>
             <li> <Link to ="/purchaseProtection">100% Purchase Protection </Link></li>
-            <li> <Link to ="/your-app">Download  Sixpine App 📱</Link></li>
+            <li style={{whiteSpace: 'nowrap'}}><Link to ="/your-app">Download Sixpine App 📱</Link></li>
           
             <li><Link to ="/help-center">Help</Link></li>
           </ul>
