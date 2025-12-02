@@ -745,7 +745,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               key={`key-details-${selectedVariant?.id || selectedColor || selectedSize || selectedPattern || selectedQuality || 'default'}`}
             >
               <div className={styles.detailCard}>
-                <strong>Brand:</strong> {product?.brand || "Sixpine"}
+                <strong>Brand:&nbsp;</strong> {product?.brand || "Sixpine"}
               </div>
               {selectedVariant?.specifications && selectedVariant.specifications.length > 0 ? (
                 [...selectedVariant.specifications]
@@ -756,7 +756,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                       key={`variant-spec-${selectedVariant?.id || 'v'}-${spec.id || index}-${selectedColor || ''}-${selectedSize || ''}`} 
                       className={styles.detailCard}
                     >
-                      <strong>{spec.name}:</strong> {spec.value}
+                      <strong>{spec.name}:&nbsp;</strong> {spec.value}
                     </div>
                   ))
               ) : (
@@ -764,7 +764,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                 ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
                 ?.map((spec: any, index: number) => (
                     <div key={`product-spec-${spec.id || index}`} className={styles.detailCard}>
-                  <strong>{spec.name}:</strong> {spec.value}
+                  <strong>{spec.name}:&nbsp;</strong> {spec.value}
               </div>
                   ))
               )}
