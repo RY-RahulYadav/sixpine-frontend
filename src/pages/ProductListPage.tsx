@@ -1039,7 +1039,7 @@ const ProductListPage: React.FC = () => {
                                   style={{ flex: 1, minWidth: 0 }}
                                 >
                                   <h3 className="product-name">
-                                    {product.title}
+                                    {product.title.length > 100 ? product.title.substring(0, 90).trim() + '...' : product.title || ''}
                                   </h3>
                                 </Link>
                                 {/* Out of Stock Indicator - Right side of title */}
@@ -1090,7 +1090,9 @@ const ProductListPage: React.FC = () => {
                               )}
                               
                               <p className="product-description" style={{ whiteSpace: 'pre-line' }}>
-                                {product.short_description}
+                                {product.short_description && product.short_description.length > 100
+                                  ? product.short_description.substring(0, 200).trim() + '...'
+                                  : product.short_description}
                               </p>
                               
                               <div className="product-rating">

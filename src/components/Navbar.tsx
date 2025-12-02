@@ -295,9 +295,9 @@ const Navbar: React.FC = () => {
               src="/logo.png" 
               alt="Sixpine" 
               style={{ 
-                height: '60px', 
+                height: '50px', 
                 width: 'auto',
-                maxWidth: '300px',
+                maxWidth: '250px',
                 objectFit: 'contain'
               }} 
             />
