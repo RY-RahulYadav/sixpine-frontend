@@ -642,12 +642,6 @@ const SellerProductDetail: React.FC = () => {
             }))
           };
         }),
-        specifications: specifications.map(s => ({
-          name: s.name,
-          value: s.value,
-          sort_order: s.sort_order,
-          is_active: s.is_active !== false
-        })),
         features: features.map(f => ({
           feature: f.feature,
           sort_order: f.sort_order,
