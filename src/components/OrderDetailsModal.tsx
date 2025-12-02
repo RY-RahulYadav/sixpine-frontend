@@ -73,6 +73,7 @@ interface OrderDetails {
   created_at: string;
   updated_at: string;
   estimated_delivery?: string;
+  tracking_number?: string;
   shipping_address: Address;
   items: OrderItem[];
   status_history?: StatusHistory[];
@@ -317,6 +318,12 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
                       {order.estimated_delivery && (
                         <p className="mb-2">
                           <strong>Expected Delivery:</strong> {new Date(order.estimated_delivery).toLocaleDateString()}
+                        </p>
+                      )}
+                      {order.tracking_number && (
+                        <p className="mb-2">
+                          <strong>Tracking Number:</strong>{' '}
+                          <span className="badge bg-info text-dark">{order.tracking_number}</span>
                         </p>
                       )}
                     </div>

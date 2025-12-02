@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { productAPI } from '../services/api';
+import { productAPI, addressAPI } from '../services/api';
 
 interface SearchSuggestion {
   text: string;
@@ -19,7 +19,7 @@ interface Category {
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { state, openCartSidebar } = useApp();
+  const { state, openCartSidebar, logout } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,9 +27,14 @@ const Navbar: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [pincode, setPincode] = useState<string>('110001');
+  const [loadingPincode, setLoadingPincode] = useState<boolean>(false);
   const searchRef = useRef<HTMLFormElement>(null);
   const loginDropdownRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<number | null>(null);
+  const defaultAddressFoundRef = useRef<boolean>(false);
 
   // Fetch categories from backend
   useEffect(() => {
@@ -44,6 +49,130 @@ const Navbar: React.FC = () => {
     
     fetchCategories();
   }, []);
+
+  // Fetch pincode from default address or detect current location
+  useEffect(() => {
+    // Reset flag when authentication state changes
+    defaultAddressFoundRef.current = false;
+
+    const detectCurrentLocation = () => {
+      // Don't proceed if default address was already found
+      if (defaultAddressFoundRef.current) {
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        console.warn('Geolocation is not supported by this browser');
+        setLoadingPincode(false);
+        return;
+      }
+
+      setLoadingPincode(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          // Double check - don't update if default address was found
+          if (defaultAddressFoundRef.current) {
+            setLoadingPincode(false);
+            return;
+          }
+
+          try {
+            const { latitude, longitude } = position.coords;
+            // Use reverse geocoding API to get pincode
+            // Using a free reverse geocoding service
+            const response = await fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+            );
+            const data = await response.json();
+            
+            // Check again before updating
+            if (defaultAddressFoundRef.current) {
+              setLoadingPincode(false);
+              return;
+            }
+            
+            if (data.postcode) {
+              setPincode(data.postcode);
+            } else {
+              // Fallback: try another service
+              try {
+                const osmResponse = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                );
+                const osmData = await osmResponse.json();
+                
+                // Check again before updating
+                if (defaultAddressFoundRef.current) {
+                  setLoadingPincode(false);
+                  return;
+                }
+                
+                if (osmData.address && osmData.address.postcode) {
+                  setPincode(osmData.address.postcode);
+                }
+              } catch (err) {
+                console.error('Error with OSM geocoding:', err);
+              }
+            }
+          } catch (error) {
+            console.error('Error getting pincode from location:', error);
+          } finally {
+            setLoadingPincode(false);
+          }
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setLoadingPincode(false);
+          // Keep default pincode if location detection fails
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 300000 // Cache for 5 minutes
+        }
+      );
+    };
+
+    const fetchPincode = async () => {
+      // First, check if user is authenticated and has default address
+      if (state.isAuthenticated) {
+        try {
+          setLoadingPincode(true);
+          const response = await addressAPI.getAddresses();
+          const addressesData = Array.isArray(response.data) 
+            ? response.data 
+            : (response.data.results || response.data.data || []);
+          const addresses = Array.isArray(addressesData) ? addressesData : [];
+          
+          // Find default address first
+          const defaultAddress = addresses.find((addr: any) => addr.is_default);
+          
+          if (defaultAddress && defaultAddress.postal_code) {
+            // If default address exists, use its pincode and STOP - don't check current location
+            defaultAddressFoundRef.current = true; // Set flag to prevent location detection
+            setPincode(defaultAddress.postal_code);
+            setLoadingPincode(false);
+            return; // Exit early - do not proceed to location detection
+          }
+          
+          // Only reach here if no default address found
+          // Now check current location
+          setLoadingPincode(false); // Reset loading before location detection
+          detectCurrentLocation();
+        } catch (error) {
+          console.error('Error fetching addresses:', error);
+          // On error fetching addresses, try to detect current location
+          setLoadingPincode(false);
+          detectCurrentLocation();
+        }
+      } else {
+        // If not authenticated, check current location directly
+        detectCurrentLocation();
+      }
+    };
+
+    fetchPincode();
+  }, [state.isAuthenticated]);
 
   // Update search query when URL params change
   useEffect(() => {
@@ -62,6 +191,9 @@ const Navbar: React.FC = () => {
       }
       if (loginDropdownRef.current && !loginDropdownRef.current.contains(event.target as Node)) {
         setShowLoginDropdown(false);
+      }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setShowProfileDropdown(false);
       }
     };
 
@@ -157,11 +289,26 @@ const Navbar: React.FC = () => {
     <nav className="navbar navbar-expand-lg navbar-light">
       <div className="container-fluid d-flex flex-wrap align-items-center">
         {/* Logo + Pin Code */}
-        <div className="d-flex align-items-center me-2 me-lg-3 flex-shrink-0">
-          <Link className="navbar-brand text-light me-2 me-lg-3" to="/">Sixpine</Link>
+        <div className="d-flex align-items-center me-2 flex-shrink-0">
+          <Link className="navbar-brand me-2" to="/" style={{ display: 'flex', alignItems: 'center' }}>
+            <img 
+              src="/logo.png" 
+              alt="Sixpine" 
+              style={{ 
+                height: '60px', 
+                width: 'auto',
+                maxWidth: '300px',
+                objectFit: 'contain'
+              }} 
+            />
+          </Link>
           <div className="pin-code d-none d-lg-flex align-items-center border rounded px-2 py-1">
             <i className="bi bi-geo-alt-fill me-1 text-danger"></i>
-            <span>110001</span>
+            {loadingPincode ? (
+              <span style={{ fontSize: '0.85rem' }}>Loading...</span>
+            ) : (
+              <span>{pincode}</span>
+            )}
           </div>
         </div>
 
@@ -169,12 +316,61 @@ const Navbar: React.FC = () => {
         <ul className="navbar-nav align-items-center d-lg-none order-lg-2 mb-2 mb-lg-0 flex-shrink-0">
           <li className="nav-item">
             {state.isAuthenticated ? (
-              <Link className="nav-link text-light d-flex align-items-center" to="/your-account" style={{ padding: '0.5rem' }}>
-                <i className="bi bi-person"></i>
-                <span className="d-none d-sm-inline ms-1" style={{ fontSize: '0.85rem' }}>
-                  {state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username}
-                </span>
-              </Link>
+              <div className="position-relative" ref={profileDropdownRef}>
+                <button
+                  className="nav-link text-light d-flex align-items-center"
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  style={{ background: 'none', border: 'none', padding: '0.5rem' }}
+                >
+                  <i className="bi bi-person"></i>
+                  <span className="d-none d-sm-inline ms-1" style={{ fontSize: '0.85rem' }}>
+                    {state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username}
+                  </span>
+                  <i className="bi bi-chevron-down ms-1 d-none d-sm-inline" style={{ fontSize: '0.7rem', lineHeight: '1' }}></i>
+                </button>
+                {showProfileDropdown && (
+                  <div className="position-absolute bg-white border rounded shadow-sm mt-1" style={{ 
+                    zIndex: 1000, 
+                    top: '100%', 
+                    right: 0,
+                    minWidth: '200px',
+                    maxWidth: '90vw'
+                  }}>
+                    <Link
+                      to="/your-account"
+                      className="d-block px-3 py-2 text-dark text-decoration-none"
+                      onClick={() => setShowProfileDropdown(false)}
+                      style={{ fontSize: '0.9rem' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-person me-2"></i>
+                      Profile
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        setShowProfileDropdown(false);
+                        await logout();
+                        navigate('/');
+                      }}
+                      className="d-block w-100 text-start px-3 py-2 text-dark text-decoration-none border-top"
+                      style={{ 
+                        fontSize: '0.9rem',
+                        background: 'none',
+                        border: 'none',
+                        borderTop: '1px solid #dee2e6',
+                        width: '100%',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-box-arrow-right me-2"></i>
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="position-relative" ref={loginDropdownRef}>
                 <button
@@ -249,7 +445,7 @@ const Navbar: React.FC = () => {
             className="form-select category-select me-2 d-none d-sm-block"
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            style={{ flexShrink: 0 }}
+            style={{ flexShrink: 0, minWidth: '150px' }}
           >
             <option value="">All Categories</option>
             {categories.map((category) => (
@@ -307,9 +503,58 @@ const Navbar: React.FC = () => {
         <ul className="navbar-nav align-items-center d-none d-lg-flex order-lg-3 flex-shrink-0">
           <li className="nav-item mx-2">
             {state.isAuthenticated ? (
-              <Link className="nav-link text-light" to="/your-account">
-                <i className="bi bi-person"></i> {state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username}
-              </Link>
+              <div className="position-relative" ref={profileDropdownRef}>
+                <button
+                  className="nav-link text-light d-flex align-items-center"
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  style={{ background: 'none', border: 'none', padding: '0.5rem 0' }}
+                >
+                  <i className="bi bi-person me-1"></i>
+                  <span>{state.user?.first_name ? `${state.user.first_name} ${state.user.last_name}`.trim() : state.user?.username}</span>
+                  <i className="bi bi-chevron-down ms-1" style={{ fontSize: '0.7rem', lineHeight: '1' }}></i>
+                </button>
+                {showProfileDropdown && (
+                  <div className="position-absolute bg-white border rounded shadow-sm mt-1" style={{ 
+                    zIndex: 1000, 
+                    top: '100%', 
+                    right: 0,
+                    minWidth: '200px'
+                  }}>
+                    <Link
+                      to="/your-account"
+                      className="d-block px-3 py-2 text-dark text-decoration-none"
+                      onClick={() => setShowProfileDropdown(false)}
+                      style={{ fontSize: '0.9rem' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-person me-2"></i>
+                      Profile
+                    </Link>
+                    <button
+                      onClick={async () => {
+                        setShowProfileDropdown(false);
+                        await logout();
+                        navigate('/');
+                      }}
+                      className="d-block w-100 text-start px-3 py-2 text-dark text-decoration-none border-top"
+                      style={{ 
+                        fontSize: '0.9rem',
+                        background: 'none',
+                        border: 'none',
+                        borderTop: '1px solid #dee2e6',
+                        width: '100%',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <i className="bi bi-box-arrow-right me-2"></i>
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="position-relative" ref={loginDropdownRef}>
                 <button

@@ -58,6 +58,7 @@ interface Order {
   items_count: number;
   created_at: string;
   estimated_delivery?: string;
+  tracking_number?: string;
   shipping_address?: any;
   razorpay_order_id?: string;
   items?: OrderItem[];
@@ -736,6 +737,13 @@ const OrdersPage: React.FC = () => {
                                     order.status.charAt(0).toUpperCase() + order.status.slice(1)
                                   }
                                 </p>
+                                {order.tracking_number && (
+                                  <p className="delivery-text">
+                                    <i className="bi bi-box-seam me-2"></i>
+                                    <strong>Tracking Number:</strong>{' '}
+                                    <span className="badge bg-info text-dark">{order.tracking_number}</span>
+                                  </p>
+                                )}
                                 {order.estimated_delivery && (
                                   <p className="delivery-text">
                                     <i className="bi bi-truck me-2"></i>

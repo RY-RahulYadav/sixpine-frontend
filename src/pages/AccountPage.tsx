@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
 import Navbar from "../components/Navbar.jsx";  
 import Footer from "../components/Footer";
 import Account  from "../components/yourAccount";
@@ -21,8 +19,6 @@ interface Product {
 }
 
 const AccountPage: React.FC = () => {
-  const { logout } = useApp();
-  const navigate = useNavigate();
   const [frequentlyViewedProducts, setFrequentlyViewedProducts] = useState<Product[]>([]);
   const [inspiredProducts, setInspiredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,11 +85,6 @@ const AccountPage: React.FC = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
-
   return (
     <div>
       <Navbar />
@@ -102,9 +93,7 @@ const AccountPage: React.FC = () => {
         <CategoryTabs />
       </div>
           <div className="accountpage_container">
-      <Account logoutButton={
-        <button className="btn btn-outline-danger" onClick={handleLogout}>Logout</button>
-      } />
+      <Account />
         
         {/* First Row - Customers frequently viewed */}
         {!loading && frequentlyViewedProducts.length > 0 && (

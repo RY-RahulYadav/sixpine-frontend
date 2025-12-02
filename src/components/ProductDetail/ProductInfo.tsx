@@ -100,20 +100,12 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       <div className="price-section">
         <div className="d-flex align-items-baseline gap-2 mb-1">
           <h1 className="mb-0 fw-bold" style={{ fontSize: '2rem' }}>₹{currentPrice.toLocaleString()}</h1>
-          <span className="text-muted" style={{ fontSize: '0.9rem' }}>/month (3 months)</span>
         </div>
-        <p className="mb-2" style={{ fontSize: '0.85rem' }}>
-          with <strong>No Cost EMI</strong> on your ICICI Credit Card{' '}
-          <a href="#" className="text-primary text-decoration-none">
-            All EMI Plans <i className="bi bi-chevron-down"></i>
-          </a>
-        </p>
         {oldPrice && oldPrice > currentPrice && (
           <div className="d-flex align-items-center gap-2 mb-1">
             <span className="badge bg-danger fw-bold text-white" style={{ fontSize: '1rem', padding: '0.4rem 0.6rem' }}>
               -{product?.discount_percentage}%
             </span>
-            <h3 className="mb-0 fw-bold" style={{ fontSize: '1.5rem' }}>₹{currentPrice.toLocaleString()}</h3>
           </div>
         )}
         {oldPrice && oldPrice > currentPrice && (

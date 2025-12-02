@@ -114,7 +114,7 @@
     font-size: 0.9rem;
     color: var(--gary);
     height: 40px;
-    margin-left: 50px;
+    margin-left: 28px;
 }
 
 
@@ -288,8 +288,8 @@
 .navbar .search-box {
     flex: 1 1 auto;
     /* allow it to grow/shrink */
-    max-width: 600px;
-    /* optional, limit width */
+    max-width: 800px;
+    /* increased width for search bar */
     margin: 0 auto;
     /* center horizontally */
 }
@@ -390,8 +390,8 @@
         /* center in the container */
         left: 50%;
         transform: translateX(-50%);
-        max-width: 600px;
-        /* optional */
+        max-width: 800px;
+        /* increased width for search bar */
         width: 100%;
         display: flex;
     }

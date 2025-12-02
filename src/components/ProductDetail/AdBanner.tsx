@@ -22,11 +22,30 @@ const AdBanner: React.FC = () => {
     const fetchAdvertisements = async () => {
       try {
         const response = await advertisementAPI.getActiveAdvertisements();
-        if (response.data && response.data.results && response.data.results.length > 0) {
-          setAdvertisements(response.data.results);
+        console.log('AdBanner API Response:', response.data);
+        
+        // Handle different response structures
+        let ads = [];
+        if (response.data) {
+          if (Array.isArray(response.data)) {
+            ads = response.data;
+          } else if (response.data.results && Array.isArray(response.data.results)) {
+            ads = response.data.results;
+          } else if (response.data.data && Array.isArray(response.data.data)) {
+            ads = response.data.data;
+          }
+        }
+        
+        if (ads.length > 0) {
+          setAdvertisements(ads);
+          console.log('AdBanner advertisements loaded:', ads.length);
+        } else {
+          console.log('AdBanner: No advertisements found');
+          setAdvertisements([]);
         }
       } catch (error) {
         console.error('Error fetching advertisements:', error);
+        setAdvertisements([]);
       }
     };
 

@@ -56,6 +56,7 @@ import CheckoutPage from './pages/checkout';
 import ManagePaymentPage from './pages/ManagePaymentPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CartSidebar from './components/CartSidebar/CartSidebar';
+import UserLayout from './components/UserLayout';
 
 function AppContent() {
   const { state, closeCartSidebar } = useApp();
@@ -64,6 +65,7 @@ function AppContent() {
     <Router>
       <div className="app-wrapper">
         <CartSidebar isOpen={state.cartSidebarOpen} onClose={closeCartSidebar} />
+        <UserLayout>
         <Routes>
             {/* Public routes - accessible without login */}
             <Route path="/" element={<LandingPage />} />
@@ -140,6 +142,7 @@ function AppContent() {
             {/* 404 - Catch all unmatched routes */}
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </UserLayout>
       </div>
     </Router>
   );

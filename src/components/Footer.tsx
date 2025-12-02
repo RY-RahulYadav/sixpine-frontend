@@ -199,7 +199,20 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className={styles.bottomBar}>
-        <div className={styles.logo}>Sixpine Logo....</div>
+        <div className={styles.logo}>
+          <Link to="/">
+            <img 
+              src="/logo.png" 
+              alt="Sixpine" 
+              style={{ 
+                height: '60px', 
+                width: 'auto',
+                maxWidth: '300px',
+                objectFit: 'contain'
+              }} 
+            />
+          </Link>
+        </div>
         <div className={styles.languageSelector}>
           <select>
   <option>English</option>

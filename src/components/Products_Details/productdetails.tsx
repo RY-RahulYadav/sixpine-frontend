@@ -12,7 +12,7 @@ import {
   FaTrash,
   // FaCheckCircle,
 } from "react-icons/fa";
-// import { AiOutlineInfoCircle } from "react-icons/ai";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 import { BsTagFill } from "react-icons/bs";
 import ShareModal from "../ShareModal";
 
@@ -35,12 +35,31 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
     const fetchAdvertisements = async () => {
       try {
         const response = await advertisementAPI.getActiveAdvertisements();
-        if (response.data && response.data.results && response.data.results.length > 0) {
-          setAdvertisements(response.data.results);
+        console.log('Advertisement API Response:', response.data);
+        
+        // Handle different response structures
+        let ads = [];
+        if (response.data) {
+          if (Array.isArray(response.data)) {
+            ads = response.data;
+          } else if (response.data.results && Array.isArray(response.data.results)) {
+            ads = response.data.results;
+          } else if (response.data.data && Array.isArray(response.data.data)) {
+            ads = response.data.data;
+          }
+        }
+        
+        if (ads.length > 0) {
+          setAdvertisements(ads);
           setCurrentAdIndex(0);
+          console.log('Advertisements loaded:', ads.length);
+        } else {
+          console.log('No advertisements found');
+          setAdvertisements([]);
         }
       } catch (error) {
         console.error('Error fetching advertisements:', error);
+        setAdvertisements([]);
       }
     };
 
@@ -55,6 +74,9 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       }, 3000); // Change every 3 seconds
 
       return () => clearInterval(interval);
+    } else if (advertisements.length === 1) {
+      // Ensure index is 0 if only one ad
+      setCurrentAdIndex(0);
     }
   }, [advertisements.length]);
 
@@ -307,9 +329,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
       {/* Breadcrumb */}
       <div className={styles.breadcrumb}>
-        <a href="#">All</a>
-        <a href="#">New Arrivals</a>
-        <a href="#">{product?.category?.name || "Category"}</a>
+        <a href="/">Home</a>
+        <a href="/products">Product</a>
         <span>{product?.title || "Product Name"}</span>
       </div>
 
@@ -370,33 +391,32 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
           {/* Price */}
         <div className={styles.priceBox}>
-  {/* EMI Price */}
-  <p className={styles.emiPrice}>
-    ₹{Math.round((selectedVariant?.price || 0) / 3).toLocaleString()} <span>/month (3 months)</span>
-  </p>
-
-  {/* EMI Info */}
-  <p className={styles.total}>
-    with <b>No Cost EMI</b> on your ICICI Credit Card{" "}
-    <button className={styles.link}>
-      All EMI Plans <span className={styles.icon}>▼</span>
-    </button>
-  </p>
-
-  {/* Discount & Final Price */}
+  {/* Actual Price */}
   <div className={styles.priceRow}>
     {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
       <span className={styles.discountBadge}>-{Math.round(((selectedVariant.old_price - selectedVariant.price) / selectedVariant.old_price) * 100)}%</span>
     )}
-    <span className={styles.finalPrice}>₹{(selectedVariant?.price || 0).toLocaleString()}</span>
+    <p className={styles.emiPrice}>
+    ₹{(selectedVariant?.price || 0).toLocaleString()}
+  </p>
+  
+
   </div>
 
+  {/* Discount & Final Price */}
+ 
   {/* MRP */}
   {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
   <p className={styles.mrp}>
       M.R.P.: <span className={styles.strike}>₹{selectedVariant.old_price.toLocaleString()}</span>
   </p>
   )}
+  
+  {/* EMI Info Note */}
+  <div className={styles.emiInfoNote}>
+    <AiOutlineInfoCircle className={styles.infoIcon} />
+    <span>EMI option available after checkout</span>
+  </div>
 </div>
 
 
@@ -577,12 +597,12 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
           </div>
 
           {/* ADVERTISEMENT */}
-          {advertisements.length > 0 ? (
+          {advertisements.length > 0 && advertisements[currentAdIndex] ? (
             <div className={styles.specialOffer}>
               <img
                 key={currentAdIndex}
                 src={advertisements[currentAdIndex].image || "https://ochaka.vercel.app/images/products/fashion/product-1.jpg"}
-                alt={advertisements[currentAdIndex].title}
+                alt={advertisements[currentAdIndex].title || "Advertisement"}
                 style={{
                   transition: 'opacity 0.5s ease-in-out',
                 }}
@@ -591,13 +611,13 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                 <strong>
                   {advertisements[currentAdIndex].discount_percentage 
                     ? `Special Offer: ${advertisements[currentAdIndex].discount_percentage}% Off`
-                    : advertisements[currentAdIndex].title}
+                    : advertisements[currentAdIndex].title || 'Special Offer'}
                 </strong>
               </p>
               <button 
                 className={styles.buyNow} 
                 onClick={() => {
-                  if (advertisements[currentAdIndex].button_link) {
+                  if (advertisements[currentAdIndex]?.button_link) {
                     if (advertisements[currentAdIndex].button_link.startsWith('http')) {
                       window.open(advertisements[currentAdIndex].button_link, '_blank');
                     } else {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
+import { useNotification } from '../../../context/NotificationContext';
 
 interface OrderItem {
   id: number;
@@ -61,6 +62,8 @@ interface Order {
     phone: string;
   };
   notes: string | null;
+  tracking_number?: string;
+  estimated_delivery?: string;
   created_at: string;
   updated_at: string;
 }
@@ -69,10 +72,17 @@ const AdminOrderDetail: React.FC = () => {
   const api = useAdminAPI();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useNotification();
   
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [trackingNumber, setTrackingNumber] = useState<string>('');
+  const [updatingTracking, setUpdatingTracking] = useState<boolean>(false);
+  const [orderStatus, setOrderStatus] = useState<string>('');
+  const [paymentStatus, setPaymentStatus] = useState<string>('');
+  const [updatingStatus, setUpdatingStatus] = useState<boolean>(false);
+  const [updatingPaymentStatus, setUpdatingPaymentStatus] = useState<boolean>(false);
   
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -115,10 +125,15 @@ const AdminOrderDetail: React.FC = () => {
             postal_code: '',
             country: '',
             phone: ''
-          }
+          },
+          tracking_number: orderData.tracking_number || '',
+          estimated_delivery: orderData.estimated_delivery || ''
         };
         
         setOrder(normalizedOrder);
+        setTrackingNumber(orderData.tracking_number || '');
+        setOrderStatus((orderData.status || '').toLowerCase().trim());
+        setPaymentStatus((orderData.payment_status || '').toLowerCase().trim());
         
       } catch (err: any) {
         console.error('Error fetching order details:', err);
@@ -206,6 +221,72 @@ const AdminOrderDetail: React.FC = () => {
       case 'refunded': return '#ef4444';
       case 'partially_refunded': return '#f59e0b';
       default: return '#6b7280';
+    }
+  };
+
+  const handleUpdateTracking = async () => {
+    if (!id || !order) return;
+    
+    try {
+      setUpdatingTracking(true);
+      await api.updateOrderTracking(parseInt(id), trackingNumber, order.estimated_delivery);
+      
+      // Update local state
+      setOrder({
+        ...order,
+        tracking_number: trackingNumber
+      });
+      
+      showSuccess('Tracking number updated successfully');
+    } catch (err: any) {
+      console.error('Error updating tracking number:', err);
+      showError(err.response?.data?.error || 'Failed to update tracking number');
+    } finally {
+      setUpdatingTracking(false);
+    }
+  };
+
+  const handleUpdateOrderStatus = async () => {
+    if (!id || !order) return;
+    
+    try {
+      setUpdatingStatus(true);
+      await api.updateOrderStatus(parseInt(id), orderStatus);
+      
+      // Update local state
+      setOrder({
+        ...order,
+        status: orderStatus
+      });
+      
+      showSuccess('Order status updated successfully');
+    } catch (err: any) {
+      console.error('Error updating order status:', err);
+      showError(err.response?.data?.error || 'Failed to update order status');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleUpdatePaymentStatus = async () => {
+    if (!id || !order) return;
+    
+    try {
+      setUpdatingPaymentStatus(true);
+      await api.updatePaymentStatus(parseInt(id), paymentStatus);
+      
+      // Update local state
+      setOrder({
+        ...order,
+        payment_status: paymentStatus
+      });
+      
+      showSuccess('Payment status updated successfully');
+    } catch (err: any) {
+      console.error('Error updating payment status:', err);
+      showError(err.response?.data?.error || 'Failed to update payment status');
+    } finally {
+      setUpdatingPaymentStatus(false);
     }
   };
   
@@ -421,6 +502,135 @@ const AdminOrderDetail: React.FC = () => {
                   Payment Method
                 </label>
                 <span>{order?.payment_method || 'N/A'}</span>
+              </div>
+              <div className="info-item">
+                <label>
+                  <span className="material-symbols-outlined">shopping_bag</span>
+                  Order Status
+                </label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+                  <select
+                    value={orderStatus}
+                    onChange={(e) => setOrderStatus(e.target.value)}
+                    disabled={updatingStatus}
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      backgroundColor: 'white',
+                      cursor: updatingStatus ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="returned">Returned</option>
+                  </select>
+                  <button
+                    onClick={handleUpdateOrderStatus}
+                    disabled={updatingStatus || orderStatus === order?.status}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: orderStatus === order?.status ? '#ccc' : '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: (updatingStatus || orderStatus === order?.status) ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      opacity: (updatingStatus || orderStatus === order?.status) ? 0.6 : 1
+                    }}
+                  >
+                    {updatingStatus ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </div>
+              <div className="info-item">
+                <label>
+                  <span className="material-symbols-outlined">payment</span>
+                  Payment Status
+                </label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+                  <select
+                    value={paymentStatus}
+                    onChange={(e) => setPaymentStatus(e.target.value)}
+                    disabled={updatingPaymentStatus}
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      backgroundColor: 'white',
+                      cursor: updatingPaymentStatus ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="failed">Failed</option>
+                    <option value="refunded">Refunded</option>
+                  </select>
+                  <button
+                    onClick={handleUpdatePaymentStatus}
+                    disabled={updatingPaymentStatus || paymentStatus === order?.payment_status}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: paymentStatus === order?.payment_status ? '#ccc' : '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: (updatingPaymentStatus || paymentStatus === order?.payment_status) ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      opacity: (updatingPaymentStatus || paymentStatus === order?.payment_status) ? 0.6 : 1
+                    }}
+                  >
+                    {updatingPaymentStatus ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
+              </div>
+              <div className="info-item">
+                <label>
+                  <span className="material-symbols-outlined">local_shipping</span>
+                  Tracking Number
+                </label>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+                  <input
+                    type="text"
+                    value={trackingNumber}
+                    onChange={(e) => setTrackingNumber(e.target.value)}
+                    placeholder="Enter tracking number"
+                    style={{
+                      flex: 1,
+                      padding: '8px 12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  <button
+                    onClick={handleUpdateTracking}
+                    disabled={updatingTracking}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: updatingTracking ? 'not-allowed' : 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      opacity: updatingTracking ? 0.6 : 1
+                    }}
+                  >
+                    {updatingTracking ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

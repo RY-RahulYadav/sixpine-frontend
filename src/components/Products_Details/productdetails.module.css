@@ -398,7 +398,7 @@
 .brand {
   font-size: 14px;
   color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   cursor: pointer;
 }
 
@@ -424,8 +424,8 @@
     /* gap: 5px; */
     font-size: 16px;
     color: #ffa41c;
-    /* margin-bottom: -5px; */
     margin-top: 0;
+    margin-bottom: 6px;
     margin-left: -8px;
 }
 
@@ -440,7 +440,7 @@
 
 .priceBox {
   font-family: Arial, sans-serif;
-  margin: 10px 0;
+  margin: 6px 0 10px 0;
 }
 
 .emiPrice {
@@ -489,9 +489,10 @@
   color: #fff;
   font-size: 14px;
   font-weight: 600;
-  padding: 2px 6px;
+  padding: 3px 6px;
   border-radius: 2px;
   margin-right: 8px;
+  margin-top: -4px;
 }
 
 .finalPrice {
@@ -510,7 +511,21 @@
   color: #777;
 }
 
+.emiInfoNote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #555;
+  margin-left: -5px;
+}
 
+.infoIcon {
+  font-size: 16px;
+  color: #0066cc;
+  flex-shrink: 0;
+}
 
 /* Offers */
 .offersTitle {
@@ -560,9 +575,6 @@
 }
 
 /* Options */
-.options {
-  /* margin-bottom: 25px; */
-}
 
 .options > div {
   display: flex;          
@@ -580,9 +592,10 @@
 }
 
 .options button {
-  flex: 1;                 /* sab buttons equal width le lenge */
-  min-width: 50px;         /* chhoti screens me minimum width */
-  padding: 8px 10px;
+  flex: 0 1 auto;          /* buttons only take space needed for content */
+  width: auto;             /* fit content width */
+  min-width: auto;         /* no minimum width constraint */
+  padding: 8px 12px;       /* horizontal padding for spacing */
   border: 1px solid #d5d9d9;
   background: #fff;
   border-radius: 8px;
@@ -591,6 +604,7 @@
   color: #0f1111;
   transition: all 0.2s ease;
   text-align: center;
+  white-space: nowrap;     /* prevent text wrapping */
 }
 
 .options button:hover {
@@ -1269,11 +1283,13 @@
   }
 
   .options button {
-    flex: initial;
+    flex: 0 1 auto;
+    width: auto;
     min-width: auto;
     padding: 6px 10px;
     font-size: 13px;
     border-radius: 8px;
+    white-space: nowrap;
   }
 
   .keyDetailsGrid {
@@ -1500,9 +1516,13 @@
   }
 
   .options button {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: auto;
     padding: 5px 8px;
     font-size: 12px;
     border-radius: 8px;
+    white-space: nowrap;
   }
 
   .keyDetailsGrid {
@@ -1708,9 +1728,13 @@
   }
 
   .options button {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: auto;
     padding: 4px 6px;
     font-size: 11px;
     border-radius: 8px;
+    white-space: nowrap;
   }
 
   .cartSummary {
