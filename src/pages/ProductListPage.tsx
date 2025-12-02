@@ -1089,7 +1089,7 @@ const ProductListPage: React.FC = () => {
                                 </div>
                               )}
                               
-                              <p className="product-description">
+                              <p className="product-description" style={{ whiteSpace: 'pre-line' }}>
                                 {product.short_description}
                               </p>
                               

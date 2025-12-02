@@ -430,6 +430,9 @@
 }
 
 .product-description {
+  white-space: pre-line;
+  word-wrap: break-word;
+  line-height: 1.5;
   font-size: 0.875rem;
   color: #565959;
   margin: 8px 0;

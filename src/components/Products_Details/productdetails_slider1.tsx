@@ -299,7 +299,12 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
             }}
             style={{ cursor: hasNavigation ? 'pointer' : 'default' }}
           >
-            {p.desc}
+            {p.desc?.split('\n').map((line: string, idx: number, arr: string[]) => (
+              <React.Fragment key={idx}>
+                {line}
+                {idx < arr.length - 1 && <br />}
+              </React.Fragment>
+            ))}
           </p>
 
           <div className={styles.productRating}>

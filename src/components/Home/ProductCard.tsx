@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { wishlistAPI } from "../../services/api";
@@ -232,6 +232,18 @@ const ProductCard = ({
   const displayPrice = newPrice || price;
   const displayDesc = desc || subtitle || '';
 
+  // Format description to preserve line breaks
+  const formatDescription = (text: string) => {
+    if (!text) return '';
+    // Preserve line breaks by splitting and joining with <br />
+    return text.split('\n').map((line, index, array) => (
+      <React.Fragment key={index}>
+        {line}
+        {index < array.length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
+
   return (
     <div 
       className={styles.craftedProductCard}
@@ -257,7 +269,7 @@ const ProductCard = ({
         onClick={handleProductClick}
         style={{ cursor: productSlug ? 'pointer' : 'default' }}
       >
-        {displayDesc}
+        {formatDescription(displayDesc)}
       </p>
       
       <div className={styles.productRating}>
