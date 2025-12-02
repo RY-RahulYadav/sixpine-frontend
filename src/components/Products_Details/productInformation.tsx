@@ -6,6 +6,27 @@ interface ProductInformationProps {
 }
 
 const ProductInformation = ({ product }: ProductInformationProps) => {
+  // Function to format text with proper line breaks and paragraphs
+  const formatDescription = (text: string | undefined) => {
+    if (!text) return null;
+    
+    // Split by double line breaks to create paragraphs
+    const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
+    
+    if (paragraphs.length === 0) return null;
+    
+    return paragraphs.map((paragraph, index) => (
+      <p key={index} className={styles.descriptionParagraph}>
+        {paragraph.trim().split('\n').map((line, lineIndex, lines) => (
+          <span key={lineIndex}>
+            {line.trim()}
+            {lineIndex < lines.length - 1 && <br />}
+          </span>
+        ))}
+      </p>
+    ));
+  };
+
   return (
     <div id="product-info" className={styles.infocontainer}>
       <h2 className={styles.heading}>Product information</h2>
@@ -33,10 +54,12 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
           <div className={styles.cardHeader}>
             <Paintbrush size={16} /> <strong>Style</strong>
           </div>
-          <p>
-            {product?.long_description || product?.short_description || 
-             "Contemporary design with smooth edges and minimalist finish, perfect for modern interiors."}
-          </p>
+          <div className={styles.descriptionText}>
+            {formatDescription(product?.long_description || product?.short_description) || (
+              <p>Contemporary design with smooth edges and minimalist finish, perfect for modern interiors.</p>
+            )}
+          </div>
+         
         </div>
 
         {/* Right Column */}
@@ -106,10 +129,11 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
       {/* Product Description */}
       <div className={styles.description}>
         <h3>Product Description</h3>
-        <p>
-          {product?.long_description || product?.short_description || 
-           "Experience premium quality with our products, designed for modern living and professional use. Built with attention to detail and quality materials for long-lasting performance."}
-        </p>
+        <div className={styles.descriptionText}>
+          {formatDescription(product?.long_description || product?.short_description) || (
+            <p>Experience premium quality with our products, designed for modern living and professional use. Built with attention to detail and quality materials for long-lasting performance.</p>
+          )}
+        </div>
         
         {product?.features && product.features.length > 0 && (
           <ul>

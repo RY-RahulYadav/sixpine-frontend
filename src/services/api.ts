@@ -32,11 +32,23 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only logout on 401 if it's not a timeout error
+    // Timeout errors might cause 401 but shouldn't trigger logout
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Check if it's a timeout error (code will be 'ECONNABORTED' or message contains timeout)
+      const isTimeout = error.code === 'ECONNABORTED' || 
+                       error.message?.toLowerCase().includes('timeout') ||
+                       error.response?.data?.detail?.toLowerCase().includes('timeout');
+      
+      if (!isTimeout) {
+        // Token expired or invalid (not a timeout)
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        // Only redirect if not already on login page
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+      }
     }
     return Promise.reject(error);
   }

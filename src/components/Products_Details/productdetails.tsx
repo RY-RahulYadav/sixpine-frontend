@@ -299,6 +299,14 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
     }
   };
 
+  // Truncate product title for breadcrumb
+  const truncateTitle = (title: string, maxLength: number = 60): string => {
+    if (!title || title.length <= maxLength) {
+      return title;
+    }
+    return title.substring(0, maxLength).trim() + '...';
+  };
+
   return (
     <div className={styles.productPage}>
       {/* Image Modal - Fullscreen */}
@@ -352,7 +360,9 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       <div className={styles.breadcrumb}>
         <a href="/">Home</a>
         <a href="/products">Product</a>
-        <span>{product?.title || "Product Name"}</span>
+        <span title={product?.title || "Product Name"}>
+          {truncateTitle(product?.title || "Product Name", 60)}
+        </span>
       </div>
 
       <div className={styles.mainLayout}>

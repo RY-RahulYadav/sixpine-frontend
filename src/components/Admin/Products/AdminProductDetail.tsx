@@ -606,7 +606,16 @@ const AdminProductDetail: React.FC = () => {
     } catch (err: any) {
       console.error('Error saving product:', err);
       let errorMessage = 'Failed to save product';
-      if (err.response?.data) {
+      
+      // Check for timeout errors
+      const isTimeout = err.code === 'ECONNABORTED' || 
+                       err.message?.toLowerCase().includes('timeout') ||
+                       (err.response?.status === 408) ||
+                       (err.response?.status === 504);
+      
+      if (isTimeout) {
+        errorMessage = 'Request timed out. The product data is large and may take longer to process. Please try again or reduce the number of images/variants.';
+      } else if (err.response?.data) {
         if (typeof err.response.data === 'string') {
           errorMessage = err.response.data;
         } else if (err.response.data.detail) {
@@ -616,7 +625,10 @@ const AdminProductDetail: React.FC = () => {
         } else {
           errorMessage = JSON.stringify(err.response.data);
         }
+      } else if (err.message) {
+        errorMessage = err.message;
       }
+      
       setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
