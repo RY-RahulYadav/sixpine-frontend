@@ -161,8 +161,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const [selectedPattern, setSelectedPattern] = useState<string>(initialVariant.pattern);
   const [selectedQuality, setSelectedQuality] = useState<string>(initialVariant.quality);
 
-  // Get available options based on current selections (smart filtering)
-  // Show all variants, but filter based on selections to show compatible options
+  // Get ALL unique options from ALL variants (show everything, don't filter)
   const availableOptions = useMemo(() => {
     if (variants.length === 0) {
       return {
@@ -173,86 +172,60 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
       };
     }
 
-    // Always show all colors (all variants)
+    // Show ALL unique colors from ALL variants
     const allAvailableColors = Array.from(new Set(
       variants.map((v: any) => v.color?.name || v.color_name).filter(Boolean)
     ));
 
-    // For sizes, patterns, and qualities: filter based on current selections
-    let filteredVariants = variants;
-    
-    // If color is selected, filter by color
-    if (selectedColor) {
-      filteredVariants = filteredVariants.filter((v: any) => 
-        (v.color?.name || v.color_name) === selectedColor
-      );
-    }
-    
-    // Get sizes available in filtered variants
-    const availableSizes = Array.from(new Set(
-      filteredVariants.map((v: any) => v.size).filter(Boolean)
+    // Show ALL unique sizes from ALL variants
+    const allAvailableSizes = Array.from(new Set(
+      variants.map((v: any) => v.size).filter(Boolean)
     ));
-    
-    // Further filter by size if selected
-    if (selectedSize && filteredVariants.length > 0) {
-      filteredVariants = filteredVariants.filter((v: any) => 
-        v.size === selectedSize || (!v.size && !selectedSize)
-      );
-    }
-    
-    // Get patterns available in filtered variants
-    const availablePatterns = Array.from(new Set(
-      filteredVariants.map((v: any) => v.pattern).filter(Boolean)
+
+    // Show ALL unique patterns from ALL variants
+    const allAvailablePatterns = Array.from(new Set(
+      variants.map((v: any) => v.pattern).filter(Boolean)
     ));
-    
-    // Further filter by pattern if selected
-    if (selectedPattern && filteredVariants.length > 0) {
-      filteredVariants = filteredVariants.filter((v: any) => 
-        v.pattern === selectedPattern || (!v.pattern && !selectedPattern)
-      );
-    }
-    
-    // Get qualities available in filtered variants
-    const availableQualities = Array.from(new Set(
-      filteredVariants.map((v: any) => v.quality).filter(Boolean)
+
+    // Show ALL unique qualities from ALL variants
+    const allAvailableQualities = Array.from(new Set(
+      variants.map((v: any) => v.quality).filter(Boolean)
     ));
 
     return {
       colors: allAvailableColors.length > 0 ? allAvailableColors : colors,
-      sizes: availableSizes.length > 0 ? availableSizes : sizes,
-      patterns: availablePatterns.length > 0 ? availablePatterns : patterns,
-      qualities: availableQualities.length > 0 ? availableQualities : qualities
+      sizes: allAvailableSizes.length > 0 ? allAvailableSizes : sizes,
+      patterns: allAvailablePatterns.length > 0 ? allAvailablePatterns : patterns,
+      qualities: allAvailableQualities.length > 0 ? allAvailableQualities : qualities
     };
-  }, [selectedColor, selectedSize, selectedPattern, selectedQuality, variants, colors, sizes, patterns, qualities]);
+  }, [variants, colors, sizes, patterns, qualities]);
 
   // Auto-select compatible options when a selection changes
+  // When user selects a color, auto-select the first available size, pattern, and quality from that color's variants
   useEffect(() => {
     if (variants.length === 0) return;
+    if (!selectedColor) return;
 
-    // Find variants matching current color selection
-    let matchingVariants = variants;
+    // Find the first variant with the selected color
+    const firstMatchingVariant = variants.find((v: any) => 
+      (v.color?.name || v.color_name) === selectedColor
+    );
     
-    if (selectedColor) {
-      matchingVariants = matchingVariants.filter((v: any) => 
-        (v.color?.name || v.color_name) === selectedColor
-      );
-    }
-    
-    if (matchingVariants.length === 0) return;
-    
-    // Auto-select size if current selection is not available in filtered variants
-    const availableSizesInFiltered = Array.from(new Set(
-      matchingVariants.map((v: any) => v.size).filter((s: any): s is string => Boolean(s))
-    ));
-    if (selectedSize && !availableSizesInFiltered.includes(selectedSize)) {
-      const firstSize = availableSizesInFiltered[0];
-      if (firstSize && typeof firstSize === 'string') {
-        setSelectedSize(firstSize);
-      }
-    } else if (!selectedSize && availableSizesInFiltered.length > 0) {
-      const firstSize = availableSizesInFiltered[0];
-      if (firstSize && typeof firstSize === 'string') {
-        setSelectedSize(firstSize);
+    if (firstMatchingVariant) {
+      // Auto-select size if not already selected or if current selection doesn't match
+      if (!selectedSize && firstMatchingVariant.size) {
+        setSelectedSize(firstMatchingVariant.size);
+      } else if (selectedSize) {
+        // Check if selected size is available for this color
+        const colorVariants = variants.filter((v: any) => 
+          (v.color?.name || v.color_name) === selectedColor
+        );
+        const availableSizesForColor = Array.from(new Set(
+          colorVariants.map((v: any) => v.size).filter(Boolean)
+        ));
+        if (!availableSizesForColor.includes(selectedSize) && firstMatchingVariant.size) {
+          setSelectedSize(firstMatchingVariant.size);
+        }
       }
     }
   }, [selectedColor, variants]);
@@ -260,14 +233,11 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   // Auto-select pattern when color or size changes
   useEffect(() => {
     if (variants.length === 0) return;
+    if (!selectedColor) return;
 
-    let matchingVariants = variants;
-    
-    if (selectedColor) {
-      matchingVariants = matchingVariants.filter((v: any) => 
-        (v.color?.name || v.color_name) === selectedColor
-      );
-    }
+    let matchingVariants = variants.filter((v: any) => 
+      (v.color?.name || v.color_name) === selectedColor
+    );
     
     if (selectedSize) {
       matchingVariants = matchingVariants.filter((v: any) => 
@@ -277,18 +247,19 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
     
     if (matchingVariants.length === 0) return;
     
-    const availablePatternsInFiltered = Array.from(new Set(
-      matchingVariants.map((v: any) => v.pattern).filter((p: any): p is string => Boolean(p))
-    ));
-    if (selectedPattern && !availablePatternsInFiltered.includes(selectedPattern)) {
-      const firstPattern = availablePatternsInFiltered[0];
-      if (firstPattern && typeof firstPattern === 'string') {
-        setSelectedPattern(firstPattern);
-      }
-    } else if (!selectedPattern && availablePatternsInFiltered.length > 0) {
-      const firstPattern = availablePatternsInFiltered[0];
-      if (firstPattern && typeof firstPattern === 'string') {
-        setSelectedPattern(firstPattern);
+    // Auto-select pattern from first matching variant
+    const firstVariant = matchingVariants[0];
+    if (firstVariant && firstVariant.pattern) {
+      if (!selectedPattern) {
+        setSelectedPattern(firstVariant.pattern);
+      } else {
+        // Check if selected pattern is available
+        const availablePatterns = Array.from(new Set(
+          matchingVariants.map((v: any) => v.pattern).filter(Boolean)
+        ));
+        if (!availablePatterns.includes(selectedPattern) && firstVariant.pattern) {
+          setSelectedPattern(firstVariant.pattern);
+        }
       }
     }
   }, [selectedColor, selectedSize, variants]);
@@ -296,14 +267,11 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   // Auto-select quality when color, size, or pattern changes
   useEffect(() => {
     if (variants.length === 0) return;
+    if (!selectedColor) return;
 
-    let matchingVariants = variants;
-    
-    if (selectedColor) {
-      matchingVariants = matchingVariants.filter((v: any) => 
-        (v.color?.name || v.color_name) === selectedColor
-      );
-    }
+    let matchingVariants = variants.filter((v: any) => 
+      (v.color?.name || v.color_name) === selectedColor
+    );
     
     if (selectedSize) {
       matchingVariants = matchingVariants.filter((v: any) => 
@@ -319,37 +287,42 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
     
     if (matchingVariants.length === 0) return;
     
-    const availableQualitiesInFiltered = Array.from(new Set(
-      matchingVariants.map((v: any) => v.quality).filter((q: any): q is string => Boolean(q))
-    ));
-    if (selectedQuality && !availableQualitiesInFiltered.includes(selectedQuality)) {
-      const firstQuality = availableQualitiesInFiltered[0];
-      if (firstQuality && typeof firstQuality === 'string') {
-        setSelectedQuality(firstQuality);
-      }
-    } else if (!selectedQuality && availableQualitiesInFiltered.length > 0) {
-      const firstQuality = availableQualitiesInFiltered[0];
-      if (firstQuality && typeof firstQuality === 'string') {
-        setSelectedQuality(firstQuality);
+    // Auto-select quality from first matching variant
+    const firstVariant = matchingVariants[0];
+    if (firstVariant && firstVariant.quality) {
+      if (!selectedQuality) {
+        setSelectedQuality(firstVariant.quality);
+      } else {
+        // Check if selected quality is available
+        const availableQualities = Array.from(new Set(
+          matchingVariants.map((v: any) => v.quality).filter(Boolean)
+        ));
+        if (!availableQualities.includes(selectedQuality) && firstVariant.quality) {
+          setSelectedQuality(firstVariant.quality);
+        }
       }
     }
   }, [selectedColor, selectedSize, selectedPattern, variants]);
 
-  // Find selected variant based on selections
-  const findSelectedVariant = () => {
+  // Find selected variant based on selections - must match ALL selected criteria exactly
+  const findSelectedVariant = useMemo(() => {
     if (variants.length === 0) return null;
     
-    return variants.find((v: any) => {
+    // Find exact match for all selected criteria
+    const exactMatch = variants.find((v: any) => {
       const colorMatch = !selectedColor || (v.color?.name || v.color_name) === selectedColor;
       const sizeMatch = !selectedSize || v.size === selectedSize || (!v.size && !selectedSize);
       const patternMatch = !selectedPattern || v.pattern === selectedPattern || (!v.pattern && !selectedPattern);
       const qualityMatch = !selectedQuality || v.quality === selectedQuality || (!v.quality && !selectedQuality);
       
       return colorMatch && sizeMatch && patternMatch && qualityMatch;
-    }) || variants[0]; // Fallback to first variant if exact match not found
-  };
+    });
+    
+    // Return exact match or fallback to first variant
+    return exactMatch || variants[0];
+  }, [variants, selectedColor, selectedSize, selectedPattern, selectedQuality]);
 
-  const selectedVariant = findSelectedVariant();
+  const selectedVariant = findSelectedVariant;
   
   // Use variant price (required - variants are the actual products)
   const cartPrice = selectedVariant?.price || 0;
@@ -735,7 +708,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               </div>
             )}
             {selectedVariant && (
-              <div className={styles.variantInfo}>
+              <div className={styles.variantInfo} key={`stock-${selectedVariant.id || 'default'}`}>
                 <small className="text-muted">
                   {selectedVariant.stock_quantity > 0 
                     ? `${selectedVariant.stock_quantity} in stock`
@@ -767,7 +740,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
 
           <div className={styles.productDetailsContent}>
             <h3>Key Details</h3>
-            <div className={styles.keyDetailsGrid} key={`key-details-${selectedVariant?.id || 'default'}`}>
+            <div 
+              className={styles.keyDetailsGrid} 
+              key={`key-details-${selectedVariant?.id || selectedColor || selectedSize || selectedPattern || selectedQuality || 'default'}`}
+            >
               <div className={styles.detailCard}>
                 <strong>Brand:</strong> {product?.brand || "Sixpine"}
               </div>
@@ -776,17 +752,20 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                   .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
                   .filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
                   .map((spec: any, index: number) => (
-                    <div key={`variant-spec-${selectedVariant?.id}-${spec.id || index}`} className={styles.detailCard}>
+                    <div 
+                      key={`variant-spec-${selectedVariant?.id || 'v'}-${spec.id || index}-${selectedColor || ''}-${selectedSize || ''}`} 
+                      className={styles.detailCard}
+                    >
                       <strong>{spec.name}:</strong> {spec.value}
                     </div>
                   ))
               ) : (
                 product?.specifications
-                  ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
-                  ?.map((spec: any, index: number) => (
+                ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
+                ?.map((spec: any, index: number) => (
                     <div key={`product-spec-${spec.id || index}`} className={styles.detailCard}>
-                      <strong>{spec.name}:</strong> {spec.value}
-                    </div>
+                  <strong>{spec.name}:</strong> {spec.value}
+              </div>
                   ))
               )}
             </div>
