@@ -135,17 +135,11 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
           )}
         </div>
         
-        {product?.features && product.features.length > 0 && (
-          <ul>
-            {product.features.map((feature: any, index: number) => (
-              <li key={index}>{feature.feature}</li>
-            ))}
-          </ul>
-        )}
+        
 
         <p>
           <strong>What is in box:</strong> 
-          <br/>{product?.title || "Product"}, Assembly parts, User manual
+          <br/>{product?.what_in_box || `${product?.title || "Product"}, Assembly parts, User manual`}
         </p>
       </div>
     </div>

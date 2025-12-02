@@ -99,6 +99,7 @@ interface Product {
   style_description?: string;
   user_guide?: string;
   care_instructions?: string;
+  what_in_box?: string;
   meta_title: string;
   meta_description: string;
   is_featured: boolean;
@@ -139,7 +140,7 @@ const AdminProductDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'basic' | 'variants' | 'details' | 'seo'>('basic');
-  const [activeDetailSection, setActiveDetailSection] = useState<'features' | 'about_items' | 'screen_offer' | 'style_description' | 'user_guide' | 'care_instructions' | 'recommendations' | null>('features');
+  const [activeDetailSection, setActiveDetailSection] = useState<'features' | 'about_items' | 'screen_offer' | 'style_description' | 'user_guide' | 'care_instructions' | 'what_in_box' | 'recommendations' | null>('features');
   
   // Form data
   const [formData, setFormData] = useState<{
@@ -161,6 +162,7 @@ const AdminProductDetail: React.FC = () => {
     style_description: string;
     user_guide: string;
     care_instructions: string;
+    what_in_box: string;
     meta_title: string;
     meta_description: string;
     is_featured: boolean;
@@ -184,6 +186,7 @@ const AdminProductDetail: React.FC = () => {
     style_description: '',
     user_guide: '',
     care_instructions: '',
+    what_in_box: '',
     meta_title: '',
     meta_description: '',
     is_featured: false,
@@ -262,6 +265,7 @@ const AdminProductDetail: React.FC = () => {
             style_description: productData.style_description || '',
             user_guide: productData.user_guide || '',
             care_instructions: productData.care_instructions || '',
+            what_in_box: productData.what_in_box || '',
             meta_title: productData.meta_title || '',
             meta_description: productData.meta_description || '',
             is_featured: productData.is_featured || false,
@@ -590,6 +594,7 @@ const AdminProductDetail: React.FC = () => {
         style_description: formData.style_description,
         user_guide: formData.user_guide,
         care_instructions: formData.care_instructions,
+        what_in_box: formData.what_in_box,
         meta_title: formData.meta_title,
         meta_description: formData.meta_description,
         is_featured: formData.is_featured,
@@ -1842,6 +1847,44 @@ const AdminProductDetail: React.FC = () => {
                     placeholder="Enter care and maintenance instructions (e.g., Wipe with a dry soft cloth. Avoid water and harsh chemicals.)"
                     className="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-green-500 focus:tw-border-transparent tw-text-sm tw-resize-none"
                   />
+                </div>
+              )}
+            </div>
+
+            {/* What in Box Section */}
+            <div className="tw-border-2 tw-border-purple-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
+              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-purple-50 tw-via-purple-100 tw-to-purple-50">
+                <button
+                  type="button"
+                  className="btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform"
+                  onClick={() => setActiveDetailSection(activeDetailSection === 'what_in_box' ? null : 'what_in_box')}
+                >
+                  <span 
+                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-purple-600 tw-font-bold tw-text-2xl" 
+                    style={{ transform: activeDetailSection === 'what_in_box' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  >
+                    expand_more
+                  </span>
+                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">What is in Box</h3>
+                </button>
+              </div>
+              {activeDetailSection === 'what_in_box' && (
+                <div className="tw-p-5 tw-bg-white">
+                  <label htmlFor="what_in_box" className="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+                    What is included in the box
+                  </label>
+                  <textarea
+                    id="what_in_box"
+                    name="what_in_box"
+                    value={formData.what_in_box}
+                    onChange={(e) => setFormData({ ...formData, what_in_box: e.target.value })}
+                    rows={8}
+                    placeholder="Enter what is included in the box (e.g., Product name, Assembly parts, User manual, Warranty card, etc.)"
+                    className="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-purple-500 focus:tw-border-transparent tw-text-sm tw-resize-y"
+                  />
+                  <p className="tw-text-xs tw-text-gray-500 tw-mt-2">
+                    This description will appear in the "What is in box" section on the product detail page.
+                  </p>
                 </div>
               )}
             </div>
