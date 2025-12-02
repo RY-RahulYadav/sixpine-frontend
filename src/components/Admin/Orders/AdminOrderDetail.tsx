@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
+import adminAPI from '../../../services/adminApi';
 import { useNotification } from '../../../context/NotificationContext';
 
 interface OrderItem {
@@ -229,7 +230,7 @@ const AdminOrderDetail: React.FC = () => {
     
     try {
       setUpdatingTracking(true);
-      await api.updateOrderTracking(parseInt(id), trackingNumber, order.estimated_delivery);
+      await adminAPI.updateOrderTracking(parseInt(id), trackingNumber, order.estimated_delivery);
       
       // Update local state
       setOrder({

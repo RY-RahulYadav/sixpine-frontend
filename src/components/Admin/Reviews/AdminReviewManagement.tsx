@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import adminAPI from '../../../services/adminApi';
 import { useNotification } from '../../../context/NotificationContext';
-import { showToast } from '../utils/adminUtils';
 
 interface ProductReview {
   id: number;
