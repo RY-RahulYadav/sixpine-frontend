@@ -62,17 +62,6 @@ interface Feature {
   is_active?: boolean;
 }
 
-interface Offer {
-  id?: number;
-  title: string;
-  description: string;
-  discount_percentage: number | null;
-  discount_amount: string | number | null;
-  is_active: boolean;
-  valid_from: string | null;
-  valid_until: string | null;
-}
-
 interface Recommendation {
   id?: number;
   recommended_product_id: number;
@@ -628,25 +617,6 @@ const SellerProductDetail: React.FC = () => {
       user_guide: userGuide
     };
     setVariants(updated);
-  };
-  
-  // Feature management
-  const handleAddFeature = () => {
-    setFeatures([...features, {
-      feature: '',
-      sort_order: features.length,
-      is_active: true
-    }]);
-  };
-  
-  const handleRemoveFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index));
-  };
-  
-  const handleFeatureChange = (index: number, field: string, value: any) => {
-    const updated = [...features];
-    updated[index] = { ...updated[index], [field]: value };
-    setFeatures(updated);
   };
   
   // About Items management
