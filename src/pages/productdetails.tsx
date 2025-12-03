@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
 import Productdetails from "../components/Products_Details/productdetails";
@@ -20,12 +20,37 @@ import { useApp } from "../context/AppContext";
 
 const NewProductDetails: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const { state } = useApp();
   const [product, setProduct] = useState<any>(null);
   const [recommendations, setRecommendations] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAdBanner, setShowAdBanner] = useState(true);
+  
+  // State to track selected variant from ProductDetails component
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  
+  // Get initial variant from URL params or default to first variant
+  useEffect(() => {
+    if (!product?.variants || product.variants.length === 0) {
+      setSelectedVariant(null);
+      return;
+    }
+    
+    const variantIdFromUrl = searchParams.get('variant') ? parseInt(searchParams.get('variant')!) : null;
+    if (variantIdFromUrl) {
+      const variant = product.variants.find((v: any) => v.id === variantIdFromUrl);
+      if (variant) {
+        setSelectedVariant(variant);
+        return;
+      }
+    }
+    
+    // Fallback to first active variant
+    const firstVariant = product.variants.find((v: any) => v.is_active) || product.variants[0] || null;
+    setSelectedVariant(firstVariant);
+  }, [product, searchParams]);
 
   useEffect(() => {
     // Check user's advertising preference
@@ -226,7 +251,7 @@ const NewProductDetails: React.FC = () => {
              
     
       <div className="productdetails_container">
-        <Productdetails product={product} />
+        <Productdetails product={product} onVariantChange={setSelectedVariant} />
         
         {/* First Row - Buy it with
 
@@ -252,7 +277,7 @@ const NewProductDetails: React.FC = () => {
           />
         )}
          
-        <ProductInformation product={product} />
+        <ProductInformation product={product} selectedVariant={selectedVariant} />
         
         {/* Third Row - Frequently viewed */}
         {recommendations?.frequently_viewed && recommendations.frequently_viewed.length > 0 && (

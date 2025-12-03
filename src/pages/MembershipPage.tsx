@@ -25,7 +25,7 @@ const MembershipPage: React.FC = () => {
       discount: '×',
       freeAbove: 'Standard',
       priority: 'Standard (Email only)',
-      returnWindow: '7 Days Return (Excluding Exchange & Select Items)',
+      returnWindow: '10 Days Return (Excluding Exchange & Select Items)',
       benefits: 'Access to all products',
     },
     {

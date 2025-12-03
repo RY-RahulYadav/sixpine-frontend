@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
@@ -18,9 +18,10 @@ import OfferInfoModal from "./OfferInfoModal";
 
 interface ProductDetailsProps {
   product: any;
+  onVariantChange?: (variant: any) => void;
 }
 
-const ProductDetails = ({ product }: ProductDetailsProps) => {
+const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const navigate = useNavigate();
   const { addToCart, state } = useApp();
   const { showError, showWarning } = useNotification();
@@ -161,6 +162,11 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   const [selectedPattern, setSelectedPattern] = useState<string>(initialVariant.pattern);
   const [selectedQuality, setSelectedQuality] = useState<string>(initialVariant.quality);
 
+  // Track which attribute was changed by user (not by auto-selection)
+  const userChangedAttribute = useRef<'color' | 'size' | 'pattern' | 'quality' | null>(null);
+  const isAutoSelecting = useRef(false);
+  const prevSelections = useRef({ color: '', size: '', pattern: '', quality: '' });
+
   // Get ALL unique options from ALL variants (show everything, don't filter)
   const availableOptions = useMemo(() => {
     if (variants.length === 0) {
@@ -200,129 +206,143 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
     };
   }, [variants, colors, sizes, patterns, qualities]);
 
-  // Auto-select compatible options when a selection changes
-  // When user selects a color, auto-select the first available size, pattern, and quality from that color's variants
-  useEffect(() => {
-    if (variants.length === 0) return;
-    if (!selectedColor) return;
-
-    // Find the first variant with the selected color
-    const firstMatchingVariant = variants.find((v: any) => 
-      (v.color?.name || v.color_name) === selectedColor
-    );
+  // Smart auto-selection: When user selects one attribute, find first matching variant and auto-select all other attributes
+  const findFirstMatchingVariant = (attributeType: 'color' | 'size' | 'pattern' | 'quality', value: string) => {
+    if (variants.length === 0) return null;
     
-    if (firstMatchingVariant) {
-      // Auto-select size if not already selected or if current selection doesn't match
-      if (!selectedSize && firstMatchingVariant.size) {
-        setSelectedSize(firstMatchingVariant.size);
-      } else if (selectedSize) {
-        // Check if selected size is available for this color
-        const colorVariants = variants.filter((v: any) => 
-          (v.color?.name || v.color_name) === selectedColor
-        );
-        const availableSizesForColor = Array.from(new Set(
-          colorVariants.map((v: any) => v.size).filter(Boolean)
-        ));
-        if (!availableSizesForColor.includes(selectedSize) && firstMatchingVariant.size) {
-          setSelectedSize(firstMatchingVariant.size);
-        }
+    return variants.find((v: any) => {
+      if (attributeType === 'color') {
+        return (v.color?.name || v.color_name) === value;
+      } else if (attributeType === 'size') {
+        return v.size === value;
+      } else if (attributeType === 'pattern') {
+        return v.pattern === value;
+      } else if (attributeType === 'quality') {
+        return v.quality === value;
       }
-    }
-  }, [selectedColor, variants]);
+      return false;
+    });
+  };
 
-  // Auto-select pattern when color or size changes
+  // Auto-select all other attributes when one attribute is changed by user
   useEffect(() => {
-    if (variants.length === 0) return;
-    if (!selectedColor) return;
-
-    let matchingVariants = variants.filter((v: any) => 
-      (v.color?.name || v.color_name) === selectedColor
-    );
-    
-    if (selectedSize) {
-      matchingVariants = matchingVariants.filter((v: any) => 
-        v.size === selectedSize || (!v.size && !selectedSize)
-      );
+    if (variants.length === 0 || isAutoSelecting.current) {
+      // Update prevSelections even if we're auto-selecting
+      prevSelections.current = {
+        color: selectedColor,
+        size: selectedSize,
+        pattern: selectedPattern,
+        quality: selectedQuality
+      };
+      return;
     }
-    
-    if (matchingVariants.length === 0) return;
-    
-    // Auto-select pattern from first matching variant
-    const firstVariant = matchingVariants[0];
-    if (firstVariant && firstVariant.pattern) {
-      if (!selectedPattern) {
-        setSelectedPattern(firstVariant.pattern);
-      } else {
-        // Check if selected pattern is available
-        const availablePatterns = Array.from(new Set(
-          matchingVariants.map((v: any) => v.pattern).filter(Boolean)
-        ));
-        if (!availablePatterns.includes(selectedPattern) && firstVariant.pattern) {
-          setSelectedPattern(firstVariant.pattern);
-        }
+
+    // Check if this is a user-initiated change (not auto-selection)
+    if (!userChangedAttribute.current) {
+      // Update prevSelections
+      prevSelections.current = {
+        color: selectedColor,
+        size: selectedSize,
+        pattern: selectedPattern,
+        quality: selectedQuality
+      };
+      return;
+    }
+
+    const changedAttr = userChangedAttribute.current;
+    let matchingVariant = null;
+
+    // Find first variant matching the changed attribute
+    if (changedAttr === 'color' && selectedColor && selectedColor !== prevSelections.current.color) {
+      matchingVariant = findFirstMatchingVariant('color', selectedColor);
+    } else if (changedAttr === 'size' && selectedSize && selectedSize !== prevSelections.current.size) {
+      matchingVariant = findFirstMatchingVariant('size', selectedSize);
+    } else if (changedAttr === 'pattern' && selectedPattern && selectedPattern !== prevSelections.current.pattern) {
+      matchingVariant = findFirstMatchingVariant('pattern', selectedPattern);
+    } else if (changedAttr === 'quality' && selectedQuality && selectedQuality !== prevSelections.current.quality) {
+      matchingVariant = findFirstMatchingVariant('quality', selectedQuality);
+    }
+
+    if (matchingVariant) {
+      isAutoSelecting.current = true;
+      
+      // Auto-select all other attributes from this variant
+      const variantColor = matchingVariant.color?.name || matchingVariant.color_name || '';
+      const variantSize = matchingVariant.size || '';
+      const variantPattern = matchingVariant.pattern || '';
+      const variantQuality = matchingVariant.quality || '';
+      
+      if (variantColor && variantColor !== selectedColor && changedAttr !== 'color') {
+        setSelectedColor(variantColor);
       }
-    }
-  }, [selectedColor, selectedSize, variants]);
-
-  // Auto-select quality when color, size, or pattern changes
-  useEffect(() => {
-    if (variants.length === 0) return;
-    if (!selectedColor) return;
-
-    let matchingVariants = variants.filter((v: any) => 
-      (v.color?.name || v.color_name) === selectedColor
-    );
-    
-    if (selectedSize) {
-      matchingVariants = matchingVariants.filter((v: any) => 
-        v.size === selectedSize || (!v.size && !selectedSize)
-      );
-    }
-    
-    if (selectedPattern) {
-      matchingVariants = matchingVariants.filter((v: any) => 
-        v.pattern === selectedPattern || (!v.pattern && !selectedPattern)
-      );
-    }
-    
-    if (matchingVariants.length === 0) return;
-    
-    // Auto-select quality from first matching variant
-    const firstVariant = matchingVariants[0];
-    if (firstVariant && firstVariant.quality) {
-      if (!selectedQuality) {
-        setSelectedQuality(firstVariant.quality);
-      } else {
-        // Check if selected quality is available
-        const availableQualities = Array.from(new Set(
-          matchingVariants.map((v: any) => v.quality).filter(Boolean)
-        ));
-        if (!availableQualities.includes(selectedQuality) && firstVariant.quality) {
-          setSelectedQuality(firstVariant.quality);
-        }
+      if (variantSize && variantSize !== selectedSize && changedAttr !== 'size') {
+        setSelectedSize(variantSize);
       }
+      if (variantPattern && variantPattern !== selectedPattern && changedAttr !== 'pattern') {
+        setSelectedPattern(variantPattern);
+      }
+      if (variantQuality && variantQuality !== selectedQuality && changedAttr !== 'quality') {
+        setSelectedQuality(variantQuality);
+      }
+
+      // Update prevSelections and reset flags
+      prevSelections.current = {
+        color: variantColor || selectedColor,
+        size: variantSize || selectedSize,
+        pattern: variantPattern || selectedPattern,
+        quality: variantQuality || selectedQuality
+      };
+      
+      // Reset flag after state updates
+      setTimeout(() => {
+        isAutoSelecting.current = false;
+        userChangedAttribute.current = null;
+      }, 0);
+    } else {
+      // Update prevSelections even if no match found
+      prevSelections.current = {
+        color: selectedColor,
+        size: selectedSize,
+        pattern: selectedPattern,
+        quality: selectedQuality
+      };
+      userChangedAttribute.current = null;
     }
-  }, [selectedColor, selectedSize, selectedPattern, variants]);
+  }, [selectedColor, selectedSize, selectedPattern, selectedQuality, variants]);
 
   // Find selected variant based on selections - must match ALL selected criteria exactly
   const findSelectedVariant = useMemo(() => {
     if (variants.length === 0) return null;
     
     // Find exact match for all selected criteria
+    // Only return variant if ALL selected attributes match exactly
     const exactMatch = variants.find((v: any) => {
-      const colorMatch = !selectedColor || (v.color?.name || v.color_name) === selectedColor;
-      const sizeMatch = !selectedSize || v.size === selectedSize || (!v.size && !selectedSize);
-      const patternMatch = !selectedPattern || v.pattern === selectedPattern || (!v.pattern && !selectedPattern);
-      const qualityMatch = !selectedQuality || v.quality === selectedQuality || (!v.quality && !selectedQuality);
+      const variantColor = v.color?.name || v.color_name || '';
+      const variantSize = v.size || '';
+      const variantPattern = v.pattern || '';
+      const variantQuality = v.quality || '';
+      
+      // All selected attributes must match exactly
+      const colorMatch = !selectedColor || variantColor === selectedColor;
+      const sizeMatch = !selectedSize || variantSize === selectedSize;
+      const patternMatch = !selectedPattern || variantPattern === selectedPattern;
+      const qualityMatch = !selectedQuality || variantQuality === selectedQuality;
       
       return colorMatch && sizeMatch && patternMatch && qualityMatch;
     });
     
-    // Return exact match or fallback to first variant
-    return exactMatch || variants[0];
+    // Return exact match only - no fallback to prevent incorrect stock display
+    return exactMatch || null;
   }, [variants, selectedColor, selectedSize, selectedPattern, selectedQuality]);
 
   const selectedVariant = findSelectedVariant;
+  
+  // Notify parent component when selected variant changes
+  useEffect(() => {
+    if (onVariantChange && selectedVariant) {
+      onVariantChange(selectedVariant);
+    }
+  }, [selectedVariant, onVariantChange]);
   
   // Use variant price (required - variants are the actual products)
   const cartPrice = selectedVariant?.price || 0;
@@ -381,8 +401,8 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
   //     });
   //   } else if (type === "replacement") {
   //     setModalContent({
-  //       title: "7 Days Replacement",
-  //       text: "You can replace this product within 7 days of delivery if it has defects.",
+  //       title: "10 Days Replacement",
+  //       text: "You can replace this product within 10 days of delivery if it has defects.",
   //       buttons: ["Understood", "See Policy"],
   //     });
   //   } else if (type === "secure") {
@@ -658,7 +678,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                   <button
                     key={`color-${index}-${color}`}
                     className={selectedColor === color ? styles.active : ""}
-                    onClick={() => setSelectedColor(color)}
+                    onClick={() => {
+                      userChangedAttribute.current = 'color';
+                      setSelectedColor(color);
+                    }}
                   >
                     {color}
                   </button>
@@ -672,7 +695,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                   <button
                     key={`size-${index}-${size}`}
                     className={selectedSize === size ? styles.active : ""}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => {
+                      userChangedAttribute.current = 'size';
+                      setSelectedSize(size);
+                    }}
                   >
                     {size}
                   </button>
@@ -686,7 +712,10 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                   <button
                     key={`pattern-${index}-${pattern}`}
                     className={selectedPattern === pattern ? styles.active : ""}
-                    onClick={() => setSelectedPattern(pattern)}
+                    onClick={() => {
+                      userChangedAttribute.current = 'pattern';
+                      setSelectedPattern(pattern);
+                    }}
                   >
                     {pattern}
                   </button>
@@ -700,20 +729,27 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
                   <button
                     key={`quality-${index}-${quality}`}
                     className={selectedQuality === quality ? styles.active : ""}
-                    onClick={() => setSelectedQuality(quality)}
+                    onClick={() => {
+                      userChangedAttribute.current = 'quality';
+                      setSelectedQuality(quality);
+                    }}
                   >
                     {quality}
                   </button>
                 ))}
               </div>
             )}
-            {selectedVariant && (
+            {selectedVariant ? (
               <div className={styles.variantInfo} key={`stock-${selectedVariant.id || 'default'}`}>
                 <small className="text-muted">
                   {selectedVariant.stock_quantity > 0 
                     ? `${selectedVariant.stock_quantity} in stock`
                     : 'Out of stock'}
                 </small>
+              </div>
+            ) : (
+              <div className={styles.variantInfo}>
+                <small className="text-muted">Please select all options</small>
               </div>
             )}
           </div>
@@ -824,7 +860,7 @@ const ProductDetails = ({ product }: ProductDetailsProps) => {
               </div>
             )}
             <p>
-              {cartQty} x Product Title - ₹{cartPrice.toLocaleString()}
+              {cartQty} x {truncateTitle(selectedVariant?.title || product?.title || "Product", 16)} = ₹{cartPrice.toLocaleString()}
             </p>
             <p>
               <strong>Total: ₹{(cartPrice * cartQty).toLocaleString()}</strong>

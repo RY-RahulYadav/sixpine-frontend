@@ -3,9 +3,10 @@ import styles from "./productInformation.module.css";
 
 interface ProductInformationProps {
   product: any;
+  selectedVariant?: any;
 }
 
-const ProductInformation = ({ product }: ProductInformationProps) => {
+const ProductInformation = ({ product, selectedVariant }: ProductInformationProps) => {
   // Function to format text with proper line breaks and paragraphs
   const formatDescription = (text: string | undefined) => {
     if (!text) return null;
@@ -39,13 +40,20 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
           <div className={styles.cardHeader}>
             <strong>Brand:</strong> {product?.brand || "Sixpine"}
           </div>
-          {product?.dimensions && (
-            <div className={styles.cardHeader}>
-              <Ruler size={16} /> <strong>Measurement</strong>
-            </div>
+          <div className={styles.cardHeader}>
+            <Ruler size={16} /> <strong>Measurement</strong>
+          </div>
+          {/* Use variant measurement_specs if available, otherwise fallback to product dimensions/weight */}
+          {selectedVariant?.measurement_specs && Object.keys(selectedVariant.measurement_specs).length > 0 ? (
+            Object.entries(selectedVariant.measurement_specs).map(([key, value]: [string, any]) => (
+              <p key={key}><strong>{key}:</strong> {value}</p>
+            ))
+          ) : (
+            <>
+              {product?.dimensions && <p>Dimensions: {product.dimensions}</p>}
+              {product?.weight && <p>Weight: {product.weight}</p>}
+            </>
           )}
-          {product?.dimensions && <p>Dimensions: {product.dimensions}</p>}
-          {product?.weight && <p>Weight: {product.weight}</p>}
         </div>
 
         {/* Middle Column - First Row */}
@@ -55,8 +63,15 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
             <Paintbrush size={16} /> <strong>Style</strong>
           </div>
           <div className={styles.descriptionText}>
-            {formatDescription(product?.style_description || product?.long_description || product?.short_description) || (
-              <p>Contemporary design with smooth edges and minimalist finish, perfect for modern interiors.</p>
+            {/* Use variant style_specs if available, otherwise fallback to product style_description */}
+            {selectedVariant?.style_specs && Object.keys(selectedVariant.style_specs).length > 0 ? (
+              Object.entries(selectedVariant.style_specs).map(([key, value]: [string, any]) => (
+                <p key={key}><strong>{key}:</strong> {value}</p>
+              ))
+            ) : (
+              formatDescription(product?.style_description || product?.long_description || product?.short_description) || (
+                <p>Contemporary design with smooth edges and minimalist finish, perfect for modern interiors.</p>
+              )
             )}
           </div>
          
@@ -85,11 +100,20 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
           <div className={styles.cardHeader}>
             <Check size={16} /> <strong>Features</strong>
           </div>
-          <ul>
-            {product?.features?.map((feature: any, index: number) => (
-              <li key={index}>{feature.feature}</li>
-            ))}
-          </ul>
+          {/* Use variant features if available, otherwise fallback to product features */}
+          {selectedVariant?.features && Object.keys(selectedVariant.features).length > 0 ? (
+            <ul>
+              {Object.entries(selectedVariant.features).map(([key, value]: [string, any]) => (
+                <li key={key}><strong>{key}:</strong> {value}</li>
+              ))}
+            </ul>
+          ) : (
+            <ul>
+              {product?.features?.map((feature: any, index: number) => (
+                <li key={index}>{feature.feature}</li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Middle Column - Second Row */}
@@ -98,7 +122,12 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
           <div className={styles.cardHeader}>
             <Book size={16} /> <strong>User Guide</strong>
           </div>
-          {product?.user_guide ? (
+          {/* Use variant user_guide if available, otherwise fallback to product user_guide */}
+          {selectedVariant?.user_guide && Object.keys(selectedVariant.user_guide).length > 0 ? (
+            Object.entries(selectedVariant.user_guide).map(([key, value]: [string, any]) => (
+              <p key={key}><strong>{key}:</strong> {value}</p>
+            ))
+          ) : product?.user_guide ? (
             <p>{product.user_guide}</p>
           ) : (
             <p>
@@ -139,7 +168,8 @@ const ProductInformation = ({ product }: ProductInformationProps) => {
 
         <p>
           <strong>What is in box:</strong> 
-          <br/>{product?.what_in_box || `${product?.title || "Product"}, Assembly parts, User manual`}
+          <br/>
+          {product?.what_in_box || `${product?.title || "Product"}, Assembly parts, User manual`}
         </p>
       </div>
     </div>

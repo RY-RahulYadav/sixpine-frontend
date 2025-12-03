@@ -1252,7 +1252,7 @@ const ProductListPage: React.FC = () => {
                   <div className="info-card">
                     <i className="bi bi-arrow-return-left"></i>
                     <h6>Easy Returns</h6>
-                    <p>7-day return policy</p>
+                    <p>10-day return policy</p>
                   </div>
                 </div>
                 <div className="col-md-3 col-6">

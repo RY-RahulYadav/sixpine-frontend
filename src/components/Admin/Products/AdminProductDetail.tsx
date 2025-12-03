@@ -39,6 +39,10 @@ interface ProductVariant {
   image: string;
   images: VariantImage[];
   specifications?: Specification[];
+  measurement_specs?: { [key: string]: string };
+  style_specs?: { [key: string]: string };
+  features?: { [key: string]: string };
+  user_guide?: { [key: string]: string };
   is_active: boolean;
 }
 
@@ -278,7 +282,11 @@ const AdminProductDetail: React.FC = () => {
             const colorId = v.color_id || (v.color?.id ? parseInt(v.color.id) : null) || 0;
             return {
               ...v,
-              color_id: colorId
+              color_id: colorId,
+              measurement_specs: v.measurement_specs || {},
+              style_specs: v.style_specs || {},
+              features: v.features || {},
+              user_guide: v.user_guide || {}
             };
           });
           setVariants(normalizedVariants);
@@ -397,6 +405,10 @@ const AdminProductDetail: React.FC = () => {
       image: '',
       images: [],
       specifications: [],
+      measurement_specs: {},
+      style_specs: {},
+      features: {},
+      user_guide: {},
       is_active: true
     }]);
   };
@@ -476,6 +488,162 @@ const AdminProductDetail: React.FC = () => {
     updated[variantIndex] = {
       ...variant,
       specifications: specs
+    };
+    setVariants(updated);
+  };
+  
+  // Variant Measurement Specs management
+  const handleAddVariantMeasurementSpec = (variantIndex: number) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const newKey = `Key ${Object.keys(variant.measurement_specs || {}).length + 1}`;
+    updated[variantIndex] = {
+      ...variant,
+      measurement_specs: { ...(variant.measurement_specs || {}), [newKey]: '' }
+    };
+    setVariants(updated);
+  };
+  
+  const handleRemoveVariantMeasurementSpec = (variantIndex: number, key: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const specs = { ...(variant.measurement_specs || {}) };
+    delete specs[key];
+    updated[variantIndex] = {
+      ...variant,
+      measurement_specs: specs
+    };
+    setVariants(updated);
+  };
+  
+  const handleVariantMeasurementSpecChange = (variantIndex: number, oldKey: string, newKey: string, value: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const specs = { ...(variant.measurement_specs || {}) };
+    if (oldKey !== newKey) {
+      delete specs[oldKey];
+    }
+    specs[newKey] = value;
+    updated[variantIndex] = {
+      ...variant,
+      measurement_specs: specs
+    };
+    setVariants(updated);
+  };
+  
+  // Variant Style Specs management
+  const handleAddVariantStyleSpec = (variantIndex: number) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const newKey = `Key ${Object.keys(variant.style_specs || {}).length + 1}`;
+    updated[variantIndex] = {
+      ...variant,
+      style_specs: { ...(variant.style_specs || {}), [newKey]: '' }
+    };
+    setVariants(updated);
+  };
+  
+  const handleRemoveVariantStyleSpec = (variantIndex: number, key: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const specs = { ...(variant.style_specs || {}) };
+    delete specs[key];
+    updated[variantIndex] = {
+      ...variant,
+      style_specs: specs
+    };
+    setVariants(updated);
+  };
+  
+  const handleVariantStyleSpecChange = (variantIndex: number, oldKey: string, newKey: string, value: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const specs = { ...(variant.style_specs || {}) };
+    if (oldKey !== newKey) {
+      delete specs[oldKey];
+    }
+    specs[newKey] = value;
+    updated[variantIndex] = {
+      ...variant,
+      style_specs: specs
+    };
+    setVariants(updated);
+  };
+  
+  // Variant Features management (key-value pairs)
+  const handleAddVariantFeature = (variantIndex: number) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const newKey = `Key ${Object.keys(variant.features || {}).length + 1}`;
+    updated[variantIndex] = {
+      ...variant,
+      features: { ...(variant.features || {}), [newKey]: '' }
+    };
+    setVariants(updated);
+  };
+  
+  const handleRemoveVariantFeature = (variantIndex: number, key: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const features = { ...(variant.features || {}) };
+    delete features[key];
+    updated[variantIndex] = {
+      ...variant,
+      features: features
+    };
+    setVariants(updated);
+  };
+  
+  const handleVariantFeatureChange = (variantIndex: number, oldKey: string, newKey: string, value: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const features = { ...(variant.features || {}) };
+    if (oldKey !== newKey) {
+      delete features[oldKey];
+    }
+    features[newKey] = value;
+    updated[variantIndex] = {
+      ...variant,
+      features: features
+    };
+    setVariants(updated);
+  };
+  
+  // Variant User Guide management (key-value pairs)
+  const handleAddVariantUserGuide = (variantIndex: number) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const newKey = `Key ${Object.keys(variant.user_guide || {}).length + 1}`;
+    updated[variantIndex] = {
+      ...variant,
+      user_guide: { ...(variant.user_guide || {}), [newKey]: '' }
+    };
+    setVariants(updated);
+  };
+  
+  const handleRemoveVariantUserGuide = (variantIndex: number, key: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const userGuide = { ...(variant.user_guide || {}) };
+    delete userGuide[key];
+    updated[variantIndex] = {
+      ...variant,
+      user_guide: userGuide
+    };
+    setVariants(updated);
+  };
+  
+  const handleVariantUserGuideChange = (variantIndex: number, oldKey: string, newKey: string, value: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const userGuide = { ...(variant.user_guide || {}) };
+    if (oldKey !== newKey) {
+      delete userGuide[oldKey];
+    }
+    userGuide[newKey] = value;
+    updated[variantIndex] = {
+      ...variant,
+      user_guide: userGuide
     };
     setVariants(updated);
   };
@@ -629,7 +797,11 @@ const AdminProductDetail: React.FC = () => {
           value: s.value,
           sort_order: s.sort_order,
           is_active: s.is_active !== false
-            }))
+            })),
+            measurement_specs: v.measurement_specs || {},
+            style_specs: v.style_specs || {},
+            features: v.features || {},
+            user_guide: v.user_guide || {}
           };
         }),
         features: features.map(f => ({
@@ -1480,6 +1652,250 @@ const AdminProductDetail: React.FC = () => {
                     </div>
                   )}
                 </div>
+                
+                {/* Variant Measurement Specifications */}
+                <div className="tw-pt-6 tw-border-t tw-border-gray-200">
+                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+                    <h5 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-flex tw-items-center tw-gap-2">
+                      <span className="material-symbols-outlined tw-text-base">straighten</span>
+                      Measurement Specifications ({Object.keys(variant.measurement_specs || {}).length})
+                    </h5>
+                    <button 
+                      type="button" 
+                      className="admin-modern-btn secondary"
+                      onClick={() => handleAddVariantMeasurementSpec(variantIndex)}
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                      Add Measurement
+                    </button>
+                  </div>
+                  <div className="tw-space-y-3">
+                    {variant.measurement_specs && Object.entries(variant.measurement_specs).map(([key, value], specIndex) => (
+                      <div key={`variant-${variantIndex}-measurement-${specIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                        <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Key</label>
+                            <input
+                              type="text"
+                              value={key}
+                              onChange={(e) => handleVariantMeasurementSpecChange(variantIndex, key, e.target.value, value as string)}
+                              placeholder="e.g., Dimensions, Weight"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                            <input
+                              type="text"
+                              value={value as string}
+                              onChange={(e) => handleVariantMeasurementSpecChange(variantIndex, key, key, e.target.value)}
+                              placeholder="e.g., 64 x 29 x 36 inch, 45 kg"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="tw-flex tw-items-end">
+                          <button
+                            type="button"
+                            className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                            onClick={() => handleRemoveVariantMeasurementSpec(variantIndex, key)}
+                          >
+                            <span className="material-symbols-outlined tw-text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {(!variant.measurement_specs || Object.keys(variant.measurement_specs).length === 0) && (
+                      <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                        <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">straighten</span>
+                        <p className="tw-mt-2">No measurement specifications added for this variant</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Variant Style Specifications */}
+                <div className="tw-pt-6 tw-border-t tw-border-gray-200">
+                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+                    <h5 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-flex tw-items-center tw-gap-2">
+                      <span className="material-symbols-outlined tw-text-base">palette</span>
+                      Style Specifications ({Object.keys(variant.style_specs || {}).length})
+                    </h5>
+                    <button 
+                      type="button" 
+                      className="admin-modern-btn secondary"
+                      onClick={() => handleAddVariantStyleSpec(variantIndex)}
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                      Add Style
+                    </button>
+                  </div>
+                  <div className="tw-space-y-3">
+                    {variant.style_specs && Object.entries(variant.style_specs).map(([key, value], specIndex) => (
+                      <div key={`variant-${variantIndex}-style-${specIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                        <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Key</label>
+                            <input
+                              type="text"
+                              value={key}
+                              onChange={(e) => handleVariantStyleSpecChange(variantIndex, key, e.target.value, value as string)}
+                              placeholder="e.g., Colour, Style, Shape"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                            <input
+                              type="text"
+                              value={value as string}
+                              onChange={(e) => handleVariantStyleSpecChange(variantIndex, key, key, e.target.value)}
+                              placeholder="e.g., Grey & Beige, Modern, Rectangular"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="tw-flex tw-items-end">
+                          <button
+                            type="button"
+                            className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                            onClick={() => handleRemoveVariantStyleSpec(variantIndex, key)}
+                          >
+                            <span className="material-symbols-outlined tw-text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {(!variant.style_specs || Object.keys(variant.style_specs).length === 0) && (
+                      <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                        <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">palette</span>
+                        <p className="tw-mt-2">No style specifications added for this variant</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Variant Features */}
+                <div className="tw-pt-6 tw-border-t tw-border-gray-200">
+                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+                    <h5 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-flex tw-items-center tw-gap-2">
+                      <span className="material-symbols-outlined tw-text-base">star</span>
+                      Features ({Object.keys(variant.features || {}).length})
+                    </h5>
+                    <button 
+                      type="button" 
+                      className="admin-modern-btn secondary"
+                      onClick={() => handleAddVariantFeature(variantIndex)}
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                      Add Feature
+                    </button>
+                  </div>
+                  <div className="tw-space-y-3">
+                    {variant.features && Object.entries(variant.features).map(([key, value], specIndex) => (
+                      <div key={`variant-${variantIndex}-feature-${specIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                        <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Key</label>
+                            <input
+                              type="text"
+                              value={key}
+                              onChange={(e) => handleVariantFeatureChange(variantIndex, key, e.target.value, value as string)}
+                              placeholder="e.g., Weight Capacity Maximum, Seating Capacity"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                            <input
+                              type="text"
+                              value={value as string}
+                              onChange={(e) => handleVariantFeatureChange(variantIndex, key, key, e.target.value)}
+                              placeholder="e.g., 450 Kilograms, 3.0"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="tw-flex tw-items-end">
+                          <button
+                            type="button"
+                            className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                            onClick={() => handleRemoveVariantFeature(variantIndex, key)}
+                          >
+                            <span className="material-symbols-outlined tw-text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {(!variant.features || Object.keys(variant.features).length === 0) && (
+                      <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                        <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">star</span>
+                        <p className="tw-mt-2">No features added for this variant</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Variant User Guide */}
+                <div className="tw-pt-6 tw-border-t tw-border-gray-200">
+                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+                    <h5 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-flex tw-items-center tw-gap-2">
+                      <span className="material-symbols-outlined tw-text-base">menu_book</span>
+                      User Guide ({Object.keys(variant.user_guide || {}).length})
+                    </h5>
+                    <button 
+                      type="button" 
+                      className="admin-modern-btn secondary"
+                      onClick={() => handleAddVariantUserGuide(variantIndex)}
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                      Add User Guide
+                    </button>
+                  </div>
+                  <div className="tw-space-y-3">
+                    {variant.user_guide && Object.entries(variant.user_guide).map(([key, value], specIndex) => (
+                      <div key={`variant-${variantIndex}-userguide-${specIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                        <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Key</label>
+                            <input
+                              type="text"
+                              value={key}
+                              onChange={(e) => handleVariantUserGuideChange(variantIndex, key, e.target.value, value as string)}
+                              placeholder="e.g., Assembly, Care Instructions"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                            <input
+                              type="text"
+                              value={value as string}
+                              onChange={(e) => handleVariantUserGuideChange(variantIndex, key, key, e.target.value)}
+                              placeholder="e.g., Required, Wipe with dry cloth"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="tw-flex tw-items-end">
+                          <button
+                            type="button"
+                            className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                            onClick={() => handleRemoveVariantUserGuide(variantIndex, key)}
+                          >
+                            <span className="material-symbols-outlined tw-text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {(!variant.user_guide || Object.keys(variant.user_guide).length === 0) && (
+                      <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                        <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">menu_book</span>
+                        <p className="tw-mt-2">No user guide added for this variant</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 </div>
                     </div>
                   </div>
@@ -1521,74 +1937,31 @@ const AdminProductDetail: React.FC = () => {
               </div>
             </div>
             
-            {/* Features Section */}
-            <div className="tw-border-2 tw-border-blue-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-blue-50 tw-via-blue-100 tw-to-blue-50">
-                <button
-                  type="button"
-                  className="btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform"
-                  onClick={() => setActiveDetailSection(activeDetailSection === 'features' ? null : 'features')}
-                >
-                  <span 
-                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-blue-600 tw-font-bold tw-text-2xl" 
-                    style={{ transform: activeDetailSection === 'features' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  >
-                    expand_more
-                  </span>
-                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">Features</h3>
-                </button>
-                <button 
-                  type="button" 
-                  className="tw-flex tw-items-center tw-gap-2 tw-px-5 tw-py-2.5 tw-bg-blue-600 tw-text-white tw-rounded-lg hover:tw-bg-blue-700 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-sm hover:tw-scale-105 active:tw-scale-95"
-                  onClick={handleAddFeature}
-                >
-                  <span className="material-symbols-outlined tw-text-lg tw-font-bold">add</span>
-                  Add Features
-                </button>
-              </div>
-              {activeDetailSection === 'features' && (
-                <div className="tw-p-5 tw-bg-white tw-space-y-3">
-                  {features.map((feature, index) => (
-                    <div key={index} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3 hover:tw-shadow-md tw-transition-shadow">
-                      <div className="tw-flex-1">
-                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Feature Description</label>
-                        <textarea
-                          value={feature.feature}
-                          onChange={(e) => handleFeatureChange(index, 'feature', e.target.value)}
-                          placeholder="Describe the feature..."
-                          rows={2}
-                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm tw-resize-none"
-                        />
-                      </div>
-                      <div className="tw-w-24">
-                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Order</label>
-                        <input
-                          type="number"
-                          value={feature.sort_order}
-                          onChange={(e) => handleFeatureChange(index, 'sort_order', parseInt(e.target.value) || 0)}
-                          placeholder="0"
-                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
-                        />
-                      </div>
-                      <div className="tw-flex tw-items-end">
-                        <button
-                          type="button"
-                          className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
-                          onClick={() => handleRemoveFeature(index)}
-                        >
-                          <span className="material-symbols-outlined tw-text-lg">delete</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {features.length === 0 && (
-                    <div className="tw-text-center tw-py-8 tw-text-gray-400">
-                      <span className="material-symbols-outlined tw-text-5xl tw-mb-2">stars</span>
-                      <p className="tw-text-sm">No features added yet. Click "Add" to create one.</p>
-                    </div>
-                  )}
+            <div className="tw-bg-orange-50 tw-border tw-border-orange-200 tw-rounded-lg tw-p-4">
+              <div className="tw-flex tw-items-start tw-gap-3">
+                <span className="material-symbols-outlined tw-text-orange-600">info</span>
+                <div>
+                  <h4 className="tw-font-semibold tw-text-orange-900 tw-mb-1">Measurement, Style, Features & User Guide Moved to Variants</h4>
+                  <p className="tw-text-sm tw-text-orange-700">
+                    <strong>Measurement</strong>, <strong>Style</strong>, <strong>Features</strong>, and <strong>User Guide</strong> are now managed at the variant level. 
+                    Each variant can have its own measurement specifications, style specifications, features, and user guide. 
+                    Go to the <strong>Variants</strong> tab to add these details for each variant.
+                  </p>
                 </div>
-              )}
+              </div>
+            </div>
+            
+            {/* Features Section - Deprecated: Now in Variants */}
+            <div className="tw-border-2 tw-border-gray-200 tw-rounded-xl tw-overflow-hidden tw-opacity-60">
+              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-gray-50 tw-via-gray-100 tw-to-gray-50">
+                <div className="tw-flex tw-items-center tw-gap-3 tw-flex-1">
+                  <span className="material-symbols-outlined tw-text-gray-400">info</span>
+                  <div>
+                    <h3 className="tw-font-bold tw-text-lg tw-text-gray-600">Features (Deprecated)</h3>
+                    <p className="tw-text-xs tw-text-gray-500">Features are now managed in the <strong>Variants</strong> tab</p>
+                  </div>
+                </div>
+              </div>
             </div>
             
             {/* About This Item Section */}
@@ -1705,7 +2078,7 @@ const AdminProductDetail: React.FC = () => {
                             updated[index] = { ...updated[index], title: e.target.value };
                             setFormData(prev => ({ ...prev, screen_offer: updated }));
                           }}
-                          placeholder="e.g., Free Delivery, 7 Days Replacement..."
+                          placeholder="e.g., Free Delivery, 10 Days Replacement..."
                           className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-purple-500 focus:tw-border-transparent tw-text-sm"
                         />
                       </div>
@@ -1747,75 +2120,30 @@ const AdminProductDetail: React.FC = () => {
               )}
             </div>
 
-            {/* Style Description Section */}
-            <div className="tw-border-2 tw-border-indigo-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-indigo-50 tw-via-indigo-100 tw-to-indigo-50">
-                <button
-                  type="button"
-                  className="btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform"
-                  onClick={() => setActiveDetailSection(activeDetailSection === 'style_description' ? null : 'style_description')}
-                >
-                  <span 
-                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-indigo-600 tw-font-bold tw-text-2xl" 
-                    style={{ transform: activeDetailSection === 'style_description' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  >
-                    expand_more
-                  </span>
-                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">Style Description</h3>
-                </button>
-              </div>
-              {activeDetailSection === 'style_description' && (
-                <div className="tw-p-5 tw-bg-white">
-                  <label htmlFor="style_description" className="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
-                    Style Description (Large text area for detailed style information)
-                  </label>
-                  <textarea
-                    id="style_description"
-                    name="style_description"
-                    value={formData.style_description}
-                    onChange={(e) => setFormData({ ...formData, style_description: e.target.value })}
-                    rows={12}
-                    placeholder="Enter detailed style description here. This will be displayed in the Style section on the product detail page..."
-                    className="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500 focus:tw-border-transparent tw-text-sm tw-resize-y"
-                  />
-                  <p className="tw-text-xs tw-text-gray-500 tw-mt-2">
-                    This description will appear in the Style section on the product detail page. Use this for detailed narrative descriptions about the product's style, design, and aesthetic features.
-                  </p>
+            {/* Style Description Section - Deprecated: Now in Variants */}
+            <div className="tw-border-2 tw-border-gray-200 tw-rounded-xl tw-overflow-hidden tw-opacity-60">
+              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-gray-50 tw-via-gray-100 tw-to-gray-50">
+                <div className="tw-flex tw-items-center tw-gap-3 tw-flex-1">
+                  <span className="material-symbols-outlined tw-text-gray-400">info</span>
+                  <div>
+                    <h3 className="tw-font-bold tw-text-lg tw-text-gray-600">Style Description (Deprecated)</h3>
+                    <p className="tw-text-xs tw-text-gray-500">Style specifications are now managed in the <strong>Variants</strong> tab</p>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* User Guide Section */}
-            <div className="tw-border-2 tw-border-teal-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-teal-50 tw-via-teal-100 tw-to-teal-50">
-                <button
-                  type="button"
-                  className=" btndetailsbox tw-flex tw-items-center tw-gap-3 tw-flex-1 hover:tw-scale-[1.01] tw-transition-transform"
-                  onClick={() => setActiveDetailSection(activeDetailSection === 'user_guide' ? null : 'user_guide')}
-                >
-                  <span 
-                    className="material-symbols-outlined tw-transition-all tw-duration-300 tw-text-teal-600 tw-font-bold tw-text-2xl" 
-                    style={{ transform: activeDetailSection === 'user_guide' ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                  >
-                    expand_more
-                  </span>
-                  <h3 className="tw-font-bold tw-text-xl tw-text-gray-800 tw-tracking-tight">User Guide</h3>
-                </button>
-              </div>
-              {activeDetailSection === 'user_guide' && (
-                <div className="tw-p-5 tw-bg-white">
-                  <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-2">Instructions</label>
-                  <textarea
-                    id="user_guide"
-                    name="user_guide"
-                    value={formData.user_guide}
-                    onChange={handleChange}
-                    rows={5}
-                    placeholder="Enter user guide instructions..."
-                    className="tw-w-full tw-px-4 tw-py-3 tw-border tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-teal-500 focus:tw-border-transparent tw-text-sm tw-resize-none"
-                  />
+            {/* User Guide Section - Deprecated: Now in Variants */}
+            <div className="tw-border-2 tw-border-gray-200 tw-rounded-xl tw-overflow-hidden tw-opacity-60">
+              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-gray-50 tw-via-gray-100 tw-to-gray-50">
+                <div className="tw-flex tw-items-center tw-gap-3 tw-flex-1">
+                  <span className="material-symbols-outlined tw-text-gray-400">info</span>
+                  <div>
+                    <h3 className="tw-font-bold tw-text-lg tw-text-gray-600">User Guide (Deprecated)</h3>
+                    <p className="tw-text-xs tw-text-gray-500">User guide is now managed in the <strong>Variants</strong> tab</p>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Care Instructions Section */}

@@ -151,7 +151,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         </li>
         <li className="d-flex align-items-center">
           <span>
-            <i className="bi bi-check-circle-fill text-success me-2"></i> 7 Days Replacement
+            <i className="bi bi-check-circle-fill text-success me-2"></i> 10 Days Replacement
           </span>
         </li>
         <li className="d-flex align-items-center">
