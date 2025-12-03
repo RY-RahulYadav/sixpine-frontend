@@ -16,6 +16,8 @@ interface ReturnRequest {
   seller_approval: boolean | null;
   seller_notes: string;
   refund_amount: number | null;
+  order_item_price?: number | string;
+  order_item_quantity?: number;
   customer_name: string;
   customer_email: string;
   created_at: string;
@@ -300,7 +302,10 @@ const AdminSixpineReturnRequests: React.FC = () => {
                 </div>
                 {approvalStatus && (
                   <div className="mb-3">
-                    <strong>Refund Amount:</strong> ₹{(selectedRequest.refund_amount || 0).toLocaleString()}
+                    <strong>Refund Amount:</strong> ₹{(
+                      selectedRequest.refund_amount || 
+                      (Number(selectedRequest.order_item_price || 0) * Number(selectedRequest.order_item_quantity || 0))
+                    ).toLocaleString()}
                   </div>
                 )}
                 <div className="mb-3">

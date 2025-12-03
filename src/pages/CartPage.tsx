@@ -179,7 +179,30 @@ const CartPage: React.FC = () => {
                       />
                     </div>
                     <div className="col-md-4">
-                      <h6 className="mb-1">{item.product.title}</h6>
+                      <Link 
+                        to={`/products-details/${item.product.slug}`}
+                        style={{
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <h6 
+                          className="mb-1"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            lineHeight: '1.4',
+                            maxHeight: '2.8em',
+                            marginBottom: '0.5rem'
+                          }}
+                        >
+                          {item.product.title}
+                        </h6>
+                      </Link>
                       {item.variant && (
                         <div className="mb-1">
                           <small className="text-muted">
