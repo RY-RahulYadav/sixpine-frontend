@@ -52,8 +52,9 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/brand-analytics', icon: 'analytics', label: 'Brand Analytics', section: 'main' },
     { path: '/admin/orders', icon: 'shopping_cart', label: 'Brand Order Management', section: 'main' },
     // Sixpine Seller Section
-    { path: '/admin/sixpine-orders', icon: 'shopping_bag', label: 'Sixpine Orders', section: 'sixpine_seller' },
     { path: '/admin/sixpine-products', icon: 'inventory_2', label: 'Sixpine Products', section: 'sixpine_seller' },
+    { path: '/admin/sixpine-orders', icon: 'shopping_bag', label: 'Sixpine Orders', section: 'sixpine_seller' },
+    { path: '/admin/sixpine-returns', icon: 'assignment_return', label: 'Sixpine Returns', section: 'sixpine_seller' },
     // Page Management Section
     { path: '/admin/homepage', icon: 'home', label: 'Home Management', section: 'page_management' },
     { path: '/admin/faq-page', icon: 'help', label: 'FAQ Page Management', section: 'page_management' },

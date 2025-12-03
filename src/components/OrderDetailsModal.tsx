@@ -612,7 +612,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
                   )}
                 </button>
               )}
-              {order && order.status === 'pending' && (
+              {order && 
+               order.payment_method?.toUpperCase() === 'COD' && 
+               ['pending', 'confirmed', 'processing'].includes(order.status) && 
+               !['shipped', 'delivered', 'cancelled', 'returned'].includes(order.status) && (
                 <button
                   className="btn btn-danger"
                   onClick={handleCancelOrder}

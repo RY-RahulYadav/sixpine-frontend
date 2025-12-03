@@ -377,6 +377,14 @@ export const orderAPI = {
     approval: boolean;
     seller_notes?: string;
   }) => API.post(`/returns/${returnRequestId}/approve/`, data),
+  
+  // Admin Sixpine return requests
+  getAdminSixpineReturnRequests: () => API.get('/returns/admin/sixpine/'),
+  
+  approveAdminSixpineReturnRequest: (returnRequestId: number, data: {
+    approval: boolean;
+    seller_notes?: string;
+  }) => API.post(`/returns/admin/sixpine/${returnRequestId}/approve/`, data),
 };
 
 // Homepage Content API calls (public)

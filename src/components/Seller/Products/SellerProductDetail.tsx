@@ -1848,45 +1848,6 @@ const SellerProductDetail: React.FC = () => {
         {/* Details Tab */}
         {activeTab === 'details' && (
           <div className="admin-card tw-space-y-3">
-            <div className="tw-bg-blue-50 tw-border tw-border-blue-200 tw-rounded-lg tw-p-4">
-              <div className="tw-flex tw-items-start tw-gap-3">
-                <span className="material-symbols-outlined tw-text-blue-600">info</span>
-                <div>
-                  <h4 className="tw-font-semibold tw-text-blue-900 tw-mb-1">Specifications Moved to Variants</h4>
-                  <p className="tw-text-sm tw-text-blue-700">
-                    Specifications are now managed at the variant level. Each variant can have its own specifications. 
-                    Go to the <strong>Variants</strong> tab to add specifications for each variant.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="tw-bg-orange-50 tw-border tw-border-orange-200 tw-rounded-lg tw-p-4">
-              <div className="tw-flex tw-items-start tw-gap-3">
-                <span className="material-symbols-outlined tw-text-orange-600">info</span>
-                <div>
-                  <h4 className="tw-font-semibold tw-text-orange-900 tw-mb-1">Measurement, Style, Features & User Guide Moved to Variants</h4>
-                  <p className="tw-text-sm tw-text-orange-700">
-                    <strong>Measurement</strong>, <strong>Style</strong>, <strong>Features</strong>, and <strong>User Guide</strong> are now managed at the variant level. 
-                    Each variant can have its own measurement specifications, style specifications, features, and user guide. 
-                    Go to the <strong>Variants</strong> tab to add these details for each variant.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Features Section - Deprecated: Now in Variants */}
-            <div className="tw-border-2 tw-border-gray-200 tw-rounded-xl tw-overflow-hidden tw-opacity-60">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-gray-50 tw-via-gray-100 tw-to-gray-50">
-                <div className="tw-flex tw-items-center tw-gap-3 tw-flex-1">
-                  <span className="material-symbols-outlined tw-text-gray-400">info</span>
-                  <div>
-                    <h3 className="tw-font-bold tw-text-lg tw-text-gray-600">Features (Deprecated)</h3>
-                    <p className="tw-text-xs tw-text-gray-500">Features are now managed in the <strong>Variants</strong> tab</p>
-                  </div>
-                </div>
-              </div>
-            </div>
             
             {/* About This Item Section */}
             <div className="tw-border-2 tw-border-green-200 tw-rounded-xl tw-overflow-hidden tw-shadow-md hover:tw-shadow-lg tw-transition-all">
@@ -2042,32 +2003,6 @@ const SellerProductDetail: React.FC = () => {
                   )}
                 </div>
               )}
-            </div>
-
-            {/* Style Description Section - Deprecated: Now in Variants */}
-            <div className="tw-border-2 tw-border-gray-200 tw-rounded-xl tw-overflow-hidden tw-opacity-60">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-gray-50 tw-via-gray-100 tw-to-gray-50">
-                <div className="tw-flex tw-items-center tw-gap-3 tw-flex-1">
-                  <span className="material-symbols-outlined tw-text-gray-400">info</span>
-                  <div>
-                    <h3 className="tw-font-bold tw-text-lg tw-text-gray-600">Style Description (Deprecated)</h3>
-                    <p className="tw-text-xs tw-text-gray-500">Style specifications are now managed in the <strong>Variants</strong> tab</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* User Guide Section - Deprecated: Now in Variants */}
-            <div className="tw-border-2 tw-border-gray-200 tw-rounded-xl tw-overflow-hidden tw-opacity-60">
-              <div className="tw-w-full tw-flex tw-justify-between tw-items-center tw-px-6 tw-py-4 tw-bg-gradient-to-r tw-from-gray-50 tw-via-gray-100 tw-to-gray-50">
-                <div className="tw-flex tw-items-center tw-gap-3 tw-flex-1">
-                  <span className="material-symbols-outlined tw-text-gray-400">info</span>
-                  <div>
-                    <h3 className="tw-font-bold tw-text-lg tw-text-gray-600">User Guide (Deprecated)</h3>
-                    <p className="tw-text-xs tw-text-gray-500">User guide is now managed in the <strong>Variants</strong> tab</p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Care Instructions Section */}

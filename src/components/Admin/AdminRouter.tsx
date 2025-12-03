@@ -29,6 +29,7 @@ import AdminCommunication from './Communication/AdminCommunication';
 import AdminSixpineProducts from './Products/AdminSixpineProducts';
 import AdminProductDetail from './Products/AdminProductDetail';
 import AdminSixpineOrders from './Orders/AdminSixpineOrders';
+import AdminSixpineReturnRequests from './Returns/AdminSixpineReturnRequests';
 import AdminDataRequests from './DataRequests/AdminDataRequests';
 import AdminMedia from './Media/AdminMedia';
 import AdminPackagingFeedback from './PackagingFeedback/AdminPackagingFeedback';
@@ -77,6 +78,7 @@ const AdminRouter = () => {
         <Route path="orders" element={<AdminOrders />} />
         <Route path="orders/:id" element={<AdminOrderDetail />} />
         <Route path="sixpine-orders" element={<AdminSixpineOrders />} />
+        <Route path="sixpine-returns" element={<AdminSixpineReturnRequests />} />
         <Route path="sixpine-products" element={<AdminSixpineProducts />} />
         <Route path="products/:id" element={<AdminProductDetail />} />
         <Route path="products/new" element={<AdminProductDetail />} />
