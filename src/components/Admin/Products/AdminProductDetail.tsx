@@ -43,6 +43,7 @@ interface ProductVariant {
   style_specs?: { [key: string]: string };
   features?: { [key: string]: string };
   user_guide?: { [key: string]: string };
+  item_details?: { [key: string]: string };
   is_active: boolean;
   subcategories?: { id: number; name: string }[];
   subcategory_ids?: number[];
@@ -286,7 +287,8 @@ const AdminProductDetail: React.FC = () => {
               measurement_specs: v.measurement_specs || {},
               style_specs: v.style_specs || {},
               features: v.features || {},
-              user_guide: v.user_guide || {}
+              user_guide: v.user_guide || {},
+              item_details: v.item_details || {}
             };
           });
           setVariants(normalizedVariants);
@@ -412,6 +414,7 @@ const AdminProductDetail: React.FC = () => {
       style_specs: {},
       features: {},
       user_guide: {},
+      item_details: {},
       is_active: true
     }]);
   };
@@ -523,10 +526,16 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const specs = { ...(variant.measurement_specs || {}) };
-    if (oldKey !== newKey) {
+    // Only update if newKey is not empty and different from oldKey
+    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
+      // Preserve the value when renaming the key
+      const currentValue = specs[oldKey] || value;
       delete specs[oldKey];
+      specs[newKey] = currentValue;
+    } else if (oldKey === newKey) {
+      // Same key, just update the value
+      specs[newKey] = value;
     }
-    specs[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       measurement_specs: specs
@@ -562,10 +571,16 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const specs = { ...(variant.style_specs || {}) };
-    if (oldKey !== newKey) {
+    // Only update if newKey is not empty and different from oldKey
+    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
+      // Preserve the value when renaming the key
+      const currentValue = specs[oldKey] || value;
       delete specs[oldKey];
+      specs[newKey] = currentValue;
+    } else if (oldKey === newKey) {
+      // Same key, just update the value
+      specs[newKey] = value;
     }
-    specs[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       style_specs: specs
@@ -601,10 +616,16 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const features = { ...(variant.features || {}) };
-    if (oldKey !== newKey) {
+    // Only update if newKey is not empty and different from oldKey
+    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
+      // Preserve the value when renaming the key
+      const currentValue = features[oldKey] || value;
       delete features[oldKey];
+      features[newKey] = currentValue;
+    } else if (oldKey === newKey) {
+      // Same key, just update the value
+      features[newKey] = value;
     }
-    features[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       features: features
@@ -640,13 +661,64 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const userGuide = { ...(variant.user_guide || {}) };
-    if (oldKey !== newKey) {
+    // Only update if newKey is not empty and different from oldKey
+    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
+      // Preserve the value when renaming the key
+      const currentValue = userGuide[oldKey] || value;
       delete userGuide[oldKey];
+      userGuide[newKey] = currentValue;
+    } else if (oldKey === newKey) {
+      // Same key, just update the value
+      userGuide[newKey] = value;
     }
-    userGuide[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       user_guide: userGuide
+    };
+    setVariants(updated);
+  };
+  
+  // Variant Item Details management (key-value pairs)
+  const handleAddVariantItemDetail = (variantIndex: number) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const newKey = `Key ${Object.keys(variant.item_details || {}).length + 1}`;
+    updated[variantIndex] = {
+      ...variant,
+      item_details: { ...(variant.item_details || {}), [newKey]: '' }
+    };
+    setVariants(updated);
+  };
+  
+  const handleRemoveVariantItemDetail = (variantIndex: number, key: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const details = { ...(variant.item_details || {}) };
+    delete details[key];
+    updated[variantIndex] = {
+      ...variant,
+      item_details: details
+    };
+    setVariants(updated);
+  };
+  
+  const handleVariantItemDetailChange = (variantIndex: number, oldKey: string, newKey: string, value: string) => {
+    const updated = [...variants];
+    const variant = updated[variantIndex];
+    const details = { ...(variant.item_details || {}) };
+    // Only update if newKey is not empty and different from oldKey
+    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
+      // Preserve the value when renaming the key
+      const currentValue = details[oldKey] || value;
+      delete details[oldKey];
+      details[newKey] = currentValue;
+    } else if (oldKey === newKey) {
+      // Same key, just update the value
+      details[newKey] = value;
+    }
+    updated[variantIndex] = {
+      ...variant,
+      item_details: details
     };
     setVariants(updated);
   };
@@ -785,7 +857,8 @@ const AdminProductDetail: React.FC = () => {
             measurement_specs: v.measurement_specs || {},
             style_specs: v.style_specs || {},
             features: v.features || {},
-            user_guide: v.user_guide || {}
+            user_guide: v.user_guide || {},
+            item_details: v.item_details || {}
           };
         }),
         features: features.map(f => ({
@@ -1900,6 +1973,67 @@ const AdminProductDetail: React.FC = () => {
                       <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
                         <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">menu_book</span>
                         <p className="tw-mt-2">No user guide added for this variant</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Variant Item Details */}
+                <div className="tw-pt-6 tw-border-t tw-border-gray-200">
+                  <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+                    <h5 className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-flex tw-items-center tw-gap-2">
+                      <span className="material-symbols-outlined tw-text-base">inventory_2</span>
+                      Item Details ({Object.keys(variant.item_details || {}).length})
+                    </h5>
+                    <button 
+                      type="button" 
+                      className="admin-modern-btn secondary"
+                      onClick={() => handleAddVariantItemDetail(variantIndex)}
+                    >
+                      <span className="material-symbols-outlined">add</span>
+                      Add Item Detail
+                    </button>
+                  </div>
+                  <div className="tw-space-y-3">
+                    {variant.item_details && Object.entries(variant.item_details).map(([key, value], detailIndex) => (
+                      <div key={`variant-${variantIndex}-itemdetail-${detailIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                        <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Key</label>
+                            <input
+                              type="text"
+                              value={key}
+                              onChange={(e) => handleVariantItemDetailChange(variantIndex, key, e.target.value, value as string)}
+                              placeholder="e.g., Assembly, Warranty, Weight"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                            <input
+                              type="text"
+                              value={value as string}
+                              onChange={(e) => handleVariantItemDetailChange(variantIndex, key, key, e.target.value)}
+                              placeholder="e.g., Required, 1 Year, 45 kg"
+                              className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                            />
+                          </div>
+                        </div>
+                        <div className="tw-flex tw-items-end">
+                          <button
+                            type="button"
+                            className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                            onClick={() => handleRemoveVariantItemDetail(variantIndex, key)}
+                          >
+                            <span className="material-symbols-outlined tw-text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {(!variant.item_details || Object.keys(variant.item_details).length === 0) && (
+                      <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                        <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">inventory_2</span>
+                        <p className="tw-mt-2">No item details added for this variant</p>
                       </div>
                     )}
                   </div>

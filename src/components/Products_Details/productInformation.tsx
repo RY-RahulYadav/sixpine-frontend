@@ -84,12 +84,21 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
             <Package size={16} /> <strong>Item Details</strong>
           </div>
           <ul>
-            {product?.specifications?.map((spec: any, index: number) => (
-              <li key={index}>{spec.name}: {spec.value}</li>
-            ))}
-            {product?.warranty && <li>Warranty: {product.warranty}</li>}
-            {product?.assembly_required !== undefined && (
-              <li>Assembly: {product.assembly_required ? "Required" : "Not Required"}</li>
+            {/* Use variant item_details if available, otherwise fallback to product specifications */}
+            {selectedVariant?.item_details && Object.keys(selectedVariant.item_details).length > 0 ? (
+              Object.entries(selectedVariant.item_details).map(([key, value]: [string, any]) => (
+                <li key={key}><strong>{key}:</strong> {value}</li>
+              ))
+            ) : (
+              <>
+                {product?.specifications?.map((spec: any, index: number) => (
+                  <li key={index}>{spec.name}: {spec.value}</li>
+                ))}
+                {product?.warranty && <li>Warranty: {product.warranty}</li>}
+                {product?.assembly_required !== undefined && (
+                  <li>Assembly: {product.assembly_required ? "Required" : "Not Required"}</li>
+                )}
+              </>
             )}
           </ul>
         </div>
