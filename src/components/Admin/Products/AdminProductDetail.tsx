@@ -296,7 +296,7 @@ const AdminProductDetail: React.FC = () => {
               item_details: v.item_details || []
             };
           });
-          console.log('Normalized variants with subcategories:', normalizedVariants.map(v => ({ id: v.id, subcategory_ids: v.subcategory_ids })));
+          console.log('Normalized variants with subcategories:', normalizedVariants.map((v: ProductVariant) => ({ id: v.id, subcategory_ids: v.subcategory_ids })));
           setVariants(normalizedVariants);
           
           // Set last selected color from existing variants (use first variant's color if available)

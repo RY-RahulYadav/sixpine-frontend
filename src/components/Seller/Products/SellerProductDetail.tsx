@@ -272,7 +272,7 @@ const SellerProductDetail: React.FC = () => {
               item_details: v.item_details || []
             };
           });
-          console.log('Normalized variants with subcategories:', normalizedVariants.map(v => ({ id: v.id, subcategory_ids: v.subcategory_ids })));
+          console.log('Normalized variants with subcategories:', normalizedVariants.map((v: ProductVariant) => ({ id: v.id, subcategory_ids: v.subcategory_ids })));
           setVariants(normalizedVariants);
           
           // Set last selected color from existing variants (use first variant's color if available)
@@ -387,11 +387,11 @@ const SellerProductDetail: React.FC = () => {
       images: [],
       specifications: [],
       subcategory_ids: [],
-      measurement_specs: {},
-      style_specs: {},
-      features: {},
-      user_guide: {},
-      item_details: {},
+      measurement_specs: [],
+      style_specs: [],
+      features: [],
+      user_guide: [],
+      item_details: [],
       is_active: true
     }]);
   };
