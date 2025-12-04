@@ -209,7 +209,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   // Smart auto-selection: When user selects one attribute, find first matching variant and auto-select all other attributes
   const findFirstMatchingVariant = (attributeType: 'color' | 'size' | 'pattern' | 'quality', value: string) => {
     if (variants.length === 0) return null;
-    
+
     return variants.find((v: any) => {
       if (attributeType === 'color') {
         return (v.color?.name || v.color_name) === value;
@@ -219,7 +219,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         return v.pattern === value;
       } else if (attributeType === 'quality') {
         return v.quality === value;
-      }
+        }
       return false;
     });
   };
@@ -274,13 +274,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       
       if (variantColor && variantColor !== selectedColor && changedAttr !== 'color') {
         setSelectedColor(variantColor);
-      }
+    }
       if (variantSize && variantSize !== selectedSize && changedAttr !== 'size') {
         setSelectedSize(variantSize);
       }
       if (variantPattern && variantPattern !== selectedPattern && changedAttr !== 'pattern') {
         setSelectedPattern(variantPattern);
-      }
+    }
       if (variantQuality && variantQuality !== selectedQuality && changedAttr !== 'quality') {
         setSelectedQuality(variantQuality);
       }
@@ -298,7 +298,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         isAutoSelecting.current = false;
         userChangedAttribute.current = null;
       }, 0);
-    } else {
+      } else {
       // Update prevSelections even if no match found
       prevSelections.current = {
         color: selectedColor,

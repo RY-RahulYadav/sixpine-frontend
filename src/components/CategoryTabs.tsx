@@ -1,10 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 const CategoryTabs: React.FC = () => {
   const [activeMobileDropdown, setActiveMobileDropdown] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Helper function to convert category/subcategory names to slugs
+  const nameToSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/&/g, 'and')
+      .replace(/[^a-z0-9-]/g, '');
+  };
+
+  // Helper function to create product link with category and subcategory
+  const createProductLink = (categoryName: string, subcategoryName?: string): string => {
+    const categorySlug = nameToSlug(categoryName);
+    if (subcategoryName) {
+      const subcategorySlug = nameToSlug(subcategoryName);
+      return `/products?category=${categorySlug}&subcategory=${subcategorySlug}`;
+    }
+    return `/products?category=${categorySlug}`;
+  };
+
+  // Helper function to handle category link clicks
+  const handleCategoryClick = (e: React.MouseEvent<HTMLAnchorElement>, categoryName: string, subcategoryName?: string) => {
+    // If already on products page, use navigate to ensure proper URL update
+    if (location.pathname === '/products') {
+      e.preventDefault();
+      const link = createProductLink(categoryName, subcategoryName);
+      navigate(link, { replace: false });
+    }
+    // Otherwise, let Link handle it normally
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -180,7 +212,10 @@ const CategoryTabs: React.FC = () => {
                   <ul className="mega-menu-list">
                     {category.items.map((item, itemIdx) => (
                       <li key={itemIdx}>
-                        <Link to={`/products?search=${encodeURIComponent(item)}`}>
+                        <Link 
+                          to={createProductLink(category.title, item)}
+                          onClick={(e) => handleCategoryClick(e, category.title, item)}
+                        >
                           {item}
                         </Link>
                       </li>
@@ -194,7 +229,13 @@ const CategoryTabs: React.FC = () => {
 
         {/* Sofa & Couches as Mega Menu (same style as All) */}
         <li className="nav-item dropdown">
-          <Link className="nav-link" to="/products?search=Sofa">Sofa & Couches</Link>
+          <Link 
+            className="nav-link" 
+            to={createProductLink('Sofa & Couches')}
+            onClick={(e) => handleCategoryClick(e, 'Sofa & Couches')}
+          >
+            Sofa & Couches
+          </Link>
           <div className="dropdown-menu mega-menu">
             <div className="mega-menu-grid">
               {sofaCouchesMega.map((col, idx) => (
@@ -203,7 +244,10 @@ const CategoryTabs: React.FC = () => {
                   <ul className="mega-menu-list">
                     {col.items.map((item, itemIdx) => (
                       <li key={itemIdx}>
-                        <Link to={`/products?search=${encodeURIComponent(item)}`}>
+                        <Link 
+                          to={createProductLink(col.title, item)}
+                          onClick={(e) => handleCategoryClick(e, col.title, item)}
+                        >
                           {item}
                         </Link>
                       </li>
@@ -217,7 +261,13 @@ const CategoryTabs: React.FC = () => {
 
         {/* Sofa Chairs as mini Mega Menu (same design as All) */}
         <li className="nav-item dropdown">
-          <Link className="nav-link" to="/products?search=Sofa Chairs">Sofa Chairs</Link>
+          <Link 
+            className="nav-link" 
+            to={createProductLink('Sofa Chairs')}
+            onClick={(e) => handleCategoryClick(e, 'Sofa Chairs')}
+          >
+            Sofa Chairs
+          </Link>
           <div className="dropdown-menu mega-menu">
             <div className="mega-menu-grid">
               {sofaChairsMega.map((col, idx) => (
@@ -226,7 +276,10 @@ const CategoryTabs: React.FC = () => {
                   <ul className="mega-menu-list">
                     {col.items.map((item, itemIdx) => (
                       <li key={itemIdx}>
-                        <Link to={`/products?search=${encodeURIComponent(item)}`}>
+                        <Link 
+                          to={createProductLink(col.title, item)}
+                          onClick={(e) => handleCategoryClick(e, col.title, item)}
+                        >
                           {item}
                         </Link>
                       </li>
@@ -240,7 +293,13 @@ const CategoryTabs: React.FC = () => {
 
         {/* Rocking Chairs as mini Mega Menu (same design as All) */}
         <li className="nav-item dropdown">
-          <Link className="nav-link" to="/products?search=Rocking Chairs">Rocking Chairs</Link>
+          <Link 
+            className="nav-link" 
+            to={createProductLink('Rocking Chairs')}
+            onClick={(e) => handleCategoryClick(e, 'Rocking Chairs')}
+          >
+            Rocking Chairs
+          </Link>
           <div className="dropdown-menu mega-menu">
             <div className="mega-menu-grid">
               {rockingChairsMega.map((col, idx) => (
@@ -249,7 +308,10 @@ const CategoryTabs: React.FC = () => {
                   <ul className="mega-menu-list">
                     {col.items.map((item, itemIdx) => (
                       <li key={itemIdx}>
-                        <Link to={`/products?search=${encodeURIComponent(item)}`}>
+                        <Link 
+                          to={createProductLink(col.title, item)}
+                          onClick={(e) => handleCategoryClick(e, col.title, item)}
+                        >
                           {item}
                         </Link>
                       </li>
@@ -263,7 +325,13 @@ const CategoryTabs: React.FC = () => {
 
         {/* Ottomans as mini Mega Menu (same design as All) */}
         <li className="nav-item dropdown">
-          <Link className="nav-link" to="/products?search=Ottomans">Ottomans</Link>
+          <Link 
+            className="nav-link" 
+            to={createProductLink('Ottomans')}
+            onClick={(e) => handleCategoryClick(e, 'Ottomans')}
+          >
+            Ottomans
+          </Link>
           <div className="dropdown-menu mega-menu">
             <div className="mega-menu-grid">
               {ottomansMega.map((col, idx) => (
@@ -272,7 +340,10 @@ const CategoryTabs: React.FC = () => {
                   <ul className="mega-menu-list">
                     {col.items.map((item, itemIdx) => (
                       <li key={itemIdx}>
-                        <Link to={`/products?search=${encodeURIComponent(item)}`}>
+                        <Link 
+                          to={createProductLink(col.title, item)}
+                          onClick={(e) => handleCategoryClick(e, col.title, item)}
+                        >
                           {item}
                         </Link>
                       </li>
@@ -286,7 +357,13 @@ const CategoryTabs: React.FC = () => {
 
         {/* Beds & Sofa Cum Beds as mega-menu (two columns) */}
         <li className="nav-item dropdown">
-          <Link className="nav-link" to="/products?search=Beds">Beds & Sofa Cum Beds</Link>
+          <Link 
+            className="nav-link" 
+            to={createProductLink('Beds')}
+            onClick={(e) => handleCategoryClick(e, 'Beds')}
+          >
+            Beds & Sofa Cum Beds
+          </Link>
           <div className="dropdown-menu mega-menu">
             <div className="mega-menu-grid">
               {bedsMega.map((col, idx) => (
@@ -295,7 +372,10 @@ const CategoryTabs: React.FC = () => {
                   <ul className="mega-menu-list">
                     {col.items.map((item, itemIdx) => (
                       <li key={itemIdx}>
-                        <Link to={`/products?search=${encodeURIComponent(item)}`}>
+                        <Link 
+                          to={createProductLink(col.title, item)}
+                          onClick={(e) => handleCategoryClick(e, col.title, item)}
+                        >
                           {item}
                         </Link>
                       </li>
@@ -309,7 +389,13 @@ const CategoryTabs: React.FC = () => {
 
         {/* Luxury as mini Mega Menu (matching design) */}
         <li className="nav-item dropdown">
-          <Link className="nav-link" to="/products?search=Luxury">Luxury</Link>
+          <Link 
+            className="nav-link" 
+            to={createProductLink('Luxury')}
+            onClick={(e) => handleCategoryClick(e, 'Luxury')}
+          >
+            Luxury
+          </Link>
           <div className="dropdown-menu mega-menu">
             <div className="mega-menu-grid">
               {luxuryMega.map((col, idx) => (
@@ -318,7 +404,10 @@ const CategoryTabs: React.FC = () => {
                   <ul className="mega-menu-list">
                     {col.items.map((item, itemIdx) => (
                       <li key={itemIdx}>
-                        <Link to={`/products?search=${encodeURIComponent(item)}`}>
+                        <Link 
+                          to={createProductLink(col.title, item)}
+                          onClick={(e) => handleCategoryClick(e, col.title, item)}
+                        >
                           {item}
                         </Link>
                       </li>
@@ -358,10 +447,14 @@ const CategoryTabs: React.FC = () => {
                     <ul className="mobile-mega-menu-list">
                       {category.items.map((item, itemIdx) => (
                         <li key={itemIdx}>
-                          <Link to={`/products?search=${encodeURIComponent(item)}`} onClick={() => {
-                            setActiveMobileDropdown(null);
-                            setDropdownPosition(null);
-                          }}>
+                          <Link 
+                            to={createProductLink(category.title, item)} 
+                            onClick={(e) => {
+                              handleCategoryClick(e, category.title, item);
+                              setActiveMobileDropdown(null);
+                              setDropdownPosition(null);
+                            }}
+                          >
                             {item}
                           </Link>
                         </li>
@@ -399,10 +492,14 @@ const CategoryTabs: React.FC = () => {
                     <ul className="mobile-mega-menu-list">
                       {col.items.map((item, itemIdx) => (
                         <li key={itemIdx}>
-                          <Link to={`/products?search=${encodeURIComponent(item)}`} onClick={() => {
-                            setActiveMobileDropdown(null);
-                            setDropdownPosition(null);
-                          }}>
+                          <Link 
+                            to={createProductLink(col.title, item)} 
+                            onClick={(e) => {
+                              handleCategoryClick(e, col.title, item);
+                              setActiveMobileDropdown(null);
+                              setDropdownPosition(null);
+                            }}
+                          >
                             {item}
                           </Link>
                         </li>
@@ -440,10 +537,14 @@ const CategoryTabs: React.FC = () => {
                     <ul className="mobile-mega-menu-list">
                       {col.items.map((item, itemIdx) => (
                         <li key={itemIdx}>
-                          <Link to={`/products?search=${encodeURIComponent(item)}`} onClick={() => {
-                            setActiveMobileDropdown(null);
-                            setDropdownPosition(null);
-                          }}>
+                          <Link 
+                            to={createProductLink(col.title, item)} 
+                            onClick={(e) => {
+                              handleCategoryClick(e, col.title, item);
+                              setActiveMobileDropdown(null);
+                              setDropdownPosition(null);
+                            }}
+                          >
                             {item}
                           </Link>
                         </li>
@@ -481,10 +582,14 @@ const CategoryTabs: React.FC = () => {
                     <ul className="mobile-mega-menu-list">
                       {col.items.map((item, itemIdx) => (
                         <li key={itemIdx}>
-                          <Link to={`/products?search=${encodeURIComponent(item)}`} onClick={() => {
-                            setActiveMobileDropdown(null);
-                            setDropdownPosition(null);
-                          }}>
+                          <Link 
+                            to={createProductLink(col.title, item)} 
+                            onClick={(e) => {
+                              handleCategoryClick(e, col.title, item);
+                              setActiveMobileDropdown(null);
+                              setDropdownPosition(null);
+                            }}
+                          >
                             {item}
                           </Link>
                         </li>
@@ -522,10 +627,14 @@ const CategoryTabs: React.FC = () => {
                     <ul className="mobile-mega-menu-list">
                       {col.items.map((item, itemIdx) => (
                         <li key={itemIdx}>
-                          <Link to={`/products?search=${encodeURIComponent(item)}`} onClick={() => {
-                            setActiveMobileDropdown(null);
-                            setDropdownPosition(null);
-                          }}>
+                          <Link 
+                            to={createProductLink(col.title, item)} 
+                            onClick={(e) => {
+                              handleCategoryClick(e, col.title, item);
+                              setActiveMobileDropdown(null);
+                              setDropdownPosition(null);
+                            }}
+                          >
                             {item}
                           </Link>
                         </li>
@@ -563,10 +672,14 @@ const CategoryTabs: React.FC = () => {
                     <ul className="mobile-mega-menu-list">
                       {col.items.map((item, itemIdx) => (
                         <li key={itemIdx}>
-                          <Link to={`/products?search=${encodeURIComponent(item)}`} onClick={() => {
-                            setActiveMobileDropdown(null);
-                            setDropdownPosition(null);
-                          }}>
+                          <Link 
+                            to={createProductLink(col.title, item)} 
+                            onClick={(e) => {
+                              handleCategoryClick(e, col.title, item);
+                              setActiveMobileDropdown(null);
+                              setDropdownPosition(null);
+                            }}
+                          >
                             {item}
                           </Link>
                         </li>
@@ -604,10 +717,14 @@ const CategoryTabs: React.FC = () => {
                     <ul className="mobile-mega-menu-list">
                       {col.items.map((item, itemIdx) => (
                         <li key={itemIdx}>
-                          <Link to={`/products?search=${encodeURIComponent(item)}`} onClick={() => {
-                            setActiveMobileDropdown(null);
-                            setDropdownPosition(null);
-                          }}>
+                          <Link 
+                            to={createProductLink(col.title, item)} 
+                            onClick={(e) => {
+                              handleCategoryClick(e, col.title, item);
+                              setActiveMobileDropdown(null);
+                              setDropdownPosition(null);
+                            }}
+                          >
                             {item}
                           </Link>
                         </li>

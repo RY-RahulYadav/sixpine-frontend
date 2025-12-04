@@ -254,6 +254,35 @@ const ProductListPage: React.FC = () => {
     setIsInitialized(true);
   }, []); // Only run on mount
 
+  // Watch for URL parameter changes (category/subcategory) and update filters
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const categoryParam = searchParams.get('category') || '';
+    const subcategoryParam = searchParams.get('subcategory') || '';
+    const currentCategory = selectedFilters.category || '';
+    const currentSubcategory = selectedFilters.subcategory || '';
+    
+    // Only update if URL params differ from current filters
+    if (categoryParam !== currentCategory || subcategoryParam !== currentSubcategory) {
+      setSelectedFilters((prev) => ({
+        ...prev,
+        category: categoryParam,
+        subcategory: subcategoryParam,
+      }));
+      
+      // Fetch subcategories if category changed
+      if (categoryParam && categoryParam !== currentCategory) {
+        fetchSubcategories(categoryParam);
+      } else if (!categoryParam) {
+        setAvailableSubcategories([]);
+      }
+      
+      // Reset to page 1 when category/subcategory changes
+      setCurrentPage(1);
+    }
+  }, [searchParams, isInitialized]);
+
   // Update URL when filters, sort, or page changes (but not on initial mount)
   useEffect(() => {
     if (!isInitialized) return;
@@ -279,9 +308,12 @@ const ProductListPage: React.FC = () => {
   ]);
 
   // Fetch products when filters, search, sort, or page changes
+  // Note: This will trigger when searchParams changes (including category/subcategory from URL)
   useEffect(() => {
-    fetchProducts();
-  }, [searchParams, sortBy, selectedFilters, currentPage, pageSize]);
+    if (isInitialized) {
+      fetchProducts();
+    }
+  }, [searchParams, sortBy, selectedFilters, currentPage, pageSize, isInitialized]);
 
   // Prevent body scroll when filters are open on mobile
   useEffect(() => {
@@ -355,19 +387,19 @@ const ProductListPage: React.FC = () => {
         params.q = searchQuery;
       }
 
-      // Add category filter if present
+      // Add category filter - prioritize URL params over state
       const categoryParam = searchParams.get('category');
       if (categoryParam) {
         params.category = categoryParam;
-      }
-
-      // Add category filter
-      if (selectedFilters.category) {
+      } else if (selectedFilters.category) {
         params.category = selectedFilters.category;
       }
 
-      // Add subcategory filter
-      if (selectedFilters.subcategory) {
+      // Add subcategory filter - prioritize URL params over state
+      const subcategoryParam = searchParams.get('subcategory');
+      if (subcategoryParam) {
+        params.subcategory = subcategoryParam;
+      } else if (selectedFilters.subcategory) {
         params.subcategory = selectedFilters.subcategory;
       }
 
@@ -422,8 +454,11 @@ const ProductListPage: React.FC = () => {
       // Add pagination parameters
       params.page = currentPage;
       params.page_size = pageSize;
+      
+      // Always expand variants to show all variants as separate items
+      params.expand_variants = 'true';
 
-      // Get products without expanding variants - backend returns all products with variants included
+      // Get products with expanded variants - backend returns each variant as a separate item
       // Backend now handles prioritizing products from user's interest categories
       console.log('Fetching products with params:', params);
       const response = await productAPI.getProducts(params);
@@ -449,8 +484,13 @@ const ProductListPage: React.FC = () => {
     }
   };
 
-  // Helper function to get first variant or null
-  const getFirstVariant = (product: Product) => {
+  // Helper function to get variant data - handles both expanded and non-expanded formats
+  const getVariantData = (product: Product) => {
+    // If variant is expanded (from backend), use the variant object directly
+    if (product.variant) {
+      return product.variant;
+    }
+    // Otherwise, try to get first variant from variants array
     if (product.variants && product.variants.length > 0) {
       return product.variants[0];
     }
@@ -459,10 +499,12 @@ const ProductListPage: React.FC = () => {
 
   const handleAddToCart = async (product: Product) => {
     try {
-      const productId = Number(product.id);
-      // Use first variant if product has variants, otherwise no variant
-      const firstVariant = getFirstVariant(product);
-      const variantId = firstVariant?.id || undefined;
+      // Use product_id if available (expanded variant), otherwise use id
+      const productId = product.product_id ? Number(product.product_id) : Number(product.id);
+      // Use variant_id if available (expanded variant), otherwise get from variant object
+      const variantId = product.variant_id 
+        ? Number(product.variant_id) 
+        : (product.variant?.id ? Number(product.variant.id) : undefined);
       
       await addToCart(productId, 1, variantId);
       // Sidebar will open automatically via context
@@ -484,10 +526,12 @@ const ProductListPage: React.FC = () => {
 
   const handleBuyNow = async (product: Product) => {
     try {
-      const productId = Number(product.id);
-      // Use first variant if product has variants, otherwise no variant
-      const firstVariant = getFirstVariant(product);
-      const variantId = firstVariant?.id || undefined;
+      // Use product_id if available (expanded variant), otherwise use id
+      const productId = product.product_id ? Number(product.product_id) : Number(product.id);
+      // Use variant_id if available (expanded variant), otherwise get from variant object
+      const variantId = product.variant_id 
+        ? Number(product.variant_id) 
+        : (product.variant?.id ? Number(product.variant.id) : undefined);
       
       // Add to cart then navigate to cart/checkout
       await addToCart(productId, 1, variantId);
@@ -1001,12 +1045,17 @@ const ProductListPage: React.FC = () => {
                   ) : (
                     <div className={`products-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
                       {products.map((product) => {
-                        // Get first variant for display
-                        const firstVariant = getFirstVariant(product);
-                        const displayImage = product.main_image || '/placeholder-image.jpg';
-                        const displayPrice = firstVariant?.price || product.price;
-                        const displayOldPrice = firstVariant?.old_price || product.old_price;
-                        const isOutOfStock = firstVariant ? !firstVariant.is_in_stock : false;
+                        // Get variant data - handles both expanded and non-expanded formats
+                        const variantData = getVariantData(product);
+                        
+                        // For expanded variants, use variant-specific data
+                        const displayImage = variantData?.image || product.main_image || '/placeholder-image.jpg';
+                        const displayPrice = variantData?.price || product.price;
+                        const displayOldPrice = variantData?.old_price || product.old_price;
+                        const isOutOfStock = variantData ? !variantData.is_in_stock : false;
+                        
+                        // Use variant title if available, otherwise fallback to product title
+                        const displayTitle = variantData?.title || product.product_title || product.title;
 
                         return (
                           <div key={product.id} className="product-card-modern">
@@ -1016,10 +1065,10 @@ const ProductListPage: React.FC = () => {
                                   {product.discount_percentage}% OFF
                                 </span>
                               )}
-                              <Link to={`/products-details/${product.slug}`}>
+                              <Link to={`/products-details/${product.slug}${product.variant_id ? `?variant=${product.variant_id}` : ''}`}>
                                 <img
                                   src={displayImage}
-                                  alt={product.title}
+                                  alt={displayTitle}
                                   className="product-image"
                                 />
                               </Link>
@@ -1034,12 +1083,12 @@ const ProductListPage: React.FC = () => {
                             <div className="product-info">
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
                                 <Link 
-                                  to={`/products-details/${product.slug}`} 
+                                  to={`/products-details/${product.slug}${product.variant_id ? `?variant=${product.variant_id}` : ''}`} 
                                   className="product-link"
                                   style={{ flex: 1, minWidth: 0 }}
                                 >
                                   <h3 className="product-name">
-                                    {product.title.length > 100 ? product.title.substring(0, 90).trim() + '...' : product.title || ''}
+                                    {displayTitle.length > 100 ? displayTitle.substring(0, 90).trim() + '...' : displayTitle || ''}
                                   </h3>
                                 </Link>
                                 {/* Out of Stock Indicator - Right side of title */}
@@ -1055,35 +1104,38 @@ const ProductListPage: React.FC = () => {
                                 )}
                               </div>
                               
-                              {/* Variant Information - Show first variant details */}
-                              {firstVariant && (
+                              {/* Variant Information - Show variant details */}
+                              {variantData && (
                                 <div className="product-variant-info">
-                                  <small className="text-muted">
-                                    {firstVariant.color && (
+                                  <small className="text-muted" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                    {variantData.color && (
                                       <span>
-                                        <strong>Color:</strong> {firstVariant.color.name}
-                                        {firstVariant.color.hex_code && (
+                                        <strong>Color:</strong> {variantData.color.name}
+                                        {variantData.color.hex_code && (
                                           <span 
                                             className="ms-1"
                                             style={{
                                               display: 'inline-block',
                                               width: '12px',
                                               height: '12px',
-                                              backgroundColor: firstVariant.color.hex_code,
+                                              backgroundColor: variantData.color.hex_code,
                                               border: '1px solid #ccc',
                                               borderRadius: '2px',
                                               verticalAlign: 'middle'
                                             }}
-                                            title={firstVariant.color.name}
+                                            title={variantData.color.name}
                                           />
                                         )}
                                       </span>
                                     )}
-                                    {firstVariant.size && (
-                                      <span><strong>Size:</strong> {firstVariant.size}</span>
+                                    {variantData.size && (
+                                      <span><strong>Size:</strong> {variantData.size}</span>
                                     )}
-                                    {firstVariant.pattern && (
-                                      <span><strong>Pattern:</strong> {firstVariant.pattern}</span>
+                                    {variantData.pattern && (
+                                      <span><strong>Pattern:</strong> {variantData.pattern}</span>
+                                    )}
+                                    {variantData.quality && (
+                                      <span><strong>Quality:</strong> {variantData.quality}</span>
                                     )}
                                   </small>
                                 </div>

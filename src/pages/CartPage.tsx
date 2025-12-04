@@ -19,9 +19,12 @@ interface CartItem {
   };
   variant?: {
     id: number;
+    title?: string;
+    image?: string;
     color: { name: string };
     size: string;
     pattern: string;
+    quality: string;
   };
   quantity: number;
   total_price: number;
@@ -172,15 +175,15 @@ const CartPage: React.FC = () => {
                   <div className="row align-items-center">
                     <div className="col-md-2">
                       <img
-                        src={item.product.main_image || '/placeholder-image.jpg'}
-                        alt={item.product.title}
+                        src={item.variant?.image || item.product.main_image || '/placeholder-image.jpg'}
+                        alt={item.variant?.title || item.product.title}
                         className="img-fluid rounded"
                         style={{ maxHeight: '80px' }}
                       />
                     </div>
                     <div className="col-md-4">
                       <Link 
-                        to={`/products-details/${item.product.slug}`}
+                        to={`/products-details/${item.product.slug}${item.variant?.id ? `?variant=${item.variant.id}` : ''}`}
                         style={{
                           textDecoration: 'none',
                           color: 'inherit',
@@ -200,7 +203,7 @@ const CartPage: React.FC = () => {
                             marginBottom: '0.5rem'
                           }}
                         >
-                          {item.product.title}
+                          {item.variant?.title || item.product.title}
                         </h6>
                       </Link>
                       {item.variant && (
@@ -208,7 +211,8 @@ const CartPage: React.FC = () => {
                           <small className="text-muted">
                             {item.variant.color?.name && <span>Color: {item.variant.color.name} </span>}
                             {item.variant.size && <span>| Size: {item.variant.size} </span>}
-                            {item.variant.pattern && <span>| Pattern: {item.variant.pattern}</span>}
+                            {item.variant.pattern && <span>| Pattern: {item.variant.pattern} </span>}
+                            {item.variant.quality && <span>| Quality: {item.variant.quality}</span>}
                           </small>
                         </div>
                       )}

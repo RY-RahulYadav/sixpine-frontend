@@ -44,6 +44,8 @@ interface ProductVariant {
   features?: { [key: string]: string };
   user_guide?: { [key: string]: string };
   is_active: boolean;
+  subcategories?: { id: number; name: string }[];
+  subcategory_ids?: number[];
 }
 
 interface Specification {
@@ -136,7 +138,6 @@ const SellerProductDetail: React.FC = () => {
     short_description: string;
     long_description: string;
     category_id: string;
-    subcategory_id: string;
     material_id: string;
     brand: string;
     dimensions: string;
@@ -160,7 +161,6 @@ const SellerProductDetail: React.FC = () => {
     short_description: '',
     long_description: '',
     category_id: '',
-    subcategory_id: '',
     material_id: '',
     brand: 'Sixpine',
     dimensions: '',
@@ -227,7 +227,6 @@ const SellerProductDetail: React.FC = () => {
             short_description: productData.short_description || '',
             long_description: productData.long_description || '',
             category_id: productData.category?.id?.toString() || '',
-            subcategory_id: productData.subcategory?.id?.toString() || '',
             material_id: productData.material?.id?.toString() || '',
             brand: productData.brand || 'Sixpine',
             dimensions: productData.dimensions || '',
@@ -259,6 +258,7 @@ const SellerProductDetail: React.FC = () => {
             return {
               ...v,
               color_id: colorId,
+              subcategory_ids: v.subcategories?.map((sub: any) => sub.id) || v.subcategory_ids || [],
               measurement_specs: v.measurement_specs || {},
               style_specs: v.style_specs || {},
               features: v.features || {},
@@ -325,6 +325,8 @@ const SellerProductDetail: React.FC = () => {
   
   const fetchSubcategories = async (categoryId: number) => {
     try {
+      // Fetch all subcategories (both active and inactive) for the variant form
+      // Don't pass is_active parameter to get all subcategories
       const response = await api.getSubcategories({ category: categoryId });
       setSubcategories(response.data.results || response.data || []);
     } catch (err) {
@@ -376,6 +378,7 @@ const SellerProductDetail: React.FC = () => {
       image: '',
       images: [],
       specifications: [],
+      subcategory_ids: [],
       measurement_specs: {},
       style_specs: {},
       features: {},
@@ -702,7 +705,6 @@ const SellerProductDetail: React.FC = () => {
         short_description: formData.short_description,
         long_description: formData.long_description,
         category_id: categoryId,
-        subcategory_id: formData.subcategory_id ? parseInt(formData.subcategory_id) : null,
         material_id: formData.material_id ? parseInt(formData.material_id) : null,
         brand: formData.brand,
         dimensions: formData.dimensions,
@@ -738,6 +740,7 @@ const SellerProductDetail: React.FC = () => {
             is_in_stock: v.is_in_stock !== false,
             image: v.image || '',
             is_active: v.is_active !== false,
+            subcategory_ids: v.subcategory_ids || [],  // Include subcategory_ids
             images: (v.images || []).map(img => ({
               image: img.image,
               alt_text: img.alt_text,
@@ -1030,23 +1033,6 @@ const SellerProductDetail: React.FC = () => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="subcategory_id">Subcategory</label>
-                <select
-                  id="subcategory_id"
-                  name="subcategory_id"
-                  value={formData.subcategory_id}
-                  onChange={handleChange}
-                  className="tw-w-full"
-                  disabled={!formData.category_id}
-                >
-                  <option value="">Select subcategory</option>
-                  {subcategories.map(sub => (
-                    <option key={sub.id} value={sub.id}>{sub.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="form-group">
                 <label htmlFor="material_id">Material</label>
                 <select
                   id="material_id"
@@ -1299,6 +1285,47 @@ const SellerProductDetail: React.FC = () => {
                         placeholder="Auto-generated if empty"
                               className="admin-input"
                       />
+                        </div>
+                        
+                        {/* Subcategories for Variant */}
+                        <div className="admin-form-group tw-col-span-full">
+                          <label>Subcategories (Select applicable subcategories for this variant)</label>
+                          <div 
+                            className="tw-border tw-border-gray-300 tw-rounded tw-p-3 tw-bg-white tw-flex tw-flex-wrap tw-gap-3"
+                          >
+                            {subcategories.length > 0 ? (
+                              subcategories.map(sub => (
+                                <div key={sub.id} className="tw-flex tw-items-center tw-min-w-0">
+                                  <input
+                                    type="checkbox"
+                                    id={`variant_${variantIndex}_subcategory_${sub.id}`}
+                                    checked={(variant.subcategory_ids || []).includes(sub.id)}
+                                    onChange={(e) => {
+                                      const currentIds = variant.subcategory_ids || [];
+                                      let newIds: number[];
+                                      if (e.target.checked) {
+                                        newIds = [...currentIds, sub.id];
+                                      } else {
+                                        newIds = currentIds.filter((id: number) => id !== sub.id);
+                                      }
+                                      handleVariantChange(variantIndex, 'subcategory_ids', newIds);
+                                    }}
+                                    className="tw-mr-2 tw-cursor-pointer tw-flex-shrink-0"
+                                  />
+                                  <label 
+                                    htmlFor={`variant_${variantIndex}_subcategory_${sub.id}`}
+                                    className="tw-cursor-pointer tw-select-none tw-whitespace-nowrap"
+                                  >
+                                    {sub.name}
+                                  </label>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="tw-text-gray-500 tw-text-sm tw-py-2 tw-w-full">
+                                {formData.category_id ? 'No subcategories available' : 'Please select a category first'}
+                              </div>
+                            )}
+                          </div>
                         </div>
                         </div>
                       </div>
