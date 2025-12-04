@@ -249,10 +249,16 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ selectedAddressId, on
             <input
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={(e) => {
+                // Only allow numbers
+                const value = e.target.value.replace(/[^0-9]/g, '');
+                setFormData({ ...formData, phone: value });
+              }}
               className={styles.formInput}
               required
               placeholder="Enter phone number"
+              pattern="[0-9]*"
+              inputMode="numeric"
             />
           </div>
 
@@ -368,6 +374,11 @@ const DeliveryAddress: React.FC<DeliveryAddressProps> = ({ selectedAddressId, on
             <p className={styles.address}>
               {selectedAddress.street_address}, {selectedAddress.city}, {selectedAddress.state}, {selectedAddress.postal_code}, {selectedAddress.country}
             </p>
+            {selectedAddress.phone && (
+              <p className={styles.address} style={{ marginTop: '4px', color: '#666' }}>
+                Phone: {selectedAddress.phone}
+              </p>
+            )}
             <button 
               onClick={() => setShowAddressModal(true)} 
               className={styles.linkButton}

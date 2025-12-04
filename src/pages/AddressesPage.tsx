@@ -314,9 +314,15 @@ const AddressesPage: React.FC = () => {
                 <input
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => {
+                    // Only allow numbers
+                    const value = e.target.value.replace(/[^0-9]/g, '');
+                    setFormData({ ...formData, phone: value });
+                  }}
                   className={styles.formInput}
                   required
+                  pattern="[0-9]*"
+                  inputMode="numeric"
                 />
               </div>
 
