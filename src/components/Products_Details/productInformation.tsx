@@ -44,9 +44,9 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
             <Ruler size={16} /> <strong>Measurement</strong>
           </div>
           {/* Use variant measurement_specs if available, otherwise fallback to product dimensions/weight */}
-          {selectedVariant?.measurement_specs && Object.keys(selectedVariant.measurement_specs).length > 0 ? (
-            Object.entries(selectedVariant.measurement_specs).map(([key, value]: [string, any]) => (
-              <p key={key}><strong>{key}:</strong> {value}</p>
+          {selectedVariant?.measurement_specs && selectedVariant.measurement_specs.length > 0 ? (
+            selectedVariant.measurement_specs.map((spec: any) => (
+              <p key={spec.id || spec.name}><strong>{spec.name}:</strong> {spec.value}</p>
             ))
           ) : (
             <>
@@ -64,9 +64,9 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
           </div>
           <div className={styles.descriptionText}>
             {/* Use variant style_specs if available, otherwise fallback to product style_description */}
-            {selectedVariant?.style_specs && Object.keys(selectedVariant.style_specs).length > 0 ? (
-              Object.entries(selectedVariant.style_specs).map(([key, value]: [string, any]) => (
-                <p key={key}><strong>{key}:</strong> {value}</p>
+            {selectedVariant?.style_specs && selectedVariant.style_specs.length > 0 ? (
+              selectedVariant.style_specs.map((spec: any) => (
+                <p key={spec.id || spec.name}><strong>{spec.name}:</strong> {spec.value}</p>
               ))
             ) : (
               formatDescription(product?.style_description || product?.long_description || product?.short_description) || (
@@ -85,9 +85,9 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
           </div>
           <ul>
             {/* Use variant item_details if available, otherwise fallback to product specifications */}
-            {selectedVariant?.item_details && Object.keys(selectedVariant.item_details).length > 0 ? (
-              Object.entries(selectedVariant.item_details).map(([key, value]: [string, any]) => (
-                <li key={key}><strong>{key}:</strong> {value}</li>
+            {selectedVariant?.item_details && selectedVariant.item_details.length > 0 ? (
+              selectedVariant.item_details.map((detail: any) => (
+                <li key={detail.id || detail.name}><strong>{detail.name}:</strong> {detail.value}</li>
               ))
             ) : (
               <>
@@ -110,10 +110,10 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
             <Check size={16} /> <strong>Features</strong>
           </div>
           {/* Use variant features if available, otherwise fallback to product features */}
-          {selectedVariant?.features && Object.keys(selectedVariant.features).length > 0 ? (
+          {selectedVariant?.features && selectedVariant.features.length > 0 ? (
             <ul>
-              {Object.entries(selectedVariant.features).map(([key, value]: [string, any]) => (
-                <li key={key}><strong>{key}:</strong> {value}</li>
+              {selectedVariant.features.map((feature: any) => (
+                <li key={feature.id || feature.name}><strong>{feature.name}:</strong> {feature.value}</li>
               ))}
             </ul>
           ) : (
@@ -132,9 +132,9 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
             <Book size={16} /> <strong>User Guide</strong>
           </div>
           {/* Use variant user_guide if available, otherwise fallback to product user_guide */}
-          {selectedVariant?.user_guide && Object.keys(selectedVariant.user_guide).length > 0 ? (
-            Object.entries(selectedVariant.user_guide).map(([key, value]: [string, any]) => (
-              <p key={key}><strong>{key}:</strong> {value}</p>
+          {selectedVariant?.user_guide && selectedVariant.user_guide.length > 0 ? (
+            selectedVariant.user_guide.map((guide: any) => (
+              <p key={guide.id || guide.name}><strong>{guide.name}:</strong> {guide.value}</p>
             ))
           ) : product?.user_guide ? (
             <p>{product.user_guide}</p>
