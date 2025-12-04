@@ -117,6 +117,9 @@ const ProductListPage: React.FC = () => {
     discount: null as number | null,
   });
   
+  // Separate state for price range display (updates immediately for UI)
+  const [displayPriceRange, setDisplayPriceRange] = useState<[number, number]>([135, 25000]);
+  
   const [brands, setBrands] = useState<any[]>([]);
   
   const [filterOptions, setFilterOptions] = useState({
@@ -230,6 +233,12 @@ const ProductListPage: React.FC = () => {
       discount: discountParam ? parseInt(discountParam) : null,
     };
     
+    // Also set display price range
+    setDisplayPriceRange([
+      minPriceParam ? parseInt(minPriceParam) : 135,
+      maxPriceParam ? parseInt(maxPriceParam) : 25000
+    ]);
+    
     setSelectedFilters(initialFilters);
     
     if (sortParam) {
@@ -311,13 +320,34 @@ const ProductListPage: React.FC = () => {
     sortBy
   ]);
 
+  // Debounced effect for price range changes (2 second delay)
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const priceRangeTimer = setTimeout(() => {
+      // Only update if display price range differs from selected filters
+      if (
+        displayPriceRange[0] !== selectedFilters.priceRange[0] ||
+        displayPriceRange[1] !== selectedFilters.priceRange[1]
+      ) {
+        setSelectedFilters((prev) => ({
+          ...prev,
+          priceRange: displayPriceRange,
+        }));
+      }
+    }, 2000); // 2 second delay
+
+    return () => clearTimeout(priceRangeTimer);
+  }, [displayPriceRange, isInitialized]);
+
   // Fetch products when filters, search, sort, or page changes
   // Note: This will trigger when searchParams changes (including category/subcategory from URL)
+  // Exclude priceRange from immediate triggers - it's handled by debounced effect above
   useEffect(() => {
     if (isInitialized) {
       fetchProducts();
     }
-  }, [searchParams, sortBy, selectedFilters, currentPage, pageSize, isInitialized]);
+  }, [searchParams, sortBy, selectedFilters.brand, selectedFilters.category, selectedFilters.subcategory, selectedFilters.colors, selectedFilters.materials, selectedFilters.rating, selectedFilters.discount, selectedFilters.priceRange, currentPage, pageSize, isInitialized]);
 
   // Prevent body scroll when filters are open on mobile
   useEffect(() => {
@@ -351,10 +381,12 @@ const ProductListPage: React.FC = () => {
           }
         });
         // Update selected price range to match vendor's range
+        const newPriceRange: [number, number] = [data.priceRange.min_price || 135, data.priceRange.max_price || 25000];
         setSelectedFilters(prev => ({
           ...prev,
-          priceRange: [data.priceRange.min_price || 135, data.priceRange.max_price || 25000]
+          priceRange: newPriceRange
         }));
+        setDisplayPriceRange(newPriceRange);
       } else {
         setFilterOptions(data);
       }
@@ -422,7 +454,7 @@ const ProductListPage: React.FC = () => {
         params.min_price = selectedFilters.priceRange[0];
       }
       
-      if (selectedFilters.priceRange[1] < 25000) { // Use default max price instead of filterOptions
+      if (selectedFilters.priceRange[1] < 100000) { // Use default max price instead of filterOptions
         params.max_price = selectedFilters.priceRange[1];
       }
 
@@ -779,8 +811,11 @@ const ProductListPage: React.FC = () => {
                             type="number"
                             className="price-input"
                             placeholder="₹135"
-                            value={selectedFilters.priceRange[0]}
-                            onChange={(e) => handleFilterChange('priceRange', [parseInt(e.target.value) || 0, selectedFilters.priceRange[1]], false)}
+                            value={displayPriceRange[0]}
+                            onChange={(e) => {
+                              const newMin = parseInt(e.target.value) || 0;
+                              setDisplayPriceRange([newMin, displayPriceRange[1]]);
+                            }}
                             onBlur={() => {
                               // Close sidebar on mobile when user finishes typing
                               if (window.innerWidth <= 991 && showFilters) {
@@ -798,8 +833,11 @@ const ProductListPage: React.FC = () => {
                             type="number"
                             className="price-input"
                             placeholder="₹25,000"
-                            value={selectedFilters.priceRange[1]}
-                            onChange={(e) => handleFilterChange('priceRange', [selectedFilters.priceRange[0], parseInt(e.target.value) || 25000], false)}
+                            value={displayPriceRange[1]}
+                            onChange={(e) => {
+                              const newMax = parseInt(e.target.value) || 25000;
+                              setDisplayPriceRange([displayPriceRange[0], newMax]);
+                            }}
                             onBlur={() => {
                               // Close sidebar on mobile when user finishes typing
                               if (window.innerWidth <= 991 && showFilters) {
@@ -815,10 +853,13 @@ const ProductListPage: React.FC = () => {
                         <input
                           type="range"
                           min="135"
-                          max="25000"
+                          max={displayPriceRange[0] >= 15000 ? "100000" : "25000"}
                           step="100"
-                          value={selectedFilters.priceRange[1]}
-                          onChange={(e) => handleFilterChange('priceRange', [selectedFilters.priceRange[0], parseInt(e.target.value)], false)}
+                          value={displayPriceRange[1]}
+                          onChange={(e) => {
+                            const newMax = parseInt(e.target.value);
+                            setDisplayPriceRange([displayPriceRange[0], newMax]);
+                          }}
                           onMouseUp={() => {
                             // Close sidebar on mobile when user releases slider
                             if (window.innerWidth <= 991 && showFilters) {
@@ -839,9 +880,18 @@ const ProductListPage: React.FC = () => {
                         />
                       </div>
                       <div className="price-presets">
-                        <button onClick={() => handleFilterChange('priceRange', [135, 5000])}>Under ₹5,000</button>
-                        <button onClick={() => handleFilterChange('priceRange', [5000, 15000])}>₹5,000 - ₹15,000</button>
-                        <button onClick={() => handleFilterChange('priceRange', [15000, 25000])}>Above ₹15,000</button>
+                        <button onClick={() => {
+                          setDisplayPriceRange([135, 5000]);
+                          setSelectedFilters(prev => ({ ...prev, priceRange: [135, 5000] }));
+                        }}>Under ₹5,000</button>
+                        <button onClick={() => {
+                          setDisplayPriceRange([5000, 15000]);
+                          setSelectedFilters(prev => ({ ...prev, priceRange: [5000, 15000] }));
+                        }}>₹5,000 - ₹15,000</button>
+                        <button onClick={() => {
+                          setDisplayPriceRange([15000, 100000]);
+                          setSelectedFilters(prev => ({ ...prev, priceRange: [15000, 100000] }));
+                        }}>Above ₹15,000</button>
                       </div>
                     </div>
 
@@ -992,6 +1042,7 @@ const ProductListPage: React.FC = () => {
                             rating: null,
                             discount: null,
                           });
+                          setDisplayPriceRange([135, 25000]);
                           setAvailableSubcategories([]);
                           setCurrentPage(1);
                           // Clear URL params except search
@@ -1032,6 +1083,7 @@ const ProductListPage: React.FC = () => {
                             rating: null,
                             discount: null,
                           });
+                          setDisplayPriceRange([135, 25000]);
                           setAvailableSubcategories([]);
                           setCurrentPage(1);
                           // Clear URL params except search
