@@ -170,6 +170,47 @@ const AdminBrands: React.FC = () => {
     }
   };
 
+  const handleDeleteProduct = async (productId: number, productTitle: string) => {
+    const confirmed = await showConfirmation({
+      title: 'Delete Product',
+      message: `Are you sure you want to delete "${productTitle}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await adminAPI.deleteProduct(productId);
+      showToast('Product deleted successfully', 'success');
+      
+      // Remove the product from the list
+      setProducts(products.filter(p => p.id !== productId));
+      
+      // Update the brand's total_products count
+      if (selectedBrand) {
+        setSelectedBrand({
+          ...selectedBrand,
+          total_products: Math.max(0, selectedBrand.total_products - 1)
+        });
+        
+        // Update the brand in the brands list
+        setBrands(brands.map(b => 
+          b.id === selectedBrand.id 
+            ? { ...b, total_products: Math.max(0, b.total_products - 1) }
+            : b
+        ));
+      }
+    } catch (err: any) {
+      console.error('Error deleting product:', err);
+      const errorMessage = err.response?.data?.error || err.response?.data?.detail || 'Failed to delete product';
+      showToast(errorMessage, 'error');
+    }
+  };
+
   const handleViewOrders = async (brand: Brand) => {
     setSelectedBrand(brand);
     setShowOrdersModal(true);
@@ -446,6 +487,7 @@ const AdminBrands: React.FC = () => {
                         <th>Price</th>
                         <th>Stock</th>
                         <th>Status</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -467,11 +509,20 @@ const AdminBrands: React.FC = () => {
                               {product.is_active ? 'Active' : 'Inactive'}
                             </span>
                           </td>
+                          <td>
+                            <button
+                              className="admin-modern-btn danger icon-only"
+                              onClick={() => handleDeleteProduct(product.id, product.title)}
+                              title="Delete product"
+                            >
+                              <span className="material-symbols-outlined">delete</span>
+                            </button>
+                          </td>
                         </tr>
                       ))}
                       {products.length === 0 && (
                         <tr>
-                          <td colSpan={5} style={{ 
+                          <td colSpan={6} style={{ 
                             textAlign: 'center', 
                             padding: '60px 20px',
                             verticalAlign: 'middle',
