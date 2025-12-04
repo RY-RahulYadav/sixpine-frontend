@@ -526,16 +526,10 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const specs = { ...(variant.measurement_specs || {}) };
-    // Only update if newKey is not empty and different from oldKey
-    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
-      // Preserve the value when renaming the key
-      const currentValue = specs[oldKey] || value;
+    if (oldKey !== newKey) {
       delete specs[oldKey];
-      specs[newKey] = currentValue;
-    } else if (oldKey === newKey) {
-      // Same key, just update the value
-      specs[newKey] = value;
     }
+    specs[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       measurement_specs: specs
@@ -571,16 +565,10 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const specs = { ...(variant.style_specs || {}) };
-    // Only update if newKey is not empty and different from oldKey
-    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
-      // Preserve the value when renaming the key
-      const currentValue = specs[oldKey] || value;
+    if (oldKey !== newKey) {
       delete specs[oldKey];
-      specs[newKey] = currentValue;
-    } else if (oldKey === newKey) {
-      // Same key, just update the value
-      specs[newKey] = value;
     }
+    specs[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       style_specs: specs
@@ -616,16 +604,10 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const features = { ...(variant.features || {}) };
-    // Only update if newKey is not empty and different from oldKey
-    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
-      // Preserve the value when renaming the key
-      const currentValue = features[oldKey] || value;
+    if (oldKey !== newKey) {
       delete features[oldKey];
-      features[newKey] = currentValue;
-    } else if (oldKey === newKey) {
-      // Same key, just update the value
-      features[newKey] = value;
     }
+    features[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       features: features
@@ -661,16 +643,10 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const userGuide = { ...(variant.user_guide || {}) };
-    // Only update if newKey is not empty and different from oldKey
-    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
-      // Preserve the value when renaming the key
-      const currentValue = userGuide[oldKey] || value;
+    if (oldKey !== newKey) {
       delete userGuide[oldKey];
-      userGuide[newKey] = currentValue;
-    } else if (oldKey === newKey) {
-      // Same key, just update the value
-      userGuide[newKey] = value;
     }
+    userGuide[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       user_guide: userGuide
@@ -706,16 +682,10 @@ const AdminProductDetail: React.FC = () => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const details = { ...(variant.item_details || {}) };
-    // Only update if newKey is not empty and different from oldKey
-    if (newKey && newKey.trim() !== '' && oldKey !== newKey) {
-      // Preserve the value when renaming the key
-      const currentValue = details[oldKey] || value;
+    if (oldKey !== newKey) {
       delete details[oldKey];
-      details[newKey] = currentValue;
-    } else if (oldKey === newKey) {
-      // Same key, just update the value
-      details[newKey] = value;
     }
+    details[newKey] = value;
     updated[variantIndex] = {
       ...variant,
       item_details: details
@@ -1993,7 +1963,7 @@ const AdminProductDetail: React.FC = () => {
                       <span className="material-symbols-outlined">add</span>
                       Add Item Detail
                     </button>
-                  </div>
+                </div>
                   <div className="tw-space-y-3">
                     {variant.item_details && Object.entries(variant.item_details).map(([key, value], detailIndex) => (
                       <div key={`variant-${variantIndex}-itemdetail-${detailIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">

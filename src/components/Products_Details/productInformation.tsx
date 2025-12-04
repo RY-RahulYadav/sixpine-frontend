@@ -91,12 +91,12 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
               ))
             ) : (
               <>
-                {product?.specifications?.map((spec: any, index: number) => (
-                  <li key={index}>{spec.name}: {spec.value}</li>
-                ))}
-                {product?.warranty && <li>Warranty: {product.warranty}</li>}
-                {product?.assembly_required !== undefined && (
-                  <li>Assembly: {product.assembly_required ? "Required" : "Not Required"}</li>
+            {product?.specifications?.map((spec: any, index: number) => (
+              <li key={index}>{spec.name}: {spec.value}</li>
+            ))}
+            {product?.warranty && <li>Warranty: {product.warranty}</li>}
+            {product?.assembly_required !== undefined && (
+              <li>Assembly: {product.assembly_required ? "Required" : "Not Required"}</li>
                 )}
               </>
             )}

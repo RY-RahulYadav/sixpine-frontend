@@ -47,7 +47,6 @@ interface Product {
   }>;
   variants?: Array<{
     id: number;
-    title?: string;
     color: {
       id: number;
       name: string;
@@ -55,12 +54,10 @@ interface Product {
     };
     size: string;
     pattern: string;
-    quality?: string;
     price: number;
     old_price: number;
     stock_quantity: number;
     is_in_stock: boolean;
-    image?: string;
   }>;
   variant?: {
     id: number;
@@ -72,7 +69,6 @@ interface Product {
     };
     size: string;
     pattern: string;
-    quality?: string;
     price?: number;
     old_price?: number;
     stock_quantity: number;
@@ -1138,7 +1134,7 @@ const ProductListPage: React.FC = () => {
                                     {variantData.pattern && (
                                       <span><strong>Pattern:</strong> {variantData.pattern}</span>
                                     )}
-                                    {variantData?.quality && (
+                                    {variantData.quality && (
                                       <span><strong>Quality:</strong> {variantData.quality}</span>
                                     )}
                                   </small>
