@@ -500,7 +500,26 @@ const ProductListPage: React.FC = () => {
       const response = await productAPI.getProducts(params);
       let productsList = response.data.results || response.data;
       
-      setProducts(productsList);
+      // Deduplicate variants by variant_id as a safety measure (in case backend returns duplicates)
+      // This ensures each variant appears only once, while preserving products without variants
+      const seenVariantIds = new Set<number | string>();
+      const uniqueProducts = productsList.filter((product: Product) => {
+        // Get variant ID from expanded variant format (variant_id) or nested variant object
+        const variantId = product.variant_id || product.variant?.id;
+        if (variantId) {
+          // If this variant ID has already been seen, skip this duplicate
+          if (seenVariantIds.has(variantId)) {
+            console.warn(`Duplicate variant detected and filtered: variant_id=${variantId}, product_id=${product.product_id || product.id}`);
+            return false;
+          }
+          // Mark this variant as seen
+          seenVariantIds.add(variantId);
+        }
+        // Keep product if: it has a unique variant_id, or it has no variant_id (product without variants)
+        return true;
+      });
+      
+      setProducts(uniqueProducts);
       // Update total count and pagination info
       if (response.data.count !== undefined) {
         setTotalProducts(response.data.count);
