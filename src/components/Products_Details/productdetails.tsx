@@ -41,6 +41,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const imageWrapperRef = useRef<HTMLDivElement>(null);
   const mainImageRef = useRef<HTMLImageElement>(null);
+  const imageSectionContainerRef = useRef<HTMLDivElement>(null);
+  const detailsSectionRef = useRef<HTMLDivElement>(null);
 
   // Zoom configuration
   const LENS_SIZE = 180; // Size of the lens square in pixels
@@ -504,6 +506,36 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     checkWishlistStatus();
   }, [state.isAuthenticated, product?.id]);
 
+  // Sync image section container height with details section
+  useEffect(() => {
+    const syncHeights = () => {
+      if (imageSectionContainerRef.current && detailsSectionRef.current) {
+        const detailsHeight = detailsSectionRef.current.offsetHeight;
+        imageSectionContainerRef.current.style.height = `${detailsHeight}px`;
+      }
+    };
+
+    // Sync on mount and when content changes
+    syncHeights();
+    
+    // Use ResizeObserver to sync when details section height changes
+    const resizeObserver = new ResizeObserver(() => {
+      syncHeights();
+    });
+
+    if (detailsSectionRef.current) {
+      resizeObserver.observe(detailsSectionRef.current);
+    }
+
+    // Also sync on window resize
+    window.addEventListener('resize', syncHeights);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', syncHeights);
+    };
+  }, [product, selectedVariant]);
+
   const handleWishlist = async () => {
     if (!state.isAuthenticated) {
       navigate('/login');
@@ -741,7 +773,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
       <div className={styles.mainLayout}>
         {/* Image Section with Zoom */}
-        <div className={styles.imageSectionContainer}>
+        <div className={styles.imageSectionContainer} ref={imageSectionContainerRef}>
           <div className={styles.imageSection}>
             <div
               className={styles.imageWrapper}
@@ -788,7 +820,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             {/* Thumbnails below the main image - Amazon style horizontal row */}
             <div className={styles.thumbnailsContainer}>
               <div className={styles.thumbnails}>
-                {images.map((img: string, index: number) => (
+                {images.slice(0, 6).map((img: string, index: number) => (
                   <div
                     key={index}
                     className={`${styles.thumbnailWrapper} ${mainImage === img ? styles.activeThumbWrapper : ""}`}
@@ -804,6 +836,17 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                     />
                   </div>
                 ))}
+                {images.length > 6 && (
+                  <div
+                    className={styles.thumbnailWrapper}
+                    onClick={openImageModal}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className={styles.moreThumbnailsBox}>
+                      <span className={styles.moreThumbnailsText}>+{images.length - 6}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -822,7 +865,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         </div>
 
         {/* PART 2 - MIDDLE DETAILS */}
-        <div className={styles.details}>
+        <div className={styles.details} ref={detailsSectionRef}>
           <h2 className={styles.title}>
             {selectedVariant?.title || product?.title || "PRODUCT TITLE GOES HERE"}
           </h2>
@@ -926,91 +969,79 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
           {/* Options */}
           <div className={styles.options}>
             {availableOptions.colors.length > 0 && (
-              <div>
-                <strong>Color: </strong>
-                {availableOptions.colors.slice(0, 6).map((color: string, index: number) => (
-                  <button
-                    key={`color-${index}-${color}`}
-                    className={selectedColor === color ? styles.active : ""}
-                    onClick={() => {
-                      userChangedAttribute.current = 'color';
-                      setSelectedColor(color);
-                    }}
-                  >
-                    {color}
-                  </button>
-                ))}
-                {availableOptions.colors.length > 6 && (
-                  <span className={styles.moreOptions}>
-                    +{availableOptions.colors.length - 6} more
-                  </span>
-                )}
+              <div className={styles.optionGroup}>
+                <strong className={styles.optionLabel}>Color:</strong>
+                <div className={styles.optionButtons}>
+                  {availableOptions.colors.map((color: string, index: number) => (
+                    <button
+                      key={`color-${index}-${color}`}
+                      className={selectedColor === color ? styles.active : ""}
+                      onClick={() => {
+                        userChangedAttribute.current = 'color';
+                        setSelectedColor(color);
+                      }}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {availableOptions.sizes.length > 0 && (
-              <div>
-                <strong>Size: </strong>
-                {availableOptions.sizes.slice(0, 6).map((size: string, index: number) => (
-                  <button
-                    key={`size-${index}-${size}`}
-                    className={selectedSize === size ? styles.active : ""}
-                    onClick={() => {
-                      userChangedAttribute.current = 'size';
-                      setSelectedSize(size);
-                    }}
-                  >
-                    {size}
-                  </button>
-                ))}
-                {availableOptions.sizes.length > 6 && (
-                  <span className={styles.moreOptions}>
-                    +{availableOptions.sizes.length - 6} more
-                  </span>
-                )}
+              <div className={styles.optionGroup}>
+                <strong className={styles.optionLabel}>Size:</strong>
+                <div className={styles.optionButtons}>
+                  {availableOptions.sizes.map((size: string, index: number) => (
+                    <button
+                      key={`size-${index}-${size}`}
+                      className={selectedSize === size ? styles.active : ""}
+                      onClick={() => {
+                        userChangedAttribute.current = 'size';
+                        setSelectedSize(size);
+                      }}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {availableOptions.patterns.length > 0 && (
-              <div>
-                <strong>Pattern: </strong>
-                {availableOptions.patterns.slice(0, 6).map((pattern: string, index: number) => (
-                  <button
-                    key={`pattern-${index}-${pattern}`}
-                    className={selectedPattern === pattern ? styles.active : ""}
-                    onClick={() => {
-                      userChangedAttribute.current = 'pattern';
-                      setSelectedPattern(pattern);
-                    }}
-                  >
-                    {pattern}
-                  </button>
-                ))}
-                {availableOptions.patterns.length > 6 && (
-                  <span className={styles.moreOptions}>
-                    +{availableOptions.patterns.length - 6} more
-                  </span>
-                )}
+              <div className={styles.optionGroup}>
+                <strong className={styles.optionLabel}>Pattern:</strong>
+                <div className={styles.optionButtons}>
+                  {availableOptions.patterns.map((pattern: string, index: number) => (
+                    <button
+                      key={`pattern-${index}-${pattern}`}
+                      className={selectedPattern === pattern ? styles.active : ""}
+                      onClick={() => {
+                        userChangedAttribute.current = 'pattern';
+                        setSelectedPattern(pattern);
+                      }}
+                    >
+                      {pattern}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {availableOptions.qualities.length > 0 && (
-              <div>
-                <strong>Quality: </strong>
-                {availableOptions.qualities.slice(0, 6).map((quality: string, index: number) => (
-                  <button
-                    key={`quality-${index}-${quality}`}
-                    className={selectedQuality === quality ? styles.active : ""}
-                    onClick={() => {
-                      userChangedAttribute.current = 'quality';
-                      setSelectedQuality(quality);
-                    }}
-                  >
-                    {quality}
-                  </button>
-                ))}
-                {availableOptions.qualities.length > 6 && (
-                  <span className={styles.moreOptions}>
-                    +{availableOptions.qualities.length - 6} more
-                  </span>
-                )}
+              <div className={styles.optionGroup}>
+                <strong className={styles.optionLabel}>Quality:</strong>
+                <div className={styles.optionButtons}>
+                  {availableOptions.qualities.map((quality: string, index: number) => (
+                    <button
+                      key={`quality-${index}-${quality}`}
+                      className={selectedQuality === quality ? styles.active : ""}
+                      onClick={() => {
+                        userChangedAttribute.current = 'quality';
+                        setSelectedQuality(quality);
+                      }}
+                    >
+                      {quality}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {selectedVariant ? (
