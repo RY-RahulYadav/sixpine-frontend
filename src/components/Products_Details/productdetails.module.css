@@ -996,6 +996,26 @@
   font-weight: 400;
 }
 
+.moreOptions {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: auto;
+  padding: 4px 10px;
+  border: 1px dotted #bbbdbd;
+  background: #ffffff;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #0f1111;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 400;
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
 
 /* Modal */
 .modalOverlay {

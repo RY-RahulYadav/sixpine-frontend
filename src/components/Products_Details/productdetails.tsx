@@ -928,7 +928,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             {availableOptions.colors.length > 0 && (
               <div>
                 <strong>Color: </strong>
-                {availableOptions.colors.map((color: string, index: number) => (
+                {availableOptions.colors.slice(0, 6).map((color: string, index: number) => (
                   <button
                     key={`color-${index}-${color}`}
                     className={selectedColor === color ? styles.active : ""}
@@ -940,12 +940,17 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                     {color}
                   </button>
                 ))}
+                {availableOptions.colors.length > 6 && (
+                  <span className={styles.moreOptions}>
+                    +{availableOptions.colors.length - 6} more
+                  </span>
+                )}
               </div>
             )}
             {availableOptions.sizes.length > 0 && (
               <div>
                 <strong>Size: </strong>
-                {availableOptions.sizes.map((size: string, index: number) => (
+                {availableOptions.sizes.slice(0, 6).map((size: string, index: number) => (
                   <button
                     key={`size-${index}-${size}`}
                     className={selectedSize === size ? styles.active : ""}
@@ -957,12 +962,17 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                     {size}
                   </button>
                 ))}
+                {availableOptions.sizes.length > 6 && (
+                  <span className={styles.moreOptions}>
+                    +{availableOptions.sizes.length - 6} more
+                  </span>
+                )}
               </div>
             )}
             {availableOptions.patterns.length > 0 && (
               <div>
                 <strong>Pattern: </strong>
-                {availableOptions.patterns.map((pattern: string, index: number) => (
+                {availableOptions.patterns.slice(0, 6).map((pattern: string, index: number) => (
                   <button
                     key={`pattern-${index}-${pattern}`}
                     className={selectedPattern === pattern ? styles.active : ""}
@@ -974,12 +984,17 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                     {pattern}
                   </button>
                 ))}
+                {availableOptions.patterns.length > 6 && (
+                  <span className={styles.moreOptions}>
+                    +{availableOptions.patterns.length - 6} more
+                  </span>
+                )}
               </div>
             )}
             {availableOptions.qualities.length > 0 && (
               <div>
                 <strong>Quality: </strong>
-                {availableOptions.qualities.map((quality: string, index: number) => (
+                {availableOptions.qualities.slice(0, 6).map((quality: string, index: number) => (
                   <button
                     key={`quality-${index}-${quality}`}
                     className={selectedQuality === quality ? styles.active : ""}
@@ -991,6 +1006,11 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                     {quality}
                   </button>
                 ))}
+                {availableOptions.qualities.length > 6 && (
+                  <span className={styles.moreOptions}>
+                    +{availableOptions.qualities.length - 6} more
+                  </span>
+                )}
               </div>
             )}
             {selectedVariant ? (
