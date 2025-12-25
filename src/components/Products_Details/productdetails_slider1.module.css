@@ -71,16 +71,23 @@
   flex: 0 0 auto; /* Shorthand for flex-grow: 0, flex-shrink: 0, flex-basis: auto */
 }
 
-.productImg1 {
-  width: 100%;
-  height: 160px;
-  object-fit: cover; 
-  border-radius: 6px;
-  margin-bottom: 10px;
-}
-
 .imageWrapper {
   position: relative;
+  width: 100%;
+  height: 220px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.productImg1 {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; 
+  border-radius: 6px;
 }
 
 .heartIcon {
@@ -253,8 +260,12 @@
     min-width: 220px;
     width: 300px;
   }
+  .imageWrapper {
+    height: 200px;
+  }
   .productImg1 {
-    height: 150px;
+    height: 100%;
+    object-fit: contain;
   }
   .productTitle {
     font-size: 1rem;
@@ -302,8 +313,12 @@ min-width: 200px;
 width: 350px;
 flex: 0 0 48%;
 }
+.imageWrapper {
+height: 200px;
+}
 .productImg1 {
-height: 150px;
+height: 100%;
+object-fit: contain;
 }
 .buyBtn {
 font-size: 0.85rem;
@@ -390,9 +405,13 @@ padding: 7px 10px;
     margin: 0 0 15px 0;
   }
 
+  .imageWrapper {
+    height: 200px;
+  }
+  
   .productImg1 {
-    height: 150px;
-    object-fit: cover;    
+    height: 100%;
+    object-fit: contain;    
   }
 
   .productTitle {
@@ -434,8 +453,13 @@ padding: 7px 10px;
       width: 100%; 
       flex: 0 0 98%;
   }
+  .imageWrapper {
+    height: 180px;
+  }
+  
   .productImg1 {
-    height: 140px;
+    height: 100%;
+    object-fit: contain;
   }
   .productTitle {
     font-size: 0.8rem;

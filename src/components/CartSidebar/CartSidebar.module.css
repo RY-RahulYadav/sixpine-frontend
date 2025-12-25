@@ -153,8 +153,11 @@
   height: 76px;
   border-radius: 4px;
   margin-bottom: 6px;
-  object-fit: cover;
-  background: #f7f7f7;
+  object-fit: contain;
+  object-position: center;
+  background: #ffffff;
+  padding: 2px;
+  box-sizing: border-box;
 }
 
 .itemPrice {

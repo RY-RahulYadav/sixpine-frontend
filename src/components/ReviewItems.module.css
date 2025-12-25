@@ -41,8 +41,12 @@
 .itemImage {
     width: 80px;
     height: 80px;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     border-radius: 4px;
+    background: #ffffff;
+    padding: 2px;
+    box-sizing: border-box;
 }
 
 .itemDetails {

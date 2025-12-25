@@ -39,11 +39,15 @@
 .small-thumbs img {
     width: 80px;
     height: 80px;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
     border: 2px solid #ddd;
+    background: #ffffff;
+    padding: 2px;
+    box-sizing: border-box;
 }
 
 .small-thumbs img:hover,

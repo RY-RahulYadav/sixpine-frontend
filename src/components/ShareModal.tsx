@@ -11,10 +11,11 @@ const ShareModal: React.FC<ShareModalProps> = ({ show, onClose }) => {
   const { showSuccess } = useNotification();
   const [copied, setCopied] = useState(false);
   
-  // Get current page URL
-  const currentUrl = window.location.href;
+  // Get current page URL dynamically
+  const getCurrentUrl = () => window.location.href;
 
   const handleCopyLink = async () => {
+    const currentUrl = getCurrentUrl();
     try {
       await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
@@ -57,7 +58,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ show, onClose }) => {
           <div className={styles.urlContainer}>
             <input
               type="text"
-              value={currentUrl}
+              value={getCurrentUrl()}
               readOnly
               className={styles.urlInput}
               onClick={(e) => (e.target as HTMLInputElement).select()}

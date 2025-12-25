@@ -178,7 +178,15 @@ const CartPage: React.FC = () => {
                         src={item.variant?.image || item.product.main_image || '/placeholder-image.jpg'}
                         alt={item.variant?.title || item.product.title}
                         className="img-fluid rounded"
-                        style={{ maxHeight: '80px' }}
+                        style={{ 
+                          maxHeight: '80px',
+                          width: '100%',
+                          objectFit: 'contain',
+                          objectPosition: 'center',
+                          backgroundColor: '#ffffff',
+                          padding: '4px',
+                          boxSizing: 'border-box'
+                        }}
                       />
                     </div>
                     <div className="col-md-4">

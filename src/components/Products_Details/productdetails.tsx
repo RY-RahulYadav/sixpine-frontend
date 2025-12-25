@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import { useNotification } from "../../context/NotificationContext";
-import { advertisementAPI } from "../../services/api";
+import { advertisementAPI, wishlistAPI, addressAPI } from "../../services/api";
 import styles from "./productdetails.module.css";
 import {
   FaStar,
   FaStarHalfAlt,
   FaRegStar,
-  FaTrash,
   FaCheckCircle,
+  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import ShareModal from "../ShareModal";
@@ -23,6 +23,8 @@ interface ProductDetailsProps {
 
 const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const navigate = useNavigate();
+  const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const { addToCart, state } = useApp();
   const { showError, showWarning } = useNotification();
   const [advertisements, setAdvertisements] = useState<any[]>([]);
@@ -31,6 +33,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<{ title: string; description: string } | null>(null);
+  const [defaultAddress, setDefaultAddress] = useState<{ city: string; postal_code: string } | null>(null);
+
+  // Amazon-style zoom feature states
+  const [isZooming, setIsZooming] = useState(false);
+  const [lensPosition, setLensPosition] = useState({ x: 0, y: 0 });
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const imageWrapperRef = useRef<HTMLDivElement>(null);
+  const mainImageRef = useRef<HTMLImageElement>(null);
+
+  // Zoom configuration
+  const LENS_SIZE = 180; // Size of the lens square in pixels
+  const ZOOM_FACTOR = 2.5; // How much to zoom in
 
   // Fetch active advertisements
   useEffect(() => {
@@ -38,7 +52,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       try {
         const response = await advertisementAPI.getActiveAdvertisements();
         console.log('Advertisement API Response:', response.data);
-        
+
         // Handle different response structures
         let ads = [];
         if (response.data) {
@@ -50,7 +64,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             ads = response.data.data;
           }
         }
-        
+
         if (ads.length > 0) {
           setAdvertisements(ads);
           setCurrentAdIndex(0);
@@ -102,13 +116,55 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     return false;
   };
 
+  // Amazon-style zoom handlers
+  const handleMouseEnter = () => {
+    setIsZooming(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsZooming(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageWrapperRef.current || !mainImageRef.current) return;
+
+    const wrapperRect = imageWrapperRef.current.getBoundingClientRect();
+    const imageRect = mainImageRef.current.getBoundingClientRect();
+
+    // Calculate mouse position relative to image
+    const mouseX = e.clientX - imageRect.left;
+    const mouseY = e.clientY - imageRect.top;
+
+    // Calculate lens position (centered on cursor)
+    let lensX = mouseX - LENS_SIZE / 2;
+    let lensY = mouseY - LENS_SIZE / 2;
+
+    // Constrain lens within image bounds
+    const maxLensX = imageRect.width - LENS_SIZE;
+    const maxLensY = imageRect.height - LENS_SIZE;
+
+    lensX = Math.max(0, Math.min(lensX, maxLensX));
+    lensY = Math.max(0, Math.min(lensY, maxLensY));
+
+    // Calculate lens position relative to wrapper (for positioning the lens element)
+    const lensLeft = lensX + (imageRect.left - wrapperRect.left);
+    const lensTop = lensY + (imageRect.top - wrapperRect.top);
+
+    setLensPosition({ x: lensLeft, y: lensTop });
+
+    // Calculate zoom background position (percentage)
+    const zoomX = (lensX / imageRect.width) * 100;
+    const zoomY = (lensY / imageRect.height) * 100;
+
+    setZoomPosition({ x: zoomX, y: zoomY });
+  };
+
   // Get variant_id from URL params if present
-  const [searchParams] = useSearchParams();
   const variantIdFromUrl = searchParams.get('variant') ? parseInt(searchParams.get('variant')!) : null;
 
   // Extract variant options from product.variants
   const variants = product?.variants || [];
-  
+
   // Get unique colors, sizes, patterns, qualities from variants
   const availableColors = Array.from(new Set(variants.map((v: any) => v.color?.name || v.color_name).filter(Boolean)));
   const availableSizes = Array.from(new Set(variants.map((v: any) => v.size).filter(Boolean)));
@@ -116,7 +172,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const availableQualities = Array.from(new Set(variants.map((v: any) => v.quality).filter(Boolean)));
 
   // Fallback to available_colors if variants not available (backward compatibility)
-  const colors = availableColors.length > 0 ? availableColors : 
+  const colors = availableColors.length > 0 ? availableColors :
     (product?.available_colors?.map((c: any) => c.color__name || c.name) || []);
   const sizes = availableSizes.length > 0 ? availableSizes : (product?.available_sizes || []);
   const patterns = availablePatterns.length > 0 ? availablePatterns : (product?.available_patterns || []);
@@ -127,12 +183,12 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     if (variantIdFromUrl && variants.length > 0) {
       const variantFromUrl = variants.find((v: any) => v.id === variantIdFromUrl);
       if (variantFromUrl) {
-      return {
-        color: variantFromUrl.color?.name || '',
-        size: variantFromUrl.size || '',
-        pattern: variantFromUrl.pattern || '',
-        quality: variantFromUrl.quality || ''
-      };
+        return {
+          color: variantFromUrl.color?.name || '',
+          size: variantFromUrl.size || '',
+          pattern: variantFromUrl.pattern || '',
+          quality: variantFromUrl.quality || ''
+        };
       }
     }
     // Default to first active variant
@@ -219,7 +275,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         return v.pattern === value;
       } else if (attributeType === 'quality') {
         return v.quality === value;
-        }
+      }
       return false;
     });
   };
@@ -265,22 +321,22 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
     if (matchingVariant) {
       isAutoSelecting.current = true;
-      
+
       // Auto-select all other attributes from this variant
       const variantColor = matchingVariant.color?.name || matchingVariant.color_name || '';
       const variantSize = matchingVariant.size || '';
       const variantPattern = matchingVariant.pattern || '';
       const variantQuality = matchingVariant.quality || '';
-      
+
       if (variantColor && variantColor !== selectedColor && changedAttr !== 'color') {
         setSelectedColor(variantColor);
-    }
+      }
       if (variantSize && variantSize !== selectedSize && changedAttr !== 'size') {
         setSelectedSize(variantSize);
       }
       if (variantPattern && variantPattern !== selectedPattern && changedAttr !== 'pattern') {
         setSelectedPattern(variantPattern);
-    }
+      }
       if (variantQuality && variantQuality !== selectedQuality && changedAttr !== 'quality') {
         setSelectedQuality(variantQuality);
       }
@@ -292,13 +348,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         pattern: variantPattern || selectedPattern,
         quality: variantQuality || selectedQuality
       };
-      
+
       // Reset flag after state updates
       setTimeout(() => {
         isAutoSelecting.current = false;
         userChangedAttribute.current = null;
       }, 0);
-      } else {
+    } else {
       // Update prevSelections even if no match found
       prevSelections.current = {
         color: selectedColor,
@@ -313,7 +369,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   // Find selected variant based on selections - must match ALL selected criteria exactly
   const findSelectedVariant = useMemo(() => {
     if (variants.length === 0) return null;
-    
+
     // Find exact match for all selected criteria
     // Only return variant if ALL selected attributes match exactly
     const exactMatch = variants.find((v: any) => {
@@ -321,59 +377,73 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       const variantSize = v.size || '';
       const variantPattern = v.pattern || '';
       const variantQuality = v.quality || '';
-      
+
       // All selected attributes must match exactly
       const colorMatch = !selectedColor || variantColor === selectedColor;
       const sizeMatch = !selectedSize || variantSize === selectedSize;
       const patternMatch = !selectedPattern || variantPattern === selectedPattern;
       const qualityMatch = !selectedQuality || variantQuality === selectedQuality;
-      
+
       return colorMatch && sizeMatch && patternMatch && qualityMatch;
     });
-    
+
     // Return exact match only - no fallback to prevent incorrect stock display
     return exactMatch || null;
   }, [variants, selectedColor, selectedSize, selectedPattern, selectedQuality]);
 
   const selectedVariant = findSelectedVariant;
-  
+
+  // Update URL when selected variant changes
+  useEffect(() => {
+    if (selectedVariant && selectedVariant.id && slug) {
+      const currentVariantId = searchParams.get('variant');
+      const newVariantId = selectedVariant.id.toString();
+
+      // Only update URL if variant ID has changed
+      if (currentVariantId !== newVariantId) {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('variant', newVariantId);
+
+        // Update URL without page reload
+        navigate(`/products-details/${slug}?${newSearchParams.toString()}`, { replace: true });
+      }
+    }
+  }, [selectedVariant, slug, navigate, searchParams]);
+
   // Notify parent component when selected variant changes
   useEffect(() => {
     if (onVariantChange && selectedVariant) {
       onVariantChange(selectedVariant);
     }
   }, [selectedVariant, onVariantChange]);
-  
-  // Use variant price (required - variants are the actual products)
-  const cartPrice = selectedVariant?.price || 0;
-  
+
   // Get images from selected variant or first variant, then fallback
   const images = selectedVariant?.images?.length > 0
     ? selectedVariant.images.map((img: any) => img.image)
     : selectedVariant?.image
-    ? [selectedVariant.image]
-    : product?.variants?.[0]?.image
-    ? [product.variants[0].image]
-    : product?.main_image
-    ? [product.main_image]
-    : [
-    "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
-    "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
-   "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
-    "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
-    "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
-  ];
-  
+      ? [selectedVariant.image]
+      : product?.variants?.[0]?.image
+        ? [product.variants[0].image]
+        : product?.main_image
+          ? [product.main_image]
+          : [
+            "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
+            "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
+            "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
+            "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
+            "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
+          ];
+
   const [mainImage, setMainImage] = useState(images[0] || '');
-  
+
   // Update main image when variant changes
   useEffect(() => {
     if (selectedVariant) {
       const variantImages = selectedVariant.images?.length > 0
         ? selectedVariant.images.map((img: any) => img.image)
         : selectedVariant.image
-        ? [selectedVariant.image]
-        : [];
+          ? [selectedVariant.image]
+          : [];
       if (variantImages.length > 0) {
         setMainImage(variantImages[0]);
       }
@@ -382,6 +452,91 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
   // Cart Summary
   const [cartQty, setCartQty] = useState(1);
+  const [isInWishlist, setIsInWishlist] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Fetch default address
+  useEffect(() => {
+    const fetchDefaultAddress = async () => {
+      if (!state.isAuthenticated) {
+        setDefaultAddress(null);
+        return;
+      }
+      try {
+        const response = await addressAPI.getAddresses();
+        const addressesData = Array.isArray(response.data) 
+          ? response.data 
+          : (response.data.results || response.data.data || []);
+        
+        const addresses = Array.isArray(addressesData) ? addressesData : [];
+        const defaultAddr = addresses.find((addr: any) => addr.is_default) || addresses[0];
+        
+        if (defaultAddr && defaultAddr.city && defaultAddr.postal_code) {
+          setDefaultAddress({
+            city: defaultAddr.city,
+            postal_code: defaultAddr.postal_code
+          });
+        } else {
+          setDefaultAddress(null);
+        }
+      } catch (error) {
+        console.error('Error fetching default address:', error);
+        setDefaultAddress(null);
+      }
+    };
+    fetchDefaultAddress();
+  }, [state.isAuthenticated]);
+
+  // Check wishlist status
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      if (!state.isAuthenticated || !product?.id) return;
+      try {
+        const response = await wishlistAPI.getWishlist();
+        if (response.data && response.data.results) {
+          const wishlistIds = response.data.results.map((item: any) => item.product?.id || item.product_id);
+          setIsInWishlist(wishlistIds.includes(product.id));
+        }
+      } catch (error) {
+        console.error('Error checking wishlist:', error);
+      }
+    };
+    checkWishlistStatus();
+  }, [state.isAuthenticated, product?.id]);
+
+  const handleWishlist = async () => {
+    if (!state.isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    if (!product?.id) return;
+
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        const response = await wishlistAPI.getWishlist();
+        if (response.data && response.data.results) {
+          const wishlistItem = response.data.results.find(
+            (item: any) => (item.product?.id || item.product_id) === product.id
+          );
+          if (wishlistItem) {
+            await wishlistAPI.removeFromWishlist(wishlistItem.id);
+            setIsInWishlist(false);
+          }
+        }
+      } else {
+        await wishlistAPI.addToWishlist(product.id);
+        setIsInWishlist(true);
+      }
+      window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+    } catch (error: any) {
+      console.error('Wishlist error:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to update wishlist';
+      showError(errorMsg);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   // Modal for info icons
   interface ModalContent {
@@ -389,7 +544,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     text: string;
     buttons: string[];
   }
-  
+
   const [modalContent, setModalContent] = useState<ModalContent | null>(null);
 
   // const handleOpenModal = (type: string) => {
@@ -478,97 +633,192 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     <div className={styles.productPage}>
       {/* Image Modal - Fullscreen */}
       {isImageModalOpen && (
-        <div 
+        <div
           className={styles.imageModalOverlay}
           onClick={closeImageModal}
         >
-          <div 
+          <div
             className={styles.imageModal}
             onClick={(e) => e.stopPropagation()}
           >
-            <button className={styles.closeBtn} onClick={closeImageModal}>
-              ✖
+            <button className={styles.modalCloseBtn} onClick={closeImageModal} aria-label="Close">
+              <svg className={styles.closeIcon} fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+              </svg>
             </button>
-            
-            <div className={styles.modalLayout}>
-              {/* Large Image on Left */}
-              <div className={styles.modalImageContainer}>
-                <img 
-                  src={mainImage} 
-                  alt="Zoomed" 
-                  className={styles.zoomedImage}
-                  onContextMenu={handleContextMenu}
-                  draggable={false}
-                />
-              </div>
 
-              {/* Thumbnails on Right */}
-              <div className={styles.modalThumbnailsContainer}>
-                {images.map((img: string, index: number) => (
-                  <img
-                    key={index}
-                    src={img}
-                    alt={`Thumb ${index}`}
-                    className={`${styles.modalThumbnail} ${
-                      mainImage === img ? styles.modalThumbnailActive : ""
-                    }`}
-                    onClick={() => handleImageClick(img)}
-                    onContextMenu={handleContextMenu}
-                    draggable={false}
-                  />
-                ))}
+            <div className={styles.modalContent}>
+              <div className={styles.modalBody}>
+                {/* Left Side - Main Image */}
+                <div className={styles.modalImageSection}>
+                  <div className={styles.modalImageWrapper}>
+                    <img 
+                      src={mainImage} 
+                      className={styles.modalMainImage} 
+                      alt="Main product view"
+                      onContextMenu={handleContextMenu}
+                      draggable={false}
+                    />
+                    {/* Amazon logo overlay */}
+                    <div className={styles.amazonLogoOverlay}>
+                      <svg width="24" height="24" viewBox="0 0 56 54">
+                        <rect fill="#001e36" width="56" height="54" rx="9.9"/>
+                        <path fill="#31a8ff" d="M11.6 37.7V14.1h7.1a13.9 13.9 0 0 1 4.7.7 8.2 8.2 0 0 1 3.1 1.9 7.2 7.2 0 0 1 1.7 2.6 8.7 8.7 0 0 1 .5 3 8.2 8.2 0 0 1-1.4 4.9 7.7 7.7 0 0 1-3.7 2.8 14.7 14.7 0 0 1-5.2.9h-3.3v7.3h-4zm5.1-19.5v7.7h2.1a8.7 8.7 0 0 0 2.6-.4 4 4 0 0 0 1.9-1.2 3.6 3.6 0 0 0 .7-2.4 3.7 3.7 0 0 0-.5-2 3.5 3.5 0 0 0-1.5-1.3 6.9 6.9 0 0 0-2.7-.5h-2.6zM43.5 24.4a13 13 0 0 0-2.7-.8 11.7 11.7 0 0 0-2.6-.3 4.8 4.8 0 0 0-1.4.2 1.2 1.2 0 0 0-.7.4 1.2 1.2 0 0 0-.2.6 1 1 0 0 0 .2.6 2.5 2.5 0 0 0 .8.6c.4.3 1 .5 1.6.8a16.1 16.1 0 0 1 3.5 1.7 5.4 5.4 0 0 1 1.8 1.9 5.1 5.1 0 0 1 .5 2.4 5.3 5.3 0 0 1-.9 3 5.8 5.8 0 0 1-2.6 2.1 10.4 10.4 0 0 1-4.2.7 15 15 0 0 1-3.1-.3 11.5 11.5 0 0 1-2.5-.7v-3.8l.1-.2a.2.2 0 0 1 .2 0 10.8 10.8 0 0 0 3 1.1 11.7 11.7 0 0 0 2.7.4 4.2 4.2 0 0 0 1.9-.3 1 1 0 0 0 .6-1 1.2 1.2 0 0 0-.6-.9 9.2 9.2 0 0 0-2.2-1.1 13.6 13.6 0 0 1-3.3-1.7 5.6 5.6 0 0 1-1.7-1.9 5.1 5.1 0 0 1-.5-2.4 5.3 5.3 0 0 1 .8-2.8 5.6 5.6 0 0 1 2.5-2.1 7.6 7.6 0 0 1 3.7-.9c1 0 2 0 3.1.1a10.6 10.6 0 0 1 2.4.8l.2.2v4l-.1.2z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side - Product Info & Thumbnails */}
+                <div className={styles.modalSidebar}>
+                  <h2 className={styles.modalProductTitle}>
+                    {selectedVariant?.title || product?.title || "Product Title"}
+                  </h2>
+
+                  <div className={styles.modalVariantInfo}>
+                    {selectedVariant?.specifications?.find((s: any) => s.name?.toLowerCase() === 'style') && (
+                      <div>
+                        Style Name: <span className={styles.modalVariantValue}>
+                          {selectedVariant.specifications.find((s: any) => s.name?.toLowerCase() === 'style')?.value || 'N/A'}
+                        </span>
+                      </div>
+                    )}
+                    {selectedColor && (
+                      <div>
+                        Pattern Name: <span className={styles.modalVariantValue}>{selectedColor}</span>
+                      </div>
+                    )}
+                    {selectedPattern && (
+                      <div>
+                        Pattern: <span className={styles.modalVariantValue}>{selectedPattern}</span>
+                      </div>
+                    )}
+                    {selectedQuality && (
+                      <div>
+                        Quality: <span className={styles.modalVariantValue}>{selectedQuality}</span>
+                      </div>
+                    )}
+                    {selectedSize && (
+                      <div>
+                        Size: <span className={styles.modalVariantValue}>{selectedSize}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.modalThumbnailGrid}>
+                    {images.map((img: string, index: number) => (
+                      <div
+                        key={index}
+                        className={`${styles.modalThumbnailBox} ${mainImage === img ? styles.modalThumbnailActive : ""}`}
+                        onClick={() => handleImageClick(img)}
+                      >
+                        <div 
+                          className={styles.modalThumbnailImage}
+                          style={{ backgroundImage: `url(${img})` }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Breadcrumb */}
-      <div className={styles.breadcrumb}>
-        <a href="/">Home</a>
-        <a href="/products">Product</a>
-        <span title={selectedVariant?.title || product?.title || "Product Name"}>
-          {truncateTitle(selectedVariant?.title || product?.title || "Product Name", 60)}
+      {/* Breadcrumb - Amazon style */}
+      <nav className={styles.breadcrumb}>
+        <a href="/">{product?.category?.parent_category?.name || "Home & Kitchen"}</a>
+        <span className={styles.breadcrumbSeparator}>›</span>
+        <a href="/products">{product?.category?.name || "Furniture"}</a>
+        <span className={styles.breadcrumbSeparator}>›</span>
+        <a href={`/products?subcategory=${product?.subcategory?.id || ''}`}>{product?.subcategory?.name || "Living Room Furniture"}</a>
+        <span className={styles.breadcrumbSeparator}>›</span>
+        <span className={styles.breadcrumbCurrent} title={selectedVariant?.title || product?.title || "Product Name"}>
+          {truncateTitle(selectedVariant?.title || product?.title || "Sofas & Couches", 40)}
         </span>
-      </div>
+      </nav>
 
       <div className={styles.mainLayout}>
-        {/* Image Section */}
-        <div className={styles.imageSection}>
-          <div className={styles.imageWrapper}>
-            <div className={styles.shareButton} onClick={(e) => { e.stopPropagation(); setIsShareModalOpen(true); }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M9.71 6.71L11 5.41V14C11 14.2652 11.1054 14.5196 11.2929 14.7071C11.4804 14.8946 11.7348 15 12 15C12.2652 15 12.5196 14.8946 12.7071 14.7071C12.8946 14.5196 13 14.2652 13 14V5.41L14.29 6.71C14.383 6.80373 14.4936 6.87812 14.6154 6.92889C14.7373 6.97966 14.868 7.0058 15 7.0058C15.132 7.0058 15.2627 6.97966 15.3846 6.92889C15.5064 6.87812 15.617 6.80373 15.71 6.71C15.8037 6.61704 15.8781 6.50644 15.9289 6.38458C15.9797 6.26272 16.0058 6.13201 16.0058 6C16.0058 5.86799 15.9797 5.73728 15.9289 5.61542C15.8781 5.49356 15.8037 5.38296 15.71 5.29L12.71 2.29C12.617 2.19627 12.5064 2.12188 12.3846 2.07111C12.2627 2.02034 12.132 1.9942 12 1.9942C11.868 1.9942 11.7373 2.02034 11.6154 2.07111C11.4936 2.12188 11.383 2.19627 11.29 2.29L8.29 5.29C8.1017 5.4783 7.99591 5.7337 7.99591 6C7.99591 6.2663 8.1017 6.5217 8.29 6.71C8.47831 6.8983 8.7337 7.00409 9 7.00409C9.2663 7.00409 9.5217 6.8983 9.71 6.71Z" fill="#0F1111"/>
-<path d="M18 9H15V11H18V20H6V11H9V9H6C5.46957 9 4.96086 9.21071 4.58579 9.58579C4.21071 9.96086 4 10.4696 4 11V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V11C20 10.4696 19.7893 9.96086 19.4142 9.58579C19.0391 9.21071 18.5304 9 18 9Z" fill="#0F1111"/>
-</svg>
-
-            </div>
-            <img
-              src={mainImage}
-              alt="Product"
-              className={styles.mainImage}
-              onClick={openImageModal}
-              onContextMenu={handleContextMenu}
-              draggable={false}
-            />
-          </div>
-
-          {/* Thumbnails below the main image */}
-          <div className={styles.thumbnails}>
-            {images.map((img: string, index: number) => (
+        {/* Image Section with Zoom */}
+        <div className={styles.imageSectionContainer}>
+          <div className={styles.imageSection}>
+            <div
+              className={styles.imageWrapper}
+              ref={imageWrapperRef}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onMouseMove={handleMouseMove}
+            >
+              <div className={styles.shareButton} onClick={(e) => { e.stopPropagation(); setIsShareModalOpen(true); }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 12V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V12" stroke="#0F1111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <polyline points="16,6 12,2 8,6" stroke="#0F1111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <line x1="12" y1="2" x2="12" y2="15" stroke="#0F1111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
               <img
-                key={index}
-                src={img}
-                alt={`Thumbnail ${index + 1}`}
-                className={`${styles.thumbnail} ${
-                  mainImage === img ? styles.activeThumb : ""
-                }`}
-                onClick={() => setMainImage(img)}
+                ref={mainImageRef}
+                src={mainImage}
+                alt="Product"
+                className={styles.mainImage}
+                onClick={openImageModal}
                 onContextMenu={handleContextMenu}
                 draggable={false}
               />
-            ))}
+              {/* Zoom Lens Overlay */}
+              {isZooming && (
+                <div
+                  className={styles.zoomLens}
+                  style={{
+                    left: `${lensPosition.x}px`,
+                    top: `${lensPosition.y}px`,
+                    width: `${LENS_SIZE}px`,
+                    height: `${LENS_SIZE}px`,
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Click to see full view - Amazon style */}
+            <div className={styles.clickToView} onClick={openImageModal}>
+              Click to see full view
+            </div>
+
+            {/* Thumbnails below the main image - Amazon style horizontal row */}
+            <div className={styles.thumbnailsContainer}>
+              <div className={styles.thumbnails}>
+                {images.map((img: string, index: number) => (
+                  <div
+                    key={index}
+                    className={`${styles.thumbnailWrapper} ${mainImage === img ? styles.activeThumbWrapper : ""}`}
+                    onMouseEnter={() => setMainImage(img)}
+                    onClick={() => setMainImage(img)}
+                  >
+                    <img
+                      src={img}
+                      alt={`Thumbnail ${index + 1}`}
+                      className={styles.thumbnail}
+                      onContextMenu={handleContextMenu}
+                      draggable={false}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
+          {/* Zoom Panel - Amazon Style (appears on right side) */}
+          {isZooming && (
+            <div
+              className={styles.zoomPanel}
+              style={{
+                backgroundImage: `url(${mainImage})`,
+                backgroundSize: `${ZOOM_FACTOR * 100}%`,
+                backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+              }}
+            />
+          )}
         </div>
 
         {/* PART 2 - MIDDLE DETAILS */}
@@ -576,9 +826,9 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
           <h2 className={styles.title}>
             {selectedVariant?.title || product?.title || "PRODUCT TITLE GOES HERE"}
           </h2>
-         <p className={styles.brand}>
-  <span className={styles.brandLabel}>Brand:</span> <span className={styles.brandName}>{product?.brand || "Sixpine"}</span>
-</p>
+          <p className={styles.brand}>
+            <span className={styles.brandLabel}>Brand:</span> <span className={styles.brandName}>{product?.brand || "Sixpine"}</span>
+          </p>
 
 
           {/* Ratings */}
@@ -598,34 +848,34 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
           </div>
 
           {/* Price */}
-        <div className={styles.priceBox}>
-  {/* Actual Price */}
-  <div className={styles.priceRow}>
-    {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
-      <span className={styles.discountBadge}>-{Math.round(((selectedVariant.old_price - selectedVariant.price) / selectedVariant.old_price) * 100)}%</span>
-    )}
-    <p className={styles.emiPrice}>
-    ₹{(selectedVariant?.price || 0).toLocaleString()}
-  </p>
-  
+          <div className={styles.priceBox}>
+            {/* Actual Price */}
+            <div className={styles.priceRow}>
+              {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
+                <span className={styles.discountBadge}>-{Math.round(((selectedVariant.old_price - selectedVariant.price) / selectedVariant.old_price) * 100)}%</span>
+              )}
+              <p className={styles.emiPrice}>
+                ₹{(selectedVariant?.price || 0).toLocaleString()}
+              </p>
 
-  </div>
 
-  {/* Discount & Final Price */}
- 
-  {/* MRP */}
-  {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
-  <p className={styles.mrp}>
-      M.R.P.: <span className={styles.strike}>₹{selectedVariant.old_price.toLocaleString()}</span>
-  </p>
-  )}
-  
-  {/* EMI Info Note */}
-  <div className={styles.emiInfoNote}>
-    <AiOutlineInfoCircle className={styles.infoIcon} />
-    <span>EMI option available after checkout</span>
-  </div>
-</div>
+            </div>
+
+            {/* Discount & Final Price */}
+
+            {/* MRP */}
+            {selectedVariant?.old_price && selectedVariant.old_price > selectedVariant.price && (
+              <p className={styles.mrp}>
+                M.R.P.: <span className={styles.strike}>₹{selectedVariant.old_price.toLocaleString()}</span>
+              </p>
+            )}
+
+            {/* EMI Info Note */}
+            <div className={styles.emiInfoNote}>
+              <AiOutlineInfoCircle className={styles.infoIcon} />
+              <span>EMI option available after checkout</span>
+            </div>
+          </div>
 
 
           <h4 className={styles.offersTitle}>Available Offers</h4>
@@ -636,16 +886,16 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                 {product.screen_offer.map((offer: any, index: number) => {
                   // Handle both string (backward compatibility) and object formats
                   const offerTitle = typeof offer === 'string' ? offer : (offer.title || offer.text || 'Offer');
-                  const offerDescription = typeof offer === 'string' 
-                    ? 'No additional details available for this offer.' 
+                  const offerDescription = typeof offer === 'string'
+                    ? 'No additional details available for this offer.'
                     : (offer.description || 'No additional details available for this offer.');
-                  
+
                   return (
                     <li key={`screen-offer-${index}`} className={styles.offerItem}>
                       <FaCheckCircle className={styles.checkIcon} />
                       <span className={styles.offerText}>{offerTitle}</span>
-                      <AiOutlineInfoCircle 
-                        className={styles.infoIconRight} 
+                      <AiOutlineInfoCircle
+                        className={styles.infoIconRight}
                         onClick={() => setSelectedOffer({ title: offerTitle, description: offerDescription })}
                       />
                     </li>
@@ -653,7 +903,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                 })}
               </>
             )}
-            
+
             {/* Default offers if no screen offers exist or as additional offers */}
             {/* {(!product?.screen_offer || !Array.isArray(product.screen_offer) || product.screen_offer.length === 0) && (
               <>
@@ -667,10 +917,10 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                 </li>
               </>
             )} */}
-            
-            
-           
-            
+
+
+
+
           </ul>
 
           {/* Options */}
@@ -746,7 +996,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             {selectedVariant ? (
               <div className={styles.variantInfo} key={`stock-${selectedVariant.id || 'default'}`}>
                 <small className="text-muted">
-                  {selectedVariant.stock_quantity > 0 
+                  {selectedVariant.stock_quantity > 0
                     ? `${selectedVariant.stock_quantity} in stock`
                     : 'Out of stock'}
                 </small>
@@ -780,8 +1030,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
           <div className={styles.productDetailsContent}>
             <h3>Key Details</h3>
-            <div 
-              className={styles.keyDetailsGrid} 
+            <div
+              className={styles.keyDetailsGrid}
               key={`key-details-${selectedVariant?.id || selectedColor || selectedSize || selectedPattern || selectedQuality || 'default'}`}
             >
               <div className={styles.detailCard}>
@@ -792,8 +1042,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
                   .filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
                   .map((spec: any, index: number) => (
-                    <div 
-                      key={`variant-spec-${selectedVariant?.id || 'v'}-${spec.id || index}-${selectedColor || ''}-${selectedSize || ''}`} 
+                    <div
+                      key={`variant-spec-${selectedVariant?.id || 'v'}-${spec.id || index}-${selectedColor || ''}-${selectedSize || ''}`}
                       className={styles.detailCard}
                     >
                       <strong>{spec.name}:&nbsp;</strong> {spec.value}
@@ -801,11 +1051,11 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   ))
               ) : (
                 product?.specifications
-                ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
-                ?.map((spec: any, index: number) => (
+                  ?.filter((spec: any) => spec.name?.toLowerCase() !== 'brand')
+                  ?.map((spec: any, index: number) => (
                     <div key={`product-spec-${spec.id || index}`} className={styles.detailCard}>
-                  <strong>{spec.name}:&nbsp;</strong> {spec.value}
-              </div>
+                      <strong>{spec.name}:&nbsp;</strong> {spec.value}
+                    </div>
                   ))
               )}
             </div>
@@ -818,7 +1068,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                 ))
               ) : (
                 product?.features?.map((feature: any, index: number) => (
-                <li key={index}>{feature.feature}</li>
+                  <li key={index}>{feature.feature}</li>
                 ))
               )}
             </ul>
@@ -839,9 +1089,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
         {/* PART 3 - RIGHT SIDEBAR */}
         <div className={styles.sidebar}>
-          {/* CART SUMMARY */}
+          {/* Purchase Box */}
           <div className={styles.cartSummary}>
-            <h3>CART SUMMARY</h3>
+            {/* Big Price */}
+            <div className={styles.bigPrice}>
+              ₹{(selectedVariant?.price || product?.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+
             {/* Delivery Date */}
             {product?.estimated_delivery_days && (
               <div className={styles.deliveryInfo}>
@@ -850,44 +1104,77 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                     const deliveryDays = product.estimated_delivery_days || 4;
                     const deliveryDate = new Date();
                     deliveryDate.setDate(deliveryDate.getDate() + deliveryDays);
-                    
+
                     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-                    
+
                     const dayName = days[deliveryDate.getDay()];
                     const day = deliveryDate.getDate();
                     const monthName = months[deliveryDate.getMonth()];
-                    
+
                     return `${dayName}, ${day} ${monthName}`;
                   })()}.
                 </p>
               </div>
             )}
-            <p>
-              {cartQty} x {truncateTitle(selectedVariant?.title || product?.title || "Product", 16)} = ₹{cartPrice.toLocaleString()}
-            </p>
-            <p>
-              <strong>Total: ₹{(cartPrice * cartQty).toLocaleString()}</strong>
-            </p>
 
-            <div className={styles.cartControls}>
-              <button
-                onClick={() => cartQty > 1 && setCartQty(cartQty - 1)}
-                className={styles.qtyBtn}
-              >
-                <FaTrash />
-              </button>
-              <span className={styles.qty}>{cartQty}</span>
-              <button
-                onClick={() => setCartQty(cartQty + 1)}
-                className={styles.qtyBtn}
-              >
-                +
-              </button>
+            {/* Location */}
+            <div className={styles.locationInfo}>
+              <FaMapMarkerAlt className={styles.locationIcon} />
+              <span>
+                Delivering to{' '}
+                <strong>
+                  {defaultAddress ? `${defaultAddress.city} ${defaultAddress.postal_code}` : 'Select location'}
+                </strong>
+                {' - '}
+                <a 
+                  href="#" 
+                  className={styles.updateLink}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/your-addresses');
+                  }}
+                >
+                  Update location
+                </a>
+              </span>
             </div>
 
+            {/* Seller Info */}
+            <div className={styles.sellerInfo}>
+              <span className={styles.sellerLabel}>Shipper / Seller:</span> <span className={styles.sellerName}>{product?.brand || "WOODIE TECHIE ART"}</span>
+            </div>
+
+            {/* Payment Info */}
+            <div className={styles.paymentInfo}>
+              <span className={styles.paymentLabel}>Payment:</span> <span className={styles.paymentText}>Secure transaction</span>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className={styles.quantitySelector}>
+              <label htmlFor="quantity-select">Quantity:</label>
+              <select
+                id="quantity-select"
+                className={styles.quantitySelect}
+                value={cartQty}
+                onChange={(e) => setCartQty(parseInt(e.target.value))}
+              >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                  <option key={num} value={num}>{num}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Action Buttons */}
             <button className={styles.addCart} onClick={handleAddToCart}>Add to Cart</button>
             <button className={styles.buyNow} onClick={handleBuyNow}>Buy Now</button>
+            <button 
+              className={styles.wishlistBtn} 
+              onClick={handleWishlist}
+              disabled={wishlistLoading}
+            >
+              {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            </button>
           </div>
 
           {/* ADVERTISEMENT */}
@@ -905,13 +1192,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               />
               <p>
                 <strong>
-                  {advertisements[currentAdIndex].discount_percentage 
+                  {advertisements[currentAdIndex].discount_percentage
                     ? `Special Offer: ${advertisements[currentAdIndex].discount_percentage}% Off`
                     : advertisements[currentAdIndex].title || 'Special Offer'}
                 </strong>
               </p>
-              <button 
-                className={styles.buyNow} 
+              <button
+                className={styles.buyNow}
                 onClick={() => {
                   if (advertisements[currentAdIndex]?.button_link) {
                     if (advertisements[currentAdIndex].button_link.startsWith('http')) {
@@ -940,8 +1227,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             </div>
           )}
         </div>
-       
-        
+
+
       </div>
 
       {/* Share Modal */}
