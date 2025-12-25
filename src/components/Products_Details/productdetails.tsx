@@ -43,6 +43,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const mainImageRef = useRef<HTMLImageElement>(null);
   const imageSectionContainerRef = useRef<HTMLDivElement>(null);
   const detailsSectionRef = useRef<HTMLDivElement>(null);
+  const zoomPanelRef = useRef<HTMLDivElement>(null);
+  const [zoomPanelTop, setZoomPanelTop] = useState(0);
 
   // Zoom configuration
   const LENS_SIZE = 180; // Size of the lens square in pixels
@@ -128,10 +130,15 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!imageWrapperRef.current || !mainImageRef.current) return;
+    if (!imageWrapperRef.current || !mainImageRef.current || !imageSectionContainerRef.current) return;
 
     const wrapperRect = imageWrapperRef.current.getBoundingClientRect();
     const imageRect = mainImageRef.current.getBoundingClientRect();
+    const containerRect = imageSectionContainerRef.current.getBoundingClientRect();
+
+    // Update zoom panel top position to follow image wrapper
+    const topOffset = wrapperRect.top - containerRect.top;
+    setZoomPanelTop(topOffset);
 
     // Calculate mouse position relative to image
     const mouseX = e.clientX - imageRect.left;
@@ -536,6 +543,42 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     };
   }, [product, selectedVariant]);
 
+  // Update zoom panel position to follow image wrapper on scroll
+  useEffect(() => {
+    const updateZoomPanelPosition = () => {
+      if (imageWrapperRef.current && imageSectionContainerRef.current && isZooming) {
+        const wrapperRect = imageWrapperRef.current.getBoundingClientRect();
+        const containerRect = imageSectionContainerRef.current.getBoundingClientRect();
+        
+        // Calculate top position relative to container
+        const topOffset = wrapperRect.top - containerRect.top;
+        setZoomPanelTop(topOffset);
+      }
+    };
+
+    // Update on scroll and resize
+    window.addEventListener('scroll', updateZoomPanelPosition, true);
+    window.addEventListener('resize', updateZoomPanelPosition);
+
+    // Initial update
+    updateZoomPanelPosition();
+
+    return () => {
+      window.removeEventListener('scroll', updateZoomPanelPosition, true);
+      window.removeEventListener('resize', updateZoomPanelPosition);
+    };
+  }, [isZooming]);
+
+  // Update zoom panel position when zooming starts
+  useEffect(() => {
+    if (isZooming && imageWrapperRef.current && imageSectionContainerRef.current) {
+      const wrapperRect = imageWrapperRef.current.getBoundingClientRect();
+      const containerRect = imageSectionContainerRef.current.getBoundingClientRect();
+      const topOffset = wrapperRect.top - containerRect.top;
+      setZoomPanelTop(topOffset);
+    }
+  }, [isZooming]);
+
   const handleWishlist = async () => {
     if (!state.isAuthenticated) {
       navigate('/login');
@@ -854,11 +897,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
           {/* Zoom Panel - Amazon Style (appears on right side) */}
           {isZooming && (
             <div
+              ref={zoomPanelRef}
               className={styles.zoomPanel}
               style={{
                 backgroundImage: `url(${mainImage})`,
                 backgroundSize: `${ZOOM_FACTOR * 100}%`,
                 backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                top: `${zoomPanelTop}px`,
               }}
             />
           )}

@@ -376,9 +376,9 @@
 
 .thumbnails {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: nowrap;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   width: 100%;
 }
 
