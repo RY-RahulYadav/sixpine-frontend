@@ -38,6 +38,7 @@ interface ProductVariant {
   stock_quantity: number;
   is_in_stock: boolean;
   image: string;
+  video_url?: string;
   images: VariantImage[];
   specifications?: Specification[];
   measurement_specs?: Specification[];
@@ -997,6 +998,7 @@ const AdminProductDetail: React.FC = () => {
             stock_quantity: parseInt(v.stock_quantity.toString()) || 0,
             is_in_stock: v.is_in_stock !== false,
             image: v.image || '',
+            video_url: v.video_url || '',
             is_active: v.is_active !== false,
             subcategory_ids: v.subcategory_ids || [],  // Include subcategory_ids
             images: (v.images || []).map(img => ({
@@ -2864,7 +2866,36 @@ const AdminProductDetail: React.FC = () => {
                       </div>
                       
                       <div className="admin-card" style={{ padding: '24px' }}>
-                        <div className="tw-space-y-4">
+                        {/* Video URL Section */}
+                        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>videocam</span>
+                            Video URL
+                          </h5>
+                          <div className="admin-form-group">
+                            <label>Video URL (YouTube, Vimeo, etc.)</label>
+                            <input
+                              type="url"
+                              value={variant.video_url || ''}
+                              onChange={(e) => handleVariantChange(variantIndex, 'video_url', e.target.value)}
+                              placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+                              className="admin-input"
+                            />
+                            {variant.video_url && (
+                              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                                Video URL: {variant.video_url}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Images Section */}
+                        <div>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
+                            Images ({variant.images?.length || 0})
+                          </h5>
+                          <div className="tw-space-y-4">
                           {variant.images?.map((img, imgIndex) => (
                             <div key={imgIndex} className="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-bg-gray-50">
                               <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-4 tw-items-start">
@@ -2939,6 +2970,7 @@ const AdminProductDetail: React.FC = () => {
                               <p className="tw-mt-2">No variant images added</p>
                             </div>
                           )}
+                          </div>
                         </div>
                       </div>
                     </div>
