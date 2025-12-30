@@ -327,10 +327,22 @@ const AdminProductDetail: React.FC = () => {
             // Extract subcategory_ids from subcategories array OR from subcategory_ids field
             const subcategoryIds = v.subcategories?.map((sub: any) => sub.id) || v.subcategory_ids || [];
             console.log('Loading variant subcategories:', { variantId: v.id, subcategories: v.subcategories, subcategory_ids: v.subcategory_ids, normalized: subcategoryIds });
+            // Normalize images array - ensure it's always an array and sorted by sort_order
+            const normalizedImages = (v.images || [])
+              .map((img: any) => ({
+                id: img.id,
+                image: img.image || '',
+                alt_text: img.alt_text || '',
+                sort_order: img.sort_order || 0,
+                is_active: img.is_active !== false
+              }))
+              .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+            console.log('Loading variant images:', { variantId: v.id, imageCount: normalizedImages.length, images: normalizedImages });
             return {
               ...v,
               color_id: colorId,
               subcategory_ids: subcategoryIds,
+              images: normalizedImages,
               measurement_specs: v.measurement_specs || [],
               style_specs: v.style_specs || [],
               features: v.features || [],
@@ -1055,10 +1067,19 @@ const AdminProductDetail: React.FC = () => {
           const colorId = v.color_id || (v.color?.id ? parseInt(v.color.id) : null) || 0;
           const subcategoryIds = v.subcategories?.map((sub: any) => sub.id) || v.subcategory_ids || [];
           console.log('Updating variant state after save:', { id: v.id, subcategoryIds });
+          // Normalize images array - ensure it's always an array
+          const normalizedImages = (v.images || []).map((img: any) => ({
+            id: img.id,
+            image: img.image || '',
+            alt_text: img.alt_text || '',
+            sort_order: img.sort_order || 0,
+            is_active: img.is_active !== false
+          }));
           return {
             ...v,
             color_id: colorId,
             subcategory_ids: subcategoryIds,
+            images: normalizedImages,
             measurement_specs: v.measurement_specs || {},
             style_specs: v.style_specs || {},
             features: v.features || {},
