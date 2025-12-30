@@ -80,6 +80,19 @@ const AdminFilterOptions: React.FC = () => {
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
   const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
   
+  // Specification Templates
+  const [specTemplatesMap, setSpecTemplatesMap] = useState<Record<number, any[]>>({});
+  const [showSpecTemplateModal, setShowSpecTemplateModal] = useState<boolean>(false);
+  const [editingSpecTemplate, setEditingSpecTemplate] = useState<any | null>(null);
+  const [specTemplateForm, setSpecTemplateForm] = useState({ 
+    category: '', 
+    section: 'specifications', 
+    field_name: '', 
+    sort_order: 0, 
+    is_active: true 
+  });
+  const [expandedSpecSection, setExpandedSpecSection] = useState<{categoryId: number, section: string} | null>(null);
+  
   // Form data
   const [categoryForm, setCategoryForm] = useState({ name: '', slug: '', description: '', is_active: true });
   const [subcategoryForm, setSubcategoryForm] = useState({ name: '', slug: '', category: '', description: '', is_active: true });
@@ -98,8 +111,19 @@ const AdminFilterOptions: React.FC = () => {
   useEffect(() => {
     if (expandedCategory) {
       fetchSubcategories(expandedCategory);
+      fetchSpecTemplates(expandedCategory);
     }
   }, [expandedCategory]);
+  
+  const fetchSpecTemplates = async (categoryId: number) => {
+    try {
+      const response = await adminAPI.getCategorySpecificationTemplates({ category: categoryId });
+      const templates = response.data.results || response.data || [];
+      setSpecTemplatesMap(prev => ({ ...prev, [categoryId]: templates }));
+    } catch (err) {
+      console.error('Error fetching specification templates:', err);
+    }
+  };
 
   const fetchAllData = async () => {
     try {
@@ -311,6 +335,87 @@ const AdminFilterOptions: React.FC = () => {
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to delete subcategory', 'error');
     }
+  };
+
+  // Specification Template handlers
+  const handleSpecTemplateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!specTemplateForm.category || !specTemplateForm.field_name) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+    setSaving(true);
+    try {
+      if (editingSpecTemplate) {
+        await adminAPI.updateCategorySpecificationTemplate(editingSpecTemplate.id, specTemplateForm);
+        showToast('Specification template updated successfully', 'success');
+      } else {
+        await adminAPI.createCategorySpecificationTemplate(specTemplateForm);
+        showToast('Specification template created successfully', 'success');
+      }
+      resetSpecTemplateForm();
+      await fetchSpecTemplates(parseInt(specTemplateForm.category));
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Failed to save specification template', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditSpecTemplate = (template: any) => {
+    setEditingSpecTemplate(template);
+    setSpecTemplateForm({
+      category: template.category.toString(),
+      section: template.section,
+      field_name: template.field_name,
+      sort_order: template.sort_order || 0,
+      is_active: template.is_active !== false
+    });
+    setShowSpecTemplateModal(true);
+  };
+
+  const resetSpecTemplateForm = () => {
+    setEditingSpecTemplate(null);
+    setSpecTemplateForm({ category: '', section: 'specifications', field_name: '', sort_order: 0, is_active: true });
+    setShowSpecTemplateModal(false);
+  };
+
+  const handleDeleteSpecTemplate = async (id: number, categoryId: number) => {
+    const confirmed = await showConfirmation({
+      title: 'Delete Specification Template',
+      message: 'Are you sure you want to delete this specification template?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonStyle: 'danger',
+    });
+
+    if (!confirmed) {
+      return;
+    }
+    try {
+      await adminAPI.deleteCategorySpecificationTemplate(id);
+      showToast('Specification template deleted successfully', 'success');
+      await fetchSpecTemplates(categoryId);
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Failed to delete specification template', 'error');
+    }
+  };
+
+  const getSectionDisplayName = (section: string) => {
+    const names: Record<string, string> = {
+      'specifications': 'Specifications',
+      'measurement_specs': 'Measurement Specifications',
+      'style_specs': 'Style Specifications',
+      'features': 'Features',
+      'user_guide': 'User Guide',
+      'item_details': 'Item Details'
+    };
+    return names[section] || section;
+  };
+
+  const getTemplatesBySection = (categoryId: number, section: string) => {
+    const templates = specTemplatesMap[categoryId] || [];
+    return templates.filter(t => t.section === section);
   };
 
   // Color handlers
@@ -574,6 +679,46 @@ const AdminFilterOptions: React.FC = () => {
                               <span className="material-symbols-outlined">edit</span>
                             </button>
                             <button
+                              className="admin-btn icon"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                try {
+                                  const token = localStorage.getItem('authToken');
+                                  const baseURL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000/api';
+                                  const downloadUrl = `${baseURL}/admin/categories/${category.id}/download_excel_template/`;
+                                  
+                                  const response = await fetch(downloadUrl, {
+                                    headers: {
+                                      'Authorization': `Token ${token}`
+                                    }
+                                  });
+                                  
+                                  if (!response.ok) {
+                                    const errorData = await response.json().catch(() => ({}));
+                                    throw new Error(errorData.error || 'Failed to download template');
+                                  }
+                                  
+                                  const blob = await response.blob();
+                                  const url = window.URL.createObjectURL(blob);
+                                  const link = document.createElement('a');
+                                  link.href = url;
+                                  link.download = `product_template_${category.name.replace(/\s+/g, '_')}_${category.id}.xlsx`;
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                  window.URL.revokeObjectURL(url);
+                                  
+                                  showToast('Base template downloaded successfully', 'success');
+                                } catch (error: any) {
+                                  console.error('Download error:', error);
+                                  showToast(error.message || 'Failed to download template', 'error');
+                                }
+                              }}
+                              title="Download Base Template"
+                            >
+                              <span className="material-symbols-outlined">download</span>
+                            </button>
+                            <button
                               className="admin-btn icon danger"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -636,6 +781,120 @@ const AdminFilterOptions: React.FC = () => {
                           {(subcategoriesMap[category.id] || []).length === 0 && (
                             <p className="empty-state">No subcategories yet</p>
                           )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Specification Templates Section */}
+                    {expandedCategory === category.id && (
+                      <div className="subcategories-section" style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+                        <div className="subcategories-header">
+                          <h5>Specification Templates (Filter/Configuration)</h5>
+                          <div style={{ display: 'flex', gap: '10px' }}>
+                            <button
+                              className="admin-btn primary"
+                              onClick={() => {
+                                resetSpecTemplateForm();
+                                setSpecTemplateForm(prev => ({ ...prev, category: category.id.toString() }));
+                                setShowSpecTemplateModal(true);
+                              }}
+                              style={{ fontSize: '13px', padding: '8px 16px' }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                              Add Template
+                            </button>
+                          </div>
+                        </div>
+
+                        <div style={{ marginTop: '15px' }}>
+                          {['specifications', 'measurement_specs', 'style_specs', 'features', 'user_guide', 'item_details'].map((section) => {
+                            const sectionTemplates = getTemplatesBySection(category.id, section);
+                            const isExpanded = expandedSpecSection?.categoryId === category.id && expandedSpecSection?.section === section;
+                            
+                            return (
+                              <div key={section} style={{ marginBottom: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '12px' }}>
+                                <div 
+                                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                                  onClick={() => setExpandedSpecSection(isExpanded ? null : { categoryId: category.id, section })}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>
+                                      {isExpanded ? 'expand_less' : 'expand_more'}
+                                    </span>
+                                    <strong>{getSectionDisplayName(section)}</strong>
+                                    <span style={{ fontSize: '12px', color: '#888', backgroundColor: '#f0f0f0', padding: '2px 8px', borderRadius: '12px' }}>
+                                      {sectionTemplates.length} field{sectionTemplates.length !== 1 ? 's' : ''}
+                                    </span>
+                                  </div>
+                                  <button
+                                    className="admin-btn primary"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      resetSpecTemplateForm();
+                                      setSpecTemplateForm(prev => ({ ...prev, category: category.id.toString(), section }));
+                                      setShowSpecTemplateModal(true);
+                                    }}
+                                    style={{ fontSize: '12px', padding: '6px 12px' }}
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+                                    Add Field
+                                  </button>
+                                </div>
+                                
+                                {isExpanded && (
+                                  <div style={{ marginTop: '10px', paddingLeft: '30px' }}>
+                                    {sectionTemplates.length > 0 ? (
+                                      <div>
+                                        {sectionTemplates.map((template) => (
+                                          <div key={template.id} style={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'space-between', 
+                                            alignItems: 'center', 
+                                            padding: '8px',
+                                            marginBottom: '5px',
+                                            backgroundColor: '#f9f9f9',
+                                            borderRadius: '4px'
+                                          }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                                              <span style={{ fontWeight: '500' }}>{template.field_name}</span>
+                                              {template.sort_order !== undefined && (
+                                                <span style={{ fontSize: '11px', color: '#888' }}>(Order: {template.sort_order})</span>
+                                              )}
+                                              {!template.is_active && (
+                                                <span className="status-badge inactive" style={{ fontSize: '10px' }}>Inactive</span>
+                                              )}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '5px' }}>
+                                              <button
+                                                className="admin-btn icon"
+                                                onClick={() => handleEditSpecTemplate(template)}
+                                                title="Edit"
+                                                style={{ padding: '4px 8px' }}
+                                              >
+                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>edit</span>
+                                              </button>
+                                              <button
+                                                className="admin-btn icon danger"
+                                                onClick={() => handleDeleteSpecTemplate(template.id, category.id)}
+                                                title="Delete"
+                                                style={{ padding: '4px 8px' }}
+                                              >
+                                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete</span>
+                                              </button>
+                                            </div>
+                  </div>
+                ))}
+              </div>
+                                    ) : (
+                                      <p className="empty-state" style={{ fontSize: '13px', color: '#888', marginTop: '10px' }}>
+                                        No fields defined for this section
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -773,6 +1032,93 @@ const AdminFilterOptions: React.FC = () => {
                     </button>
                     <button type="submit" className="admin-btn primary" disabled={saving}>
                       {saving ? 'Saving...' : editingSubcategory ? 'Update' : 'Create'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Specification Template Modal */}
+          {showSpecTemplateModal && (
+            <div className="admin-modal-overlay" onClick={resetSpecTemplateForm}>
+              <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="admin-modal-header">
+                  <h2>{editingSpecTemplate ? 'Edit Specification Template' : 'New Specification Template'}</h2>
+                  <button className="admin-modal-close" onClick={resetSpecTemplateForm}>
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+                <form onSubmit={handleSpecTemplateSubmit} className="admin-modal-body">
+                  <div className="form-group">
+                    <label>Category*</label>
+                    <select
+                      value={specTemplateForm.category}
+                      onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, category: e.target.value })}
+                      required
+                      disabled={!!specTemplateForm.category}
+                    >
+                      <option value="">Select category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Section*</label>
+                    <select
+                      value={specTemplateForm.section}
+                      onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, section: e.target.value })}
+                      required
+                    >
+                      <option value="specifications">Specifications</option>
+                      <option value="measurement_specs">Measurement Specifications</option>
+                      <option value="style_specs">Style Specifications</option>
+                      <option value="features">Features</option>
+                      <option value="user_guide">User Guide</option>
+                      <option value="item_details">Item Details</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Field Name*</label>
+                    <input
+                      type="text"
+                      value={specTemplateForm.field_name}
+                      onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, field_name: e.target.value })}
+                      placeholder="e.g., Brand, Weight, Bed Type"
+                      required
+                    />
+                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                      This will be the default field name that appears when creating products in this category
+                    </small>
+                  </div>
+                  <div className="form-group">
+                    <label>Sort Order</label>
+                    <input
+                      type="number"
+                      value={specTemplateForm.sort_order}
+                      onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, sort_order: parseInt(e.target.value) || 0 })}
+                      min="0"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={specTemplateForm.is_active}
+                        onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, is_active: e.target.checked })}
+                      />
+                      Active
+                    </label>
+                  </div>
+                  <div className="form-actions">
+                    <button type="button" className="admin-btn secondary" onClick={resetSpecTemplateForm}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="admin-btn primary" disabled={saving}>
+                      {saving ? 'Saving...' : editingSpecTemplate ? 'Update' : 'Create'}
                     </button>
                   </div>
                 </form>

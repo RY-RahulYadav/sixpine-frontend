@@ -182,6 +182,7 @@ export const sellerAPI = {
   getCategories: (params?: any) => API.get('/admin/categories/', { params }),
   getCategoriesHierarchical: () => API.get('/admin/categories/hierarchical/'),
   getCategory: (id: number) => API.get(`/admin/categories/${id}/`),
+  getCategorySpecificationDefaults: (categoryId: number) => API.get(`/admin/categories/${categoryId}/specification_defaults/`),
   getSubcategories: (params?: any) => API.get('/admin/subcategories/', { params }),
   getSubcategory: (id: number) => API.get(`/admin/subcategories/${id}/`),
   getColors: (params?: any) => API.get('/admin/colors/', { params }),
@@ -231,8 +232,13 @@ export const productAPI = {
   
   getProductReviews: (slug: string) => API.get(`/products/${slug}/reviews/`),
   
-  addReview: (slug: string, reviewData: any) =>
-    API.post(`/products/${slug}/reviews/`, reviewData),
+  addReview: (slug: string, reviewData: any) => {
+    // If reviewData is FormData, don't set Content-Type header
+    const config = reviewData instanceof FormData 
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+    return API.post(`/products/${slug}/reviews/`, reviewData, config);
+  },
   
   getProductRecommendations: (slug: string) => 
     API.get(`/products/${slug}/recommendations/`),

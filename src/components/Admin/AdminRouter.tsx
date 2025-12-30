@@ -68,6 +68,9 @@ const AdminRouter = () => {
   return (
     <Routes>
       <Route path="login" element={<AdminLogin />} />
+      {/* Product routes outside layout for full-screen */}
+      <Route path="products/:id" element={<AdminProductDetail />} />
+      <Route path="products/new" element={<AdminProductDetail />} />
       <Route element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         {/* Main Menu */}
@@ -80,8 +83,6 @@ const AdminRouter = () => {
         <Route path="sixpine-orders" element={<AdminSixpineOrders />} />
         <Route path="sixpine-returns" element={<AdminSixpineReturnRequests />} />
         <Route path="sixpine-products" element={<AdminSixpineProducts />} />
-        <Route path="products/:id" element={<AdminProductDetail />} />
-        <Route path="products/new" element={<AdminProductDetail />} />
         {/* Page Management Section */}
         <Route path="homepage" element={<AdminHomePageManagement />} />
         <Route path="trending" element={<AdminTrendingPageManagement />} />

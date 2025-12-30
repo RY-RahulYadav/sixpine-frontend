@@ -16,6 +16,8 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
     comment: "",
     user_name: ""
   });
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [attachmentPreviews, setAttachmentPreviews] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -24,7 +26,8 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
       try {
         const response = await productAPI.getProductReviews(product.slug);
         // Handle paginated response - reviews are in response.data.results
-        setReviews(response.data.results || response.data || []);
+        const reviewsData = response.data.results || response.data || [];
+        setReviews(reviewsData);
       } catch (error) {
         console.error('Error fetching reviews:', error);
         setReviews([]);
@@ -36,17 +39,78 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
     fetchReviews();
   }, [product?.slug]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles: File[] = [];
+    const previews: string[] = [];
+
+    files.forEach((file) => {
+      // Validate file type
+      const isImage = file.type.startsWith('image/');
+      const isPDF = file.type === 'application/pdf';
+      const isVideo = file.type.startsWith('video/');
+
+      if (!isImage && !isPDF && !isVideo) {
+        alert(`${file.name} is not a valid file type. Please upload images, PDFs, or videos.`);
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        alert(`${file.name} is too large. Maximum size is 10MB.`);
+        return;
+      }
+
+      validFiles.push(file);
+
+      // Create preview for images
+      if (isImage) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          previews.push(reader.result as string);
+          setAttachmentPreviews([...previews]);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previews.push('');
+      }
+    });
+
+    setAttachments([...attachments, ...validFiles]);
+  };
+
+  const removeAttachment = (index: number) => {
+    const newAttachments = attachments.filter((_, i) => i !== index);
+    const newPreviews = attachmentPreviews.filter((_, i) => i !== index);
+    setAttachments(newAttachments);
+    setAttachmentPreviews(newPreviews);
+  };
+
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!product?.slug || newReview.rating === 0) return;
 
     setSubmitting(true);
     try {
-      await productAPI.addReview(product.slug, newReview);
+      const formData = new FormData();
+      formData.append('rating', newReview.rating.toString());
+      formData.append('title', newReview.title);
+      formData.append('comment', newReview.comment);
+      formData.append('user_name', newReview.user_name);
+
+      // Append attachments
+      attachments.forEach((file, index) => {
+        formData.append(`attachment_${index}`, file);
+      });
+
+      await productAPI.addReview(product.slug, formData);
       // Refresh reviews
       const response = await productAPI.getProductReviews(product.slug);
       setReviews(response.data.results || response.data || []);
       setNewReview({ rating: 0, title: "", comment: "", user_name: "" });
+      setAttachments([]);
+      setAttachmentPreviews([]);
     } catch (error) {
       console.error('Error submitting review:', error);
     } finally {
@@ -116,6 +180,47 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
                 onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
                 required
               ></textarea>
+              
+              {/* File Upload */}
+              <div className={styles.fileUploadSection}>
+                <label htmlFor="review-attachments" className={styles.fileUploadLabel}>
+                  Attach Files (Images, PDFs, Videos) - Max 10MB each
+                </label>
+                <input
+                  id="review-attachments"
+                  type="file"
+                  multiple
+                  accept="image/*,application/pdf,video/*"
+                  onChange={handleFileChange}
+                  className={styles.fileInput}
+                />
+                
+                {/* Attachment Previews */}
+                {attachments.length > 0 && (
+                  <div className={styles.attachmentPreviews}>
+                    {attachments.map((file, index) => (
+                      <div key={index} className={styles.attachmentPreview}>
+                        {attachmentPreviews[index] ? (
+                          <img src={attachmentPreviews[index]} alt={file.name} className={styles.attachmentThumbnail} />
+                        ) : (
+                          <div className={styles.attachmentIcon}>
+                            {file.type === 'application/pdf' ? '📄' : '🎥'}
+                          </div>
+                        )}
+                        <span className={styles.attachmentName}>{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeAttachment(index)}
+                          className={styles.removeAttachment}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
               <button type="submit" disabled={submitting}>
                 {submitting ? 'Submitting...' : 'Submit Review'}
               </button>
@@ -145,6 +250,8 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
                 <p>
                   "{review.comment}"
                 </p>
+                
+                
                 <small>{new Date(review.created_at).toLocaleDateString()}</small>
               </div>
             ))

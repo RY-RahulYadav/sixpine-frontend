@@ -727,13 +727,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                 {/* Left Side - Main Image */}
                 <div className={styles.modalImageSection}>
                   <div className={styles.modalImageWrapper}>
-                    <img 
-                      src={mainImage} 
+                <img
+                  src={mainImage}
                       className={styles.modalMainImage} 
                       alt="Main product view"
-                      onContextMenu={handleContextMenu}
-                      draggable={false}
-                    />
+                  onContextMenu={handleContextMenu}
+                  draggable={false}
+                />
                     {/* Amazon logo overlay */}
                     <div className={styles.amazonLogoOverlay}>
                       <svg width="24" height="24" viewBox="0 0 56 54">
@@ -742,7 +742,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                       </svg>
                     </div>
                   </div>
-                </div>
+              </div>
 
                 {/* Right Side - Product Info & Thumbnails */}
                 <div className={styles.modalSidebar}>
@@ -781,18 +781,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   </div>
 
                   <div className={styles.modalThumbnailGrid}>
-                    {images.map((img: string, index: number) => (
+                {images.map((img: string, index: number) => (
                       <div
-                        key={index}
+                    key={index}
                         className={`${styles.modalThumbnailBox} ${mainImage === img ? styles.modalThumbnailActive : ""}`}
-                        onClick={() => handleImageClick(img)}
+                    onClick={() => handleImageClick(img)}
                       >
                         <div 
                           className={styles.modalThumbnailImage}
                           style={{ backgroundImage: `url(${img})` }}
-                        />
+                  />
                       </div>
-                    ))}
+                ))}
                   </div>
                 </div>
               </div>
@@ -1017,18 +1017,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Color:</strong>
                 <div className={styles.optionButtons}>
-                  {availableOptions.colors.map((color: string, index: number) => (
-                    <button
-                      key={`color-${index}-${color}`}
-                      className={selectedColor === color ? styles.active : ""}
-                      onClick={() => {
-                        userChangedAttribute.current = 'color';
-                        setSelectedColor(color);
-                      }}
-                    >
-                      {color}
-                    </button>
-                  ))}
+                {availableOptions.colors.map((color: string, index: number) => (
+                  <button
+                    key={`color-${index}-${color}`}
+                    className={selectedColor === color ? styles.active : ""}
+                    onClick={() => {
+                      userChangedAttribute.current = 'color';
+                      setSelectedColor(color);
+                    }}
+                  >
+                    {color}
+                  </button>
+                ))}
                 </div>
               </div>
             )}
@@ -1036,18 +1036,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Size:</strong>
                 <div className={styles.optionButtons}>
-                  {availableOptions.sizes.map((size: string, index: number) => (
-                    <button
-                      key={`size-${index}-${size}`}
-                      className={selectedSize === size ? styles.active : ""}
-                      onClick={() => {
-                        userChangedAttribute.current = 'size';
-                        setSelectedSize(size);
-                      }}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                {availableOptions.sizes.map((size: string, index: number) => (
+                  <button
+                    key={`size-${index}-${size}`}
+                    className={selectedSize === size ? styles.active : ""}
+                    onClick={() => {
+                      userChangedAttribute.current = 'size';
+                      setSelectedSize(size);
+                    }}
+                  >
+                    {size}
+                  </button>
+                ))}
                 </div>
               </div>
             )}
@@ -1055,18 +1055,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Pattern:</strong>
                 <div className={styles.optionButtons}>
-                  {availableOptions.patterns.map((pattern: string, index: number) => (
-                    <button
-                      key={`pattern-${index}-${pattern}`}
-                      className={selectedPattern === pattern ? styles.active : ""}
-                      onClick={() => {
-                        userChangedAttribute.current = 'pattern';
-                        setSelectedPattern(pattern);
-                      }}
-                    >
-                      {pattern}
-                    </button>
-                  ))}
+                {availableOptions.patterns.map((pattern: string, index: number) => (
+                  <button
+                    key={`pattern-${index}-${pattern}`}
+                    className={selectedPattern === pattern ? styles.active : ""}
+                    onClick={() => {
+                      userChangedAttribute.current = 'pattern';
+                      setSelectedPattern(pattern);
+                    }}
+                  >
+                    {pattern}
+                  </button>
+                ))}
                 </div>
               </div>
             )}
@@ -1074,18 +1074,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Quality:</strong>
                 <div className={styles.optionButtons}>
-                  {availableOptions.qualities.map((quality: string, index: number) => (
-                    <button
-                      key={`quality-${index}-${quality}`}
-                      className={selectedQuality === quality ? styles.active : ""}
-                      onClick={() => {
-                        userChangedAttribute.current = 'quality';
-                        setSelectedQuality(quality);
-                      }}
-                    >
-                      {quality}
-                    </button>
-                  ))}
+                {availableOptions.qualities.map((quality: string, index: number) => (
+                  <button
+                    key={`quality-${index}-${quality}`}
+                    className={selectedQuality === quality ? styles.active : ""}
+                    onClick={() => {
+                      userChangedAttribute.current = 'quality';
+                      setSelectedQuality(quality);
+                    }}
+                  >
+                    {quality}
+                  </button>
+                ))}
                 </div>
               </div>
             )}

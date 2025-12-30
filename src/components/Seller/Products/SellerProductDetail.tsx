@@ -183,6 +183,7 @@ const SellerProductDetail: React.FC = () => {
   // Variants
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [lastSelectedColorId, setLastSelectedColorId] = useState<number | null>(null);
+  const [categorySpecDefaults, setCategorySpecDefaults] = useState<any>(null);
   
   // Features
   const [features, setFeatures] = useState<Feature[]>([]);
@@ -345,10 +346,58 @@ const SellerProductDetail: React.FC = () => {
   useEffect(() => {
     if (formData.category_id) {
       fetchSubcategories(parseInt(formData.category_id));
+      // Fetch and apply specification defaults for the category
+      applyCategorySpecificationDefaults(parseInt(formData.category_id));
     } else {
       setSubcategories([]);
     }
   }, [formData.category_id]);
+  
+  const applyCategorySpecificationDefaults = async (categoryId: number) => {
+    try {
+      const response = await api.getCategorySpecificationDefaults(categoryId);
+      const defaults = response.data;
+      // Store defaults for use when adding new variants
+      setCategorySpecDefaults(defaults);
+      
+      // Only merge defaults with existing variant specifications (only add missing fields)
+      // Don't auto-create variants
+      if (variants.length > 0) {
+        const updatedVariants = variants.map(variant => {
+          const mergedVariant = { ...variant };
+          
+          // For each section, add defaults that don't already exist
+          Object.keys(defaults).forEach((section: string) => {
+            const sectionKey = section as keyof typeof defaults;
+            const existingSpecs = (variant[sectionKey as keyof typeof variant] as Specification[]) || [];
+            const existingFieldNames = existingSpecs.map((s: Specification) => s.name);
+            
+            // Add defaults that don't exist
+            (defaults[sectionKey] || []).forEach((defaultField: any) => {
+              if (!existingFieldNames.includes(defaultField.field_name)) {
+                existingSpecs.push({
+                  id: 0,
+                  name: defaultField.field_name,
+                  value: '',
+                  sort_order: defaultField.sort_order || existingSpecs.length
+                });
+              }
+            });
+            
+            mergedVariant[sectionKey as keyof typeof mergedVariant] = existingSpecs as any;
+          });
+          
+          return mergedVariant;
+        });
+        
+        setVariants(updatedVariants);
+      }
+    } catch (err) {
+      console.error('Error fetching category specification defaults:', err);
+      // Silently fail - defaults are optional
+      setCategorySpecDefaults(null);
+    }
+  };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -374,7 +423,18 @@ const SellerProductDetail: React.FC = () => {
   const handleAddVariant = () => {
     // Use last selected color, or first color, or 0 if no colors available
     const defaultColorId = lastSelectedColorId || colors[0]?.id || 0;
-    setVariants([...variants, {
+    
+    // Pre-fill with category specification defaults if available
+    const defaults = categorySpecDefaults || {
+      specifications: [],
+      measurement_specs: [],
+      style_specs: [],
+      features: [],
+      user_guide: [],
+      item_details: []
+    };
+    
+    const newVariant: ProductVariant = {
       color_id: defaultColorId,
       size: '',
       pattern: '',
@@ -385,15 +445,47 @@ const SellerProductDetail: React.FC = () => {
       is_in_stock: true,
       image: '',
       images: [],
-      specifications: [],
+      specifications: (defaults.specifications || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
       subcategory_ids: [],
-      measurement_specs: [],
-      style_specs: [],
-      features: [],
-      user_guide: [],
-      item_details: [],
+      measurement_specs: (defaults.measurement_specs || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      style_specs: (defaults.style_specs || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      features: (defaults.features || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      user_guide: (defaults.user_guide || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      item_details: (defaults.item_details || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
       is_active: true
-    }]);
+    };
+    
+    setVariants([...variants, newVariant]);
   };
   
   const handleRemoveVariant = (index: number) => {

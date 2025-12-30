@@ -34,6 +34,14 @@ export const adminAPI = {
   toggleProductFeatured: (id: number) => API.post(`/admin/products/${id}/toggle_featured/`),
   updateProductStock: (id: number, variant_id: number, quantity: number) => 
     API.post(`/admin/products/${id}/update_stock/`, { variant_id, quantity }),
+  importProductsExcel: (formData: FormData) => API.post('/admin/products/import_excel/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 120000
+  }),
+  updateProductFromExcel: (productId: number, formData: FormData) => API.post(`/admin/products/${productId}/update_from_excel/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 120000
+  }),
   
   // Orders
   getOrders: (params?: any) => API.get('/admin/orders/', { params }),
@@ -51,6 +59,13 @@ export const adminAPI = {
   getCategories: (params?: any) => API.get('/admin/categories/', { params }),
   getCategoriesHierarchical: () => API.get('/admin/categories/hierarchical/'),
   getCategory: (id: number) => API.get(`/admin/categories/${id}/`),
+  getCategorySpecificationDefaults: (categoryId: number) => API.get(`/admin/categories/${categoryId}/specification_defaults/`),
+  // Category Specification Templates
+  getCategorySpecificationTemplates: (params?: any) => API.get('/admin/category-specification-templates/', { params }),
+  getCategorySpecificationTemplate: (id: number) => API.get(`/admin/category-specification-templates/${id}/`),
+  createCategorySpecificationTemplate: (templateData: any) => API.post('/admin/category-specification-templates/', templateData),
+  updateCategorySpecificationTemplate: (id: number, templateData: any) => API.put(`/admin/category-specification-templates/${id}/`, templateData),
+  deleteCategorySpecificationTemplate: (id: number) => API.delete(`/admin/category-specification-templates/${id}/`),
   createCategory: (categoryData: any) => API.post('/admin/categories/', categoryData),
   updateCategory: (id: number, categoryData: any) => API.put(`/admin/categories/${id}/`, categoryData),
   deleteCategory: (id: number) => API.delete(`/admin/categories/${id}/`),

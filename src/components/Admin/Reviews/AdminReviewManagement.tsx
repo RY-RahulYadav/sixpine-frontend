@@ -13,6 +13,14 @@ interface ProductReview {
   rating: number;
   title: string;
   comment: string;
+  attachments?: Array<{
+    url: string;
+    public_id?: string;
+    type: string;
+    name: string;
+    size?: number;
+    mime_type?: string;
+  }>;
   is_verified_purchase: boolean;
   is_approved: boolean;
   created_at: string;
@@ -248,6 +256,56 @@ const AdminReviewManagement: React.FC = () => {
                     )}
                     
                     <p className="tw-text-gray-700 tw-mb-3">{review.comment}</p>
+                    
+                    {/* Display Attachments */}
+                    {review.attachments && Array.isArray(review.attachments) && review.attachments.length > 0 && (
+                      <div className="tw-mb-3">
+                        <p className="tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">Attachments:</p>
+                        <div className="tw-flex tw-flex-wrap tw-gap-3">
+                          {review.attachments.map((attachment: any, attIndex: number) => (
+                            <div key={attIndex} className="tw-border tw-border-gray-200 tw-rounded-lg tw-overflow-hidden">
+                              {attachment.type === 'image' || attachment.mime_type?.startsWith('image/') ? (
+                                <a href={attachment.url} target="_blank" rel="noopener noreferrer">
+                                  <img 
+                                    src={attachment.url} 
+                                    alt={attachment.name || 'Review attachment'} 
+                                    className="tw-max-w-[200px] tw-max-h-[200px] tw-object-cover tw-cursor-pointer hover:tw-opacity-80" 
+                                  />
+                                </a>
+                              ) : attachment.type === 'raw' || attachment.mime_type === 'application/pdf' ? (
+                                <a 
+                                  href={attachment.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="tw-block tw-p-3 tw-bg-gray-50 hover:tw-bg-gray-100 tw-transition-colors"
+                                >
+                                  <div className="tw-text-2xl tw-mb-1">📄</div>
+                                  <div className="tw-text-xs tw-text-gray-600">{attachment.name || 'PDF Document'}</div>
+                                </a>
+                              ) : attachment.type === 'video' || attachment.mime_type?.startsWith('video/') ? (
+                                <video 
+                                  controls 
+                                  className="tw-max-w-[300px] tw-max-h-[300px]"
+                                >
+                                  <source src={attachment.url} type={attachment.mime_type} />
+                                  Your browser does not support the video tag.
+                                </video>
+                              ) : (
+                                <a 
+                                  href={attachment.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="tw-block tw-p-3 tw-bg-gray-50 hover:tw-bg-gray-100 tw-transition-colors"
+                                >
+                                  <div className="tw-text-2xl tw-mb-1">📎</div>
+                                  <div className="tw-text-xs tw-text-gray-600">{attachment.name || 'Attachment'}</div>
+                                </a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="tw-flex tw-flex-wrap tw-gap-4 tw-text-sm tw-text-gray-600">
                       <div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
+import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
 import { useNotification } from '../../../context/NotificationContext';
 
@@ -146,8 +147,48 @@ const AdminProductDetail: React.FC = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'variants' | 'details' | 'seo'>('basic');
+  const [importingExcel, setImportingExcel] = useState<boolean>(false);
+  const [importProgress, setImportProgress] = useState<string>('');
+  const [importResult, setImportResult] = useState<{success: boolean, message: string, products_created?: number, variants_created?: number, errors?: string[]} | null>(null);
+  const [updatingExcel, setUpdatingExcel] = useState<boolean>(false);
+  const [updateProgress, setUpdateProgress] = useState<string>('');
+  const [updateResult, setUpdateResult] = useState<{success: boolean, message: string, variants_created?: number, variants_updated?: number, errors?: string[]} | null>(null);
+  // New sidebar navigation state
+  type NavigationSection = 'basic' | 'variant' | 'variants' | 'variants-old' | 'variant-details' | 'variant-images' | 'variant-gallery' | 'variant-specs' | 'details';
+  const [activeSection, setActiveSection] = useState<NavigationSection>('basic');
+  const [activeVariantIndex, setActiveVariantIndex] = useState<number | null>(null);
+  const [expandedVariants, setExpandedVariants] = useState<Set<number>>(new Set());
+  
+  // Initialize: if editing and has variants, expand first variant
+  useEffect(() => {
+    if (!isNew && product && product.variants && product.variants.length > 0 && expandedVariants.size === 0) {
+      // Don't auto-expand on load - let user choose
+    }
+  }, [isNew, product]);
   const [activeDetailSection, setActiveDetailSection] = useState<'features' | 'about_items' | 'screen_offer' | 'style_description' | 'user_guide' | 'care_instructions' | 'what_in_box' | 'recommendations' | null>('features');
+  
+  // Helper to toggle variant expansion
+  const toggleVariantExpansion = (index: number) => {
+    setExpandedVariants(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+  
+  // Helper to navigate to variant section
+  const navigateToVariantSection = (variantIndex: number, section: 'variant-details' | 'variant-images' | 'variant-gallery' | 'variant-specs') => {
+    setActiveVariantIndex(variantIndex);
+    setActiveSection(section);
+    // Auto-expand the variant
+    if (!expandedVariants.has(variantIndex)) {
+      setExpandedVariants(prev => new Set(prev).add(variantIndex));
+    }
+  };
   
   // Form data
   const [formData, setFormData] = useState<{
@@ -201,6 +242,7 @@ const AdminProductDetail: React.FC = () => {
   // Variants
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [lastSelectedColorId, setLastSelectedColorId] = useState<number | null>(null);
+  const [categorySpecDefaults, setCategorySpecDefaults] = useState<any>(null);
   
   // Features
   const [features, setFeatures] = useState<Feature[]>([]);
@@ -374,10 +416,58 @@ const AdminProductDetail: React.FC = () => {
   useEffect(() => {
     if (formData.category_id) {
       fetchSubcategories(parseInt(formData.category_id));
+      // Fetch and apply specification defaults for the category
+      applyCategorySpecificationDefaults(parseInt(formData.category_id));
     } else {
       setSubcategories([]);
     }
   }, [formData.category_id]);
+  
+  const applyCategorySpecificationDefaults = async (categoryId: number) => {
+    try {
+      const response = await api.getCategorySpecificationDefaults(categoryId);
+      const defaults = response.data;
+      // Store defaults for use when adding new variants
+      setCategorySpecDefaults(defaults);
+      
+      // Only merge defaults with existing variant specifications (only add missing fields)
+      // Don't auto-create variants
+      if (variants.length > 0) {
+        const updatedVariants = variants.map(variant => {
+          const mergedVariant = { ...variant };
+          
+          // For each section, add defaults that don't already exist
+          Object.keys(defaults).forEach((section: string) => {
+            const sectionKey = section as keyof typeof defaults;
+            const existingSpecs = (variant[sectionKey as keyof typeof variant] as Specification[]) || [];
+            const existingFieldNames = existingSpecs.map((s: Specification) => s.name);
+            
+            // Add defaults that don't exist
+            (defaults[sectionKey] || []).forEach((defaultField: any) => {
+              if (!existingFieldNames.includes(defaultField.field_name)) {
+                existingSpecs.push({
+                  id: 0,
+                  name: defaultField.field_name,
+                  value: '',
+                  sort_order: defaultField.sort_order || existingSpecs.length
+                });
+              }
+            });
+            
+            (mergedVariant as any)[sectionKey] = existingSpecs;
+          });
+          
+          return mergedVariant;
+        });
+        
+        setVariants(updatedVariants);
+      }
+    } catch (err) {
+      console.error('Error fetching category specification defaults:', err);
+      // Silently fail - defaults are optional
+      setCategorySpecDefaults(null);
+    }
+  };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -403,7 +493,18 @@ const AdminProductDetail: React.FC = () => {
   const handleAddVariant = () => {
     // Use last selected color, or first color, or 0 if no colors available
     const defaultColorId = lastSelectedColorId || colors[0]?.id || 0;
-    setVariants([...variants, {
+    
+    // Pre-fill with category specification defaults if available
+    const defaults = categorySpecDefaults || {
+      specifications: [],
+      measurement_specs: [],
+      style_specs: [],
+      features: [],
+      user_guide: [],
+      item_details: []
+    };
+    
+    const newVariant: ProductVariant = {
       color_id: defaultColorId,
       size: '',
       pattern: '',
@@ -414,19 +515,81 @@ const AdminProductDetail: React.FC = () => {
       is_in_stock: true,
       image: '',
       images: [],
-      specifications: [],
+      specifications: (defaults.specifications || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
       subcategory_ids: [],
-      measurement_specs: [],
-      style_specs: [],
-      features: [],
-      user_guide: [],
-      item_details: [],
+      measurement_specs: (defaults.measurement_specs || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      style_specs: (defaults.style_specs || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      features: (defaults.features || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      user_guide: (defaults.user_guide || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
+      item_details: (defaults.item_details || []).map((d: any) => ({
+        id: 0,
+        name: d.field_name,
+        value: '',
+        sort_order: d.sort_order || 0
+      })),
       is_active: true
-    }]);
+    };
+    
+    const newVariants = [...variants, newVariant];
+    setVariants(newVariants);
+    
+    // Auto-expand and navigate to the new variant
+    const newVariantIndex = newVariants.length - 1;
+    setExpandedVariants(prev => new Set(prev).add(newVariantIndex));
+    setActiveVariantIndex(newVariantIndex);
+    setActiveSection('variant-details');
   };
   
   const handleRemoveVariant = (index: number) => {
     setVariants(variants.filter((_, i) => i !== index));
+    // Clean up navigation state if removed variant was active
+    if (activeVariantIndex === index) {
+      setActiveVariantIndex(null);
+      setActiveSection('variants');
+    } else if (activeVariantIndex !== null && activeVariantIndex > index) {
+      // Adjust active index if a variant before the active one was removed
+      setActiveVariantIndex(activeVariantIndex - 1);
+    }
+    // Remove from expanded set
+    setExpandedVariants(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(index);
+      // Adjust indices for variants after the removed one
+      const adjustedSet = new Set<number>();
+      newSet.forEach(idx => {
+        if (idx > index) {
+          adjustedSet.add(idx - 1);
+        } else if (idx < index) {
+          adjustedSet.add(idx);
+        }
+      });
+      return adjustedSet;
+    });
   };
   
   const handleVariantChange = (index: number, field: string, value: any) => {
@@ -1005,80 +1168,1160 @@ const AdminProductDetail: React.FC = () => {
   }
   
   return (
-    <div className="admin-product-detail">
-      <div className="admin-header-actions">
-        <div className="admin-header-with-back">
+    <div style={{ 
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: '#ffffff',
+      zIndex: 1000
+    }}>
+      {/* Full-screen Header */}
+      <div style={{
+        height: '64px',
+        backgroundColor: '#000000',
+        borderBottom: '1px solid #333333',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+        zIndex: 1001
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button 
-            className="admin-back-button" 
             onClick={() => navigate(isSixpineProduct ? `${basePath}/sixpine-products` : `${basePath}/products`)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: 'transparent',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+              color: '#ffffff'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333333'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
-            <span className="material-symbols-outlined">arrow_back</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>arrow_back</span>
           </button>
-          <h2>{isNew ? 'Add New Product' : 'Edit Product'}</h2>
+          <h2 style={{ 
+            margin: 0, 
+            fontSize: '20px', 
+            fontWeight: '600', 
+            color: '#ffffff' 
+          }}>
+            {isNew ? 'Add New Product' : 'Edit Product'}
+          </h2>
         </div>
+        {isNew && (
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              className="admin-btn secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #666666',
+                backgroundColor: '#333333',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }} 
+              onClick={() => {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.xlsx,.xls';
+                fileInput.onchange = async (e: any) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  
+                  setImportingExcel(true);
+                  setImportProgress('Reading Excel file...');
+                  setImportResult(null);
+                  
+                  try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    // Simulate progress updates
+                    setTimeout(() => setImportProgress('Validating Excel format...'), 300);
+                    setTimeout(() => setImportProgress('Processing Parent Product data...'), 600);
+                    setTimeout(() => setImportProgress('Processing Child Variation data...'), 900);
+                    
+                    const response = await adminAPI.importProductsExcel(formData);
+                    
+                    setImportProgress('Creating products and variants...');
+                    
+                    if (response.data.success) {
+                      setImportProgress('Products created successfully!');
+                      setImportResult({
+                        success: true,
+                        message: `Successfully created ${response.data.products_created} products and ${response.data.variants_created} variants`,
+                        products_created: response.data.products_created,
+                        variants_created: response.data.variants_created,
+                        errors: response.data.errors || []
+                      });
+                      
+                      // Show success toast
+                      showToast(
+                        `Products created successfully: ${response.data.products_created} products, ${response.data.variants_created} variants`,
+                        'success'
+                      );
+                      
+                      if (response.data.errors && response.data.errors.length > 0) {
+                        console.warn('Import errors:', response.data.errors);
+                        showToast(
+                          `${response.data.errors.length} errors occurred. Check console for details.`,
+                          'info'
+                        );
+                      }
+                      
+                      // Navigate to products list after 3 seconds
+                      setTimeout(() => {
+                        setImportingExcel(false);
+                        navigate(isSixpineProduct ? `${basePath}/sixpine-products` : `${basePath}/products`);
+                      }, 3000);
+                    } else {
+                      setImportProgress('Import failed');
+                      setImportResult({
+                        success: false,
+                        message: response.data.message || 'Import failed',
+                        errors: []
+                      });
+                      showToast(response.data.message || 'Import failed', 'error');
+                      setTimeout(() => {
+                        setImportingExcel(false);
+                      }, 2000);
+                    }
+                  } catch (error: any) {
+                    setImportProgress('Error occurred');
+                    setImportResult({
+                      success: false,
+                      message: error.response?.data?.error || 'Failed to import products from Excel',
+                      errors: []
+                    });
+                    showToast(
+                      error.response?.data?.error || 'Failed to import products from Excel',
+                      'error'
+                    );
+                    setTimeout(() => {
+                      setImportingExcel(false);
+                    }, 2000);
+                  }
+                };
+                fileInput.click();
+              }}
+            >
+              <span className="material-symbols-outlined">upload_file</span>
+              Import Products from Excel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const form = document.querySelector('form[data-product-form]') as HTMLFormElement;
+                if (form) {
+                  form.requestSubmit();
+                }
+              }}
+              disabled={saving}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px',
+                borderRadius: '8px',
+                border: '1px solid #f97316',
+                backgroundColor: '#f97316',
+                color: '#ffffff',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                opacity: saving ? 0.6 : 1,
+                width: '40px',
+                height: '40px'
+              }}
+            >
+              {saving ? (
+                <span className="spinner-small"></span>
+              ) : (
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+              )}
+            </button>
+          </div>
+        )}
         {!isNew && product && (
-          <div className="header-actions">
-            <button className="admin-btn secondary" onClick={() => window.open(`/products-details/${product.slug}`, '_blank')}>
-              <span className="material-symbols-outlined">visibility</span>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button 
+              className="admin-btn secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #666666',
+                backgroundColor: '#333333',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }} 
+              onClick={async () => {
+                try {
+                  const token = localStorage.getItem('authToken');
+                  const baseURL = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000/api';
+                  const downloadUrl = `${baseURL}/admin/products/${product.id}/download_excel/`;
+                  
+                  const response = await fetch(downloadUrl, {
+                    headers: {
+                      'Authorization': `Token ${token}`
+                    }
+                  });
+                  
+                  if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || 'Failed to download Excel');
+                  }
+                  
+                  const blob = await response.blob();
+                  const url = window.URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `product_${product.slug}_${product.id}.xlsx`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  window.URL.revokeObjectURL(url);
+                  
+                  showToast('Product Excel downloaded successfully', 'success');
+                } catch (error: any) {
+                  console.error('Download error:', error);
+                  showToast(error.message || 'Failed to download Excel', 'error');
+                }
+              }}
+            >
+              <span className="material-symbols-outlined">download</span>
+              Download Excel
+            </button>
+            <button 
+              className="admin-btn secondary" 
+              onClick={() => {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '.xlsx,.xls';
+                fileInput.onchange = async (e: any) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  
+                  setUpdatingExcel(true);
+                  setUpdateProgress('Reading Excel file...');
+                  setUpdateResult(null);
+                  
+                  try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    
+                    // Simulate progress updates
+                    setTimeout(() => setUpdateProgress('Validating Excel format...'), 300);
+                    setTimeout(() => setUpdateProgress('Processing Parent Product data...'), 600);
+                    setTimeout(() => setUpdateProgress('Processing Child Variation data...'), 900);
+                    
+                    const response = await adminAPI.updateProductFromExcel(product!.id, formData);
+                    
+                    setUpdateProgress('Updating product and variants...');
+                    
+                    if (response.data.success) {
+                      setUpdateProgress('Product updated successfully!');
+                      setUpdateResult({
+                        success: true,
+                        message: 'Product successfully edited',
+                        variants_created: response.data.variants_created,
+                        variants_updated: response.data.variants_updated,
+                        errors: response.data.errors || []
+                      });
+                      
+                      showToast(
+                        'Product successfully edited',
+                        'success'
+                      );
+                      if (response.data.errors && response.data.errors.length > 0) {
+                        console.warn('Update errors:', response.data.errors);
+                        showToast(
+                          `${response.data.errors.length} errors occurred. Check console for details.`,
+                          'info'
+                        );
+                      }
+                      
+                      // Reload product data after 2 seconds
+                      setTimeout(() => {
+                        setUpdatingExcel(false);
+                        window.location.reload();
+                      }, 2000);
+                    } else {
+                      setUpdateProgress('Update failed');
+                      setUpdateResult({
+                        success: false,
+                        message: response.data.message || 'Update failed',
+                        errors: []
+                      });
+                      showToast(response.data.message || 'Update failed', 'error');
+                      setTimeout(() => {
+                        setUpdatingExcel(false);
+                      }, 2000);
+                    }
+                  } catch (error: any) {
+                    setUpdateProgress('Error occurred');
+                    setUpdateResult({
+                      success: false,
+                      message: error.response?.data?.error || 'Failed to update product from Excel',
+                      errors: []
+                    });
+                    showToast(
+                      error.response?.data?.error || 'Failed to update product from Excel',
+                      'error'
+                    );
+                    setTimeout(() => {
+                      setUpdatingExcel(false);
+                    }, 2000);
+                  }
+                };
+                fileInput.click();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #666666',
+                backgroundColor: '#333333',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span className="material-symbols-outlined">upload_file</span>
+              Update from Excel
+            </button>
+            <button 
+              className="admin-btn secondary" 
+              onClick={() => window.open(`/products-details/${product.slug}`, '_blank')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #666666',
+                backgroundColor: '#333333',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>visibility</span>
               View Product
             </button>
-            <button className="admin-btn danger" onClick={handleDelete}>
-              <span className="material-symbols-outlined">delete</span>
-              Delete Product
+            <button
+              type="button"
+              onClick={handleToggleActive}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: formData.is_active ? '1px solid #f59e0b' : '1px solid #10b981',
+                backgroundColor: 'transparent',
+                color: formData.is_active ? '#f59e0b' : '#10b981',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              {formData.is_active ? 'Hide Product' : 'Show Product'}
+            </button>
+            <button
+              type="button"
+              onClick={handleToggleFeatured}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: formData.is_featured ? '1px solid #666666' : '1px solid #3b82f6',
+                backgroundColor: formData.is_featured ? '#333333' : '#3b82f6',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s'
+              }}
+            >
+              {formData.is_featured ? 'Unmark Featured' : 'Mark Featured'}
+            </button>
+            <button 
+              className="admin-btn danger" 
+              onClick={handleDelete}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px',
+                borderRadius: '8px',
+                border: '1px solid #dc2626',
+                backgroundColor: '#dc2626',
+                color: '#ffffff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                width: '40px',
+                height: '40px'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const form = document.querySelector('form[data-product-form]') as HTMLFormElement;
+                if (form) {
+                  form.requestSubmit();
+                }
+              }}
+              disabled={saving}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '8px',
+                borderRadius: '8px',
+                border: '1px solid #f97316',
+                backgroundColor: '#f97316',
+                color: '#ffffff',
+                cursor: saving ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s',
+                opacity: saving ? 0.6 : 1,
+                width: '40px',
+                height: '40px'
+              }}
+            >
+              {saving ? (
+                <span className="spinner-small"></span>
+              ) : (
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+              )}
             </button>
           </div>
         )}
       </div>
       
+      {/* Main Content Area */}
+      <div style={{ 
+        flex: 1,
+        display: 'flex',
+        overflow: 'hidden',
+        backgroundColor: '#ffffff'
+      }}>
       {error && (
-        <div className="admin-error-message">
-          <span className="material-symbols-outlined">error</span>
+        <div style={{
+          position: 'absolute',
+          top: '80px',
+          left: '24px',
+          right: '24px',
+          zIndex: 100,
+          padding: '12px 16px',
+          backgroundColor: '#fef2f2',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+          color: '#991b1b',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '14px'
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>error</span>
           {error}
         </div>
       )}
       
       {success && (
-        <div className="admin-success-message">
-          <span className="material-symbols-outlined">check_circle</span>
+        <div style={{
+          position: 'absolute',
+          top: '80px',
+          left: '24px',
+          right: '24px',
+          zIndex: 100,
+          padding: '12px 16px',
+          backgroundColor: '#f0fdf4',
+          border: '1px solid #bbf7d0',
+          borderRadius: '8px',
+          color: '#166534',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '14px'
+        }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
           {success}
         </div>
       )}
       
-      <form onSubmit={handleSubmit}>
-        {/* Tabs */}
-        <div className="admin-tabs" style={{ marginBottom: 0 }}>
-          <button
-            type="button"
-            className={activeTab === 'basic' ? 'active' : ''}
-            onClick={() => setActiveTab('basic')}
-          >
-            Basic Info
-          </button>
-          <button
-            type="button"
-            className={activeTab === 'variants' ? 'active' : ''}
-            onClick={() => setActiveTab('variants')}
-          >
-            Variants ({variants.length})
-          </button>
-          <button
-            type="button"
-            className={activeTab === 'details' ? 'active' : ''}
-            onClick={() => setActiveTab('details')}
-          >
-            Details
-          </button>
-          {/* <button
-            type="button"
-            className={activeTab === 'seo' ? 'active' : ''}
-            onClick={() => setActiveTab('seo')}
-          >
-            SEO
-          </button> */}
-        </div>
+        {/* Excel Update Progress Modal */}
+        {updatingExcel && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '32px',
+              maxWidth: '500px',
+              width: '90%',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+            }}>
+              {!updateResult ? (
+                <>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    marginBottom: '24px'
+                  }}>
+                    <div className="admin-loader" style={{ width: '40px', height: '40px' }}></div>
+                    <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#333' }}>
+                      Updating Product...
+                    </h3>
+                  </div>
+                  <p style={{
+                    margin: '0 0 24px 0',
+                    color: '#666',
+                    fontSize: '14px'
+                  }}>
+                    {updateProgress}
+                  </p>
+                  <div style={{
+                    width: '100%',
+                    height: '8px',
+                    backgroundColor: '#e5e7eb',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    position: 'relative'
+                  }}>
+                    <div style={{
+                      width: updateProgress.includes('successfully') ? '100%' : 
+                             updateProgress.includes('Updating') ? '85%' :
+                             updateProgress.includes('Processing') ? '60%' :
+                             updateProgress.includes('Validating') ? '40%' : '20%',
+                      height: '100%',
+                      backgroundColor: updateProgress.includes('successfully') ? '#10b981' : '#3b82f6',
+                      borderRadius: '4px',
+                      transition: 'width 0.5s ease, background-color 0.3s ease',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}>
+                      {!updateProgress.includes('successfully') && (
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                          animation: 'shimmer 1.5s infinite'
+                        }}></div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    marginBottom: '24px'
+                  }}>
+                    {updateResult.success ? (
+                      <span className="material-symbols-outlined" style={{
+                        fontSize: '48px',
+                        color: '#10b981'
+                      }}>check_circle</span>
+                    ) : (
+                      <span className="material-symbols-outlined" style={{
+                        fontSize: '48px',
+                        color: '#ef4444'
+                      }}>error</span>
+                    )}
+                    <h3 style={{
+                      margin: 0,
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: updateResult.success ? '#10b981' : '#ef4444'
+                    }}>
+                      {updateResult.success ? 'Update Successful!' : 'Update Failed'}
+                    </h3>
+                  </div>
+                  <p style={{
+                    margin: '0 0 16px 0',
+                    color: '#666',
+                    fontSize: '14px',
+                    lineHeight: '1.5'
+                  }}>
+                    {updateResult.message}
+                  </p>
+                  {updateResult.errors && updateResult.errors.length > 0 && (
+                    <div style={{
+                      backgroundColor: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      marginBottom: '16px',
+                      maxHeight: '150px',
+                      overflowY: 'auto'
+                    }}>
+                      <p style={{
+                        margin: '0 0 8px 0',
+                        color: '#991b1b',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}>
+                        Errors ({updateResult.errors.length}):
+                      </p>
+                      <ul style={{
+                        margin: 0,
+                        paddingLeft: '20px',
+                        color: '#991b1b',
+                        fontSize: '12px'
+                      }}>
+                        {updateResult.errors.slice(0, 5).map((error, idx) => (
+                          <li key={idx} style={{ marginBottom: '4px' }}>{error}</li>
+                        ))}
+                        {updateResult.errors.length > 5 && (
+                          <li style={{ fontStyle: 'italic' }}>... and {updateResult.errors.length - 5} more errors</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  <p style={{
+                    margin: '16px 0 0 0',
+                    color: '#999',
+                    fontSize: '12px',
+                    fontStyle: 'italic'
+                  }}>
+                    {updateResult.success ? 'Reloading product data...' : 'Please check the errors and try again.'}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
         
-        {/* Basic Info Tab */}
-        {activeTab === 'basic' && (
+        {/* Excel Import Progress Modal */}
+      {importingExcel && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+          }}>
+            {!importResult ? (
+              <>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  marginBottom: '24px'
+                }}>
+                  <div className="admin-loader" style={{ width: '40px', height: '40px' }}></div>
+                  <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#333' }}>
+                    Creating Products...
+                  </h3>
+                </div>
+                <p style={{
+                  margin: '0 0 24px 0',
+                  color: '#666',
+                  fontSize: '14px'
+                }}>
+                  {importProgress}
+                </p>
+                <div style={{
+                  width: '100%',
+                  height: '8px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}>
+                  <div style={{
+                    width: importProgress.includes('successfully') ? '100%' : 
+                           importProgress.includes('Creating') ? '85%' :
+                           importProgress.includes('Processing') ? '60%' :
+                           importProgress.includes('Validating') ? '40%' : '20%',
+                    height: '100%',
+                    backgroundColor: importProgress.includes('successfully') ? '#10b981' : '#3b82f6',
+                    borderRadius: '4px',
+                    transition: 'width 0.5s ease, background-color 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    {!importProgress.includes('successfully') && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                        animation: 'shimmer 1.5s infinite'
+                      }}></div>
+                    )}
+                  </div>
+                </div>
+                <style>{`
+                  @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                  }
+                `}</style>
+              </>
+            ) : (
+              <>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  marginBottom: '24px'
+                }}>
+                  {importResult.success ? (
+                    <span className="material-symbols-outlined" style={{
+                      fontSize: '48px',
+                      color: '#10b981'
+                    }}>check_circle</span>
+                  ) : (
+                    <span className="material-symbols-outlined" style={{
+                      fontSize: '48px',
+                      color: '#ef4444'
+                    }}>error</span>
+                  )}
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: '20px',
+                    fontWeight: '600',
+                    color: importResult.success ? '#10b981' : '#ef4444'
+                  }}>
+                    {importResult.success ? 'Import Successful!' : 'Import Failed'}
+                  </h3>
+                </div>
+                <p style={{
+                  margin: '0 0 16px 0',
+                  color: '#666',
+                  fontSize: '14px',
+                  lineHeight: '1.5'
+                }}>
+                  {importResult.message}
+                </p>
+                {importResult.success && importResult.products_created !== undefined && (
+                  <div style={{
+                    backgroundColor: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '16px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ color: '#166534', fontSize: '14px', fontWeight: '500' }}>Products Created:</span>
+                      <span style={{ color: '#166534', fontSize: '14px', fontWeight: '600' }}>{importResult.products_created}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#166534', fontSize: '14px', fontWeight: '500' }}>Variants Created:</span>
+                      <span style={{ color: '#166534', fontSize: '14px', fontWeight: '600' }}>{importResult.variants_created}</span>
+                    </div>
+                  </div>
+                )}
+                {importResult.errors && importResult.errors.length > 0 && (
+                  <div style={{
+                    backgroundColor: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '16px',
+                    maxHeight: '150px',
+                    overflowY: 'auto'
+                  }}>
+                    <p style={{
+                      margin: '0 0 8px 0',
+                      color: '#991b1b',
+                      fontSize: '12px',
+                      fontWeight: '600'
+                    }}>
+                      Errors ({importResult.errors.length}):
+                    </p>
+                    <ul style={{
+                      margin: 0,
+                      paddingLeft: '20px',
+                      color: '#991b1b',
+                      fontSize: '12px'
+                    }}>
+                      {importResult.errors.slice(0, 5).map((error, idx) => (
+                        <li key={idx} style={{ marginBottom: '4px' }}>{error}</li>
+                      ))}
+                      {importResult.errors.length > 5 && (
+                        <li style={{ fontStyle: 'italic' }}>... and {importResult.errors.length - 5} more errors</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+                <p style={{
+                  margin: '16px 0 0 0',
+                  color: '#999',
+                  fontSize: '12px',
+                  fontStyle: 'italic'
+                }}>
+                  {importResult.success ? 'Redirecting to products list...' : 'Please check the errors and try again.'}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Main Content Area */}
+      <div style={{ 
+        flex: 1,
+        display: 'flex',
+        overflow: 'hidden',
+        backgroundColor: '#ffffff'
+      }}>
+      <form onSubmit={handleSubmit} data-product-form style={{ 
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        {error && (
+          <div style={{
+            position: 'absolute',
+            top: '16px',
+            left: '16px',
+            right: '16px',
+            zIndex: 100,
+            padding: '12px 16px',
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '8px',
+            color: '#991b1b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '14px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>error</span>
+            {error}
+          </div>
+        )}
+        
+        {success && (
+          <div style={{
+            position: 'absolute',
+            top: '16px',
+            left: '16px',
+            right: '16px',
+            zIndex: 100,
+            padding: '12px 16px',
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: '8px',
+            color: '#166534',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '14px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>check_circle</span>
+            {success}
+          </div>
+        )}
+        
+        {/* New Sidebar-Based Layout */}
+        <div style={{ 
+          display: 'flex', 
+          flex: 1,
+          gap: '0',
+          backgroundColor: '#ffffff',
+          overflow: 'hidden'
+        }}>
+          {/* Left Sidebar Navigation */}
+          <div style={{
+            width: '280px',
+            backgroundColor: '#ffffff',
+            borderRight: '1px solid #e5e7eb',
+            overflowY: 'auto',
+            padding: '16px 0'
+          }}>
+            {/* Basic Information */}
+            <div 
+              onClick={() => setActiveSection('basic')}
+              style={{
+                padding: '12px 20px',
+                cursor: 'pointer',
+                backgroundColor: activeSection === 'basic' ? '#eff6ff' : 'transparent',
+                borderLeft: activeSection === 'basic' ? '3px solid #3b82f6' : '3px solid transparent',
+                color: activeSection === 'basic' ? '#1e40af' : '#374151',
+                fontWeight: activeSection === 'basic' ? '600' : '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                info
+              </span>
+              <span>Basic Information</span>
+            </div>
+
+            {/* Variants Section */}
+            <div style={{ marginTop: '8px' }}>
+              <div 
+                onClick={() => {
+                  if (variants.length > 0) {
+                    setActiveSection('variants');
+                    setActiveVariantIndex(0);
+                    navigateToVariantSection(0, 'variant-details');
+                  }
+                }}
+                style={{
+                  padding: '12px 20px',
+                  cursor: 'pointer',
+                  backgroundColor: activeSection.startsWith('variant') ? '#eff6ff' : 'transparent',
+                  borderLeft: activeSection.startsWith('variant') ? '3px solid #3b82f6' : '3px solid transparent',
+                  color: activeSection.startsWith('variant') ? '#1e40af' : '#374151',
+                  fontWeight: activeSection.startsWith('variant') ? '600' : '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                    style
+                  </span>
+                  <span>Variants ({variants.length})</span>
+                </div>
+                {variants.length > 0 && (
+                  <span className="material-symbols-outlined" style={{ 
+                    fontSize: '18px',
+                    transform: expandedVariants.size > 0 ? 'rotate(90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}>
+                    chevron_right
+                  </span>
+                )}
+              </div>
+
+              {/* Variant List */}
+              {variants.map((variant, variantIndex) => {
+                const isExpanded = expandedVariants.has(variantIndex);
+                const isActive = activeVariantIndex === variantIndex && activeSection.startsWith('variant');
+                const selectedColor = colors.find(c => c.id === (variant.color_id || variant.color?.id));
+                
+                return (
+                  <div key={variantIndex} style={{ 
+                    borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+                    backgroundColor: isActive ? '#eff6ff' : 'transparent'
+                  }}>
+                    {/* Variant Header */}
+                    <div
+                      onClick={() => {
+                        toggleVariantExpansion(variantIndex);
+                        if (!isExpanded) {
+                          navigateToVariantSection(variantIndex, 'variant-details');
+                        }
+                      }}
+                      style={{
+                        padding: '10px 20px 10px 48px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        color: isActive ? '#1e40af' : '#6b7280',
+                        fontWeight: isActive ? '600' : '500',
+                        fontSize: '14px',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                        <span className="material-symbols-outlined" style={{ 
+                          fontSize: '16px',
+                          transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.2s'
+                        }}>
+                          chevron_right
+                        </span>
+                        <span>Variant {variantIndex + 1}</span>
+                        {selectedColor && (
+                          <div 
+                            style={{ 
+                              width: '16px', 
+                              height: '16px', 
+                              borderRadius: '4px',
+                              backgroundColor: selectedColor.hex_code || '#ccc',
+                              border: '1px solid #e5e7eb'
+                            }}
+                            title={selectedColor.name}
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Variant Sub-sections */}
+                    {isExpanded && (
+                      <div style={{ paddingLeft: '48px' }}>
+                        {[
+                          { key: 'variant-details', label: 'Details', icon: 'info' },
+                          { key: 'variant-images', label: 'Images', icon: 'image' },
+                          { key: 'variant-gallery', label: 'Image Gallery', icon: 'photo_library' },
+                          { key: 'variant-specs', label: 'Specification Template', icon: 'description' }
+                        ].map(({ key, label, icon }) => {
+                          const isSubActive = activeSection === key && activeVariantIndex === variantIndex;
+                          return (
+                            <div
+                              key={key}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigateToVariantSection(variantIndex, key as any);
+                              }}
+                              style={{
+                                padding: '8px 20px 8px 32px',
+                                cursor: 'pointer',
+                                backgroundColor: isSubActive ? '#dbeafe' : 'transparent',
+                                color: isSubActive ? '#1e40af' : '#6b7280',
+                                fontSize: '13px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                transition: 'all 0.2s',
+                                fontWeight: isSubActive ? '600' : '400'
+                              }}
+                            >
+                              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                                {icon}
+                              </span>
+                              <span>{label}</span>
+        </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Add Variant Button */}
+              <div
+                onClick={handleAddVariant}
+                style={{
+                  padding: '10px 20px 10px 48px',
+                  cursor: 'pointer',
+                  color: '#3b82f6',
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginTop: '4px',
+                  fontWeight: '500'
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                <span>Add Variant</span>
+              </div>
+            </div>
+
+            {/* Details Section */}
+            <div 
+              onClick={() => setActiveSection('details')}
+              style={{
+                padding: '12px 20px',
+                cursor: 'pointer',
+                backgroundColor: activeSection === 'details' ? '#eff6ff' : 'transparent',
+                borderLeft: activeSection === 'details' ? '3px solid #3b82f6' : '3px solid transparent',
+                color: activeSection === 'details' ? '#1e40af' : '#374151',
+                fontWeight: activeSection === 'details' ? '600' : '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginTop: '8px',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                description
+              </span>
+              <span>Details</span>
+            </div>
+          </div>
+
+          {/* Right Content Panel */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            backgroundColor: '#ffffff',
+            padding: '24px'
+          }}>
+        
+            {/* Dynamic Content Based on Active Section */}
+            {activeSection === 'basic' && (
           <div className="admin-card">
             <h3>Basic Information</h3>
             
@@ -1292,8 +2535,940 @@ const AdminProductDetail: React.FC = () => {
           </div>
         )}
         
-        {/* Variants Tab */}
-        {activeTab === 'variants' && (
+            {/* Variant Sections */}
+            {activeSection.startsWith('variant') && activeVariantIndex !== null && variants[activeVariantIndex] && (
+              (() => {
+                const variant = variants[activeVariantIndex];
+                const variantIndex = activeVariantIndex;
+                const selectedColor = colors.find(c => c.id === (variant.color_id || variant.color?.id));
+                
+                // Variant Details Section
+                if (activeSection === 'variant-details') {
+                  return (
+                    <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <div>
+                          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
+                            Variant {variantIndex + 1} - Details
+                          </h2>
+                          {selectedColor && (
+                            <p style={{ color: '#6b7280', fontSize: '14px' }}>
+                              {selectedColor.name} {variant.size && `• ${variant.size}`} {variant.pattern && `• ${variant.pattern}`}
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className="admin-modern-btn danger icon-only"
+                          onClick={() => handleRemoveVariant(variantIndex)}
+                          title="Delete Variant"
+                        >
+                          <span className="material-symbols-outlined">delete</span>
+                        </button>
+                      </div>
+                      
+                      <div className="admin-card" style={{ padding: '24px' }}>
+                        {/* Basic Information */}
+                        <div style={{ marginBottom: '32px' }}>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>info</span>
+                            Basic Information
+                          </h5>
+                          <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4">
+                            <div className="admin-form-group">
+                              <label className="tw-flex tw-items-center tw-gap-1">
+                                Color <span className="tw-text-red-500">*</span>
+                              </label>
+                              <div className="tw-relative">
+                                <select
+                                  value={String(variant.color_id || variant.color?.id || '')}
+                                  onChange={(e) => {
+                                    const colorId = e.target.value ? parseInt(e.target.value) : 0;
+                                    handleVariantChange(variantIndex, 'color_id', colorId);
+                                  }}
+                                  className="admin-input tw-pr-10"
+                                  required
+                                >
+                                  <option value="">Select color</option>
+                                  {colors.map(color => (
+                                    <option key={color.id} value={String(color.id)}>
+                                      {color.name} {color.hex_code && `(${color.hex_code})`}
+                                    </option>
+                                  ))}
+                                </select>
+                                {selectedColor?.hex_code && (
+                                  <div 
+                                    className="tw-absolute tw-right-3 tw-top-1/2 tw-transform -tw-translate-y-1/2 tw-w-5 tw-h-5 tw-rounded tw-border tw-border-gray-300"
+                                    style={{ backgroundColor: selectedColor.hex_code }}
+                                    title={selectedColor.name}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="admin-form-group">
+                              <label>Size</label>
+                              <input
+                                type="text"
+                                value={variant.size}
+                                onChange={(e) => handleVariantChange(variantIndex, 'size', e.target.value)}
+                                placeholder="e.g., M, L, 3-Seater"
+                                className="admin-input"
+                              />
+                            </div>
+                            
+                            <div className="admin-form-group">
+                              <label>Pattern</label>
+                              <input
+                                type="text"
+                                value={variant.pattern}
+                                onChange={(e) => handleVariantChange(variantIndex, 'pattern', e.target.value)}
+                                placeholder="e.g., Classic, Modern"
+                                className="admin-input"
+                              />
+                            </div>
+                            
+                            <div className="admin-form-group">
+                              <label>Quality</label>
+                              <input
+                                type="text"
+                                value={variant.quality || ''}
+                                onChange={(e) => handleVariantChange(variantIndex, 'quality', e.target.value)}
+                                placeholder="e.g., Premium, Standard"
+                                className="admin-input"
+                              />
+                            </div>
+                            
+                            <div className="admin-form-group">
+                              <label>Variant Title</label>
+                              <input
+                                type="text"
+                                value={variant.title || ''}
+                                onChange={(e) => handleVariantChange(variantIndex, 'title', e.target.value)}
+                                placeholder="Auto-generated if empty"
+                                className="admin-input"
+                              />
+                            </div>
+                            
+                            <div className="admin-form-group tw-flex tw-items-end">
+                              <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={variant.is_active}
+                                  onChange={(e) => handleVariantChange(variantIndex, 'is_active', e.target.checked)}
+                                />
+                                <span>Is Active</span>
+                              </label>
+                            </div>
+                            
+                            {/* Subcategories */}
+                            <div className="admin-form-group tw-col-span-full">
+                              <label>Subcategories</label>
+                              <div className="tw-border tw-border-gray-300 tw-rounded tw-p-3 tw-bg-white tw-flex tw-flex-wrap tw-gap-3">
+                                {subcategories.length > 0 ? (
+                                  subcategories.map(sub => {
+                                    const isChecked = Array.isArray(variant.subcategory_ids) && variant.subcategory_ids.includes(sub.id);
+                                    return (
+                                      <div key={sub.id} className="tw-flex tw-items-center">
+                                        <input
+                                          type="checkbox"
+                                          id={`variant_${variantIndex}_subcategory_${sub.id}`}
+                                          checked={isChecked}
+                                          onChange={(e) => {
+                                            const currentIds = Array.isArray(variant.subcategory_ids) ? variant.subcategory_ids : [];
+                                            let newIds: number[];
+                                            if (e.target.checked) {
+                                              newIds = [...currentIds, sub.id];
+                                            } else {
+                                              newIds = currentIds.filter((id: number) => id !== sub.id);
+                                            }
+                                            handleVariantChange(variantIndex, 'subcategory_ids', newIds);
+                                          }}
+                                          className="tw-mr-2"
+                                        />
+                                        <label htmlFor={`variant_${variantIndex}_subcategory_${sub.id}`} className="tw-cursor-pointer">
+                                          {sub.name}
+                                        </label>
+                                      </div>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="tw-text-gray-500 tw-text-sm">
+                                    {formData.category_id ? 'No subcategories available' : 'Please select a category first'}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Pricing & Stock */}
+                        <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>payments</span>
+                            Pricing & Stock
+                          </h5>
+                          <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-4">
+                            <div className="admin-form-group">
+                              <label>Price <span className="tw-text-red-500">*</span></label>
+                              <div className="tw-relative">
+                                <span className="tw-absolute tw-left-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-gray-500">₹</span>
+                                <input
+                                  type="number"
+                                  value={variant.price}
+                                  onChange={(e) => handleVariantChange(variantIndex, 'price', e.target.value)}
+                                  step="0.01"
+                                  required
+                                  className="admin-input tw-pl-8"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="admin-form-group">
+                              <label>Old Price</label>
+                              <div className="tw-relative">
+                                <span className="tw-absolute tw-left-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-gray-500">₹</span>
+                                <input
+                                  type="number"
+                                  value={variant.old_price || ''}
+                                  onChange={(e) => handleVariantChange(variantIndex, 'old_price', e.target.value || null)}
+                                  step="0.01"
+                                  className="admin-input tw-pl-8"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="admin-form-group">
+                              <label>Stock Quantity <span className="tw-text-red-500">*</span></label>
+                              <input
+                                type="number"
+                                value={variant.stock_quantity}
+                                onChange={(e) => handleVariantChange(variantIndex, 'stock_quantity', parseInt(e.target.value) || 0)}
+                                min="0"
+                                required
+                                className="admin-input"
+                              />
+                            </div>
+                            
+                            <div className="admin-form-group tw-flex tw-items-end">
+                              <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={variant.is_in_stock}
+                                  onChange={(e) => handleVariantChange(variantIndex, 'is_in_stock', e.target.checked)}
+                                />
+                                <span>Is In Stock</span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Variant Images Section (Main Image)
+                if (activeSection === 'variant-images') {
+                  return (
+                    <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <div>
+                          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
+                            Variant {variantIndex + 1} - Main Image
+                          </h2>
+                          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+                            Set the primary image for this variant
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="admin-card" style={{ padding: '24px' }}>
+                        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                          <div className="admin-form-group">
+                            <label>Image URL</label>
+                            <input
+                              type="url"
+                              value={variant.image}
+                              onChange={(e) => handleVariantChange(variantIndex, 'image', e.target.value)}
+                              placeholder="https://example.com/image.jpg"
+                              className="admin-input"
+                            />
+                          </div>
+                          <div className="admin-form-group">
+                            {variant.image ? (
+                              <div className="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-bg-gray-50">
+                                <img 
+                                  src={variant.image} 
+                                  alt="Variant" 
+                                  className="tw-w-full tw-h-48 tw-object-contain tw-rounded"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3EImage not found%3C/text%3E%3C/svg%3E';
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-p-8 tw-text-center tw-bg-gray-50">
+                                <span className="material-symbols-outlined tw-text-gray-400 tw-text-4xl">image</span>
+                                <p className="tw-text-sm tw-text-gray-500 tw-mt-2">No image added</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Variant Gallery Section (Additional Images)
+                if (activeSection === 'variant-gallery') {
+                  return (
+                    <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <div>
+                          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
+                            Variant {variantIndex + 1} - Image Gallery
+                          </h2>
+                          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+                            Add additional images for this variant ({variant.images?.length || 0} images)
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="admin-modern-btn primary"
+                          onClick={() => handleAddVariantImage(variantIndex)}
+                        >
+                          <span className="material-symbols-outlined">add</span>
+                          Add Image
+                        </button>
+                      </div>
+                      
+                      <div className="admin-card" style={{ padding: '24px' }}>
+                        <div className="tw-space-y-4">
+                          {variant.images?.map((img, imgIndex) => (
+                            <div key={imgIndex} className="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-bg-gray-50">
+                              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-4 tw-items-start">
+                                <div className="md:tw-col-span-4">
+                                  {img.image ? (
+                                    <div className="tw-border tw-border-gray-200 tw-rounded-lg tw-overflow-hidden tw-bg-white">
+                                      <img 
+                                        src={img.image} 
+                                        alt={img.alt_text || 'Variant image'} 
+                                        className="tw-w-full tw-h-32 tw-object-contain"
+                                        onError={(e) => {
+                                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3EImage not found%3C/text%3E%3C/svg%3E';
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-p-4 tw-text-center tw-bg-white tw-h-32 tw-flex tw-items-center tw-justify-center">
+                                      <span className="material-symbols-outlined tw-text-gray-400">image</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="md:tw-col-span-7 tw-space-y-3">
+                                  <div className="admin-form-group">
+                                    <label>Image URL</label>
+                                    <input
+                                      type="url"
+                                      value={img.image}
+                                      onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'image', e.target.value)}
+                                      placeholder="https://example.com/image.jpg"
+                                      className="admin-input"
+                                    />
+                                  </div>
+                                  <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+                                    <div className="admin-form-group">
+                                      <label>Alt Text</label>
+                                      <input
+                                        type="text"
+                                        value={img.alt_text}
+                                        onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'alt_text', e.target.value)}
+                                        placeholder="Image description"
+                                        className="admin-input"
+                                      />
+                                    </div>
+                                    <div className="admin-form-group">
+                                      <label>Sort Order</label>
+                                      <input
+                                        type="number"
+                                        value={img.sort_order}
+                                        onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                                        placeholder="0"
+                                        className="admin-input"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="md:tw-col-span-1 tw-flex tw-items-start tw-justify-end">
+                                  <button
+                                    type="button"
+                                    className="admin-modern-btn danger icon-only"
+                                    onClick={() => handleRemoveVariantImage(variantIndex, imgIndex)}
+                                    title="Remove Image"
+                                  >
+                                    <span className="material-symbols-outlined">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          {(!variant.images || variant.images.length === 0) && (
+                            <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                              <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">photo_library</span>
+                              <p className="tw-mt-2">No variant images added</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Variant Specifications Section
+                if (activeSection === 'variant-specs') {
+                  return (
+                    <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
+                      <div style={{ marginBottom: '24px' }}>
+                        <div>
+                          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
+                            Variant {variantIndex + 1} - Specification Template
+                          </h2>
+                          <p style={{ color: '#6b7280', fontSize: '14px' }}>
+                            Manage specifications for this variant
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="admin-card" style={{ padding: '24px' }}>
+                        {/* Specifications */}
+                        <div style={{ marginBottom: '32px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>list</span>
+                              Specifications ({variant.specifications?.length || 0})
+                            </h5>
+                            <button 
+                              type="button" 
+                              className="admin-modern-btn secondary"
+                              onClick={() => handleAddVariantSpecification(variantIndex)}
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              Add Specification
+                            </button>
+                          </div>
+                          <div className="tw-space-y-3">
+                            {variant.specifications?.map((spec, specIndex) => (
+                              <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                                <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
+                                    <input
+                                      type="text"
+                                      value={spec.name}
+                                      onChange={(e) => handleVariantSpecificationChange(variantIndex, specIndex, 'name', e.target.value)}
+                                      placeholder="e.g., Brand, Depth, Style"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                                    <input
+                                      type="text"
+                                      value={spec.value}
+                                      onChange={(e) => handleVariantSpecificationChange(variantIndex, specIndex, 'value', e.target.value)}
+                                      placeholder="e.g., Atomberg, 12 inch, Modern"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="tw-w-24">
+                                  <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Order</label>
+                                  <input
+                                    type="number"
+                                    value={spec.sort_order}
+                                    onChange={(e) => handleVariantSpecificationChange(variantIndex, specIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                                    placeholder="0"
+                                    className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                  />
+                                </div>
+                                <div className="tw-flex tw-items-end">
+                                  <button
+                                    type="button"
+                                    className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                                    onClick={() => handleRemoveVariantSpecification(variantIndex, specIndex)}
+                                  >
+                                    <span className="material-symbols-outlined tw-text-lg">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                            {(!variant.specifications || variant.specifications.length === 0) && (
+                              <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                                <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">list</span>
+                                <p className="tw-mt-2">No specifications added for this variant</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Measurement Specifications */}
+                        <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>straighten</span>
+                              Measurement Specifications ({variant.measurement_specs?.length || 0})
+                            </h5>
+                            <button 
+                              type="button" 
+                              className="admin-modern-btn secondary"
+                              onClick={() => {
+                                const updated = [...variants];
+                                updated[variantIndex].measurement_specs = [...(updated[variantIndex].measurement_specs || []), {
+                                  name: '',
+                                  value: '',
+                                  sort_order: updated[variantIndex].measurement_specs?.length || 0
+                                }];
+                                setVariants(updated);
+                              }}
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              Add Measurement Spec
+                            </button>
+                          </div>
+                          <div className="tw-space-y-3">
+                            {variant.measurement_specs?.map((spec, specIndex) => (
+                              <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                                <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
+                                    <input
+                                      type="text"
+                                      value={spec.name}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].measurement_specs) {
+                                          updated[variantIndex].measurement_specs[specIndex] = { ...spec, name: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., Length, Width, Height"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                                    <input
+                                      type="text"
+                                      value={spec.value}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].measurement_specs) {
+                                          updated[variantIndex].measurement_specs[specIndex] = { ...spec, value: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., 64 x 29 x 36 inch"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="tw-flex tw-items-end">
+                                  <button
+                                    type="button"
+                                    className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors"
+                                    onClick={() => {
+                                      const updated = [...variants];
+                                      if (updated[variantIndex].measurement_specs) {
+                                        updated[variantIndex].measurement_specs = updated[variantIndex].measurement_specs.filter((_, i) => i !== specIndex);
+                                      }
+                                      setVariants(updated);
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined tw-text-lg">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Style Specifications */}
+                        <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>palette</span>
+                              Style Specifications ({variant.style_specs?.length || 0})
+                            </h5>
+                            <button 
+                              type="button" 
+                              className="admin-modern-btn secondary"
+                              onClick={() => {
+                                const updated = [...variants];
+                                updated[variantIndex].style_specs = [...(updated[variantIndex].style_specs || []), {
+                                  name: '',
+                                  value: '',
+                                  sort_order: updated[variantIndex].style_specs?.length || 0
+                                }];
+                                setVariants(updated);
+                              }}
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              Add Style Spec
+                            </button>
+                          </div>
+                          <div className="tw-space-y-3">
+                            {variant.style_specs?.map((spec, specIndex) => (
+                              <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                                <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
+                                    <input
+                                      type="text"
+                                      value={spec.name}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].style_specs) {
+                                          updated[variantIndex].style_specs[specIndex] = { ...spec, name: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., Colour, Style, Shape"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                                    <input
+                                      type="text"
+                                      value={spec.value}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].style_specs) {
+                                          updated[variantIndex].style_specs[specIndex] = { ...spec, value: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., Grey & Beige, Modern, Rectangular"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="tw-flex tw-items-end">
+                                  <button
+                                    type="button"
+                                    className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors"
+                                    onClick={() => {
+                                      const updated = [...variants];
+                                      if (updated[variantIndex].style_specs) {
+                                        updated[variantIndex].style_specs = updated[variantIndex].style_specs.filter((_, i) => i !== specIndex);
+                                      }
+                                      setVariants(updated);
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined tw-text-lg">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Features */}
+                        <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>star</span>
+                              Features ({variant.features?.length || 0})
+                            </h5>
+                            <button 
+                              type="button" 
+                              className="admin-modern-btn secondary"
+                              onClick={() => {
+                                const updated = [...variants];
+                                updated[variantIndex].features = [...(updated[variantIndex].features || []), {
+                                  name: '',
+                                  value: '',
+                                  sort_order: updated[variantIndex].features?.length || 0
+                                }];
+                                setVariants(updated);
+                              }}
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              Add Feature
+                            </button>
+                          </div>
+                          <div className="tw-space-y-3">
+                            {variant.features?.map((spec, specIndex) => (
+                              <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                                <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
+                                    <input
+                                      type="text"
+                                      value={spec.name}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].features) {
+                                          updated[variantIndex].features[specIndex] = { ...spec, name: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., Weight Capacity, Seating Capacity"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                                    <input
+                                      type="text"
+                                      value={spec.value}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].features) {
+                                          updated[variantIndex].features[specIndex] = { ...spec, value: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., 450 Kilograms, 3.0"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="tw-flex tw-items-end">
+                                  <button
+                                    type="button"
+                                    className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors"
+                                    onClick={() => {
+                                      const updated = [...variants];
+                                      if (updated[variantIndex].features) {
+                                        updated[variantIndex].features = updated[variantIndex].features.filter((_, i) => i !== specIndex);
+                                      }
+                                      setVariants(updated);
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined tw-text-lg">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* User Guide */}
+                        <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>menu_book</span>
+                              User Guide ({variant.user_guide?.length || 0})
+                            </h5>
+                            <button 
+                              type="button" 
+                              className="admin-modern-btn secondary"
+                              onClick={() => {
+                                const updated = [...variants];
+                                updated[variantIndex].user_guide = [...(updated[variantIndex].user_guide || []), {
+                                  name: '',
+                                  value: '',
+                                  sort_order: updated[variantIndex].user_guide?.length || 0
+                                }];
+                                setVariants(updated);
+                              }}
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              Add User Guide
+                            </button>
+                          </div>
+                          <div className="tw-space-y-3">
+                            {variant.user_guide?.map((spec, specIndex) => (
+                              <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                                <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
+                                    <input
+                                      type="text"
+                                      value={spec.name}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].user_guide) {
+                                          updated[variantIndex].user_guide[specIndex] = { ...spec, name: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., Assembly, Care Instructions"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                                    <input
+                                      type="text"
+                                      value={spec.value}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].user_guide) {
+                                          updated[variantIndex].user_guide[specIndex] = { ...spec, value: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., Required, Wipe with dry cloth"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="tw-flex tw-items-end">
+                                  <button
+                                    type="button"
+                                    className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors"
+                                    onClick={() => {
+                                      const updated = [...variants];
+                                      if (updated[variantIndex].user_guide) {
+                                        updated[variantIndex].user_guide = updated[variantIndex].user_guide.filter((_, i) => i !== specIndex);
+                                      }
+                                      setVariants(updated);
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined tw-text-lg">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Item Details */}
+                        <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory_2</span>
+                              Item Details ({variant.item_details?.length || 0})
+                            </h5>
+                            <button 
+                              type="button" 
+                              className="admin-modern-btn secondary"
+                              onClick={() => {
+                                const updated = [...variants];
+                                updated[variantIndex].item_details = [...(updated[variantIndex].item_details || []), {
+                                  name: '',
+                                  value: '',
+                                  sort_order: updated[variantIndex].item_details?.length || 0
+                                }];
+                                setVariants(updated);
+                              }}
+                            >
+                              <span className="material-symbols-outlined">add</span>
+                              Add Item Detail
+                            </button>
+                          </div>
+                          <div className="tw-space-y-3">
+                            {variant.item_details?.map((spec, specIndex) => (
+                              <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                                <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
+                                    <input
+                                      type="text"
+                                      value={spec.name}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].item_details) {
+                                          updated[variantIndex].item_details[specIndex] = { ...spec, name: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., Warranty, Package Contents"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Value</label>
+                                    <input
+                                      type="text"
+                                      value={spec.value}
+                                      onChange={(e) => {
+                                        const updated = [...variants];
+                                        if (updated[variantIndex].item_details) {
+                                          updated[variantIndex].item_details[specIndex] = { ...spec, value: e.target.value };
+                                        }
+                                        setVariants(updated);
+                                      }}
+                                      placeholder="e.g., 1 Year, Package Contents"
+                                      className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="tw-flex tw-items-end">
+                                  <button
+                                    type="button"
+                                    className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors"
+                                    onClick={() => {
+                                      const updated = [...variants];
+                                      if (updated[variantIndex].item_details) {
+                                        updated[variantIndex].item_details = updated[variantIndex].item_details.filter((_, i) => i !== specIndex);
+                                      }
+                                      setVariants(updated);
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined tw-text-lg">delete</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                return null;
+              })()
+            )}
+            
+            {/* Variants List View - Show when no specific variant is selected */}
+            {activeSection === 'variants' && activeVariantIndex === null && variants.length > 0 && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827' }}>Product Variants</h2>
+                  <button 
+                    type="button" 
+                    className="admin-modern-btn primary"
+                    onClick={handleAddVariant}
+                  >
+                    <span className="material-symbols-outlined">add</span>
+                    Add Variant
+                  </button>
+                </div>
+                <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+                  Select a variant from the sidebar to edit its details, images, or specifications.
+                </p>
+              </div>
+            )}
+            
+            {/* Show variant list if no variants exist */}
+            {activeSection === 'variants' && variants.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '48px' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#9ca3af', marginBottom: '16px' }}>
+                  style
+                </span>
+                <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                  No Variants Yet
+                </h3>
+                <p style={{ color: '#6b7280', marginBottom: '24px' }}>
+                  Add your first variant to get started
+                </p>
+                <button 
+                  type="button" 
+                  className="admin-modern-btn primary"
+                  onClick={handleAddVariant}
+                >
+                  <span className="material-symbols-outlined">add</span>
+                  Add Variant
+                </button>
+              </div>
+            )}
+            
+            {/* Old Variants Tab - Keep for backward compatibility during transition */}
+            {false && activeSection === 'variants-old' && (
           <div className="admin-card">
             <div className="tw-flex tw-justify-between tw-items-center tw-mb-6">
               <div>
@@ -2126,8 +4301,8 @@ const AdminProductDetail: React.FC = () => {
           </div>
         )}
         
-        {/* Details Tab */}
-        {activeTab === 'details' && (
+            {/* Details Section */}
+            {activeSection === 'details' && (
           <div className="admin-card tw-space-y-3">
             
             {/* About This Item Section */}
@@ -2500,56 +4675,42 @@ const AdminProductDetail: React.FC = () => {
             </div>
           </div>
         )} */}
-        
-        {/* Submit Button */}
-        <div className="tw-fixed tw-bottom-0 tw-left-0 tw-right-0 tw-bg-white tw-border-t tw-p-4 tw-shadow-lg tw-z-10">
-          <div className="tw-max-w-7xl tw-mx-auto tw-flex tw-justify-between tw-items-center">
-                <button
-                  type="button"
-              className="admin-btn secondary"
-              onClick={() => navigate('/admin/products')}
-            >
-              Cancel
-            </button>
-            <div className="tw-flex tw-gap-3">
-              {!isNew && product && (
-                <>
-                  <button
-                    type="button"
-                    className={`admin-btn ${formData.is_active ? 'warning' : 'success'}`}
-                  onClick={handleToggleActive}
-                >
-                  {formData.is_active ? 'Hide Product' : 'Show Product'}
-                </button>
-                <button
-                  type="button"
-                    className={`admin-btn ${formData.is_featured ? 'secondary' : 'info'}`}
-                  onClick={handleToggleFeatured}
-                >
-                    {formData.is_featured ? 'Unmark Featured' : 'Mark Featured'}
-                  </button>
-                </>
-              )}
-              <button type="submit" className="admin-btn primary" disabled={saving}>
-                {saving ? (
-                  <>
-                    <span className="spinner-small"></span>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined">save</span>
-                    {isNew ? 'Create Product' : 'Save Changes'}
-                  </>
-                )}
-                </button>
-              </div>
-            </div>
           </div>
+          {/* End Right Content Panel */}
+        </div>
+        {/* End Sidebar Layout */}
       </form>
+      </div>
       
-      {/* Spacer for fixed footer */}
-      <div className="tw-h-20"></div>
+      {/* Styles for sidebar navigation */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .admin-product-detail .sidebar-nav-item {
+          transition: all 0.2s ease;
+        }
+        
+        .admin-product-detail .sidebar-nav-item:hover {
+          background-color: #f3f4f6;
+        }
+        
+        .admin-product-detail .sidebar-nav-item.active {
+          background-color: #eff6ff;
+          border-left-color: #3b82f6;
+          color: #1e40af;
+          font-weight: 600;
+        }
+      `}</style>
+    </div>
     </div>
   );
 };

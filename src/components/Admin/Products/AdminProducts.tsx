@@ -219,6 +219,48 @@ const AdminProducts: React.FC = () => {
           </div>
         </div>
         <div className="admin-page-actions">
+          <button
+            className="admin-modern-btn secondary"
+            onClick={() => {
+              const fileInput = document.createElement('input');
+              fileInput.type = 'file';
+              fileInput.accept = '.xlsx,.xls';
+              fileInput.onchange = async (e: any) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  
+                  const response = await adminAPI.importProductsExcel(formData);
+                  
+                  if (response.data.success) {
+                    showToast(
+                      `Import successful: ${response.data.products_created} products, ${response.data.variants_created} variants created`,
+                      'success'
+                    );
+                    if (response.data.errors && response.data.errors.length > 0) {
+                      console.warn('Import errors:', response.data.errors);
+                    }
+                    // Refresh products list
+                    fetchProducts();
+                  } else {
+                    showToast(response.data.message || 'Import failed', 'error');
+                  }
+                } catch (error: any) {
+                  showToast(
+                    error.response?.data?.error || 'Failed to import Excel file',
+                    'error'
+                  );
+                }
+              };
+              fileInput.click();
+            }}
+          >
+            <span className="material-symbols-outlined">upload_file</span>
+            Import Excel
+          </button>
           <Link to={`${basePath}/products/new`} className="admin-modern-btn primary">
             <span className="material-symbols-outlined">add</span>
             Add New Product
