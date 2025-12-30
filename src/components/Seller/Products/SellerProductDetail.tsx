@@ -384,7 +384,7 @@ const SellerProductDetail: React.FC = () => {
               }
             });
             
-            mergedVariant[sectionKey as keyof typeof mergedVariant] = existingSpecs as any;
+            (mergedVariant as any)[sectionKey] = existingSpecs;
           });
           
           return mergedVariant;

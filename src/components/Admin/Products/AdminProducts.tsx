@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
+import adminAPI from '../../../services/adminApi';
 import { formatCurrency, showToast } from '../utils/adminUtils';
 import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
@@ -98,64 +99,64 @@ const AdminProducts: React.FC = () => {
     }
   }, [isSellerPanel, api]);
   
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const params: any = {
-          page: currentPage,
-        };
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params: any = {
+        page: currentPage,
+      };
+      
+      if (searchTerm) params.search = searchTerm;
+      if (filterCategory) params.category = filterCategory;
+      if (filterStock) params.stock_status = filterStock;
+      if (filterActive) params.is_active = filterActive;
+      if (filterBrand && !isSellerPanel) params.vendor = filterBrand;
+      
+      console.log('Fetching products with params:', params);
+      const response = await api.getProducts(params);
+      
+      console.log('API Response:', response.data);
+      
+      if (response.data) {
+        let productsList = [];
+        let count = 0;
         
-        if (searchTerm) params.search = searchTerm;
-        if (filterCategory) params.category = filterCategory;
-        if (filterStock) params.stock_status = filterStock;
-        if (filterActive) params.is_active = filterActive;
-        if (filterBrand && !isSellerPanel) params.vendor = filterBrand;
-        
-        console.log('Fetching products with params:', params);
-        const response = await api.getProducts(params);
-        
-        console.log('API Response:', response.data);
-        
-        if (response.data) {
-          let productsList = [];
-          let count = 0;
-          
-          if (response.data.results && Array.isArray(response.data.results)) {
-            productsList = response.data.results;
-            count = response.data.count || productsList.length;
-          } else if (Array.isArray(response.data)) {
-            productsList = response.data;
-            count = productsList.length;
-          }
-          
-          setProducts(productsList);
-          setTotalCount(count);
-          
-          const pageSize = 20;
-          setTotalPages(Math.max(Math.ceil(count / pageSize), 1));
-          setError(null);
-        } else {
-          setProducts([]);
-          setTotalPages(1);
-          setError('No data received from server');
+        if (response.data.results && Array.isArray(response.data.results)) {
+          productsList = response.data.results;
+          count = response.data.count || productsList.length;
+        } else if (Array.isArray(response.data)) {
+          productsList = response.data;
+          count = productsList.length;
         }
-      } catch (err: any) {
-        console.error('Error fetching products:', err);
-        if (err.response) {
-          console.error('Error response:', err.response.data);
-          setError(err.response.data.detail || err.response.data.error || 'Failed to load products');
-        } else {
-          setError('Failed to load products');
-        }
+        
+        setProducts(productsList);
+        setTotalCount(count);
+        
+        const pageSize = 20;
+        setTotalPages(Math.max(Math.ceil(count / pageSize), 1));
+        setError(null);
+      } else {
         setProducts([]);
-      } finally {
-        setLoading(false);
+        setTotalPages(1);
+        setError('No data received from server');
       }
-    };
-    
+    } catch (err: any) {
+      console.error('Error fetching products:', err);
+      if (err.response) {
+        console.error('Error response:', err.response.data);
+        setError(err.response.data.detail || err.response.data.error || 'Failed to load products');
+      } else {
+        setError('Failed to load products');
+      }
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchTerm, filterCategory, filterStock, filterActive, filterBrand, isSellerPanel, api]);
+  
+  useEffect(() => {
     fetchProducts();
-  }, [currentPage, searchTerm, filterCategory, filterStock, filterActive, filterBrand, isSellerPanel]);
+  }, [fetchProducts]);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
