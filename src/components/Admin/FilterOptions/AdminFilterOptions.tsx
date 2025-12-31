@@ -118,10 +118,36 @@ const AdminFilterOptions: React.FC = () => {
   const fetchSpecTemplates = async (categoryId: number) => {
     try {
       const response = await adminAPI.getCategorySpecificationTemplates({ category: categoryId });
-      const templates = response.data.results || response.data || [];
-      setSpecTemplatesMap(prev => ({ ...prev, [categoryId]: templates }));
+      let templates = [];
+      
+      // Handle different response structures
+      if (response.data) {
+        if (Array.isArray(response.data)) {
+          templates = response.data;
+        } else if (response.data.results && Array.isArray(response.data.results)) {
+          templates = response.data.results;
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          templates = response.data.data;
+        }
+      }
+      
+      // Ensure templates is an array
+      if (!Array.isArray(templates)) {
+        templates = [];
+      }
+      
+      // Update state with new templates
+      setSpecTemplatesMap(prev => ({ 
+        ...prev, 
+        [categoryId]: templates 
+      }));
     } catch (err) {
       console.error('Error fetching specification templates:', err);
+      // On error, set empty array to ensure UI updates
+      setSpecTemplatesMap(prev => ({ 
+        ...prev, 
+        [categoryId]: [] 
+      }));
     }
   };
 
@@ -345,6 +371,8 @@ const AdminFilterOptions: React.FC = () => {
       return;
     }
     setSaving(true);
+    // Save category ID before resetting form
+    const categoryId = parseInt(specTemplateForm.category);
     try {
       if (editingSpecTemplate) {
         await adminAPI.updateCategorySpecificationTemplate(editingSpecTemplate.id, specTemplateForm);
@@ -354,7 +382,8 @@ const AdminFilterOptions: React.FC = () => {
         showToast('Specification template created successfully', 'success');
       }
       resetSpecTemplateForm();
-      await fetchSpecTemplates(parseInt(specTemplateForm.category));
+      // Fetch templates after reset, using saved categoryId
+      await fetchSpecTemplates(categoryId);
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to save specification template', 'error');
     } finally {

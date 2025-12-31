@@ -2895,7 +2895,7 @@ const AdminProductDetail: React.FC = () => {
                             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
                             Images ({variant.images?.length || 0})
                           </h5>
-                          <div className="tw-space-y-4">
+                        <div className="tw-space-y-4">
                           {variant.images?.map((img, imgIndex) => (
                             <div key={imgIndex} className="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-bg-gray-50">
                               <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-4 tw-items-start">
@@ -2997,9 +2997,9 @@ const AdminProductDetail: React.FC = () => {
                         <div style={{ marginBottom: '32px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>list</span>
-                              Specifications ({variant.specifications?.length || 0})
-                            </h5>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>list</span>
+                            Specifications ({variant.specifications?.length || 0})
+                          </h5>
                             <button 
                               type="button" 
                               className="admin-modern-btn secondary"
@@ -3068,25 +3068,25 @@ const AdminProductDetail: React.FC = () => {
                         <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>straighten</span>
-                              Measurement Specifications ({variant.measurement_specs?.length || 0})
-                            </h5>
-                            <button 
-                              type="button" 
-                              className="admin-modern-btn secondary"
-                              onClick={() => {
-                                const updated = [...variants];
-                                updated[variantIndex].measurement_specs = [...(updated[variantIndex].measurement_specs || []), {
-                                  name: '',
-                                  value: '',
-                                  sort_order: updated[variantIndex].measurement_specs?.length || 0
-                                }];
-                                setVariants(updated);
-                              }}
-                            >
-                              <span className="material-symbols-outlined">add</span>
-                              Add Measurement Spec
-                            </button>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>straighten</span>
+                            Measurement Specifications ({variant.measurement_specs?.length || 0})
+                          </h5>
+                          <button 
+                            type="button" 
+                            className="admin-modern-btn secondary"
+                            onClick={() => {
+                              const updated = [...variants];
+                              updated[variantIndex].measurement_specs = [...(updated[variantIndex].measurement_specs || []), {
+                                name: '',
+                                value: '',
+                                sort_order: updated[variantIndex].measurement_specs?.length || 0
+                              }];
+                              setVariants(updated);
+                            }}
+                          >
+                            <span className="material-symbols-outlined">add</span>
+                            Add Measurement Spec
+                          </button>
                           </div>
                           <div className="tw-space-y-3">
                             {variant.measurement_specs?.map((spec, specIndex) => (
@@ -3100,7 +3100,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].measurement_specs) {
-                                          updated[variantIndex].measurement_specs[specIndex] = { ...spec, name: e.target.value };
+                                        updated[variantIndex].measurement_specs[specIndex] = { ...spec, name: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3116,7 +3116,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].measurement_specs) {
-                                          updated[variantIndex].measurement_specs[specIndex] = { ...spec, value: e.target.value };
+                                        updated[variantIndex].measurement_specs[specIndex] = { ...spec, value: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3132,7 +3132,7 @@ const AdminProductDetail: React.FC = () => {
                                     onClick={() => {
                                       const updated = [...variants];
                                       if (updated[variantIndex].measurement_specs) {
-                                        updated[variantIndex].measurement_specs = updated[variantIndex].measurement_specs.filter((_, i) => i !== specIndex);
+                                      updated[variantIndex].measurement_specs = updated[variantIndex].measurement_specs.filter((_, i) => i !== specIndex);
                                       }
                                       setVariants(updated);
                                     }}
@@ -3149,25 +3149,25 @@ const AdminProductDetail: React.FC = () => {
                         <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>palette</span>
-                              Style Specifications ({variant.style_specs?.length || 0})
-                            </h5>
-                            <button 
-                              type="button" 
-                              className="admin-modern-btn secondary"
-                              onClick={() => {
-                                const updated = [...variants];
-                                updated[variantIndex].style_specs = [...(updated[variantIndex].style_specs || []), {
-                                  name: '',
-                                  value: '',
-                                  sort_order: updated[variantIndex].style_specs?.length || 0
-                                }];
-                                setVariants(updated);
-                              }}
-                            >
-                              <span className="material-symbols-outlined">add</span>
-                              Add Style Spec
-                            </button>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>palette</span>
+                            Style Specifications ({variant.style_specs?.length || 0})
+                          </h5>
+                          <button 
+                            type="button" 
+                            className="admin-modern-btn secondary"
+                            onClick={() => {
+                              const updated = [...variants];
+                              updated[variantIndex].style_specs = [...(updated[variantIndex].style_specs || []), {
+                                name: '',
+                                value: '',
+                                sort_order: updated[variantIndex].style_specs?.length || 0
+                              }];
+                              setVariants(updated);
+                            }}
+                          >
+                            <span className="material-symbols-outlined">add</span>
+                            Add Style Spec
+                          </button>
                           </div>
                           <div className="tw-space-y-3">
                             {variant.style_specs?.map((spec, specIndex) => (
@@ -3181,7 +3181,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].style_specs) {
-                                          updated[variantIndex].style_specs[specIndex] = { ...spec, name: e.target.value };
+                                        updated[variantIndex].style_specs[specIndex] = { ...spec, name: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3197,7 +3197,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].style_specs) {
-                                          updated[variantIndex].style_specs[specIndex] = { ...spec, value: e.target.value };
+                                        updated[variantIndex].style_specs[specIndex] = { ...spec, value: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3213,7 +3213,7 @@ const AdminProductDetail: React.FC = () => {
                                     onClick={() => {
                                       const updated = [...variants];
                                       if (updated[variantIndex].style_specs) {
-                                        updated[variantIndex].style_specs = updated[variantIndex].style_specs.filter((_, i) => i !== specIndex);
+                                      updated[variantIndex].style_specs = updated[variantIndex].style_specs.filter((_, i) => i !== specIndex);
                                       }
                                       setVariants(updated);
                                     }}
@@ -3230,25 +3230,25 @@ const AdminProductDetail: React.FC = () => {
                         <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>star</span>
-                              Features ({variant.features?.length || 0})
-                            </h5>
-                            <button 
-                              type="button" 
-                              className="admin-modern-btn secondary"
-                              onClick={() => {
-                                const updated = [...variants];
-                                updated[variantIndex].features = [...(updated[variantIndex].features || []), {
-                                  name: '',
-                                  value: '',
-                                  sort_order: updated[variantIndex].features?.length || 0
-                                }];
-                                setVariants(updated);
-                              }}
-                            >
-                              <span className="material-symbols-outlined">add</span>
-                              Add Feature
-                            </button>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>star</span>
+                            Features ({variant.features?.length || 0})
+                          </h5>
+                          <button 
+                            type="button" 
+                            className="admin-modern-btn secondary"
+                            onClick={() => {
+                              const updated = [...variants];
+                              updated[variantIndex].features = [...(updated[variantIndex].features || []), {
+                                name: '',
+                                value: '',
+                                sort_order: updated[variantIndex].features?.length || 0
+                              }];
+                              setVariants(updated);
+                            }}
+                          >
+                            <span className="material-symbols-outlined">add</span>
+                            Add Feature
+                          </button>
                           </div>
                           <div className="tw-space-y-3">
                             {variant.features?.map((spec, specIndex) => (
@@ -3262,7 +3262,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].features) {
-                                          updated[variantIndex].features[specIndex] = { ...spec, name: e.target.value };
+                                        updated[variantIndex].features[specIndex] = { ...spec, name: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3278,7 +3278,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].features) {
-                                          updated[variantIndex].features[specIndex] = { ...spec, value: e.target.value };
+                                        updated[variantIndex].features[specIndex] = { ...spec, value: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3294,7 +3294,7 @@ const AdminProductDetail: React.FC = () => {
                                     onClick={() => {
                                       const updated = [...variants];
                                       if (updated[variantIndex].features) {
-                                        updated[variantIndex].features = updated[variantIndex].features.filter((_, i) => i !== specIndex);
+                                      updated[variantIndex].features = updated[variantIndex].features.filter((_, i) => i !== specIndex);
                                       }
                                       setVariants(updated);
                                     }}
@@ -3311,25 +3311,25 @@ const AdminProductDetail: React.FC = () => {
                         <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>menu_book</span>
-                              User Guide ({variant.user_guide?.length || 0})
-                            </h5>
-                            <button 
-                              type="button" 
-                              className="admin-modern-btn secondary"
-                              onClick={() => {
-                                const updated = [...variants];
-                                updated[variantIndex].user_guide = [...(updated[variantIndex].user_guide || []), {
-                                  name: '',
-                                  value: '',
-                                  sort_order: updated[variantIndex].user_guide?.length || 0
-                                }];
-                                setVariants(updated);
-                              }}
-                            >
-                              <span className="material-symbols-outlined">add</span>
-                              Add User Guide
-                            </button>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>menu_book</span>
+                            User Guide ({variant.user_guide?.length || 0})
+                          </h5>
+                          <button 
+                            type="button" 
+                            className="admin-modern-btn secondary"
+                            onClick={() => {
+                              const updated = [...variants];
+                              updated[variantIndex].user_guide = [...(updated[variantIndex].user_guide || []), {
+                                name: '',
+                                value: '',
+                                sort_order: updated[variantIndex].user_guide?.length || 0
+                              }];
+                              setVariants(updated);
+                            }}
+                          >
+                            <span className="material-symbols-outlined">add</span>
+                            Add User Guide
+                          </button>
                           </div>
                           <div className="tw-space-y-3">
                             {variant.user_guide?.map((spec, specIndex) => (
@@ -3343,7 +3343,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].user_guide) {
-                                          updated[variantIndex].user_guide[specIndex] = { ...spec, name: e.target.value };
+                                        updated[variantIndex].user_guide[specIndex] = { ...spec, name: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3359,7 +3359,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].user_guide) {
-                                          updated[variantIndex].user_guide[specIndex] = { ...spec, value: e.target.value };
+                                        updated[variantIndex].user_guide[specIndex] = { ...spec, value: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3375,7 +3375,7 @@ const AdminProductDetail: React.FC = () => {
                                     onClick={() => {
                                       const updated = [...variants];
                                       if (updated[variantIndex].user_guide) {
-                                        updated[variantIndex].user_guide = updated[variantIndex].user_guide.filter((_, i) => i !== specIndex);
+                                      updated[variantIndex].user_guide = updated[variantIndex].user_guide.filter((_, i) => i !== specIndex);
                                       }
                                       setVariants(updated);
                                     }}
@@ -3392,25 +3392,25 @@ const AdminProductDetail: React.FC = () => {
                         <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory_2</span>
-                              Item Details ({variant.item_details?.length || 0})
-                            </h5>
-                            <button 
-                              type="button" 
-                              className="admin-modern-btn secondary"
-                              onClick={() => {
-                                const updated = [...variants];
-                                updated[variantIndex].item_details = [...(updated[variantIndex].item_details || []), {
-                                  name: '',
-                                  value: '',
-                                  sort_order: updated[variantIndex].item_details?.length || 0
-                                }];
-                                setVariants(updated);
-                              }}
-                            >
-                              <span className="material-symbols-outlined">add</span>
-                              Add Item Detail
-                            </button>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>inventory_2</span>
+                            Item Details ({variant.item_details?.length || 0})
+                          </h5>
+                          <button 
+                            type="button" 
+                            className="admin-modern-btn secondary"
+                            onClick={() => {
+                              const updated = [...variants];
+                              updated[variantIndex].item_details = [...(updated[variantIndex].item_details || []), {
+                                name: '',
+                                value: '',
+                                sort_order: updated[variantIndex].item_details?.length || 0
+                              }];
+                              setVariants(updated);
+                            }}
+                          >
+                            <span className="material-symbols-outlined">add</span>
+                            Add Item Detail
+                          </button>
                           </div>
                           <div className="tw-space-y-3">
                             {variant.item_details?.map((spec, specIndex) => (
@@ -3424,7 +3424,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].item_details) {
-                                          updated[variantIndex].item_details[specIndex] = { ...spec, name: e.target.value };
+                                        updated[variantIndex].item_details[specIndex] = { ...spec, name: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3440,7 +3440,7 @@ const AdminProductDetail: React.FC = () => {
                                       onChange={(e) => {
                                         const updated = [...variants];
                                         if (updated[variantIndex].item_details) {
-                                          updated[variantIndex].item_details[specIndex] = { ...spec, value: e.target.value };
+                                        updated[variantIndex].item_details[specIndex] = { ...spec, value: e.target.value };
                                         }
                                         setVariants(updated);
                                       }}
@@ -3456,7 +3456,7 @@ const AdminProductDetail: React.FC = () => {
                                     onClick={() => {
                                       const updated = [...variants];
                                       if (updated[variantIndex].item_details) {
-                                        updated[variantIndex].item_details = updated[variantIndex].item_details.filter((_, i) => i !== specIndex);
+                                      updated[variantIndex].item_details = updated[variantIndex].item_details.filter((_, i) => i !== specIndex);
                                       }
                                       setVariants(updated);
                                     }}

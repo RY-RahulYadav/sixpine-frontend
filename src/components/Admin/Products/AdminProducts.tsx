@@ -100,60 +100,60 @@ const AdminProducts: React.FC = () => {
   }, [isSellerPanel, api]);
   
   const fetchProducts = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params: any = {
-        page: currentPage,
-      };
-      
-      if (searchTerm) params.search = searchTerm;
-      if (filterCategory) params.category = filterCategory;
-      if (filterStock) params.stock_status = filterStock;
-      if (filterActive) params.is_active = filterActive;
-      if (filterBrand && !isSellerPanel) params.vendor = filterBrand;
-      
-      console.log('Fetching products with params:', params);
-      const response = await api.getProducts(params);
-      
-      console.log('API Response:', response.data);
-      
-      if (response.data) {
-        let productsList = [];
-        let count = 0;
+      try {
+        setLoading(true);
+        const params: any = {
+          page: currentPage,
+        };
         
-        if (response.data.results && Array.isArray(response.data.results)) {
-          productsList = response.data.results;
-          count = response.data.count || productsList.length;
-        } else if (Array.isArray(response.data)) {
-          productsList = response.data;
-          count = productsList.length;
+        if (searchTerm) params.search = searchTerm;
+        if (filterCategory) params.category = filterCategory;
+        if (filterStock) params.stock_status = filterStock;
+        if (filterActive) params.is_active = filterActive;
+        if (filterBrand && !isSellerPanel) params.vendor = filterBrand;
+        
+        console.log('Fetching products with params:', params);
+        const response = await api.getProducts(params);
+        
+        console.log('API Response:', response.data);
+        
+        if (response.data) {
+          let productsList = [];
+          let count = 0;
+          
+          if (response.data.results && Array.isArray(response.data.results)) {
+            productsList = response.data.results;
+            count = response.data.count || productsList.length;
+          } else if (Array.isArray(response.data)) {
+            productsList = response.data;
+            count = productsList.length;
+          }
+          
+          setProducts(productsList);
+          setTotalCount(count);
+          
+          const pageSize = 20;
+          setTotalPages(Math.max(Math.ceil(count / pageSize), 1));
+          setError(null);
+        } else {
+          setProducts([]);
+          setTotalPages(1);
+          setError('No data received from server');
         }
-        
-        setProducts(productsList);
-        setTotalCount(count);
-        
-        const pageSize = 20;
-        setTotalPages(Math.max(Math.ceil(count / pageSize), 1));
-        setError(null);
-      } else {
+      } catch (err: any) {
+        console.error('Error fetching products:', err);
+        if (err.response) {
+          console.error('Error response:', err.response.data);
+          setError(err.response.data.detail || err.response.data.error || 'Failed to load products');
+        } else {
+          setError('Failed to load products');
+        }
         setProducts([]);
-        setTotalPages(1);
-        setError('No data received from server');
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      console.error('Error fetching products:', err);
-      if (err.response) {
-        console.error('Error response:', err.response.data);
-        setError(err.response.data.detail || err.response.data.error || 'Failed to load products');
-      } else {
-        setError('Failed to load products');
-      }
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
   }, [currentPage, searchTerm, filterCategory, filterStock, filterActive, filterBrand, isSellerPanel, api]);
-  
+    
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
