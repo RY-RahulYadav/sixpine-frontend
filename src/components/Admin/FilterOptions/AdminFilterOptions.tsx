@@ -123,8 +123,8 @@ const AdminFilterOptions: React.FC = () => {
         page_size: 1000  // Request large page size to get all results
       });
       
-      let allTemplates = [];
-      let templates = [];
+      let allTemplates: any[] = [];
+      let templates: any[] = [];
       
       // Handle different response structures
       if (response.data) {
@@ -150,7 +150,7 @@ const AdminFilterOptions: React.FC = () => {
             page: page
           });
           
-          let nextTemplates = [];
+          let nextTemplates: any[] = [];
           if (nextResponse.data) {
             if (Array.isArray(nextResponse.data)) {
               nextTemplates = nextResponse.data;
