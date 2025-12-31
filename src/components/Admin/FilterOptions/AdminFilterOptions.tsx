@@ -117,7 +117,13 @@ const AdminFilterOptions: React.FC = () => {
   
   const fetchSpecTemplates = async (categoryId: number) => {
     try {
-      const response = await adminAPI.getCategorySpecificationTemplates({ category: categoryId });
+      // First try to get all results with a large page_size
+      let response = await adminAPI.getCategorySpecificationTemplates({ 
+        category: categoryId,
+        page_size: 1000  // Request large page size to get all results
+      });
+      
+      let allTemplates = [];
       let templates = [];
       
       // Handle different response structures
@@ -131,15 +137,52 @@ const AdminFilterOptions: React.FC = () => {
         }
       }
       
-      // Ensure templates is an array
-      if (!Array.isArray(templates)) {
-        templates = [];
+      allTemplates = [...templates];
+      
+      // If there's pagination and we didn't get all results, fetch remaining pages
+      if (response.data && response.data.next) {
+        let nextUrl = response.data.next;
+        let page = 2;
+        
+        while (nextUrl) {
+          const nextResponse = await adminAPI.getCategorySpecificationTemplates({ 
+            category: categoryId,
+            page: page
+          });
+          
+          let nextTemplates = [];
+          if (nextResponse.data) {
+            if (Array.isArray(nextResponse.data)) {
+              nextTemplates = nextResponse.data;
+              nextUrl = null;
+            } else if (nextResponse.data.results && Array.isArray(nextResponse.data.results)) {
+              nextTemplates = nextResponse.data.results;
+              nextUrl = nextResponse.data.next || null;
+            } else if (nextResponse.data.data && Array.isArray(nextResponse.data.data)) {
+              nextTemplates = nextResponse.data.data;
+              nextUrl = null;
+            }
+          }
+          
+          allTemplates = [...allTemplates, ...nextTemplates];
+          
+          if (nextUrl) {
+            page++;
+          } else {
+            break;
+          }
+        }
       }
       
-      // Update state with new templates
+      // Ensure templates is an array
+      if (!Array.isArray(allTemplates)) {
+        allTemplates = [];
+      }
+      
+      // Update state with all templates
       setSpecTemplatesMap(prev => ({ 
         ...prev, 
-        [categoryId]: templates 
+        [categoryId]: allTemplates 
       }));
     } catch (err) {
       console.error('Error fetching specification templates:', err);
