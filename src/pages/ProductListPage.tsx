@@ -61,12 +61,6 @@ interface Product {
     stock_quantity: number;
     is_in_stock: boolean;
     image?: string;
-    images?: Array<{
-      id: number;
-      image: string;
-      alt_text: string;
-      sort_order: number;
-    }>;
   }>;
   variant?: {
     id: number;
@@ -1129,40 +1123,8 @@ const ProductListPage: React.FC = () => {
                         // Get variant data - handles both expanded and non-expanded formats
                         const variantData = getVariantData(product);
                         
-                        // For expanded variants, main_image already contains the variant image
-                        // Priority: variant image > variant images array > main_image (for expanded) > first variant image > product main_image > placeholder
-                        let displayImage = '/placeholder-image.jpg';
-                        
-                        // First, try to get image from variant data
-                        const variantDataAny = variantData as any;
-                        if (variantDataAny?.image) {
-                          displayImage = variantDataAny.image;
-                        } else if (variantDataAny?.images && variantDataAny.images.length > 0 && variantDataAny.images[0]?.image) {
-                          displayImage = variantDataAny.images[0].image;
-                        } 
-                        // For expanded variants (has variant_id), main_image already has the variant image
-                        else if (product.variant_id && product.main_image) {
-                          displayImage = product.main_image;
-                        } 
-                        // For non-expanded products, try to get image from first variant
-                        else if (product.variants && product.variants.length > 0) {
-                          // Try to get image from first active variant with image
-                          const firstVariantWithImage = product.variants.find((v: any) => v.image || (v.images && v.images.length > 0));
-                          if (firstVariantWithImage) {
-                            const variantAny = firstVariantWithImage as any;
-                            if (variantAny.image) {
-                              displayImage = variantAny.image;
-                            } else if (variantAny.images && variantAny.images.length > 0 && variantAny.images[0]?.image) {
-                              displayImage = variantAny.images[0].image;
-                            }
-                          }
-                        } 
-                        // Fallback to product main_image or product images
-                        else if (product.main_image) {
-                          displayImage = product.main_image;
-                        } else if (product.images && product.images.length > 0 && product.images[0]?.image) {
-                          displayImage = product.images[0].image;
-                        }
+                        // For expanded variants, use variant-specific data
+                        const displayImage = variantData?.image || product.main_image || '/placeholder-image.jpg';
                         const displayPrice = variantData?.price || product.price;
                         const displayOldPrice = variantData?.old_price || product.old_price;
                         const isOutOfStock = variantData ? !variantData.is_in_stock : false;
