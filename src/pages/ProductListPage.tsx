@@ -61,6 +61,12 @@ interface Product {
     stock_quantity: number;
     is_in_stock: boolean;
     image?: string;
+    images?: Array<{
+      id: number;
+      image: string;
+      alt_text: string;
+      sort_order: number;
+    }>;
   }>;
   variant?: {
     id: number;
@@ -1128,10 +1134,11 @@ const ProductListPage: React.FC = () => {
                         let displayImage = '/placeholder-image.jpg';
                         
                         // First, try to get image from variant data
-                        if (variantData?.image) {
-                          displayImage = variantData.image;
-                        } else if (variantData?.images && variantData.images.length > 0 && variantData.images[0]?.image) {
-                          displayImage = variantData.images[0].image;
+                        const variantDataAny = variantData as any;
+                        if (variantDataAny?.image) {
+                          displayImage = variantDataAny.image;
+                        } else if (variantDataAny?.images && variantDataAny.images.length > 0 && variantDataAny.images[0]?.image) {
+                          displayImage = variantDataAny.images[0].image;
                         } 
                         // For expanded variants (has variant_id), main_image already has the variant image
                         else if (product.variant_id && product.main_image) {
@@ -1142,10 +1149,11 @@ const ProductListPage: React.FC = () => {
                           // Try to get image from first active variant with image
                           const firstVariantWithImage = product.variants.find((v: any) => v.image || (v.images && v.images.length > 0));
                           if (firstVariantWithImage) {
-                            if (firstVariantWithImage.image) {
-                              displayImage = firstVariantWithImage.image;
-                            } else if (firstVariantWithImage.images && firstVariantWithImage.images.length > 0 && firstVariantWithImage.images[0]?.image) {
-                              displayImage = firstVariantWithImage.images[0].image;
+                            const variantAny = firstVariantWithImage as any;
+                            if (variantAny.image) {
+                              displayImage = variantAny.image;
+                            } else if (variantAny.images && variantAny.images.length > 0 && variantAny.images[0]?.image) {
+                              displayImage = variantAny.images[0].image;
                             }
                           }
                         } 
