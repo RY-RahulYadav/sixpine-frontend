@@ -455,6 +455,102 @@
   color: #565959;
 }
 
+/* Video Thumbnail */
+.videoThumbnail {
+  width: 100%;
+  height: 100%;
+  background: #e5e7eb;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.videoPlayButton {
+  position: relative;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.videoPlayButton svg {
+  margin-left: 2px; /* Slight offset to center the triangle visually */
+}
+
+.thumbnailWrapper:hover .videoPlayButton {
+  transform: scale(1.05);
+}
+
+.videoLabel {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #565959;
+  text-align: center;
+  width: 100%;
+}
+
+.videoPlayButtonOverlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.videoPlayButtonOverlay svg {
+  margin-left: 2px; /* Slight offset to center the triangle visually */
+}
+
+.thumbnailWrapper:hover .videoPlayButtonOverlay {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+/* Video Player in Modal */
+.videoPlayerInModal {
+  width: 100%;
+  height: 100%;
+  max-height: 670px;
+  min-height: 400px;
+  object-fit: contain;
+  background: #000;
+  outline: none;
+  border-radius: 4px;
+}
+
+.videoError {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 4px;
+  padding: 20px;
+  text-align: center;
+  color: #666;
+}
+
 /* Image Modal - New Design */
 .imageModalOverlay {
   position: fixed;
@@ -1044,6 +1140,13 @@
 .options button.active {
   background: #ffffff;
   border: 1px solid #c7511f;
+  color: #0f1111;
+  font-weight: 400;
+}
+
+.options button.available {
+  background: #ffffff;
+  border: 1px solid #bbbdbd;
   color: #0f1111;
   font-weight: 400;
 }

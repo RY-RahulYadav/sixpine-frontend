@@ -21,6 +21,93 @@ interface ProductDetailsProps {
   onVariantChange?: (variant: any) => void;
 }
 
+// Component to generate thumbnail from video URL
+const VideoThumbnailGenerator = ({ videoUrl }: { videoUrl: string }) => {
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (videoRef.current && canvasRef.current && videoUrl) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      const captureFrame = () => {
+        try {
+          video.currentTime = 0.1; // Seek to 0.1 seconds
+        } catch (err) {
+          console.error('Error seeking video:', err);
+        }
+      };
+
+      const onLoadedData = () => {
+        try {
+          const ctx = canvas.getContext('2d');
+          if (ctx && video.videoWidth > 0 && video.videoHeight > 0) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            setThumbnailUrl(dataUrl);
+          }
+        } catch (err) {
+          console.error('Error capturing video frame:', err);
+        }
+      };
+
+      video.addEventListener('loadeddata', onLoadedData);
+      video.addEventListener('seeked', onLoadedData);
+      
+      // Try to load and capture
+      video.load();
+      captureFrame();
+
+      return () => {
+        video.removeEventListener('loadeddata', onLoadedData);
+        video.removeEventListener('seeked', onLoadedData);
+      };
+    }
+  }, [videoUrl]);
+
+  if (thumbnailUrl) {
+    return (
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <img
+          src={thumbnailUrl}
+          alt="Video thumbnail"
+          className={styles.thumbnail}
+          style={{ objectFit: 'cover' }}
+        />
+        <div className={styles.videoPlayButtonOverlay}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        crossOrigin="anonymous"
+        preload="metadata"
+        style={{ display: 'none' }}
+      />
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <div className={styles.videoThumbnail}>
+        <div className={styles.videoPlayButton}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+    </>
+  );
+};
+
 const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
@@ -31,6 +118,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<{ title: string; description: string } | null>(null);
   const [defaultAddress, setDefaultAddress] = useState<{ city: string; postal_code: string } | null>(null);
@@ -108,6 +196,16 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
   const closeImageModal = () => {
     setIsImageModalOpen(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const openVideoModal = () => {
+    setIsVideoModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeVideoModal = () => {
+    setIsVideoModalOpen(false);
     document.body.style.overflow = 'auto';
   };
 
@@ -270,6 +368,68 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       qualities: allAvailableQualities.length > 0 ? allAvailableQualities : qualities
     };
   }, [variants, colors, sizes, patterns, qualities]);
+
+  // Calculate which options are available based on current selections
+  // For each attribute, show which options are available given the other selected attributes
+  const getAvailableOptionsForAttribute = useMemo(() => {
+    if (variants.length === 0) {
+      return {
+        colors: new Set(colors),
+        sizes: new Set(sizes),
+        patterns: new Set(patterns),
+        qualities: new Set(qualities)
+      };
+    }
+
+    // Helper function to filter variants based on selected attributes, excluding one attribute
+    const getFilteredVariants = (excludeAttribute: 'color' | 'size' | 'pattern' | 'quality' | null) => {
+      return variants.filter((v: any) => {
+        const variantColor = v.color?.name || v.color_name || '';
+        const variantSize = v.size || '';
+        const variantPattern = v.pattern || '';
+        const variantQuality = v.quality || '';
+
+        // Match all selected attributes except the excluded one
+        const colorMatch = excludeAttribute === 'color' || !selectedColor || variantColor === selectedColor;
+        const sizeMatch = excludeAttribute === 'size' || !selectedSize || variantSize === selectedSize;
+        const patternMatch = excludeAttribute === 'pattern' || !selectedPattern || variantPattern === selectedPattern;
+        const qualityMatch = excludeAttribute === 'quality' || !selectedQuality || variantQuality === selectedQuality;
+
+        return colorMatch && sizeMatch && patternMatch && qualityMatch;
+      });
+    };
+
+    // Get available colors (filter by size, pattern, quality, but not color)
+    const variantsForColors = getFilteredVariants('color');
+    const availableColors = new Set(
+      variantsForColors.map((v: any) => v.color?.name || v.color_name).filter(Boolean)
+    );
+
+    // Get available sizes (filter by color, pattern, quality, but not size)
+    const variantsForSizes = getFilteredVariants('size');
+    const availableSizes = new Set(
+      variantsForSizes.map((v: any) => v.size).filter(Boolean)
+    );
+
+    // Get available patterns (filter by color, size, quality, but not pattern)
+    const variantsForPatterns = getFilteredVariants('pattern');
+    const availablePatterns = new Set(
+      variantsForPatterns.map((v: any) => v.pattern).filter(Boolean)
+    );
+
+    // Get available qualities (filter by color, size, pattern, but not quality)
+    const variantsForQualities = getFilteredVariants('quality');
+    const availableQualities = new Set(
+      variantsForQualities.map((v: any) => v.quality).filter(Boolean)
+    );
+
+    return {
+      colors: availableColors,
+      sizes: availableSizes,
+      patterns: availablePatterns,
+      qualities: availableQualities
+    };
+  }, [variants, selectedColor, selectedSize, selectedPattern, selectedQuality, colors, sizes, patterns, qualities]);
 
   // Smart auto-selection: When user selects one attribute, find first matching variant and auto-select all other attributes
   const findFirstMatchingVariant = (attributeType: 'color' | 'size' | 'pattern' | 'quality', value: string) => {
@@ -442,6 +602,94 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
             "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
           ];
+
+  // Get video URL from selected variant
+  const videoUrl = selectedVariant?.video_url || null;
+
+  // Helper function to get video embed URL and type
+  const getVideoEmbedInfo = (url: string) => {
+    if (!url) return { type: 'none', embedUrl: '', thumbnailUrl: '' };
+
+    // YouTube URL patterns
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      let videoId = '';
+      
+      // Extract video ID from different YouTube URL formats
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+      } else if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1]?.split('&')[0] || '';
+      } else if (url.includes('youtube.com/embed/')) {
+        videoId = url.split('embed/')[1]?.split('?')[0] || '';
+      }
+      
+      if (videoId) {
+        return {
+          type: 'youtube',
+          embedUrl: `https://www.youtube.com/embed/${videoId}`,
+          thumbnailUrl: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+        };
+      }
+    }
+
+    // Vimeo URL patterns
+    if (url.includes('vimeo.com')) {
+      let videoId = '';
+      
+      if (url.includes('vimeo.com/')) {
+        videoId = url.split('vimeo.com/')[1]?.split('?')[0] || '';
+      }
+      
+      if (videoId) {
+        return {
+          type: 'vimeo',
+          embedUrl: `https://player.vimeo.com/video/${videoId}`,
+          thumbnailUrl: '' // Vimeo requires API call for thumbnail, will use fallback
+        };
+      }
+    }
+
+    // Cloudinary video URL - generate thumbnail
+    if (url.includes('cloudinary.com') && url.includes('/video/upload/')) {
+      // Generate Cloudinary video thumbnail by adding image transformation parameters
+      // Cloudinary allows generating image thumbnails from videos using transformations
+      // Format: /video/upload/[transformations]/[public_id]
+      // For thumbnail: add w_300,h_300,c_fill,q_auto,f_jpg,so_0 (start offset 0 = first frame)
+      
+      // Check if URL already has transformations
+      const hasTransformations = url.match(/\/video\/upload\/v\d+\//);
+      
+      let thumbnailUrl = '';
+      if (hasTransformations) {
+        // URL has version: /video/upload/v1234567890/path/to/video
+        // Insert transformations after version
+        thumbnailUrl = url.replace(/\/video\/upload\/(v\d+\/)/, '/video/upload/$1w_300,h_300,c_fill,q_auto,f_jpg,so_0/');
+      } else {
+        // URL doesn't have version: /video/upload/path/to/video
+        // Insert transformations after /video/upload/
+        thumbnailUrl = url.replace(/\/video\/upload\//, '/video/upload/w_300,h_300,c_fill,q_auto,f_jpg,so_0/');
+      }
+      
+      return {
+        type: 'direct',
+        embedUrl: url,
+        thumbnailUrl: thumbnailUrl
+      };
+    }
+
+    // Direct video URL (mp4, mov, etc.) - try to use video element to generate thumbnail
+    if (url.match(/\.(mp4|mov|avi|webm|ogg)$/i)) {
+      return {
+        type: 'direct',
+        embedUrl: url,
+        thumbnailUrl: '' // Will use video element fallback
+      };
+    }
+
+    return { type: 'none', embedUrl: '', thumbnailUrl: '' };
+  };
+
+  const videoEmbedInfo = videoUrl ? getVideoEmbedInfo(videoUrl) : { type: 'none', embedUrl: '', thumbnailUrl: '' };
 
   const [mainImage, setMainImage] = useState(images[0] || '');
 
@@ -706,6 +954,95 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
   return (
     <div className={styles.productPage}>
+      {/* Video Modal */}
+      {isVideoModalOpen && videoUrl && (
+        <div
+          className={styles.imageModalOverlay}
+          onClick={closeVideoModal}
+        >
+          <div
+            className={styles.imageModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className={styles.modalCloseBtn} onClick={closeVideoModal} aria-label="Close">
+              <svg className={styles.closeIcon} fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+              </svg>
+            </button>
+
+            <div className={styles.modalContent}>
+              <div className={styles.modalBody}>
+                {/* Left Side - Video Player */}
+                <div className={styles.modalImageSection}>
+                  <div className={styles.modalImageWrapper}>
+                    {videoEmbedInfo.type === 'youtube' || videoEmbedInfo.type === 'vimeo' ? (
+                      <iframe
+                        src={videoEmbedInfo.embedUrl}
+                        className={styles.videoPlayerInModal}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ width: '100%', height: '100%', minHeight: '400px' }}
+                      />
+                    ) : videoEmbedInfo.type === 'direct' ? (
+                      <video
+                        src={videoEmbedInfo.embedUrl}
+                        controls
+                        autoPlay
+                        className={styles.videoPlayerInModal}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
+                      <div className={styles.videoError}>
+                        <p>Invalid video URL. Please provide a valid YouTube, Vimeo, or Cloudinary URL.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Side - Product Info (without thumbnails) */}
+                <div className={styles.modalSidebar}>
+                  <h2 className={styles.modalProductTitle}>
+                    {selectedVariant?.title || product?.title || "Product Title"}
+                  </h2>
+
+                  <div className={styles.modalVariantInfo}>
+                    {selectedVariant?.specifications?.find((s: any) => s.name?.toLowerCase() === 'style') && (
+                      <div>
+                        Style Name: <span className={styles.modalVariantValue}>
+                          {selectedVariant.specifications.find((s: any) => s.name?.toLowerCase() === 'style')?.value || 'N/A'}
+                        </span>
+                      </div>
+                    )}
+                    {selectedColor && (
+                      <div>
+                        Pattern Name: <span className={styles.modalVariantValue}>{selectedColor}</span>
+                      </div>
+                    )}
+                    {selectedPattern && (
+                      <div>
+                        Pattern: <span className={styles.modalVariantValue}>{selectedPattern}</span>
+                      </div>
+                    )}
+                    {selectedQuality && (
+                      <div>
+                        Quality: <span className={styles.modalVariantValue}>{selectedQuality}</span>
+                      </div>
+                    )}
+                    {selectedSize && (
+                      <div>
+                        Size: <span className={styles.modalVariantValue}>{selectedSize}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Image Modal - Fullscreen */}
       {isImageModalOpen && (
         <div
@@ -863,7 +1200,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             {/* Thumbnails below the main image - Amazon style horizontal row */}
             <div className={styles.thumbnailsContainer}>
               <div className={styles.thumbnails}>
-                {images.slice(0, 6).map((img: string, index: number) => (
+                {images.slice(0, 5).map((img: string, index: number) => (
                   <div
                     key={index}
                     className={`${styles.thumbnailWrapper} ${mainImage === img ? styles.activeThumbWrapper : ""}`}
@@ -879,14 +1216,120 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                     />
                   </div>
                 ))}
-                {images.length > 6 && (
+                {/* Video thumbnail - show after 5 images, before "more images" box if video exists */}
+                {videoUrl && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div
+                      className={styles.thumbnailWrapper}
+                      onClick={openVideoModal}
+                      style={{ cursor: 'pointer', position: 'relative' }}
+                    >
+                      {videoEmbedInfo.thumbnailUrl ? (
+                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                          <img
+                            src={videoEmbedInfo.thumbnailUrl}
+                            alt="Video thumbnail"
+                            className={styles.thumbnail}
+                            style={{ objectFit: 'cover' }}
+                            onError={(e) => {
+                              // Fallback: try to use video element to capture frame for direct video URLs
+                              const target = e.target as HTMLImageElement;
+                              const parent = target.parentElement;
+                              if (parent && videoUrl && !videoUrl.includes('youtube.com') && !videoUrl.includes('vimeo.com')) {
+                                // For direct video URLs, try to capture a frame
+                                const video = document.createElement('video');
+                                video.src = videoUrl;
+                                video.crossOrigin = 'anonymous';
+                                video.currentTime = 0.1; // Seek to 0.1 seconds
+                                video.addEventListener('loadeddata', () => {
+                                  try {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = video.videoWidth || 300;
+                                    canvas.height = video.videoHeight || 300;
+                                    const ctx = canvas.getContext('2d');
+                                    if (ctx) {
+                                      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                                      const thumbnailDataUrl = canvas.toDataURL('image/jpeg');
+                                      target.src = thumbnailDataUrl;
+                                      target.style.display = 'block';
+                                    }
+                                  } catch (err) {
+                                    // If canvas capture fails, show default thumbnail
+                                    target.style.display = 'none';
+                                    parent.innerHTML = `
+                                      <div class="${styles.videoThumbnail}">
+                                        <div class="${styles.videoPlayButton}">
+                                          <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                            <path d="M8 5v14l11-7z"/>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                    `;
+                                  }
+                                });
+                                video.addEventListener('error', () => {
+                                  // Video load failed, show default thumbnail
+                                  target.style.display = 'none';
+                                  parent.innerHTML = `
+                                    <div class="${styles.videoThumbnail}">
+                                      <div class="${styles.videoPlayButton}">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                          <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  `;
+                                });
+                              } else {
+                                // For YouTube/Vimeo or other cases, show default thumbnail
+                                target.style.display = 'none';
+                                if (parent) {
+                                  parent.innerHTML = `
+                                    <div class="${styles.videoThumbnail}">
+                                      <div class="${styles.videoPlayButton}">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                          <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                  `;
+                                }
+                              }
+                            }}
+                          />
+                          <div className={styles.videoPlayButtonOverlay}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          </div>
+                        </div>
+                      ) : (
+                        // No thumbnail URL available - try to generate from video for direct URLs
+                        videoUrl && !videoUrl.includes('youtube.com') && !videoUrl.includes('vimeo.com') ? (
+                          <VideoThumbnailGenerator videoUrl={videoUrl} />
+                        ) : (
+                          <div className={styles.videoThumbnail}>
+                            <div className={styles.videoPlayButton}>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                    <div className={styles.videoLabel}>VIDEO</div>
+                  </div>
+                )}
+                {/* Show "+X more" box if there are more than 5 images (or 5 images + video) */}
+                {images.length > 5 && (
                   <div
                     className={styles.thumbnailWrapper}
                     onClick={openImageModal}
                     style={{ cursor: 'pointer' }}
                   >
                     <div className={styles.moreThumbnailsBox}>
-                      <span className={styles.moreThumbnailsText}>+{images.length - 6}</span>
+                      <span className={styles.moreThumbnailsText}>+{images.length - 5}</span>
                     </div>
                   </div>
                 )}
@@ -1017,10 +1460,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Color:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.colors.map((color: string, index: number) => (
+                {availableOptions.colors.map((color: string, index: number) => {
+                  const isSelected = selectedColor === color;
+                  const isAvailable = getAvailableOptionsForAttribute.colors.has(color);
+                  const className = isSelected 
+                    ? styles.active 
+                    : isAvailable 
+                      ? styles.available 
+                      : "";
+                  return (
                   <button
                     key={`color-${index}-${color}`}
-                    className={selectedColor === color ? styles.active : ""}
+                      className={className}
                     onClick={() => {
                       userChangedAttribute.current = 'color';
                       setSelectedColor(color);
@@ -1028,7 +1479,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   >
                     {color}
                   </button>
-                ))}
+                  );
+                })}
                 </div>
               </div>
             )}
@@ -1036,10 +1488,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Size:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.sizes.map((size: string, index: number) => (
+                {availableOptions.sizes.map((size: string, index: number) => {
+                  const isSelected = selectedSize === size;
+                  const isAvailable = getAvailableOptionsForAttribute.sizes.has(size);
+                  const className = isSelected 
+                    ? styles.active 
+                    : isAvailable 
+                      ? styles.available 
+                      : "";
+                  return (
                   <button
                     key={`size-${index}-${size}`}
-                    className={selectedSize === size ? styles.active : ""}
+                      className={className}
                     onClick={() => {
                       userChangedAttribute.current = 'size';
                       setSelectedSize(size);
@@ -1047,7 +1507,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   >
                     {size}
                   </button>
-                ))}
+                  );
+                })}
                 </div>
               </div>
             )}
@@ -1055,10 +1516,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Pattern:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.patterns.map((pattern: string, index: number) => (
+                {availableOptions.patterns.map((pattern: string, index: number) => {
+                  const isSelected = selectedPattern === pattern;
+                  const isAvailable = getAvailableOptionsForAttribute.patterns.has(pattern);
+                  const className = isSelected 
+                    ? styles.active 
+                    : isAvailable 
+                      ? styles.available 
+                      : "";
+                  return (
                   <button
                     key={`pattern-${index}-${pattern}`}
-                    className={selectedPattern === pattern ? styles.active : ""}
+                      className={className}
                     onClick={() => {
                       userChangedAttribute.current = 'pattern';
                       setSelectedPattern(pattern);
@@ -1066,7 +1535,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   >
                     {pattern}
                   </button>
-                ))}
+                  );
+                })}
                 </div>
               </div>
             )}
@@ -1074,10 +1544,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Quality:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.qualities.map((quality: string, index: number) => (
+                {availableOptions.qualities.map((quality: string, index: number) => {
+                  const isSelected = selectedQuality === quality;
+                  const isAvailable = getAvailableOptionsForAttribute.qualities.has(quality);
+                  const className = isSelected 
+                    ? styles.active 
+                    : isAvailable 
+                      ? styles.available 
+                      : "";
+                  return (
                   <button
                     key={`quality-${index}-${quality}`}
-                    className={selectedQuality === quality ? styles.active : ""}
+                      className={className}
                     onClick={() => {
                       userChangedAttribute.current = 'quality';
                       setSelectedQuality(quality);
@@ -1085,7 +1563,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   >
                     {quality}
                   </button>
-                ))}
+                  );
+                })}
                 </div>
               </div>
             )}

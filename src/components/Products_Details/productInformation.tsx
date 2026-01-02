@@ -37,17 +37,17 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
         
         {/* Brand & Measurement */}
         <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <strong>Brand:</strong> {product?.brand || "Sixpine"}
-          </div>
+         
           <div className={styles.cardHeader}>
             <Ruler size={16} /> <strong>Measurement</strong>
           </div>
           {/* Use variant measurement_specs if available, otherwise fallback to product dimensions/weight */}
           {selectedVariant?.measurement_specs && selectedVariant.measurement_specs.length > 0 ? (
-            selectedVariant.measurement_specs.map((spec: any) => (
-              <p key={spec.id || spec.name}><strong>{spec.name}:</strong> {spec.value}</p>
-            ))
+            [...selectedVariant.measurement_specs]
+              .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+              .map((spec: any) => (
+                <p key={spec.id || spec.name}><strong>{spec.name}:</strong> {spec.value}</p>
+              ))
           ) : (
             <>
               {product?.dimensions && <p>Dimensions: {product.dimensions}</p>}
@@ -65,9 +65,11 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
           <div className={styles.descriptionText}>
             {/* Use variant style_specs if available, otherwise fallback to product style_description */}
             {selectedVariant?.style_specs && selectedVariant.style_specs.length > 0 ? (
-              selectedVariant.style_specs.map((spec: any) => (
-                <p key={spec.id || spec.name}><strong>{spec.name}:</strong> {spec.value}</p>
-              ))
+              [...selectedVariant.style_specs]
+                .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+                .map((spec: any) => (
+                  <p key={spec.id || spec.name}><strong>{spec.name}:</strong> {spec.value}</p>
+                ))
             ) : (
               formatDescription(product?.style_description || product?.long_description || product?.short_description) || (
                 <p>Contemporary design with smooth edges and minimalist finish, perfect for modern interiors.</p>
@@ -86,9 +88,11 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
           <ul>
             {/* Use variant item_details if available, otherwise fallback to product specifications */}
             {selectedVariant?.item_details && selectedVariant.item_details.length > 0 ? (
-              selectedVariant.item_details.map((detail: any) => (
-                <li key={detail.id || detail.name}><strong>{detail.name}:</strong> {detail.value}</li>
-              ))
+              [...selectedVariant.item_details]
+                .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+                .map((detail: any) => (
+                  <li key={detail.id || detail.name}><strong>{detail.name}:</strong> {detail.value}</li>
+                ))
             ) : (
               <>
             {product?.specifications?.map((spec: any, index: number) => (
@@ -112,9 +116,11 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
           {/* Use variant features if available, otherwise fallback to product features */}
           {selectedVariant?.features && selectedVariant.features.length > 0 ? (
             <ul>
-              {selectedVariant.features.map((feature: any) => (
-                <li key={feature.id || feature.name}><strong>{feature.name}:</strong> {feature.value}</li>
-              ))}
+              {[...selectedVariant.features]
+                .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+                .map((feature: any) => (
+                  <li key={feature.id || feature.name}><strong>{feature.name}:</strong> {feature.value}</li>
+                ))}
             </ul>
           ) : (
             <ul>
@@ -133,9 +139,11 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
           </div>
           {/* Use variant user_guide if available, otherwise fallback to product user_guide */}
           {selectedVariant?.user_guide && selectedVariant.user_guide.length > 0 ? (
-            selectedVariant.user_guide.map((guide: any) => (
-              <p key={guide.id || guide.name}><strong>{guide.name}:</strong> {guide.value}</p>
-            ))
+            [...selectedVariant.user_guide]
+              .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+              .map((guide: any) => (
+                <p key={guide.id || guide.name}><strong>{guide.name}:</strong> {guide.value}</p>
+              ))
           ) : product?.user_guide ? (
             <p>{product.user_guide}</p>
           ) : (

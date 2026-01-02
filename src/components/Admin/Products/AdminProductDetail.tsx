@@ -24,6 +24,7 @@ interface VariantImage {
 interface ProductVariant {
   id?: number;
   title?: string;
+  sku?: string;
   color_id: number;
   color?: {
     id: number;
@@ -155,7 +156,7 @@ const AdminProductDetail: React.FC = () => {
   const [updateProgress, setUpdateProgress] = useState<string>('');
   const [updateResult, setUpdateResult] = useState<{success: boolean, message: string, variants_created?: number, variants_updated?: number, errors?: string[]} | null>(null);
   // New sidebar navigation state
-  type NavigationSection = 'basic' | 'variant' | 'variants' | 'variants-old' | 'variant-details' | 'variant-images' | 'variant-gallery' | 'variant-specs' | 'details';
+  type NavigationSection = 'basic' | 'variant' | 'variants' | 'variants-old' | 'variant-details' | 'variant-images' | 'variant-specs' | 'details';
   const [activeSection, setActiveSection] = useState<NavigationSection>('basic');
   const [activeVariantIndex, setActiveVariantIndex] = useState<number | null>(null);
   const [expandedVariants, setExpandedVariants] = useState<Set<number>>(new Set());
@@ -182,7 +183,7 @@ const AdminProductDetail: React.FC = () => {
   };
   
   // Helper to navigate to variant section
-  const navigateToVariantSection = (variantIndex: number, section: 'variant-details' | 'variant-images' | 'variant-gallery' | 'variant-specs') => {
+  const navigateToVariantSection = (variantIndex: number, section: 'variant-details' | 'variant-images' | 'variant-specs') => {
     setActiveVariantIndex(variantIndex);
     setActiveSection(section);
     // Auto-expand the variant
@@ -625,30 +626,293 @@ const AdminProductDetail: React.FC = () => {
     }
   };
   
-  const handleAddVariantImage = (variantIndex: number) => {
+  // Bulk upload images to Cloudinary
+  const [uploadingImages, setUploadingImages] = useState<{ [key: number]: boolean }>({});
+  const [uploadingVideo, setUploadingVideo] = useState<{ [key: number]: boolean }>({});
+  
+  const handleBulkImageUpload = async (variantIndex: number, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    
+    const fileArray = Array.from(files);
+    const maxImages = 10;
+    const currentImageCount = (variants[variantIndex].image ? 1 : 0) + (variants[variantIndex].images?.length || 0);
+    
+    if (currentImageCount + fileArray.length > maxImages) {
+      showToast(`Maximum ${maxImages} images allowed. You can upload ${maxImages - currentImageCount} more.`, 'error');
+      return;
+    }
+    
+    // Limit to max 10 images total
+    const filesToUpload = fileArray.slice(0, maxImages - currentImageCount);
+    
+    setUploadingImages(prev => ({ ...prev, [variantIndex]: true }));
+    
+    try {
+      const uploadedUrls: string[] = [];
+      
+      // Upload each image to Cloudinary
+      for (const file of filesToUpload) {
+        if (!file.type.startsWith('image/')) {
+          showToast(`${file.name} is not an image file`, 'error');
+          continue;
+        }
+        
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const response = await adminAPI.uploadMedia(formData);
+        if (response.data?.cloudinary_url) {
+          uploadedUrls.push(response.data.cloudinary_url);
+        }
+      }
+      
+      if (uploadedUrls.length > 0) {
+        const updated = [...variants];
+        const variant = updated[variantIndex];
+        
+        // First image becomes main image, rest go to images array
+        if (!variant.image && uploadedUrls.length > 0) {
+          variant.image = uploadedUrls[0];
+          // Remaining images go to array
+          const remainingImages = uploadedUrls.slice(1).map((url, idx) => ({
+            image: url,
+            alt_text: `Image ${idx + 2}`,
+            sort_order: (variant.images?.length || 0) + idx,
+            is_active: true
+          }));
+          variant.images = [...(variant.images || []), ...remainingImages];
+        } else {
+          // If main image exists, all new images go to array
+          const newImages = uploadedUrls.map((url, idx) => ({
+            image: url,
+            alt_text: `Image ${(variant.images?.length || 0) + idx + 1}`,
+            sort_order: (variant.images?.length || 0) + idx,
+            is_active: true
+          }));
+          variant.images = [...(variant.images || []), ...newImages];
+        }
+        
+        setVariants(updated);
+        showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
+      }
+    } catch (error: any) {
+      console.error('Error uploading images:', error);
+      showToast(error.response?.data?.error || 'Failed to upload images', 'error');
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [variantIndex]: false }));
+    }
+  };
+  
+  // Helper to get all images as unified list (main image first, then array images)
+  const getAllImages = (variant: ProductVariant): Array<{ image: string; alt_text: string; sort_order: number; is_active: boolean; isMain: boolean }> => {
+    const allImages: Array<{ image: string; alt_text: string; sort_order: number; is_active: boolean; isMain: boolean }> = [];
+    
+    // Add main image as first item if it exists
+    if (variant.image) {
+      allImages.push({
+        image: variant.image,
+        alt_text: '',
+        sort_order: 0,
+        is_active: true,
+        isMain: true
+      });
+    }
+    
+    // Add array images
+    if (variant.images && variant.images.length > 0) {
+      variant.images.forEach((img, idx) => {
+        allImages.push({
+          image: img.image,
+          alt_text: img.alt_text || '',
+          sort_order: idx + (variant.image ? 1 : 0),
+          is_active: img.is_active !== false,
+          isMain: false
+        });
+      });
+    }
+    
+    return allImages;
+  };
+  
+  // Drag and drop handlers for image reordering
+  const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
+  
+  const handleDragStart = (e: React.DragEvent, imageIndex: number) => {
+    setDraggedImageIndex(imageIndex);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+  
+  const handleDrop = (variantIndex: number, targetIndex: number) => {
+    if (draggedImageIndex === null) return;
+    
     const updated = [...variants];
-    updated[variantIndex].images = [...(updated[variantIndex].images || []), {
-      image: '',
-      alt_text: '',
-      sort_order: updated[variantIndex].images?.length || 0,
-      is_active: true
-    }];
+    const variant = updated[variantIndex];
+    const allImages = getAllImages(variant);
+    
+    // Reorder images
+    const [movedImage] = allImages.splice(draggedImageIndex, 1);
+    allImages.splice(targetIndex, 0, movedImage);
+    
+    // First image becomes main, rest go to array
+    if (allImages.length > 0) {
+      variant.image = allImages[0].image;
+      variant.images = allImages.slice(1).map((img, idx) => ({
+        image: img.image,
+        alt_text: img.alt_text,
+        sort_order: idx,
+        is_active: true
+      }));
+    } else {
+      variant.image = '';
+      variant.images = [];
+    }
+    
     setVariants(updated);
+    setDraggedImageIndex(null);
   };
   
   const handleRemoveVariantImage = (variantIndex: number, imageIndex: number) => {
     const updated = [...variants];
-    updated[variantIndex].images = updated[variantIndex].images.filter((_, i) => i !== imageIndex);
+    const variant = updated[variantIndex];
+    const allImages = getAllImages(variant);
+    
+    // Remove the image at the specified index
+    allImages.splice(imageIndex, 1);
+    
+    // First image becomes main, rest go to array (if main was deleted, next becomes main)
+    if (allImages.length > 0) {
+      variant.image = allImages[0].image;
+      variant.images = allImages.slice(1).map((img, idx) => ({
+        image: img.image,
+        alt_text: img.alt_text,
+        sort_order: idx,
+        is_active: true
+      }));
+    } else {
+      variant.image = '';
+      variant.images = [];
+    }
+    
     setVariants(updated);
+  };
+
+  const handleAddImageByUrl = (variantIndex: number, imageUrl: string, altText: string = '') => {
+    if (!imageUrl || !imageUrl.trim()) {
+      showToast('Please enter a valid image URL', 'error');
+      return;
+    }
+
+    const variant = variants[variantIndex];
+    if (!variant) return;
+
+    const allImages = getAllImages(variant);
+    
+    // Check if we've reached the limit (10 images total)
+    if (allImages.length >= 10) {
+      showToast('Maximum 10 images allowed. Please remove an image first.', 'error');
+      return;
+    }
+
+    // Create new image object
+    const newImage = {
+      image: imageUrl.trim(),
+      alt_text: altText.trim() || '',
+      sort_order: allImages.length
+    };
+
+    // If no main image exists, this becomes the main image
+    if (!variant.image) {
+      const updatedVariants = [...variants];
+      updatedVariants[variantIndex] = {
+        ...variant,
+        image: imageUrl.trim()
+      };
+      setVariants(updatedVariants);
+    } else {
+      // Add to images array
+      const updatedVariants = [...variants];
+      const currentImages = variant.images || [];
+      updatedVariants[variantIndex] = {
+        ...variant,
+        images: [...currentImages, newImage]
+      };
+      setVariants(updatedVariants);
+    }
+
+    showSuccess('Image added successfully');
   };
   
   const handleVariantImageChange = (variantIndex: number, imageIndex: number, field: string, value: any) => {
     const updated = [...variants];
-    updated[variantIndex].images[imageIndex] = {
-      ...updated[variantIndex].images[imageIndex],
+    const variant = updated[variantIndex];
+    const allImages = getAllImages(variant);
+    
+    // Update the image
+    allImages[imageIndex] = {
+      ...allImages[imageIndex],
       [field]: value
     };
+    
+    // Rebuild: first image becomes main, rest go to array
+    if (allImages.length > 0) {
+      variant.image = allImages[0].image;
+      variant.images = allImages.slice(1).map((img, idx) => ({
+        image: img.image,
+        alt_text: img.alt_text,
+        sort_order: idx,
+        is_active: true
+      }));
+    } else {
+      variant.image = '';
+      variant.images = [];
+    }
+    
     setVariants(updated);
+  };
+  
+  // Upload video to Cloudinary
+  const handleVideoUpload = async (variantIndex: number, file: File | null) => {
+    if (!file) return;
+    
+    // Validate file type
+    const allowedVideoTypes = ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/ogg'];
+    if (!allowedVideoTypes.includes(file.type)) {
+      showToast('Invalid file type. Please upload a video file (MP4, MOV, AVI, WebM, or OGG)', 'error');
+      return;
+    }
+    
+    // Validate file size (max 100MB)
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      showToast('File size too large. Maximum size is 100MB.', 'error');
+      return;
+    }
+    
+    setUploadingVideo(prev => ({ ...prev, [variantIndex]: true }));
+    
+    try {
+      const formData = new FormData();
+      formData.append('video', file);
+      
+      // Use longer timeout for video uploads (5 minutes)
+      const response = await adminAPI.uploadMedia(formData, 300000);
+      if (response.data?.cloudinary_url) {
+        const updated = [...variants];
+        updated[variantIndex].video_url = response.data.cloudinary_url;
+        setVariants(updated);
+        showToast('Video uploaded successfully!', 'success');
+      }
+    } catch (error: any) {
+      console.error('Error uploading video:', error);
+      showToast(error.response?.data?.error || 'Failed to upload video', 'error');
+    } finally {
+      setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
+    }
   };
   
   // Variant Specification management
@@ -2254,7 +2518,6 @@ const AdminProductDetail: React.FC = () => {
                         {[
                           { key: 'variant-details', label: 'Details', icon: 'info' },
                           { key: 'variant-images', label: 'Images', icon: 'image' },
-                          { key: 'variant-gallery', label: 'Image Gallery', icon: 'photo_library' },
                           { key: 'variant-specs', label: 'Specification Template', icon: 'description' }
                         ].map(({ key, label, icon }) => {
                           const isSubActive = activeSection === key && activeVariantIndex === variantIndex;
@@ -2673,6 +2936,17 @@ const AdminProductDetail: React.FC = () => {
                               />
                             </div>
                             
+                            <div className="admin-form-group">
+                              <label>Variant SKU</label>
+                              <input
+                                type="text"
+                                value={variant.sku || ''}
+                                onChange={(e) => handleVariantChange(variantIndex, 'sku', e.target.value)}
+                                placeholder="e.g., PROD-RED-M-L"
+                                className="admin-input"
+                              />
+                            </div>
+                            
                             <div className="admin-form-group tw-flex tw-items-end">
                               <label className="tw-flex tw-items-center tw-gap-2 tw-cursor-pointer">
                                 <input
@@ -2790,186 +3064,443 @@ const AdminProductDetail: React.FC = () => {
                   );
                 }
                 
-                // Variant Images Section (Main Image)
+                // Unified Variant Images Section
                 if (activeSection === 'variant-images') {
+                  const totalImages = (variant.image ? 1 : 0) + (variant.images?.length || 0);
+                  const maxImages = 10;
+                  const remainingSlots = maxImages - totalImages;
+                  
                   return (
                     <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div>
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1} - Main Image
+                            Variant {variantIndex + 1} - Images
                           </h2>
                           <p style={{ color: '#6b7280', fontSize: '14px' }}>
-                            Set the primary image for this variant
+                            Upload up to {maxImages} images. First image becomes main image. ({totalImages}/{maxImages} images)
                           </p>
                         </div>
                       </div>
                       
                       <div className="admin-card" style={{ padding: '24px' }}>
-                        <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
-                          <div className="admin-form-group">
-                            <label>Image URL</label>
-                            <input
-                              type="url"
-                              value={variant.image}
-                              onChange={(e) => handleVariantChange(variantIndex, 'image', e.target.value)}
-                              placeholder="https://example.com/image.jpg"
-                              className="admin-input"
-                            />
-                          </div>
-                          <div className="admin-form-group">
-                            {variant.image ? (
-                              <div className="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-bg-gray-50">
-                                <img 
-                                  src={variant.image} 
-                                  alt="Variant" 
-                                  className="tw-w-full tw-h-48 tw-object-contain tw-rounded"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3EImage not found%3C/text%3E%3C/svg%3E';
-                                  }}
-                                />
+                        {/* Bulk Upload Section */}
+                        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cloud_upload</span>
+                            Bulk Upload Images
+                          </h5>
+                          <div
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (remainingSlots > 0 && !uploadingImages[variantIndex]) {
+                                handleBulkImageUpload(variantIndex, e.dataTransfer.files);
+                              }
+                            }}
+                            style={{
+                              border: '2px dashed #cbd5e1',
+                              borderRadius: '8px',
+                              padding: '32px',
+                              textAlign: 'center',
+                              backgroundColor: uploadingImages[variantIndex] ? '#f3f4f6' : '#fafafa',
+                              cursor: uploadingImages[variantIndex] || remainingSlots === 0 ? 'not-allowed' : 'pointer',
+                              opacity: uploadingImages[variantIndex] || remainingSlots === 0 ? 0.6 : 1,
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!uploadingImages[variantIndex] && remainingSlots > 0) {
+                                e.currentTarget.style.borderColor = '#3b82f6';
+                                e.currentTarget.style.backgroundColor = '#eff6ff';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#cbd5e1';
+                              e.currentTarget.style.backgroundColor = '#fafafa';
+                            }}
+                          >
+                            {uploadingImages[variantIndex] ? (
+                              <div>
+                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>hourglass_empty</span>
+                                <p style={{ marginTop: '12px', color: '#6b7280' }}>Uploading images...</p>
+                              </div>
+                            ) : remainingSlots === 0 ? (
+                              <div>
+                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#9ca3af' }}>image</span>
+                                <p style={{ marginTop: '12px', color: '#6b7280' }}>Maximum {maxImages} images reached</p>
                               </div>
                             ) : (
-                              <div className="tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-p-8 tw-text-center tw-bg-gray-50">
-                                <span className="material-symbols-outlined tw-text-gray-400 tw-text-4xl">image</span>
-                                <p className="tw-text-sm tw-text-gray-500 tw-mt-2">No image added</p>
-                              </div>
+                              <>
+                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>cloud_upload</span>
+                                <p style={{ marginTop: '12px', color: '#374151', fontWeight: '500' }}>
+                                  Drag and drop images here, or click to select
+                                </p>
+                                <p style={{ marginTop: '4px', color: '#6b7280', fontSize: '14px' }}>
+                                  You can upload up to {remainingSlots} more image{remainingSlots !== 1 ? 's' : ''} (Max {maxImages} total)
+                                </p>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  multiple
+                                  style={{ display: 'none' }}
+                                  id={`bulk-upload-${variantIndex}`}
+                                  onChange={(e) => {
+                                    if (e.target.files && remainingSlots > 0) {
+                                      handleBulkImageUpload(variantIndex, e.target.files);
+                                    }
+                                    e.target.value = '';
+                                  }}
+                                  disabled={uploadingImages[variantIndex] || remainingSlots === 0}
+                                />
+                                <label
+                                  htmlFor={`bulk-upload-${variantIndex}`}
+                                  style={{
+                                    display: 'inline-block',
+                                    marginTop: '16px',
+                                    padding: '8px 16px',
+                                    backgroundColor: '#3b82f6',
+                                    color: 'white',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '500'
+                                  }}
+                                >
+                                  Select Images
+                                </label>
+                              </>
                             )}
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                }
-                
-                // Variant Gallery Section (Additional Images)
-                if (activeSection === 'variant-gallery') {
-                  return (
-                    <div style={{ animation: 'fadeIn 0.3s ease-in' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <div>
-                          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1} - Image Gallery
-                          </h2>
-                          <p style={{ color: '#6b7280', fontSize: '14px' }}>
-                            Add additional images for this variant ({variant.images?.length || 0} images)
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          className="admin-modern-btn primary"
-                          onClick={() => handleAddVariantImage(variantIndex)}
-                        >
-                          <span className="material-symbols-outlined">add</span>
-                          Add Image
-                        </button>
-                      </div>
-                      
-                      <div className="admin-card" style={{ padding: '24px' }}>
+                        
                         {/* Video URL Section */}
                         <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
                           <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>videocam</span>
                             Video URL
                           </h5>
+                          
+                          {/* Video Upload Section */}
+                          <div
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (!uploadingVideo[variantIndex]) {
+                                const file = e.dataTransfer.files[0];
+                                if (file) {
+                                  handleVideoUpload(variantIndex, file);
+                                }
+                              }
+                            }}
+                            style={{
+                              border: '2px dashed #cbd5e1',
+                              borderRadius: '8px',
+                              padding: '24px',
+                              textAlign: 'center',
+                              backgroundColor: uploadingVideo[variantIndex] ? '#f3f4f6' : '#fafafa',
+                              cursor: uploadingVideo[variantIndex] ? 'not-allowed' : 'pointer',
+                              opacity: uploadingVideo[variantIndex] ? 0.6 : 1,
+                              transition: 'all 0.2s',
+                              marginBottom: '16px'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!uploadingVideo[variantIndex]) {
+                                e.currentTarget.style.borderColor = '#3b82f6';
+                                e.currentTarget.style.backgroundColor = '#eff6ff';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#cbd5e1';
+                              e.currentTarget.style.backgroundColor = uploadingVideo[variantIndex] ? '#f3f4f6' : '#fafafa';
+                            }}
+                          >
+                            {uploadingVideo[variantIndex] ? (
+                              <div>
+                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>hourglass_empty</span>
+                                <p style={{ marginTop: '12px', color: '#6b7280' }}>Uploading video...</p>
+                              </div>
+                            ) : (
+                              <>
+                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>cloud_upload</span>
+                                <p style={{ marginTop: '12px', color: '#374151', fontWeight: '500' }}>
+                                  Drag and drop video here, or click to select
+                                </p>
+                                <p style={{ marginTop: '4px', color: '#6b7280', fontSize: '14px' }}>
+                                  Supported formats: MP4, MOV, AVI, WebM, OGG (Max 100MB)
+                                </p>
+                                <input
+                                  type="file"
+                                  accept="video/*"
+                                  style={{ display: 'none' }}
+                                  id={`video-upload-${variantIndex}`}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleVideoUpload(variantIndex, file);
+                                    }
+                                    e.target.value = '';
+                                  }}
+                                  disabled={uploadingVideo[variantIndex]}
+                                />
+                                <label
+                                  htmlFor={`video-upload-${variantIndex}`}
+                                  style={{
+                                    display: 'inline-block',
+                                    marginTop: '16px',
+                                    padding: '8px 16px',
+                                    backgroundColor: '#3b82f6',
+                                    color: 'white',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: '500'
+                                  }}
+                                >
+                                  Select Video
+                                </label>
+                              </>
+                            )}
+                          </div>
+                          
                           <div className="admin-form-group">
-                            <label>Video URL (YouTube, Vimeo, etc.)</label>
+                            <label>Video URL (YouTube, Vimeo, or Cloudinary URL)</label>
                             <input
                               type="url"
                               value={variant.video_url || ''}
                               onChange={(e) => handleVariantChange(variantIndex, 'video_url', e.target.value)}
-                              placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+                              placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/... or upload above"
                               className="admin-input"
                             />
                             {variant.video_url && (
-                              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                                Video URL: {variant.video_url}
-                              </p>
+                              <div style={{ marginTop: '8px' }}>
+                                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', wordBreak: 'break-all' }}>
+                                  Video URL: {variant.video_url}
+                                </p>
+                                {variant.video_url.includes('cloudinary.com') && (
+                                  <div style={{ marginTop: '8px' }}>
+                                    <video
+                                      src={variant.video_url}
+                                      controls
+                                      style={{
+                                        width: '100%',
+                                        maxWidth: '400px',
+                                        borderRadius: '8px',
+                                        backgroundColor: '#000'
+                                      }}
+                                    >
+                                      Your browser does not support the video tag.
+                                    </video>
+                                  </div>
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
                         
-                        {/* Images Section */}
+                        {/* Unified Images Section with Drag & Drop */}
                         <div>
                           <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
-                            Images ({variant.images?.length || 0})
+                            Images ({getAllImages(variant).length})
+                            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '400', marginLeft: '8px' }}>
+                              (Drag to reorder - First image is main)
+                            </span>
                           </h5>
-                        <div className="tw-space-y-4">
-                          {variant.images?.map((img, imgIndex) => (
-                            <div key={imgIndex} className="tw-border tw-border-gray-200 tw-rounded-lg tw-p-4 tw-bg-gray-50">
-                              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-4 tw-items-start">
-                                <div className="md:tw-col-span-4">
-                                  {img.image ? (
-                                    <div className="tw-border tw-border-gray-200 tw-rounded-lg tw-overflow-hidden tw-bg-white">
-                                      <img 
-                                        src={img.image} 
-                                        alt={img.alt_text || 'Variant image'} 
-                                        className="tw-w-full tw-h-32 tw-object-contain"
-                                        onError={(e) => {
-                                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3EImage not found%3C/text%3E%3C/svg%3E';
-                                        }}
-                                      />
-                                    </div>
-                                  ) : (
-                                    <div className="tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-p-4 tw-text-center tw-bg-white tw-h-32 tw-flex tw-items-center tw-justify-center">
-                                      <span className="material-symbols-outlined tw-text-gray-400">image</span>
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="md:tw-col-span-7 tw-space-y-3">
-                                  <div className="admin-form-group">
-                                    <label>Image URL</label>
-                                    <input
-                                      type="url"
-                                      value={img.image}
-                                      onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'image', e.target.value)}
-                                      placeholder="https://example.com/image.jpg"
-                                      className="admin-input"
-                                    />
-                                  </div>
-                                  <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-                                    <div className="admin-form-group">
-                                      <label>Alt Text</label>
-                                      <input
-                                        type="text"
-                                        value={img.alt_text}
-                                        onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'alt_text', e.target.value)}
-                                        placeholder="Image description"
-                                        className="admin-input"
-                                      />
-                                    </div>
-                                    <div className="admin-form-group">
-                                      <label>Sort Order</label>
-                                      <input
-                                        type="number"
-                                        value={img.sort_order}
-                                        onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'sort_order', parseInt(e.target.value) || 0)}
-                                        placeholder="0"
-                                        className="admin-input"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="md:tw-col-span-1 tw-flex tw-items-start tw-justify-end">
-                                  <button
-                                    type="button"
-                                    className="admin-modern-btn danger icon-only"
-                                    onClick={() => handleRemoveVariantImage(variantIndex, imgIndex)}
-                                    title="Remove Image"
-                                  >
-                                    <span className="material-symbols-outlined">delete</span>
-                                  </button>
-                                </div>
+                          
+                          {/* Manual Image URL Addition */}
+                          <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                            <h6 style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>link</span>
+                              Add Image by URL
+                            </h6>
+                            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-3">
+                              <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '12px', color: '#6b7280' }}>Image URL</label>
+                                <input
+                                  type="url"
+                                  id={`manual-image-url-${variantIndex}`}
+                                  placeholder="https://example.com/image.jpg"
+                                  className="admin-input"
+                                  style={{ fontSize: '14px' }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      const input = e.target as HTMLInputElement;
+                                      const url = input.value.trim();
+                                      if (url) {
+                                        handleAddImageByUrl(variantIndex, url);
+                                        input.value = '';
+                                      }
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <div className="admin-form-group" style={{ marginBottom: 0 }}>
+                                <label style={{ fontSize: '12px', color: '#6b7280' }}>Alt Text (Optional)</label>
+                                <input
+                                  type="text"
+                                  id={`manual-image-alt-${variantIndex}`}
+                                  placeholder="Image description"
+                                  className="admin-input"
+                                  style={{ fontSize: '14px' }}
+                                />
+                              </div>
+                              <div className="tw-flex tw-items-end">
+                                <button
+                                  type="button"
+                                  className="admin-modern-btn primary"
+                                  onClick={() => {
+                                    const urlInput = document.getElementById(`manual-image-url-${variantIndex}`) as HTMLInputElement;
+                                    const altInput = document.getElementById(`manual-image-alt-${variantIndex}`) as HTMLInputElement;
+                                    const url = urlInput?.value.trim();
+                                    if (url) {
+                                      handleAddImageByUrl(variantIndex, url, altInput?.value.trim() || '');
+                                      urlInput.value = '';
+                                      if (altInput) altInput.value = '';
+                                    }
+                                  }}
+                                  style={{ width: '100%' }}
+                                >
+                                  <span className="material-symbols-outlined" style={{ fontSize: '18px', marginRight: '4px' }}>add</span>
+                                  Add Image
+                                </button>
                               </div>
                             </div>
-                          ))}
-                          {(!variant.images || variant.images.length === 0) && (
-                            <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
-                              <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">photo_library</span>
-                              <p className="tw-mt-2">No variant images added</p>
-                            </div>
-                          )}
+                          </div>
+                          
+                          <div className="tw-space-y-4">
+                            {getAllImages(variant).map((img, imgIndex) => (
+                              <div
+                                key={imgIndex}
+                                draggable
+                                onDragStart={(e) => handleDragStart(e, imgIndex)}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  handleDrop(variantIndex, imgIndex);
+                                }}
+                                style={{
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: '8px',
+                                  padding: '16px',
+                                  backgroundColor: imgIndex === 0 ? '#eff6ff' : '#fafafa',
+                                  cursor: 'move',
+                                  transition: 'all 0.2s',
+                                  borderColor: imgIndex === 0 ? '#3b82f6' : '#e5e7eb'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.borderColor = '#3b82f6';
+                                  e.currentTarget.style.backgroundColor = '#f0f9ff';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.borderColor = imgIndex === 0 ? '#3b82f6' : '#e5e7eb';
+                                  e.currentTarget.style.backgroundColor = imgIndex === 0 ? '#eff6ff' : '#fafafa';
+                                }}
+                              >
+                                <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-4 tw-items-start">
+                                  <div className="md:tw-col-span-1 tw-flex tw-items-center tw-justify-center">
+                                    <span className="material-symbols-outlined" style={{ color: '#9ca3af', cursor: 'grab' }}>drag_handle</span>
+                                  </div>
+                                  <div className="md:tw-col-span-3">
+                                    {img.image ? (
+                                      <div className="tw-border tw-border-gray-200 tw-rounded-lg tw-overflow-hidden tw-bg-white" style={{ position: 'relative' }}>
+                                        {imgIndex === 0 && (
+                                          <span style={{
+                                            position: 'absolute',
+                                            top: '8px',
+                                            right: '8px',
+                                            backgroundColor: '#3b82f6',
+                                            color: 'white',
+                                            padding: '4px 8px',
+                                            borderRadius: '4px',
+                                            fontSize: '11px',
+                                            fontWeight: '600',
+                                            zIndex: 10
+                                          }}>MAIN</span>
+                                        )}
+                                        <img 
+                                          src={img.image} 
+                                          alt={img.alt_text || 'Variant image'} 
+                                          className="tw-w-full tw-h-32 tw-object-contain"
+                                          onError={(e) => {
+                                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3EImage not found%3C/text%3E%3C/svg%3E';
+                                          }}
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-p-4 tw-text-center tw-bg-white tw-h-32 tw-flex tw-items-center tw-justify-center">
+                                        <span className="material-symbols-outlined tw-text-gray-400">image</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="md:tw-col-span-7 tw-space-y-3">
+                                    <div className="admin-form-group">
+                                      <label>Image URL</label>
+                                      <input
+                                        type="url"
+                                        value={img.image}
+                                        onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'image', e.target.value)}
+                                        placeholder="https://example.com/image.jpg"
+                                        className="admin-input"
+                                      />
+                                      {img.image && (
+                                        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', wordBreak: 'break-all' }}>
+                                          URL: {img.image}
+                                        </p>
+                                      )}
+                                    </div>
+                                    <div className="tw-grid tw-grid-cols-2 tw-gap-3">
+                                      <div className="admin-form-group">
+                                        <label>Alt Text</label>
+                                        <input
+                                          type="text"
+                                          value={img.alt_text}
+                                          onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'alt_text', e.target.value)}
+                                          placeholder="Image description"
+                                          className="admin-input"
+                                        />
+                                      </div>
+                                      <div className="admin-form-group">
+                                        <label>Sort Order</label>
+                                        <input
+                                          type="number"
+                                          value={img.sort_order}
+                                          onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                                          placeholder="0"
+                                          className="admin-input"
+                                          readOnly
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="md:tw-col-span-1 tw-flex tw-items-start tw-justify-end">
+                                    <button
+                                      type="button"
+                                      className="admin-modern-btn danger icon-only"
+                                      onClick={() => handleRemoveVariantImage(variantIndex, imgIndex)}
+                                      title="Remove Image"
+                                    >
+                                      <span className="material-symbols-outlined">delete</span>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                            {getAllImages(variant).length === 0 && (
+                              <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                                <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">photo_library</span>
+                                <p className="tw-mt-2">No images added</p>
+                                <p className="tw-text-xs tw-text-gray-400 tw-mt-1">Upload images above to add them here</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -3821,10 +4352,13 @@ const AdminProductDetail: React.FC = () => {
                     <button
                       type="button"
                             className="admin-modern-btn secondary"
-                        onClick={() => handleAddVariantImage(variantIndex)}
+                        onClick={() => {
+                          // Navigate to variant images section for bulk upload
+                          navigateToVariantSection(variantIndex, 'variant-images');
+                        }}
                     >
                             <span className="material-symbols-outlined">add</span>
-                        Add Image
+                        Manage Images
                     </button>
                     </div>
                         <div className="tw-space-y-4">
