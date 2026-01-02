@@ -634,6 +634,7 @@ const AdminProductDetail: React.FC = () => {
   // Bulk upload images to Cloudinary
   const [uploadingImages, setUploadingImages] = useState<{ [key: number]: boolean }>({});
   const [imageUploadProgress, setImageUploadProgress] = useState<{ [key: number]: { current: number; total: number; percentage: number } }>({});
+  const [imageUploadErrors, setImageUploadErrors] = useState<{ [key: number]: Array<{ fileName: string; error: string }> }>({});
   const [showImageUploadModal, setShowImageUploadModal] = useState<{ [key: number]: boolean }>({});
   const [uploadingVideo, setUploadingVideo] = useState<{ [key: number]: boolean }>({});
   const [videoUploadProgress, setVideoUploadProgress] = useState<{ [key: number]: number }>({});
@@ -659,6 +660,7 @@ const AdminProductDetail: React.FC = () => {
       ...prev, 
       [variantIndex]: { current: 0, total: filesToUpload.length, percentage: 0 } 
     }));
+    setImageUploadErrors(prev => ({ ...prev, [variantIndex]: [] }));
     setShowImageUploadModal(prev => ({ ...prev, [variantIndex]: true }));
     
     try {
@@ -670,7 +672,15 @@ const AdminProductDetail: React.FC = () => {
       for (let i = 0; i < filesToUpload.length; i++) {
         const file = filesToUpload[i];
         if (!file.type.startsWith('image/')) {
-          failedImages.push({ fileName: file.name, error: 'Not an image file' });
+          const errorInfo = { fileName: file.name, error: 'Not an image file' };
+          failedImages.push(errorInfo);
+          
+          // Update error state in real-time
+          setImageUploadErrors(prev => ({
+            ...prev,
+            [variantIndex]: [...(prev[variantIndex] || []), errorInfo]
+          }));
+          
           // Update progress to account for skipped file
           const completedFiles = i + 1;
           const overallProgress = (completedFiles / totalFiles) * 100;
@@ -774,10 +784,18 @@ const AdminProductDetail: React.FC = () => {
           });
         } catch (error: any) {
           // Track failed image but continue with next ones
-          failedImages.push({ 
+          const errorInfo = { 
             fileName: file.name, 
             error: error.message || 'Upload failed' 
-          });
+          };
+          failedImages.push(errorInfo);
+          
+          // Update error state in real-time
+          setImageUploadErrors(prev => ({
+            ...prev,
+            [variantIndex]: [...(prev[variantIndex] || []), errorInfo]
+          }));
+          
           // Update progress to account for failed file
           const completedFiles = i + 1;
           const overallProgress = (completedFiles / totalFiles) * 100;
@@ -2902,6 +2920,7 @@ const AdminProductDetail: React.FC = () => {
         const progressData = imageUploadProgress[variantIndex] || { current: 0, total: 0, percentage: 0 };
         const progress = progressData.percentage || 0;
         const isUploading = uploadingImages[variantIndex] || false;
+        const failedImages = imageUploadErrors[variantIndex] || [];
         
         return (
           <div
@@ -2943,11 +2962,16 @@ const AdminProductDetail: React.FC = () => {
                     delete newModal[variantIndex];
                     return newModal;
                   });
-                  // Clear progress when closing
+                  // Clear progress and errors when closing
                   setImageUploadProgress(prev => {
                     const newProgress = { ...prev };
                     delete newProgress[variantIndex];
                     return newProgress;
+                  });
+                  setImageUploadErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors[variantIndex];
+                    return newErrors;
                   });
                 }}
                 style={{
@@ -3069,7 +3093,7 @@ const AdminProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              {progress === 100 && !isUploading && (
+              {progress === 100 && !isUploading && failedImages.length === 0 && (
                 <p style={{
                   margin: '16px 0 0 0',
                   color: '#10b981',
@@ -3078,6 +3102,67 @@ const AdminProductDetail: React.FC = () => {
                 }}>
                   All images uploaded successfully!
                 </p>
+              )}
+              
+              {/* Failed Images Display */}
+              {failedImages.length > 0 && (
+                <div style={{
+                  marginTop: '20px',
+                  padding: '16px',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '12px'
+                  }}>
+                    <span className="material-symbols-outlined" style={{
+                      fontSize: '20px',
+                      color: '#ef4444'
+                    }}>error</span>
+                    <h4 style={{
+                      margin: 0,
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#991b1b'
+                    }}>
+                      Failed Images ({failedImages.length})
+                    </h4>
+                  </div>
+                  <div style={{
+                    maxHeight: '150px',
+                    overflowY: 'auto',
+                    fontSize: '12px'
+                  }}>
+                    {failedImages.map((failed, idx) => (
+                      <div key={idx} style={{
+                        padding: '8px',
+                        marginBottom: '6px',
+                        backgroundColor: '#fff',
+                        borderRadius: '4px',
+                        border: '1px solid #fecaca'
+                      }}>
+                        <div style={{
+                          fontWeight: '600',
+                          color: '#991b1b',
+                          marginBottom: '4px',
+                          wordBreak: 'break-word'
+                        }}>
+                          {failed.fileName}
+                        </div>
+                        <div style={{
+                          color: '#dc2626',
+                          fontSize: '11px'
+                        }}>
+                          {failed.error}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </div>
