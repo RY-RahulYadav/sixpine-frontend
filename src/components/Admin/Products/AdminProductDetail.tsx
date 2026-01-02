@@ -5073,36 +5073,26 @@ const AdminProductDetail: React.FC = () => {
                           <button 
                             type="button" 
                             className="admin-modern-btn secondary"
-                            onClick={() => {
-                              const updated = [...variants];
-                              updated[variantIndex].style_specs = [...(updated[variantIndex].style_specs || []), {
-                                name: '',
-                                value: '',
-                                sort_order: updated[variantIndex].style_specs?.length || 0
-                              }];
-                              setVariants(updated);
-                            }}
+                            onClick={() => handleAddVariantStyleSpec(variantIndex)}
                           >
                             <span className="material-symbols-outlined">add</span>
                             Add Style Spec
                           </button>
                           </div>
                           <div className="tw-space-y-3">
-                            {variant.style_specs?.map((spec, specIndex) => (
-                              <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                            {sortSpecsByTemplate(variant.style_specs || [], 'style_specs')
+                              .map((spec, sortedIndex) => {
+                              // Find original index after sorting
+                              const originalIndex = variant.style_specs?.findIndex(s => s === spec) ?? sortedIndex;
+                              return (
+                              <div key={spec.id || `style-${originalIndex}-${spec.name}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
                                 <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
                                   <div>
                                     <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
                                     <input
                                       type="text"
                                       value={spec.name}
-                                      onChange={(e) => {
-                                        const updated = [...variants];
-                                        if (updated[variantIndex].style_specs) {
-                                        updated[variantIndex].style_specs[specIndex] = { ...spec, name: e.target.value };
-                                        }
-                                        setVariants(updated);
-                                      }}
+                                      onChange={(e) => handleVariantStyleSpecChange(variantIndex, originalIndex, 'name', e.target.value)}
                                       placeholder="e.g., Colour, Style, Shape"
                                       className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                                     />
@@ -5112,35 +5102,34 @@ const AdminProductDetail: React.FC = () => {
                                     <input
                                       type="text"
                                       value={spec.value}
-                                      onChange={(e) => {
-                                        const updated = [...variants];
-                                        if (updated[variantIndex].style_specs) {
-                                        updated[variantIndex].style_specs[specIndex] = { ...spec, value: e.target.value };
-                                        }
-                                        setVariants(updated);
-                                      }}
+                                      onChange={(e) => handleVariantStyleSpecChange(variantIndex, originalIndex, 'value', e.target.value)}
                                       placeholder="e.g., Grey & Beige, Modern, Rectangular"
                                       className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                                     />
                                   </div>
                                 </div>
+                                <div className="tw-w-24">
+                                  <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Order</label>
+                                  <input
+                                    type="number"
+                                    value={spec.sort_order}
+                                    onChange={(e) => handleVariantStyleSpecChange(variantIndex, originalIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                                    placeholder="0"
+                                    className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
+                                  />
+                                </div>
                                 <div className="tw-flex tw-items-end">
                                   <button
                                     type="button"
                                     className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors"
-                                    onClick={() => {
-                                      const updated = [...variants];
-                                      if (updated[variantIndex].style_specs) {
-                                      updated[variantIndex].style_specs = updated[variantIndex].style_specs.filter((_, i) => i !== specIndex);
-                                      }
-                                      setVariants(updated);
-                                    }}
+                                    onClick={() => handleRemoveVariantStyleSpec(variantIndex, originalIndex)}
                                   >
                                     <span className="material-symbols-outlined tw-text-lg">delete</span>
                                   </button>
                                 </div>
                               </div>
-                            ))}
+                            );
+                            })}
                           </div>
                         </div>
                         
