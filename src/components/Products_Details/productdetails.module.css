@@ -1118,7 +1118,7 @@
   width: auto;
   min-width: auto;
   padding: 4px 10px;
-  border: 1px dotted #bbbdbd;
+  border: 2px dotted #bbbdbd;
   background: #ffffff;
   border-radius: 10px;
   cursor: pointer;
@@ -1134,6 +1134,7 @@
 .options button:hover {
   background: #ffffff;
   border-color: #999999;
+  border-width: 2px;
   border-style: dotted;
 }
 

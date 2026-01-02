@@ -243,6 +243,8 @@ const AdminProductDetail: React.FC = () => {
   
   // Variants
   const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [originalVariants, setOriginalVariants] = useState<ProductVariant[]>([]);
+  const [originalProduct, setOriginalProduct] = useState<any>(null);
   const [lastSelectedColorId, setLastSelectedColorId] = useState<number | null>(null);
   const [categorySpecDefaults, setCategorySpecDefaults] = useState<any>(null);
   
@@ -354,6 +356,9 @@ const AdminProductDetail: React.FC = () => {
           });
           console.log('Normalized variants with subcategories:', normalizedVariants.map((v: ProductVariant) => ({ id: v.id, subcategory_ids: v.subcategory_ids })));
           setVariants(normalizedVariants);
+          // Store original variants for change tracking
+          setOriginalVariants(JSON.parse(JSON.stringify(normalizedVariants)));
+          setOriginalProduct(JSON.parse(JSON.stringify(productData)));
           
           // Set last selected color from existing variants (use first variant's color if available)
           if (normalizedVariants.length > 0 && normalizedVariants[0].color_id && normalizedVariants[0].color_id !== 0) {
@@ -628,7 +633,11 @@ const AdminProductDetail: React.FC = () => {
   
   // Bulk upload images to Cloudinary
   const [uploadingImages, setUploadingImages] = useState<{ [key: number]: boolean }>({});
+  const [imageUploadProgress, setImageUploadProgress] = useState<{ [key: number]: { current: number; total: number; percentage: number } }>({});
+  const [showImageUploadModal, setShowImageUploadModal] = useState<{ [key: number]: boolean }>({});
   const [uploadingVideo, setUploadingVideo] = useState<{ [key: number]: boolean }>({});
+  const [videoUploadProgress, setVideoUploadProgress] = useState<{ [key: number]: number }>({});
+  const [showVideoUploadModal, setShowVideoUploadModal] = useState<{ [key: number]: boolean }>({});
   
   const handleBulkImageUpload = async (variantIndex: number, files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -646,12 +655,19 @@ const AdminProductDetail: React.FC = () => {
     const filesToUpload = fileArray.slice(0, maxImages - currentImageCount);
     
     setUploadingImages(prev => ({ ...prev, [variantIndex]: true }));
+    setImageUploadProgress(prev => ({ 
+      ...prev, 
+      [variantIndex]: { current: 0, total: filesToUpload.length, percentage: 0 } 
+    }));
+    setShowImageUploadModal(prev => ({ ...prev, [variantIndex]: true }));
     
     try {
       const uploadedUrls: string[] = [];
+      const totalFiles = filesToUpload.length;
       
-      // Upload each image to Cloudinary
-      for (const file of filesToUpload) {
+      // Upload each image to Cloudinary with progress tracking
+      for (let i = 0; i < filesToUpload.length; i++) {
+        const file = filesToUpload[i];
         if (!file.type.startsWith('image/')) {
           showToast(`${file.name} is not an image file`, 'error');
           continue;
@@ -660,14 +676,90 @@ const AdminProductDetail: React.FC = () => {
         const formData = new FormData();
         formData.append('image', file);
         
-        const response = await adminAPI.uploadMedia(formData);
-        if (response.data?.cloudinary_url) {
-          uploadedUrls.push(response.data.cloudinary_url);
-        }
+        // Use XMLHttpRequest for progress tracking
+        const xhr = new XMLHttpRequest();
+        const baseUrl = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000/api';
+        const apiUrl = baseUrl.replace(/\/api$/, '') + '/api/admin/media/upload/';
+        const token = localStorage.getItem('access_token') || localStorage.getItem('authToken');
+        
+        await new Promise<void>((resolve, reject) => {
+          // Track upload progress
+          xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              const fileProgress = e.loaded / e.total;
+              // Calculate overall progress: (completed files + current file progress) / total files
+              const completedFiles = i;
+              const overallProgress = ((completedFiles + fileProgress) / totalFiles) * 100;
+              setImageUploadProgress(prev => ({
+                ...prev,
+                [variantIndex]: {
+                  current: completedFiles + 1,
+                  total: totalFiles,
+                  percentage: Math.min(Math.round(overallProgress), 99) // Cap at 99% until all files complete
+                }
+              }));
+            }
+          });
+          
+          // Handle completion
+          xhr.addEventListener('load', () => {
+            if (xhr.status === 201) {
+              try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.cloudinary_url) {
+                  uploadedUrls.push(response.cloudinary_url);
+                  // Update progress when file completes
+                  const completedFiles = i + 1;
+                  const overallProgress = (completedFiles / totalFiles) * 100;
+                  setImageUploadProgress(prev => ({
+                    ...prev,
+                    [variantIndex]: {
+                      current: completedFiles,
+                      total: totalFiles,
+                      percentage: Math.round(overallProgress)
+                    }
+                  }));
+                  resolve();
+                } else {
+                  reject(new Error('No URL in response'));
+                }
+              } catch (error) {
+                reject(error);
+              }
+            } else {
+              reject(new Error(`Upload failed: ${xhr.status}`));
+            }
+          });
+          
+          // Handle errors
+          xhr.addEventListener('error', () => reject(new Error('Network error')));
+          xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+          
+          // Open and send request
+          xhr.open('POST', apiUrl);
+          if (token) {
+            const authHeader = token.startsWith('Bearer ') || token.startsWith('Token ') 
+              ? token 
+              : `Token ${token}`;
+            xhr.setRequestHeader('Authorization', authHeader);
+          }
+          xhr.timeout = 300000; // 5 minutes
+          xhr.send(formData);
+        });
       }
       
+      // Update progress to 100%
+      setImageUploadProgress(prev => ({
+        ...prev,
+        [variantIndex]: {
+          current: totalFiles,
+          total: totalFiles,
+          percentage: 100
+        }
+      }));
+      
       if (uploadedUrls.length > 0) {
-        const updated = [...variants];
+    const updated = [...variants];
         const variant = updated[variantIndex];
         
         // First image becomes main image, rest go to images array
@@ -697,9 +789,10 @@ const AdminProductDetail: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error uploading images:', error);
-      showToast(error.response?.data?.error || 'Failed to upload images', 'error');
+      showToast(error.message || error.response?.data?.error || 'Failed to upload images', 'error');
     } finally {
       setUploadingImages(prev => ({ ...prev, [variantIndex]: false }));
+      // Don't clear progress automatically - let user close modal manually
     }
   };
   
@@ -711,7 +804,7 @@ const AdminProductDetail: React.FC = () => {
     if (variant.image) {
       allImages.push({
         image: variant.image,
-        alt_text: '',
+      alt_text: '',
         sort_order: 0,
         is_active: true,
         isMain: true
@@ -734,29 +827,18 @@ const AdminProductDetail: React.FC = () => {
     return allImages;
   };
   
-  // Drag and drop handlers for image reordering
-  const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
-  
-  const handleDragStart = (e: React.DragEvent, imageIndex: number) => {
-    setDraggedImageIndex(imageIndex);
-    e.dataTransfer.effectAllowed = 'move';
-  };
-  
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-  };
-  
-  const handleDrop = (variantIndex: number, targetIndex: number) => {
-    if (draggedImageIndex === null) return;
-    
+  // Move image up or down
+  const handleMoveImage = (variantIndex: number, imageIndex: number, direction: 'up' | 'down') => {
     const updated = [...variants];
     const variant = updated[variantIndex];
     const allImages = getAllImages(variant);
     
-    // Reorder images
-    const [movedImage] = allImages.splice(draggedImageIndex, 1);
-    allImages.splice(targetIndex, 0, movedImage);
+    if (direction === 'up' && imageIndex === 0) return; // Can't move first image up
+    if (direction === 'down' && imageIndex === allImages.length - 1) return; // Can't move last image down
+    
+    const newIndex = direction === 'up' ? imageIndex - 1 : imageIndex + 1;
+    const [movedImage] = allImages.splice(imageIndex, 1);
+    allImages.splice(newIndex, 0, movedImage);
     
     // First image becomes main, rest go to array
     if (allImages.length > 0) {
@@ -773,7 +855,6 @@ const AdminProductDetail: React.FC = () => {
     }
     
     setVariants(updated);
-    setDraggedImageIndex(null);
   };
   
   const handleRemoveVariantImage = (variantIndex: number, imageIndex: number) => {
@@ -886,32 +967,119 @@ const AdminProductDetail: React.FC = () => {
       return;
     }
     
-    // Validate file size (max 100MB)
-    const maxSize = 100 * 1024 * 1024; // 100MB
+    // Validate file size (max 500MB)
+    const maxSize = 500 * 1024 * 1024; // 500MB
     if (file.size > maxSize) {
-      showToast('File size too large. Maximum size is 100MB.', 'error');
+      showToast('File size too large. Maximum size is 500MB.', 'error');
       return;
     }
     
     setUploadingVideo(prev => ({ ...prev, [variantIndex]: true }));
+    setVideoUploadProgress(prev => ({ ...prev, [variantIndex]: 0 }));
+    setShowVideoUploadModal(prev => ({ ...prev, [variantIndex]: true }));
     
     try {
       const formData = new FormData();
       formData.append('video', file);
       
-      // Use longer timeout for video uploads (5 minutes)
-      const response = await adminAPI.uploadMedia(formData, 300000);
-      if (response.data?.cloudinary_url) {
-        const updated = [...variants];
-        updated[variantIndex].video_url = response.data.cloudinary_url;
-        setVariants(updated);
-        showToast('Video uploaded successfully!', 'success');
-      }
+      // Use XMLHttpRequest for progress tracking
+      const xhr = new XMLHttpRequest();
+      // Get API base URL - remove /api suffix if present, then add /api/admin/media/upload/
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL as string) || 'http://localhost:8000/api';
+      const apiUrl = baseUrl.replace(/\/api$/, '') + '/api/admin/media/upload/';
+      const token = localStorage.getItem('access_token') || localStorage.getItem('authToken');
+      
+      return new Promise<void>((resolve, reject) => {
+        // Track upload progress
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable && e.total > 0) {
+            // Only update progress if we have valid data
+            const percentComplete = Math.min(Math.round((e.loaded / e.total) * 100), 99);
+            setVideoUploadProgress(prev => ({ ...prev, [variantIndex]: percentComplete }));
+          }
+        });
+        
+        // Handle completion
+        xhr.addEventListener('load', () => {
+          if (xhr.status === 201) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              if (response.cloudinary_url) {
+                // Update progress to 100% only after successful upload
+                setVideoUploadProgress(prev => ({ ...prev, [variantIndex]: 100 }));
+                
+                // Small delay to show 100% before marking as complete
+                setTimeout(() => {
+                  // Update variant with video URL
+                  const updated = [...variants];
+                  updated[variantIndex].video_url = response.cloudinary_url;
+                  setVariants(updated);
+                  
+                  // Show success message
+                  showToast('Video uploaded successfully!', 'success');
+                  
+                  // Mark upload as complete
+                  setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
+                  
+                  resolve();
+                }, 300);
+              } else {
+                throw new Error('No URL in response');
+              }
+            } catch (error) {
+              console.error('Error parsing response:', error);
+              showToast('Failed to parse upload response', 'error');
+              setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
+              reject(error);
+            }
+          } else {
+            try {
+              const errorResponse = JSON.parse(xhr.responseText);
+              showToast(errorResponse.error || `Upload failed with status ${xhr.status}`, 'error');
+            } catch {
+              showToast(`Upload failed with status ${xhr.status}`, 'error');
+            }
+            setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
+            reject(new Error(`Upload failed: ${xhr.status}`));
+          }
+        });
+        
+        // Handle errors
+        xhr.addEventListener('error', () => {
+          showToast('Network error during upload', 'error');
+          reject(new Error('Network error'));
+        });
+        
+        xhr.addEventListener('abort', () => {
+          showToast('Upload cancelled', 'info');
+          reject(new Error('Upload cancelled'));
+        });
+        
+        xhr.addEventListener('timeout', () => {
+          showToast('Upload timeout. Please try again.', 'error');
+          reject(new Error('Upload timeout'));
+        });
+        
+        // Open and send request with optimized settings
+        xhr.open('POST', apiUrl);
+        if (token) {
+          // Check if token format is Bearer or Token
+          const authHeader = token.startsWith('Bearer ') || token.startsWith('Token ') 
+            ? token 
+            : `Token ${token}`;
+          xhr.setRequestHeader('Authorization', authHeader);
+        }
+        // Increase timeout for large videos (15 minutes)
+        xhr.timeout = 900000; // 15 minutes
+        // Send request
+        xhr.send(formData);
+      });
     } catch (error: any) {
       console.error('Error uploading video:', error);
-      showToast(error.response?.data?.error || 'Failed to upload video', 'error');
+      showToast(error.message || 'Failed to upload video', 'error');
     } finally {
       setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
+      // Don't clear progress automatically - let user close modal manually
     }
   };
   
@@ -1190,6 +1358,118 @@ const AdminProductDetail: React.FC = () => {
     setTimeout(() => setSuccess(null), 3000);
   };
   
+  // Helper function to deep compare two objects
+  const deepEqual = (obj1: any, obj2: any): boolean => {
+    if (obj1 === obj2) return true;
+    if (obj1 == null || obj2 == null) return false;
+    if (typeof obj1 !== typeof obj2) return false;
+    
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+      if (obj1.length !== obj2.length) return false;
+      return obj1.every((val, idx) => deepEqual(val, obj2[idx]));
+    }
+    
+    if (typeof obj1 === 'object') {
+      const keys1 = Object.keys(obj1);
+      const keys2 = Object.keys(obj2);
+      if (keys1.length !== keys2.length) return false;
+      return keys1.every(key => deepEqual(obj1[key], obj2[key]));
+    }
+    
+    return obj1 === obj2;
+  };
+
+  // Helper function to filter out empty specification entries
+  const filterSpecArray = (specs: any[] | undefined | null | {}): any[] => {
+    // Handle case where it might be an object instead of array
+    if (!specs) return [];
+    if (typeof specs === 'object' && !Array.isArray(specs)) {
+      // If it's an object, try to convert to array or return empty
+      if (Object.keys(specs).length === 0) return [];
+      // If it has array-like structure, try to extract
+      return [];
+    }
+    if (!Array.isArray(specs)) return [];
+    
+    return specs
+      .filter((spec: any) => {
+        // Filter out null, undefined, or non-objects
+        if (!spec || typeof spec !== 'object' || Array.isArray(spec)) return false;
+        
+        // Check if it's an empty object
+        if (Object.keys(spec).length === 0) return false;
+        
+        // Extract name and value (handle different property name cases)
+        const name = (spec.name || spec.Name || '').toString().trim();
+        const value = (spec.value || spec.Value || '').toString().trim();
+        
+        // Only include if both name and value are non-empty
+        return name !== '' && value !== '';
+      })
+      .map((spec: any) => ({
+        id: spec.id,
+        name: (spec.name || spec.Name || '').toString().trim(),
+        value: (spec.value || spec.Value || '').toString().trim(),
+        sort_order: spec.sort_order || spec.sortOrder || 0,
+        is_active: spec.is_active !== false && spec.isActive !== false
+      }));
+  };
+
+  // Helper function to build variant payload
+  const buildVariantPayload = (v: ProductVariant) => {
+          const colorId = v.color_id || v.color?.id;
+          if (!colorId) {
+            throw new Error(`Variant ${v.id || 'new'} is missing a color selection`);
+          }
+          return {
+            id: v.id,
+            color_id: colorId,
+            sku: v.sku || '',
+            size: v.size || '',
+            pattern: v.pattern || '',
+            quality: v.quality || '',
+            title: v.title || '',
+          price: v.price ? parseFloat(v.price.toString()) : null,
+          old_price: v.old_price ? parseFloat(v.old_price.toString()) : null,
+            stock_quantity: parseInt(v.stock_quantity.toString()) || 0,
+            is_in_stock: v.is_in_stock !== false,
+            image: v.image || '',
+            video_url: v.video_url || '',
+            is_active: v.is_active !== false,
+      subcategory_ids: v.subcategory_ids || [],
+            images: (v.images || []).map(img => ({
+              image: img.image,
+              alt_text: img.alt_text,
+              sort_order: img.sort_order,
+              is_active: img.is_active !== false
+            })),
+            specifications: (v.specifications || []).map((s: Specification) => ({
+          name: s.name,
+          value: s.value,
+          sort_order: s.sort_order,
+          is_active: s.is_active !== false
+            })),
+      // Filter out empty entries from arrays
+      measurement_specs: filterSpecArray(v.measurement_specs),
+      style_specs: filterSpecArray(v.style_specs),
+      features: filterSpecArray(v.features),
+      user_guide: filterSpecArray(v.user_guide),
+      item_details: filterSpecArray(v.item_details)
+    };
+  };
+
+  // Check if variant has changed
+  const hasVariantChanged = (current: ProductVariant, original: ProductVariant | undefined): boolean => {
+    if (!original) return true; // New variant
+    if (!original.id && current.id) return true; // Variant was just created
+    
+    const currentPayload = buildVariantPayload(current);
+    const originalPayload = buildVariantPayload(original);
+    
+    // Compare all fields
+    return !deepEqual(currentPayload, originalPayload);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -1220,97 +1500,152 @@ const AdminProductDetail: React.FC = () => {
       setSaving(true);
       setError(null);
       
-      const payload: any = {
-        title: formData.title,
-        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        sku: formData.sku || null,
-        short_description: formData.short_description,
-        long_description: formData.long_description,
-        category_id: categoryId,
-        material_id: formData.material_id ? parseInt(formData.material_id) : null,
-        brand: isSixpineProduct ? 'Sixpine' : formData.brand,
-        dimensions: formData.dimensions,
-        weight: formData.weight,
-        warranty: formData.warranty,
-        assembly_required: formData.assembly_required,
-        estimated_delivery_days: formData.estimated_delivery_days,
-        screen_offer: formData.screen_offer,
-        style_description: formData.style_description,
-        user_guide: formData.user_guide,
-        care_instructions: formData.care_instructions,
-        what_in_box: formData.what_in_box,
-        meta_title: formData.meta_title,
-        meta_description: formData.meta_description,
-        is_featured: formData.is_featured,
-        is_active: formData.is_active,
-        variants: variants.map(v => {
-          // Ensure color_id is always set (from v.color_id or v.color.id)
-          const colorId = v.color_id || v.color?.id;
-          if (!colorId) {
-            throw new Error(`Variant ${v.id || 'new'} is missing a color selection`);
-          }
-          console.log('Building variant payload:', { originalId: v.id, colorId, subcategory_ids: v.subcategory_ids });
-          return {
-            id: v.id,
-            color_id: colorId,
-            size: v.size || '',
-            pattern: v.pattern || '',
-            quality: v.quality || '',
-            title: v.title || '',
-          price: v.price ? parseFloat(v.price.toString()) : null,
-          old_price: v.old_price ? parseFloat(v.old_price.toString()) : null,
-            stock_quantity: parseInt(v.stock_quantity.toString()) || 0,
-            is_in_stock: v.is_in_stock !== false,
-            image: v.image || '',
-            video_url: v.video_url || '',
-            is_active: v.is_active !== false,
-            subcategory_ids: v.subcategory_ids || [],  // Include subcategory_ids
-            images: (v.images || []).map(img => ({
-              image: img.image,
-              alt_text: img.alt_text,
-              sort_order: img.sort_order,
-              is_active: img.is_active !== false
-            })),
-            specifications: (v.specifications || []).map((s: Specification) => ({
-          name: s.name,
-          value: s.value,
-          sort_order: s.sort_order,
-          is_active: s.is_active !== false
-            })),
-            measurement_specs: v.measurement_specs || {},
-            style_specs: v.style_specs || {},
-            features: v.features || {},
-            user_guide: v.user_guide || {},
-            item_details: v.item_details || {}
-          };
-        }),
-        features: features.map(f => ({
+      // Build base payload with only changed product fields (for edit mode)
+      const payload: any = {};
+      
+      if (isNew) {
+        // For new products, send all fields
+        payload.title = formData.title;
+        payload.slug = formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        payload.sku = formData.sku || null;
+        payload.short_description = formData.short_description;
+        payload.long_description = formData.long_description;
+        payload.category_id = categoryId;
+        payload.material_id = formData.material_id ? parseInt(formData.material_id) : null;
+        payload.brand = isSixpineProduct ? 'Sixpine' : formData.brand;
+        payload.dimensions = formData.dimensions;
+        payload.weight = formData.weight;
+        payload.warranty = formData.warranty;
+        payload.assembly_required = formData.assembly_required;
+        payload.estimated_delivery_days = formData.estimated_delivery_days;
+        payload.screen_offer = formData.screen_offer;
+        payload.style_description = formData.style_description;
+        payload.user_guide = formData.user_guide;
+        payload.care_instructions = formData.care_instructions;
+        payload.what_in_box = formData.what_in_box;
+        payload.meta_title = formData.meta_title;
+        payload.meta_description = formData.meta_description;
+        payload.is_featured = formData.is_featured;
+        payload.is_active = formData.is_active;
+        // Send all variants for new products
+        payload.variants = variants.map(v => buildVariantPayload(v));
+        payload.features = features.map(f => ({
           feature: f.feature,
           sort_order: f.sort_order,
           is_active: f.is_active !== false
-        })),
-        about_items: aboutItems.map(a => ({
-          item: a.item || a.feature, // Support both item and feature field for backward compatibility
+        }));
+        payload.about_items = aboutItems.map(a => ({
+          item: a.item || a.feature,
           sort_order: a.sort_order,
           is_active: a.is_active !== false
-        })),
-        recommendations: recommendations.map(r => ({
+        }));
+        payload.recommendations = recommendations.map(r => ({
           id: r.id,
           recommended_product_id: r.recommended_product_id,
           recommendation_type: r.recommendation_type,
           sort_order: r.sort_order || 0,
           is_active: r.is_active !== false
-        }))
-      };
+        }));
+      } else {
+        // For updates, only send changed fields
+        if (originalProduct) {
+          // Compare product fields
+          if (formData.title !== originalProduct.title) payload.title = formData.title;
+          if (formData.slug !== originalProduct.slug) payload.slug = formData.slug;
+          if (formData.sku !== originalProduct.sku) payload.sku = formData.sku;
+          if (formData.short_description !== originalProduct.short_description) payload.short_description = formData.short_description;
+          if (formData.long_description !== originalProduct.long_description) payload.long_description = formData.long_description;
+          if (categoryId !== originalProduct.category?.id) payload.category_id = categoryId;
+          const materialId = formData.material_id ? parseInt(formData.material_id) : null;
+          if (materialId !== originalProduct.material?.id) payload.material_id = materialId;
+          const brand = isSixpineProduct ? 'Sixpine' : formData.brand;
+          if (brand !== originalProduct.brand) payload.brand = brand;
+          if (formData.dimensions !== originalProduct.dimensions) payload.dimensions = formData.dimensions;
+          if (formData.weight !== originalProduct.weight) payload.weight = formData.weight;
+          if (formData.warranty !== originalProduct.warranty) payload.warranty = formData.warranty;
+          if (formData.assembly_required !== originalProduct.assembly_required) payload.assembly_required = formData.assembly_required;
+          if (formData.estimated_delivery_days !== originalProduct.estimated_delivery_days) payload.estimated_delivery_days = formData.estimated_delivery_days;
+          if (!deepEqual(formData.screen_offer, originalProduct.screen_offer)) payload.screen_offer = formData.screen_offer;
+          if (formData.style_description !== originalProduct.style_description) payload.style_description = formData.style_description;
+          if (formData.user_guide !== originalProduct.user_guide) payload.user_guide = formData.user_guide;
+          if (formData.care_instructions !== originalProduct.care_instructions) payload.care_instructions = formData.care_instructions;
+          if (formData.what_in_box !== originalProduct.what_in_box) payload.what_in_box = formData.what_in_box;
+          if (formData.meta_title !== originalProduct.meta_title) payload.meta_title = formData.meta_title;
+          if (formData.meta_description !== originalProduct.meta_description) payload.meta_description = formData.meta_description;
+          if (formData.is_featured !== originalProduct.is_featured) payload.is_featured = formData.is_featured;
+          if (formData.is_active !== originalProduct.is_active) payload.is_active = formData.is_active;
+        }
+        
+        // IMPORTANT: Always send ALL variants to prevent deletion of unchanged variants
+        // For unchanged variants, send minimal data (just ID and essential fields) to reduce payload size
+        // For changed variants, send full payload
+        // This significantly reduces payload size and processing time for products with many variants (90+)
+        payload.variants = variants.map(v => {
+          const original = originalVariants.find(ov => ov.id === v.id);
+          
+          // If variant hasn't changed, send minimal data to reduce payload size
+          if (original && !hasVariantChanged(v, original)) {
+            // Send only ID and essential fields - backend will skip update if nothing changed
+            return {
+              id: v.id,
+              color_id: v.color_id || v.color?.id,
+              sku: v.sku || '',
+              // Minimal required fields to satisfy serializer validation
+              size: v.size || '',
+              pattern: v.pattern || '',
+              quality: v.quality || '',
+              price: v.price ? parseFloat(v.price.toString()) : null,
+              stock_quantity: parseInt(v.stock_quantity.toString()) || 0,
+              is_in_stock: v.is_in_stock !== false,
+              is_active: v.is_active !== false,
+              subcategory_ids: v.subcategory_ids || []
+              // Don't send images, specifications, measurement_specs, style_specs, etc. for unchanged variants
+              // Backend will skip processing these if not provided
+            };
+          }
+          
+          // If variant has changed, send full payload
+          return buildVariantPayload(v);
+        });
+        
+        // Only send changed features, about_items, recommendations if they changed
+        if (!deepEqual(features, originalProduct?.features || [])) {
+          payload.features = features.map(f => ({
+            feature: f.feature,
+            sort_order: f.sort_order,
+            is_active: f.is_active !== false
+          }));
+        }
+        
+        if (!deepEqual(aboutItems, originalProduct?.about_items || [])) {
+          payload.about_items = aboutItems.map(a => ({
+            item: a.item || a.feature,
+            sort_order: a.sort_order,
+            is_active: a.is_active !== false
+          }));
+        }
+        
+        if (!deepEqual(recommendations, originalProduct?.recommendations || [])) {
+          payload.recommendations = recommendations.map(r => ({
+            id: r.id,
+            recommended_product_id: r.recommended_product_id,
+            recommendation_type: r.recommendation_type,
+            sort_order: r.sort_order || 0,
+            is_active: r.is_active !== false
+          }));
+        }
+      }
       
-      console.log('Saving product with payload:', payload);
-      console.log('Variant subcategories being saved:', payload.variants.map((v: any) => ({ 
-        variantId: v.id, 
-        color_id: v.color_id, 
-        subcategory_ids: v.subcategory_ids,
-        subcategory_ids_type: typeof v.subcategory_ids,
-        subcategory_ids_isArray: Array.isArray(v.subcategory_ids)
-      })));
+      console.log('Saving product with payload (optimized):', payload);
+      if (payload.variants) {
+        const changedCount = payload.variants.filter((v: any) => {
+          const original = originalVariants.find(ov => ov.id === v.id);
+          if (!original) return true;
+          const current = variants.find(cv => cv.id === v.id);
+          return current && hasVariantChanged(current, original);
+        }).length;
+        console.log(`Sending ${payload.variants.length} variant(s) (${changedCount} changed, ${payload.variants.length - changedCount} unchanged)`);
+      }
       
       let response;
       if (isNew) {
@@ -1323,16 +1658,15 @@ const AdminProductDetail: React.FC = () => {
         navigate(`${basePath}/products/${response.data.id}`);
         }
       } else {
+        // Use PATCH for partial updates
         response = await api.updateProduct(parseInt(id!), payload);
         console.log('Product update response:', response.data);
-        console.log('Updated variants with subcategories:', response.data.variants?.map((v: any) => ({ id: v.id, subcategories: v.subcategories, subcategory_ids: v.subcategory_ids })));
         setProduct(response.data);
         
         // CRITICAL: Update variants state with the response data to get new IDs and subcategories
         const updatedVariants = (response.data.variants || []).map((v: any) => {
           const colorId = v.color_id || (v.color?.id ? parseInt(v.color.id) : null) || 0;
           const subcategoryIds = v.subcategories?.map((sub: any) => sub.id) || v.subcategory_ids || [];
-          console.log('Updating variant state after save:', { id: v.id, subcategoryIds });
           // Normalize images array - ensure it's always an array
           const normalizedImages = (v.images || []).map((img: any) => ({
             id: img.id,
@@ -1354,6 +1688,9 @@ const AdminProductDetail: React.FC = () => {
           };
         });
         setVariants(updatedVariants);
+        // Update original variants after successful save
+        setOriginalVariants(JSON.parse(JSON.stringify(updatedVariants)));
+        setOriginalProduct(JSON.parse(JSON.stringify(response.data)));
         
         showSuccess('Product updated successfully!');
       }
@@ -2319,6 +2656,376 @@ const AdminProductDetail: React.FC = () => {
         </div>
       )}
       
+      {/* Video Upload Progress Modal */}
+      {Object.keys(showVideoUploadModal).map((key) => {
+        const variantIndex = parseInt(key);
+        if (!showVideoUploadModal[variantIndex]) return null;
+        
+        const progress = videoUploadProgress[variantIndex] || 0;
+        const isUploading = uploadingVideo[variantIndex] || false;
+        
+        return (
+          <div
+            key={variantIndex}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999
+            }}
+            onClick={(e) => {
+              // Don't close on overlay click - only close button
+              e.stopPropagation();
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                padding: '32px',
+                maxWidth: '500px',
+                width: '90%',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+                position: 'relative'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  setShowVideoUploadModal(prev => {
+                    const newModal = { ...prev };
+                    delete newModal[variantIndex];
+                    return newModal;
+                  });
+                  // Clear progress when closing
+                  setVideoUploadProgress(prev => {
+                    const newProgress = { ...prev };
+                    delete newProgress[variantIndex];
+                    return newProgress;
+                  });
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '8px',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#374151';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#6b7280';
+                }}
+                title="Close"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>close</span>
+              </button>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                marginBottom: '24px'
+              }}>
+                {isUploading ? (
+                  <div className="admin-loader" style={{ width: '40px', height: '40px' }}></div>
+                ) : progress === 100 ? (
+                  <span className="material-symbols-outlined" style={{
+                    fontSize: '48px',
+                    color: '#10b981'
+                  }}>check_circle</span>
+                ) : (
+                  <span className="material-symbols-outlined" style={{
+                    fontSize: '48px',
+                    color: '#3b82f6'
+                  }}>cloud_upload</span>
+                )}
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#333'
+                }}>
+                  {isUploading ? 'Uploading Video...' : progress === 100 ? 'Upload Complete!' : 'Video Upload'}
+                </h3>
+              </div>
+
+              <div style={{
+                marginBottom: '24px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  color: '#374151',
+                  fontWeight: '500'
+                }}>
+                  <span>Upload Progress</span>
+                  <span style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#3b82f6'
+                  }}>{progress}%</span>
+                </div>
+                <div style={{
+                  width: '100%',
+                  height: '12px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}>
+                  <div style={{
+                    width: `${progress}%`,
+                    height: '100%',
+                    backgroundColor: progress === 100 ? '#10b981' : '#3b82f6',
+                    borderRadius: '6px',
+                    transition: 'width 0.3s ease, background-color 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    {isUploading && progress < 100 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                        animation: 'shimmer 1.5s infinite'
+                      }}></div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {progress === 100 && !isUploading && (
+                <p style={{
+                  margin: '16px 0 0 0',
+                  color: '#10b981',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  Video uploaded successfully!
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      
+      {/* Image Upload Progress Modal */}
+      {Object.keys(showImageUploadModal).map((key) => {
+        const variantIndex = parseInt(key);
+        if (!showImageUploadModal[variantIndex]) return null;
+        
+        const progressData = imageUploadProgress[variantIndex] || { current: 0, total: 0, percentage: 0 };
+        const progress = progressData.percentage || 0;
+        const isUploading = uploadingImages[variantIndex] || false;
+        
+        return (
+          <div
+            key={variantIndex}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 9999
+            }}
+            onClick={(e) => {
+              // Don't close on overlay click - only close button
+              e.stopPropagation();
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                padding: '32px',
+                maxWidth: '500px',
+                width: '90%',
+                boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+                position: 'relative'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  setShowImageUploadModal(prev => {
+                    const newModal = { ...prev };
+                    delete newModal[variantIndex];
+                    return newModal;
+                  });
+                  // Clear progress when closing
+                  setImageUploadProgress(prev => {
+                    const newProgress = { ...prev };
+                    delete newProgress[variantIndex];
+                    return newProgress;
+                  });
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '16px',
+                  right: '16px',
+                  background: 'transparent',
+                  border: 'none',
+                  padding: '8px',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#374151';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = '#6b7280';
+                }}
+                title="Close"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>close</span>
+              </button>
+
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+                marginBottom: '24px'
+              }}>
+                {isUploading ? (
+                  <div className="admin-loader" style={{ width: '40px', height: '40px' }}></div>
+                ) : progress === 100 ? (
+                  <span className="material-symbols-outlined" style={{
+                    fontSize: '48px',
+                    color: '#10b981'
+                  }}>check_circle</span>
+                ) : (
+                  <span className="material-symbols-outlined" style={{
+                    fontSize: '48px',
+                    color: '#3b82f6'
+                  }}>cloud_upload</span>
+                )}
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#333'
+                }}>
+                  {isUploading ? 'Uploading Images...' : progress === 100 ? 'Upload Complete!' : 'Image Upload'}
+                </h3>
+              </div>
+
+              <div style={{
+                marginBottom: '24px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '12px',
+                  fontSize: '14px',
+                  color: '#374151',
+                  fontWeight: '500'
+                }}>
+                  <span>Upload Progress</span>
+                  <span style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#3b82f6'
+                  }}>{progress}%</span>
+                </div>
+                {progressData.total > 0 && (
+                  <div style={{
+                    fontSize: '12px',
+                    color: '#6b7280',
+                    marginBottom: '8px'
+                  }}>
+                    Uploaded {progressData.current} of {progressData.total} images
+                  </div>
+                )}
+                <div style={{
+                  width: '100%',
+                  height: '12px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '6px',
+                  overflow: 'hidden',
+                  position: 'relative'
+                }}>
+                  <div style={{
+                    width: `${progress}%`,
+                    height: '100%',
+                    backgroundColor: progress === 100 ? '#10b981' : '#3b82f6',
+                    borderRadius: '6px',
+                    transition: 'width 0.3s ease, background-color 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    {isUploading && progress < 100 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                        animation: 'shimmer 1.5s infinite'
+                      }}></div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {progress === 100 && !isUploading && (
+                <p style={{
+                  margin: '16px 0 0 0',
+                  color: '#10b981',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  All images uploaded successfully!
+                </p>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      
       {/* Main Content Area */}
       <div style={{ 
         flex: 1,
@@ -3084,12 +3791,19 @@ const AdminProductDetail: React.FC = () => {
                       </div>
                       
                       <div className="admin-card" style={{ padding: '24px' }}>
-                        {/* Bulk Upload Section */}
-                        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
-                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cloud_upload</span>
-                            Bulk Upload Images
-                          </h5>
+                        {/* Upload Sections in Row */}
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: '24px', 
+                          marginBottom: '32px',
+                          flexWrap: 'wrap'
+                        }}>
+                          {/* Bulk Upload Section */}
+                          <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cloud_upload</span>
+                              Bulk Upload Images
+                            </h5>
                           <div
                             onDragOver={(e) => {
                               e.preventDefault();
@@ -3105,12 +3819,16 @@ const AdminProductDetail: React.FC = () => {
                             style={{
                               border: '2px dashed #cbd5e1',
                               borderRadius: '8px',
-                              padding: '32px',
+                              padding: '20px',
                               textAlign: 'center',
                               backgroundColor: uploadingImages[variantIndex] ? '#f3f4f6' : '#fafafa',
                               cursor: uploadingImages[variantIndex] || remainingSlots === 0 ? 'not-allowed' : 'pointer',
                               opacity: uploadingImages[variantIndex] || remainingSlots === 0 ? 0.6 : 1,
-                              transition: 'all 0.2s'
+                              transition: 'all 0.2s',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              minHeight: '180px'
                             }}
                             onMouseEnter={(e) => {
                               if (!uploadingImages[variantIndex] && remainingSlots > 0) {
@@ -3125,21 +3843,21 @@ const AdminProductDetail: React.FC = () => {
                           >
                             {uploadingImages[variantIndex] ? (
                               <div>
-                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>hourglass_empty</span>
-                                <p style={{ marginTop: '12px', color: '#6b7280' }}>Uploading images...</p>
+                                <span className="material-symbols-outlined" style={{ fontSize: '36px', color: '#3b82f6' }}>hourglass_empty</span>
+                                <p style={{ marginTop: '8px', color: '#6b7280', fontSize: '14px' }}>Uploading images...</p>
                               </div>
                             ) : remainingSlots === 0 ? (
                               <div>
-                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#9ca3af' }}>image</span>
-                                <p style={{ marginTop: '12px', color: '#6b7280' }}>Maximum {maxImages} images reached</p>
+                                <span className="material-symbols-outlined" style={{ fontSize: '36px', color: '#9ca3af' }}>image</span>
+                                <p style={{ marginTop: '8px', color: '#6b7280', fontSize: '14px' }}>Maximum {maxImages} images reached</p>
                               </div>
                             ) : (
                               <>
-                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>cloud_upload</span>
-                                <p style={{ marginTop: '12px', color: '#374151', fontWeight: '500' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '36px', color: '#3b82f6' }}>cloud_upload</span>
+                                <p style={{ marginTop: '8px', color: '#374151', fontWeight: '500', fontSize: '14px' }}>
                                   Drag and drop images here, or click to select
                                 </p>
-                                <p style={{ marginTop: '4px', color: '#6b7280', fontSize: '14px' }}>
+                                <p style={{ marginTop: '4px', color: '#6b7280', fontSize: '12px' }}>
                                   You can upload up to {remainingSlots} more image{remainingSlots !== 1 ? 's' : ''} (Max {maxImages} total)
                                 </p>
                                 <input
@@ -3160,13 +3878,13 @@ const AdminProductDetail: React.FC = () => {
                                   htmlFor={`bulk-upload-${variantIndex}`}
                                   style={{
                                     display: 'inline-block',
-                                    marginTop: '16px',
-                                    padding: '8px 16px',
+                                    marginTop: '12px',
+                                    padding: '6px 14px',
                                     backgroundColor: '#3b82f6',
                                     color: 'white',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
-                                    fontSize: '14px',
+                                    fontSize: '13px',
                                     fontWeight: '500'
                                   }}
                                 >
@@ -3175,14 +3893,14 @@ const AdminProductDetail: React.FC = () => {
                               </>
                             )}
                           </div>
-                        </div>
-                        
-                        {/* Video URL Section */}
-                        <div style={{ marginBottom: '32px', paddingBottom: '24px', borderBottom: '1px solid #e5e7eb' }}>
-                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>videocam</span>
-                            Video URL
-                          </h5>
+                          </div>
+                          
+                          {/* Video URL Section */}
+                          <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column' }}>
+                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>videocam</span>
+                              Video URL
+                            </h5>
                           
                           {/* Video Upload Section */}
                           <div
@@ -3203,13 +3921,17 @@ const AdminProductDetail: React.FC = () => {
                             style={{
                               border: '2px dashed #cbd5e1',
                               borderRadius: '8px',
-                              padding: '24px',
+                              padding: '20px',
                               textAlign: 'center',
                               backgroundColor: uploadingVideo[variantIndex] ? '#f3f4f6' : '#fafafa',
                               cursor: uploadingVideo[variantIndex] ? 'not-allowed' : 'pointer',
                               opacity: uploadingVideo[variantIndex] ? 0.6 : 1,
                               transition: 'all 0.2s',
-                              marginBottom: '16px'
+                              marginBottom: '16px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              minHeight: '180px'
                             }}
                             onMouseEnter={(e) => {
                               if (!uploadingVideo[variantIndex]) {
@@ -3224,17 +3946,46 @@ const AdminProductDetail: React.FC = () => {
                           >
                             {uploadingVideo[variantIndex] ? (
                               <div>
-                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>hourglass_empty</span>
-                                <p style={{ marginTop: '12px', color: '#6b7280' }}>Uploading video...</p>
+                                <span className="material-symbols-outlined" style={{ fontSize: '36px', color: '#3b82f6' }}>hourglass_empty</span>
+                                <p style={{ marginTop: '8px', color: '#6b7280', fontSize: '14px' }}>Uploading video...</p>
+                                <div style={{ width: '100%', marginTop: '12px', padding: '0 12px' }}>
+                                  <div style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'space-between',
+                                    marginBottom: '6px',
+                                    fontSize: '13px',
+                                    color: '#374151',
+                                    fontWeight: '500'
+                                  }}>
+                                    <span>Progress</span>
+                                    <span>{videoUploadProgress[variantIndex] || 0}%</span>
+                                  </div>
+                                  <div style={{
+                                    width: '100%',
+                                    height: '8px',
+                                    backgroundColor: '#e5e7eb',
+                                    borderRadius: '4px',
+                                    overflow: 'hidden'
+                                  }}>
+                                    <div style={{
+                                      width: `${videoUploadProgress[variantIndex] || 0}%`,
+                                      height: '100%',
+                                      backgroundColor: '#3b82f6',
+                                      transition: 'width 0.3s ease',
+                                      borderRadius: '4px'
+                                    }} />
+                                  </div>
+                                </div>
                               </div>
                             ) : (
                               <>
-                                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#3b82f6' }}>cloud_upload</span>
-                                <p style={{ marginTop: '12px', color: '#374151', fontWeight: '500' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: '36px', color: '#3b82f6' }}>cloud_upload</span>
+                                <p style={{ marginTop: '8px', color: '#374151', fontWeight: '500', fontSize: '14px' }}>
                                   Drag and drop video here, or click to select
                                 </p>
-                                <p style={{ marginTop: '4px', color: '#6b7280', fontSize: '14px' }}>
-                                  Supported formats: MP4, MOV, AVI, WebM, OGG (Max 100MB)
+                                <p style={{ marginTop: '4px', color: '#6b7280', fontSize: '12px' }}>
+                                  Supported formats: MP4, MOV, AVI, WebM, OGG (Max 500MB)
                                 </p>
                                 <input
                                   type="file"
@@ -3254,13 +4005,13 @@ const AdminProductDetail: React.FC = () => {
                                   htmlFor={`video-upload-${variantIndex}`}
                                   style={{
                                     display: 'inline-block',
-                                    marginTop: '16px',
-                                    padding: '8px 16px',
+                                    marginTop: '12px',
+                                    padding: '6px 14px',
                                     backgroundColor: '#3b82f6',
                                     color: 'white',
                                     borderRadius: '6px',
                                     cursor: 'pointer',
-                                    fontSize: '14px',
+                                    fontSize: '13px',
                                     fontWeight: '500'
                                   }}
                                 >
@@ -3269,67 +4020,118 @@ const AdminProductDetail: React.FC = () => {
                               </>
                             )}
                           </div>
-                          
-                          <div className="admin-form-group">
-                            <label>Video URL (YouTube, Vimeo, or Cloudinary URL)</label>
+                          </div>
+                        </div>
+                        
+                        {/* Video URL Input and Preview - Full Width Below Upload Sections */}
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: '12px', 
+                          alignItems: 'flex-start',
+                          marginTop: '24px',
+                          width: '100%'
+                        }}>
+                          <div style={{ flex: '1', minWidth: '200px' }}>
+                            <label style={{ 
+                              display: 'block', 
+                              fontSize: '13px', 
+                              fontWeight: '500', 
+                              color: '#374151', 
+                              marginBottom: '6px' 
+                            }}>
+                              Video URL (YouTube, Vimeo, or Cloudinary URL)
+                            </label>
                             <input
                               type="url"
                               value={variant.video_url || ''}
                               onChange={(e) => handleVariantChange(variantIndex, 'video_url', e.target.value)}
                               placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/... or upload above"
                               className="admin-input"
+                              style={{ 
+                                width: '100%',
+                                padding: '8px 12px',
+                                fontSize: '13px',
+                                borderRadius: '6px',
+                                border: '1px solid #d1d5db',
+                                outline: 'none',
+                                transition: 'border-color 0.2s',
+                                boxSizing: 'border-box'
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.borderColor = '#3b82f6';
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.borderColor = '#d1d5db';
+                              }}
                             />
                             {variant.video_url && (
-                              <div style={{ marginTop: '8px' }}>
-                                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px', wordBreak: 'break-all' }}>
-                                  Video URL: {variant.video_url}
-                                </p>
-                                {variant.video_url.includes('cloudinary.com') && (
-                                  <div style={{ marginTop: '8px' }}>
-                                    <video
-                                      src={variant.video_url}
-                                      controls
-                                      style={{
-                                        width: '100%',
-                                        maxWidth: '400px',
-                                        borderRadius: '8px',
-                                        backgroundColor: '#000'
-                                      }}
-                                    >
-                                      Your browser does not support the video tag.
-                                    </video>
-                                  </div>
-                                )}
-                              </div>
+                              <p style={{ 
+                                fontSize: '11px', 
+                                color: '#6b7280', 
+                                marginTop: '6px', 
+                                wordBreak: 'break-all',
+                                lineHeight: '1.4'
+                              }}>
+                                {variant.video_url}
+                              </p>
                             )}
                           </div>
+                          {variant.video_url && variant.video_url.includes('cloudinary.com') && (
+                            <div style={{ 
+                              flexShrink: 0,
+                              width: '180px'
+                            }}>
+                              <label style={{ 
+                                display: 'block', 
+                                fontSize: '13px', 
+                                fontWeight: '500', 
+                                color: '#374151', 
+                                marginBottom: '6px' 
+                              }}>
+                                Preview
+                              </label>
+                              <video
+                                src={variant.video_url}
+                                controls
+                                style={{
+                                  width: '100%',
+                                  borderRadius: '6px',
+                                  backgroundColor: '#000',
+                                  maxHeight: '120px',
+                                  objectFit: 'contain'
+                                }}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          )}
                         </div>
                         
-                        {/* Unified Images Section with Drag & Drop */}
+                        {/* Unified Images Section */}
                         <div>
-                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginTop: '24px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_library</span>
                             Images ({getAllImages(variant).length})
                             <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '400', marginLeft: '8px' }}>
-                              (Drag to reorder - First image is main)
+                              (First image is main)
                             </span>
                           </h5>
                           
                           {/* Manual Image URL Addition */}
-                          <div style={{ marginBottom: '24px', padding: '16px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-                            <h6 style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>link</span>
+                          <div style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                            <h6 style={{ fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>link</span>
                               Add Image by URL
                             </h6>
-                            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-3">
+                            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-2">
                               <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                                <label style={{ fontSize: '12px', color: '#6b7280' }}>Image URL</label>
+                                <label style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Image URL</label>
                                 <input
                                   type="url"
                                   id={`manual-image-url-${variantIndex}`}
                                   placeholder="https://example.com/image.jpg"
                                   className="admin-input"
-                                  style={{ fontSize: '14px' }}
+                                  style={{ fontSize: '13px', padding: '6px 10px' }}
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                       e.preventDefault();
@@ -3344,13 +4146,13 @@ const AdminProductDetail: React.FC = () => {
                                 />
                               </div>
                               <div className="admin-form-group" style={{ marginBottom: 0 }}>
-                                <label style={{ fontSize: '12px', color: '#6b7280' }}>Alt Text (Optional)</label>
+                                <label style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px', display: 'block' }}>Alt Text (Optional)</label>
                                 <input
                                   type="text"
                                   id={`manual-image-alt-${variantIndex}`}
                                   placeholder="Image description"
                                   className="admin-input"
-                                  style={{ fontSize: '14px' }}
+                                  style={{ fontSize: '13px', padding: '6px 10px' }}
                                 />
                               </div>
                               <div className="tw-flex tw-items-end">
@@ -3367,32 +4169,24 @@ const AdminProductDetail: React.FC = () => {
                                       if (altInput) altInput.value = '';
                                     }
                                   }}
-                                  style={{ width: '100%' }}
+                                  style={{ width: '100%', padding: '6px 12px', fontSize: '13px' }}
                                 >
-                                  <span className="material-symbols-outlined" style={{ fontSize: '18px', marginRight: '4px' }}>add</span>
+                                  <span className="material-symbols-outlined" style={{ fontSize: '16px', marginRight: '4px' }}>add</span>
                                   Add Image
                                 </button>
                               </div>
                             </div>
                           </div>
                           
-                          <div className="tw-space-y-4">
+                        <div className="tw-space-y-3">
                             {getAllImages(variant).map((img, imgIndex) => (
                               <div
                                 key={imgIndex}
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, imgIndex)}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => {
-                                  e.preventDefault();
-                                  handleDrop(variantIndex, imgIndex);
-                                }}
                                 style={{
                                   border: '1px solid #e5e7eb',
                                   borderRadius: '8px',
-                                  padding: '16px',
+                                  padding: '12px',
                                   backgroundColor: imgIndex === 0 ? '#eff6ff' : '#fafafa',
-                                  cursor: 'move',
                                   transition: 'all 0.2s',
                                   borderColor: imgIndex === 0 ? '#3b82f6' : '#e5e7eb'
                                 }}
@@ -3405,102 +4199,223 @@ const AdminProductDetail: React.FC = () => {
                                   e.currentTarget.style.backgroundColor = imgIndex === 0 ? '#eff6ff' : '#fafafa';
                                 }}
                               >
-                                <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-12 tw-gap-4 tw-items-start">
-                                  <div className="md:tw-col-span-1 tw-flex tw-items-center tw-justify-center">
-                                    <span className="material-symbols-outlined" style={{ color: '#9ca3af', cursor: 'grab' }}>drag_handle</span>
-                                  </div>
-                                  <div className="md:tw-col-span-3">
-                                    {img.image ? (
-                                      <div className="tw-border tw-border-gray-200 tw-rounded-lg tw-overflow-hidden tw-bg-white" style={{ position: 'relative' }}>
+                              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                  {/* Image Preview */}
+                                  <div style={{ flexShrink: 0, width: '100px' }}>
+                                  {img.image ? (
+                                      <div style={{ 
+                                        border: '1px solid #e5e7eb', 
+                                        borderRadius: '6px', 
+                                        overflow: 'hidden', 
+                                        backgroundColor: '#fff',
+                                        position: 'relative',
+                                        height: '80px'
+                                      }}>
                                         {imgIndex === 0 && (
                                           <span style={{
                                             position: 'absolute',
-                                            top: '8px',
-                                            right: '8px',
+                                            top: '4px',
+                                            right: '4px',
                                             backgroundColor: '#3b82f6',
                                             color: 'white',
-                                            padding: '4px 8px',
-                                            borderRadius: '4px',
-                                            fontSize: '11px',
+                                            padding: '2px 6px',
+                                            borderRadius: '3px',
+                                            fontSize: '9px',
                                             fontWeight: '600',
                                             zIndex: 10
                                           }}>MAIN</span>
                                         )}
-                                        <img 
-                                          src={img.image} 
-                                          alt={img.alt_text || 'Variant image'} 
-                                          className="tw-w-full tw-h-32 tw-object-contain"
-                                          onError={(e) => {
-                                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3EImage not found%3C/text%3E%3C/svg%3E';
-                                          }}
-                                        />
-                                      </div>
-                                    ) : (
-                                      <div className="tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg tw-p-4 tw-text-center tw-bg-white tw-h-32 tw-flex tw-items-center tw-justify-center">
-                                        <span className="material-symbols-outlined tw-text-gray-400">image</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="md:tw-col-span-7 tw-space-y-3">
-                                    <div className="admin-form-group">
-                                      <label>Image URL</label>
-                                      <input
-                                        type="url"
-                                        value={img.image}
-                                        onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'image', e.target.value)}
-                                        placeholder="https://example.com/image.jpg"
-                                        className="admin-input"
+                                      <img 
+                                        src={img.image} 
+                                        alt={img.alt_text || 'Variant image'} 
+                                        style={{ 
+                                          width: '100%', 
+                                          height: '100%', 
+                                          objectFit: 'contain',
+                                          display: 'block'
+                                        }}
+                                        onError={(e) => {
+                                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3EImage not found%3C/text%3E%3C/svg%3E';
+                                        }}
                                       />
-                                      {img.image && (
-                                        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', wordBreak: 'break-all' }}>
-                                          URL: {img.image}
-                                        </p>
-                                      )}
                                     </div>
-                                    <div className="tw-grid tw-grid-cols-2 tw-gap-3">
-                                      <div className="admin-form-group">
-                                        <label>Alt Text</label>
-                                        <input
-                                          type="text"
-                                          value={img.alt_text}
-                                          onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'alt_text', e.target.value)}
-                                          placeholder="Image description"
-                                          className="admin-input"
-                                        />
-                                      </div>
-                                      <div className="admin-form-group">
-                                        <label>Sort Order</label>
-                                        <input
-                                          type="number"
-                                          value={img.sort_order}
-                                          onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'sort_order', parseInt(e.target.value) || 0)}
-                                          placeholder="0"
-                                          className="admin-input"
-                                          readOnly
-                                        />
-                                      </div>
+                                  ) : (
+                                    <div style={{ 
+                                      border: '2px dashed #d1d5db', 
+                                      borderRadius: '6px', 
+                                      padding: '8px', 
+                                      textAlign: 'center', 
+                                      backgroundColor: '#fff', 
+                                      height: '80px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                    }}>
+                                      <span className="material-symbols-outlined" style={{ color: '#9ca3af', fontSize: '20px' }}>image</span>
                                     </div>
+                                  )}
+                                </div>
+                                
+                                {/* Up/Down Buttons */}
+                                <div style={{ 
+                                  display: 'flex', 
+                                  flexDirection: 'column', 
+                                  gap: '4px',
+                                  flexShrink: 0,
+                                  paddingTop: '4px'
+                                }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleMoveImage(variantIndex, imgIndex, 'up')}
+                                    disabled={imgIndex === 0}
+                                    style={{
+                                      padding: '4px',
+                                      border: '1px solid #d1d5db',
+                                      borderRadius: '4px',
+                                      backgroundColor: imgIndex === 0 ? '#f3f4f6' : '#fff',
+                                      cursor: imgIndex === 0 ? 'not-allowed' : 'pointer',
+                                      color: imgIndex === 0 ? '#9ca3af' : '#374151',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (imgIndex !== 0) {
+                                        e.currentTarget.style.borderColor = '#3b82f6';
+                                        e.currentTarget.style.backgroundColor = '#eff6ff';
+                                      }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.borderColor = '#d1d5db';
+                                      e.currentTarget.style.backgroundColor = imgIndex === 0 ? '#f3f4f6' : '#fff';
+                                    }}
+                                    title="Move Up"
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_upward</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleMoveImage(variantIndex, imgIndex, 'down')}
+                                    disabled={imgIndex === getAllImages(variant).length - 1}
+                                    style={{
+                                      padding: '4px',
+                                      border: '1px solid #d1d5db',
+                                      borderRadius: '4px',
+                                      backgroundColor: imgIndex === getAllImages(variant).length - 1 ? '#f3f4f6' : '#fff',
+                                      cursor: imgIndex === getAllImages(variant).length - 1 ? 'not-allowed' : 'pointer',
+                                      color: imgIndex === getAllImages(variant).length - 1 ? '#9ca3af' : '#374151',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      if (imgIndex !== getAllImages(variant).length - 1) {
+                                        e.currentTarget.style.borderColor = '#3b82f6';
+                                        e.currentTarget.style.backgroundColor = '#eff6ff';
+                                      }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.borderColor = '#d1d5db';
+                                      e.currentTarget.style.backgroundColor = imgIndex === getAllImages(variant).length - 1 ? '#f3f4f6' : '#fff';
+                                    }}
+                                    title="Move Down"
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_downward</span>
+                                  </button>
+                                </div>
+                                
+                                {/* Input Fields - Side by Side */}
+                                <div style={{ flex: '1', display: 'flex', gap: '12px' }}>
+                                  <div style={{ flex: '1' }}>
+                                    <label style={{ 
+                                      display: 'block', 
+                                      fontSize: '12px', 
+                                      fontWeight: '500', 
+                                      color: '#374151', 
+                                      marginBottom: '4px' 
+                                    }}>
+                                      Image URL
+                                    </label>
+                                    <input
+                                      type="url"
+                                      value={img.image}
+                                      onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'image', e.target.value)}
+                                      placeholder="https://example.com/image.jpg"
+                                      className="admin-input"
+                                      style={{ 
+                                        width: '100%',
+                                        padding: '6px 10px',
+                                        fontSize: '13px'
+                                      }}
+                                    />
                                   </div>
-                                  <div className="md:tw-col-span-1 tw-flex tw-items-start tw-justify-end">
-                                    <button
-                                      type="button"
-                                      className="admin-modern-btn danger icon-only"
-                                      onClick={() => handleRemoveVariantImage(variantIndex, imgIndex)}
-                                      title="Remove Image"
-                                    >
-                                      <span className="material-symbols-outlined">delete</span>
-                                    </button>
+                                  <div style={{ flex: '1' }}>
+                                    <label style={{ 
+                                      display: 'block', 
+                                      fontSize: '12px', 
+                                      fontWeight: '500', 
+                                      color: '#374151', 
+                                      marginBottom: '4px' 
+                                    }}>
+                                      Alt Text
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={img.alt_text}
+                                      onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'alt_text', e.target.value)}
+                                      placeholder="Image description"
+                                      className="admin-input"
+                                      style={{ 
+                                        width: '100%',
+                                        padding: '6px 10px',
+                                        fontSize: '13px'
+                                      }}
+                                    />
                                   </div>
                                 </div>
+                                
+                                {/* Delete Button */}
+                                <div style={{ flexShrink: 0, paddingTop: '4px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveVariantImage(variantIndex, imgIndex)}
+                                    title="Remove Image"
+                                    style={{
+                                      padding: '6px',
+                                      border: '1px solid #ef4444',
+                                      borderRadius: '4px',
+                                      backgroundColor: '#fff',
+                                      cursor: 'pointer',
+                                      color: '#ef4444',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      transition: 'all 0.2s'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                      e.currentTarget.style.backgroundColor = '#fef2f2';
+                                      e.currentTarget.style.borderColor = '#dc2626';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                      e.currentTarget.style.backgroundColor = '#fff';
+                                      e.currentTarget.style.borderColor = '#ef4444';
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                                  </button>
+                                </div>
                               </div>
-                            ))}
+                            </div>
+                          ))}
                             {getAllImages(variant).length === 0 && (
-                              <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
-                                <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">photo_library</span>
+                            <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
+                              <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">photo_library</span>
                                 <p className="tw-mt-2">No images added</p>
                                 <p className="tw-text-xs tw-text-gray-400 tw-mt-1">Upload images above to add them here</p>
-                              </div>
-                            )}
+                            </div>
+                          )}
                           </div>
                         </div>
                       </div>

@@ -26,7 +26,7 @@ export const adminAPI = {
   updateProduct: (id: number, productData: any) => {
     // Use PATCH for partial updates and increase timeout for large payloads
     return API.patch(`/admin/products/${id}/`, productData, {
-      timeout: 60000 // 60 seconds for large product updates
+      timeout: 120000 // 120 seconds for large product updates (increased for safety)
     });
   },
   deleteProduct: (id: number) => API.delete(`/admin/products/${id}/`),
