@@ -348,7 +348,20 @@ const AdminProductDetail: React.FC = () => {
               color_id: colorId,
               subcategory_ids: subcategoryIds,
               images: normalizedImages,
-              measurement_specs: v.measurement_specs || [],
+              specifications: (v.specifications || []).map((s: any) => ({
+                id: s.id,
+                name: s.name || '',
+                value: s.value || '',
+                sort_order: s.sort_order || 0,
+                is_active: s.is_active !== false
+              })),
+              measurement_specs: (v.measurement_specs || []).map((s: any) => ({
+                id: s.id,
+                name: s.name || '',
+                value: s.value || '',
+                sort_order: s.sort_order || 0,
+                is_active: s.is_active !== false
+              })),
               style_specs: v.style_specs || [],
               features: v.features || [],
               user_guide: v.user_guide || [],
@@ -443,6 +456,58 @@ const AdminProductDetail: React.FC = () => {
     }
   }, [formData.category_id]);
   
+  // Re-sort specifications when templates are loaded or updated
+  useEffect(() => {
+    if (variants.length > 0 && Object.keys(categorySpecTemplates).length > 0) {
+      setVariants(prevVariants => prevVariants.map(variant => ({
+        ...variant,
+        specifications: sortSpecsByTemplate(variant.specifications || [], 'specifications'),
+        measurement_specs: sortSpecsByTemplate(variant.measurement_specs || [], 'measurement_specs'),
+        style_specs: sortSpecsByTemplate(variant.style_specs || [], 'style_specs'),
+        features: sortSpecsByTemplate(variant.features || [], 'features'),
+        user_guide: sortSpecsByTemplate(variant.user_guide || [], 'user_guide'),
+        item_details: sortSpecsByTemplate(variant.item_details || [], 'item_details')
+      })));
+    }
+  }, [categorySpecTemplates]);
+  
+  // Helper function to sort specifications according to template order
+  const sortSpecsByTemplate = (specs: Specification[], section: 'specifications' | 'measurement_specs' | 'style_specs' | 'features' | 'user_guide' | 'item_details', templates?: { [section: string]: Array<{ field_name: string; sort_order: number }> }): Specification[] => {
+    if (!specs || specs.length === 0) return specs;
+    
+    const templatesToUse = templates || categorySpecTemplates;
+    const templateSpecs = templatesToUse[section] || [];
+    if (templateSpecs.length === 0) {
+      // No template, just sort by sort_order
+      return [...specs].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    }
+    
+    const templateFieldNames = new Set(templateSpecs.map(t => t.field_name.toLowerCase()));
+    
+    return [...specs].sort((a, b) => {
+      const aName = (a.name || '').toLowerCase();
+      const bName = (b.name || '').toLowerCase();
+      const aInTemplate = templateFieldNames.has(aName);
+      const bInTemplate = templateFieldNames.has(bName);
+      
+      // Template items come first
+      if (aInTemplate && !bInTemplate) return -1;
+      if (!aInTemplate && bInTemplate) return 1;
+      
+      // Both in template: sort by template order
+      if (aInTemplate && bInTemplate) {
+        const aTemplate = templateSpecs.find(t => t.field_name.toLowerCase() === aName);
+        const bTemplate = templateSpecs.find(t => t.field_name.toLowerCase() === bName);
+        if (aTemplate && bTemplate) {
+          return aTemplate.sort_order - bTemplate.sort_order;
+        }
+      }
+      
+      // Both not in template: sort by sort_order
+      return (a.sort_order || 0) - (b.sort_order || 0);
+    });
+  };
+
   // Fetch category specification templates
   const fetchCategorySpecTemplates = async (categoryId: number) => {
     try {
@@ -463,18 +528,23 @@ const AdminProductDetail: React.FC = () => {
         }
       }
       
-      // Group by section and store
+      // Group by section and store - handle all sections
       const templatesBySection: { [section: string]: Array<{ field_name: string; sort_order: number }> } = {
         specifications: [],
-        measurement_specs: []
+        measurement_specs: [],
+        style_specs: [],
+        features: [],
+        user_guide: [],
+        item_details: []
       };
       
       templates.forEach((template: any) => {
-        if (template.section === 'specifications' || template.section === 'measurement_specs') {
-          if (!templatesBySection[template.section]) {
-            templatesBySection[template.section] = [];
+        const section = template.section;
+        if (templatesBySection.hasOwnProperty(section)) {
+          if (!templatesBySection[section]) {
+            templatesBySection[section] = [];
           }
-          templatesBySection[template.section].push({
+          templatesBySection[section].push({
             field_name: template.field_name,
             sort_order: template.sort_order
           });
@@ -487,6 +557,20 @@ const AdminProductDetail: React.FC = () => {
       });
       
       setCategorySpecTemplates(templatesBySection);
+      
+      // After templates are loaded, re-sort all existing variants' specifications for all sections
+      setVariants(prevVariants => {
+        if (prevVariants.length === 0) return prevVariants;
+        return prevVariants.map(variant => ({
+          ...variant,
+          specifications: sortSpecsByTemplate(variant.specifications || [], 'specifications', templatesBySection),
+          measurement_specs: sortSpecsByTemplate(variant.measurement_specs || [], 'measurement_specs', templatesBySection),
+          style_specs: sortSpecsByTemplate(variant.style_specs || [], 'style_specs', templatesBySection),
+          features: sortSpecsByTemplate(variant.features || [], 'features', templatesBySection),
+          user_guide: sortSpecsByTemplate(variant.user_guide || [], 'user_guide', templatesBySection),
+          item_details: sortSpecsByTemplate(variant.item_details || [], 'item_details', templatesBySection)
+        }));
+      });
     } catch (err) {
       console.error('Error fetching category spec templates:', err);
       setCategorySpecTemplates({});
@@ -527,7 +611,14 @@ const AdminProductDetail: React.FC = () => {
               }
             });
             
+            // Sort specs after merging
+            if (sectionKey === 'specifications') {
+              (mergedVariant as any)[sectionKey] = sortSpecsByTemplate(existingSpecs, 'specifications');
+            } else if (sectionKey === 'measurement_specs') {
+              (mergedVariant as any)[sectionKey] = sortSpecsByTemplate(existingSpecs, 'measurement_specs');
+            } else {
             (mergedVariant as any)[sectionKey] = existingSpecs;
+            }
           });
           
           return mergedVariant;
@@ -1391,12 +1482,23 @@ const AdminProductDetail: React.FC = () => {
   const handleAddVariantStyleSpec = (variantIndex: number) => {
     const updated = [...variants];
     const variant = updated[variantIndex];
+    const existingSpecs = variant.style_specs || [];
+    
+    // Get max sort_order from template items, or use existing specs
+    const templateSpecs = categorySpecTemplates.style_specs || [];
+    const maxTemplateOrder = templateSpecs.length > 0 
+      ? Math.max(...templateSpecs.map(t => t.sort_order))
+      : -1;
+    
+    // New items should go after template items
+    const newSortOrder = maxTemplateOrder + 1;
+    
     updated[variantIndex] = {
       ...variant,
-      style_specs: [...(variant.style_specs || []), {
+      style_specs: [...existingSpecs, {
         name: '',
         value: '',
-        sort_order: (variant.style_specs || []).length,
+        sort_order: newSortOrder,
         is_active: true
       }]
     };
@@ -1418,9 +1520,23 @@ const AdminProductDetail: React.FC = () => {
     const variant = updated[variantIndex];
     const specs = [...(variant.style_specs || [])];
     specs[specIndex] = { ...specs[specIndex], [field]: value };
+    
+    // If name changed, try to match with template and update sort_order
+    if (field === 'name' && value && categorySpecTemplates.style_specs) {
+      const template = categorySpecTemplates.style_specs.find(
+        t => t.field_name.toLowerCase() === value.toLowerCase()
+      );
+      if (template) {
+        specs[specIndex].sort_order = template.sort_order;
+      }
+    }
+    
+    // Sort specs: template items first (by template order), then non-template items (by sort_order)
+    const sortedSpecs = sortSpecsByTemplate(specs, 'style_specs');
+    
     updated[variantIndex] = {
       ...variant,
-      style_specs: specs
+      style_specs: sortedSpecs
     };
     setVariants(updated);
   };
@@ -1429,12 +1545,23 @@ const AdminProductDetail: React.FC = () => {
   const handleAddVariantFeature = (variantIndex: number) => {
     const updated = [...variants];
     const variant = updated[variantIndex];
+    const existingSpecs = variant.features || [];
+    
+    // Get max sort_order from template items, or use existing specs
+    const templateSpecs = categorySpecTemplates.features || [];
+    const maxTemplateOrder = templateSpecs.length > 0 
+      ? Math.max(...templateSpecs.map(t => t.sort_order))
+      : -1;
+    
+    // New items should go after template items
+    const newSortOrder = maxTemplateOrder + 1;
+    
     updated[variantIndex] = {
       ...variant,
-      features: [...(variant.features || []), {
+      features: [...existingSpecs, {
         name: '',
         value: '',
-        sort_order: (variant.features || []).length,
+        sort_order: newSortOrder,
         is_active: true
       }]
     };
@@ -1456,9 +1583,23 @@ const AdminProductDetail: React.FC = () => {
     const variant = updated[variantIndex];
     const features = [...(variant.features || [])];
     features[specIndex] = { ...features[specIndex], [field]: value };
+    
+    // If name changed, try to match with template and update sort_order
+    if (field === 'name' && value && categorySpecTemplates.features) {
+      const template = categorySpecTemplates.features.find(
+        t => t.field_name.toLowerCase() === value.toLowerCase()
+      );
+      if (template) {
+        features[specIndex].sort_order = template.sort_order;
+      }
+    }
+    
+    // Sort specs: template items first (by template order), then non-template items (by sort_order)
+    const sortedFeatures = sortSpecsByTemplate(features, 'features');
+    
     updated[variantIndex] = {
       ...variant,
-      features: features
+      features: sortedFeatures
     };
     setVariants(updated);
   };
@@ -1467,12 +1608,23 @@ const AdminProductDetail: React.FC = () => {
   const handleAddVariantUserGuide = (variantIndex: number) => {
     const updated = [...variants];
     const variant = updated[variantIndex];
+    const existingSpecs = variant.user_guide || [];
+    
+    // Get max sort_order from template items, or use existing specs
+    const templateSpecs = categorySpecTemplates.user_guide || [];
+    const maxTemplateOrder = templateSpecs.length > 0 
+      ? Math.max(...templateSpecs.map(t => t.sort_order))
+      : -1;
+    
+    // New items should go after template items
+    const newSortOrder = maxTemplateOrder + 1;
+    
     updated[variantIndex] = {
       ...variant,
-      user_guide: [...(variant.user_guide || []), {
+      user_guide: [...existingSpecs, {
         name: '',
         value: '',
-        sort_order: (variant.user_guide || []).length,
+        sort_order: newSortOrder,
         is_active: true
       }]
     };
@@ -1494,9 +1646,23 @@ const AdminProductDetail: React.FC = () => {
     const variant = updated[variantIndex];
     const userGuide = [...(variant.user_guide || [])];
     userGuide[specIndex] = { ...userGuide[specIndex], [field]: value };
+    
+    // If name changed, try to match with template and update sort_order
+    if (field === 'name' && value && categorySpecTemplates.user_guide) {
+      const template = categorySpecTemplates.user_guide.find(
+        t => t.field_name.toLowerCase() === value.toLowerCase()
+      );
+      if (template) {
+        userGuide[specIndex].sort_order = template.sort_order;
+      }
+    }
+    
+    // Sort specs: template items first (by template order), then non-template items (by sort_order)
+    const sortedUserGuide = sortSpecsByTemplate(userGuide, 'user_guide');
+    
     updated[variantIndex] = {
       ...variant,
-      user_guide: userGuide
+      user_guide: sortedUserGuide
     };
     setVariants(updated);
   };
@@ -1505,12 +1671,23 @@ const AdminProductDetail: React.FC = () => {
   const handleAddVariantItemDetail = (variantIndex: number) => {
     const updated = [...variants];
     const variant = updated[variantIndex];
+    const existingSpecs = variant.item_details || [];
+    
+    // Get max sort_order from template items, or use existing specs
+    const templateSpecs = categorySpecTemplates.item_details || [];
+    const maxTemplateOrder = templateSpecs.length > 0 
+      ? Math.max(...templateSpecs.map(t => t.sort_order))
+      : -1;
+    
+    // New items should go after template items
+    const newSortOrder = maxTemplateOrder + 1;
+    
     updated[variantIndex] = {
       ...variant,
-      item_details: [...(variant.item_details || []), {
+      item_details: [...existingSpecs, {
         name: '',
         value: '',
-        sort_order: (variant.item_details || []).length,
+        sort_order: newSortOrder,
         is_active: true
       }]
     };
@@ -5867,15 +6044,19 @@ const AdminProductDetail: React.FC = () => {
                     </button>
                   </div>
                   <div className="tw-space-y-3">
-                    {variant.style_specs?.map((spec, specIndex) => (
-                      <div key={specIndex} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                    {sortSpecsByTemplate(variant.style_specs || [], 'style_specs')
+                      .map((spec, sortedIndex) => {
+                      // Find original index after sorting
+                      const originalIndex = variant.style_specs?.findIndex(s => s === spec) ?? sortedIndex;
+                      return (
+                      <div key={spec.id || `style-${originalIndex}-${spec.name}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
                         <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
                           <div>
                             <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
                             <input
                               type="text"
                               value={spec.name}
-                              onChange={(e) => handleVariantStyleSpecChange(variantIndex, specIndex, 'name', e.target.value)}
+                              onChange={(e) => handleVariantStyleSpecChange(variantIndex, originalIndex, 'name', e.target.value)}
                               placeholder="e.g., Colour, Style, Shape"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -5885,7 +6066,7 @@ const AdminProductDetail: React.FC = () => {
                             <input
                               type="text"
                               value={spec.value}
-                              onChange={(e) => handleVariantStyleSpecChange(variantIndex, specIndex, 'value', e.target.value)}
+                              onChange={(e) => handleVariantStyleSpecChange(variantIndex, originalIndex, 'value', e.target.value)}
                               placeholder="e.g., Grey & Beige, Modern, Rectangular"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -5896,7 +6077,7 @@ const AdminProductDetail: React.FC = () => {
                           <input
                             type="number"
                             value={spec.sort_order}
-                            onChange={(e) => handleVariantStyleSpecChange(variantIndex, specIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                            onChange={(e) => handleVariantStyleSpecChange(variantIndex, originalIndex, 'sort_order', parseInt(e.target.value) || 0)}
                             placeholder="0"
                             className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                           />
@@ -5905,13 +6086,14 @@ const AdminProductDetail: React.FC = () => {
                           <button
                             type="button"
                             className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
-                            onClick={() => handleRemoveVariantStyleSpec(variantIndex, specIndex)}
+                            onClick={() => handleRemoveVariantStyleSpec(variantIndex, originalIndex)}
                           >
                             <span className="material-symbols-outlined tw-text-lg">delete</span>
                           </button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                     {(!variant.style_specs || variant.style_specs.length === 0) && (
                       <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
                         <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">palette</span>
@@ -5938,15 +6120,19 @@ const AdminProductDetail: React.FC = () => {
                     </button>
                   </div>
                   <div className="tw-space-y-3">
-                    {variant.features?.map((spec, specIndex) => (
-                      <div key={`variant-${variantIndex}-feature-${specIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                    {sortSpecsByTemplate(variant.features || [], 'features')
+                      .map((spec, sortedIndex) => {
+                      // Find original index after sorting
+                      const originalIndex = variant.features?.findIndex(s => s === spec) ?? sortedIndex;
+                      return (
+                      <div key={spec.id || `feature-${originalIndex}-${spec.name}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
                         <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
                           <div>
                             <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
                             <input
                               type="text"
                               value={spec.name}
-                              onChange={(e) => handleVariantFeatureChange(variantIndex, specIndex, 'name', e.target.value)}
+                              onChange={(e) => handleVariantFeatureChange(variantIndex, originalIndex, 'name', e.target.value)}
                               placeholder="e.g., Weight Capacity Maximum, Seating Capacity"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -5956,7 +6142,7 @@ const AdminProductDetail: React.FC = () => {
                             <input
                               type="text"
                               value={spec.value}
-                              onChange={(e) => handleVariantFeatureChange(variantIndex, specIndex, 'value', e.target.value)}
+                              onChange={(e) => handleVariantFeatureChange(variantIndex, originalIndex, 'value', e.target.value)}
                               placeholder="e.g., 450 Kilograms, 3.0"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -5967,7 +6153,7 @@ const AdminProductDetail: React.FC = () => {
                           <input
                             type="number"
                             value={spec.sort_order}
-                            onChange={(e) => handleVariantFeatureChange(variantIndex, specIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                            onChange={(e) => handleVariantFeatureChange(variantIndex, originalIndex, 'sort_order', parseInt(e.target.value) || 0)}
                             placeholder="0"
                             className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                           />
@@ -5976,13 +6162,14 @@ const AdminProductDetail: React.FC = () => {
                           <button
                             type="button"
                             className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
-                            onClick={() => handleRemoveVariantFeature(variantIndex, specIndex)}
+                            onClick={() => handleRemoveVariantFeature(variantIndex, originalIndex)}
                           >
                             <span className="material-symbols-outlined tw-text-lg">delete</span>
                           </button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                     {(!variant.features || variant.features.length === 0) && (
                       <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
                         <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">star</span>
@@ -6009,15 +6196,19 @@ const AdminProductDetail: React.FC = () => {
                     </button>
                   </div>
                   <div className="tw-space-y-3">
-                    {variant.user_guide?.map((spec, specIndex) => (
-                      <div key={`variant-${variantIndex}-userguide-${specIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                    {sortSpecsByTemplate(variant.user_guide || [], 'user_guide')
+                      .map((spec, sortedIndex) => {
+                      // Find original index after sorting
+                      const originalIndex = variant.user_guide?.findIndex(s => s === spec) ?? sortedIndex;
+                      return (
+                      <div key={spec.id || `userguide-${originalIndex}-${spec.name}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
                         <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
                           <div>
                             <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
                             <input
                               type="text"
                               value={spec.name}
-                              onChange={(e) => handleVariantUserGuideChange(variantIndex, specIndex, 'name', e.target.value)}
+                              onChange={(e) => handleVariantUserGuideChange(variantIndex, originalIndex, 'name', e.target.value)}
                               placeholder="e.g., Assembly, Care Instructions"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -6027,7 +6218,7 @@ const AdminProductDetail: React.FC = () => {
                             <input
                               type="text"
                               value={spec.value}
-                              onChange={(e) => handleVariantUserGuideChange(variantIndex, specIndex, 'value', e.target.value)}
+                              onChange={(e) => handleVariantUserGuideChange(variantIndex, originalIndex, 'value', e.target.value)}
                               placeholder="e.g., Required, Wipe with dry cloth"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -6038,7 +6229,7 @@ const AdminProductDetail: React.FC = () => {
                           <input
                             type="number"
                             value={spec.sort_order}
-                            onChange={(e) => handleVariantUserGuideChange(variantIndex, specIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                            onChange={(e) => handleVariantUserGuideChange(variantIndex, originalIndex, 'sort_order', parseInt(e.target.value) || 0)}
                             placeholder="0"
                             className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                           />
@@ -6047,13 +6238,14 @@ const AdminProductDetail: React.FC = () => {
                           <button
                             type="button"
                             className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
-                            onClick={() => handleRemoveVariantUserGuide(variantIndex, specIndex)}
+                            onClick={() => handleRemoveVariantUserGuide(variantIndex, originalIndex)}
                           >
                             <span className="material-symbols-outlined tw-text-lg">delete</span>
                           </button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                     {(!variant.user_guide || variant.user_guide.length === 0) && (
                       <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
                         <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">menu_book</span>
@@ -6080,15 +6272,19 @@ const AdminProductDetail: React.FC = () => {
                     </button>
                 </div>
                   <div className="tw-space-y-3">
-                    {variant.item_details?.map((spec, specIndex) => (
-                      <div key={`variant-${variantIndex}-itemdetail-${specIndex}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
+                    {sortSpecsByTemplate(variant.item_details || [], 'item_details')
+                      .map((spec, sortedIndex) => {
+                      // Find original index after sorting
+                      const originalIndex = variant.item_details?.findIndex(s => s === spec) ?? sortedIndex;
+                      return (
+                      <div key={spec.id || `itemdetail-${originalIndex}-${spec.name}`} className="tw-p-4 tw-bg-gray-50 tw-border tw-border-gray-200 tw-rounded-lg tw-flex tw-gap-3">
                         <div className="tw-flex-1 tw-grid tw-grid-cols-2 tw-gap-3">
                           <div>
                             <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Name</label>
                             <input
                               type="text"
                               value={spec.name}
-                              onChange={(e) => handleVariantItemDetailChange(variantIndex, specIndex, 'name', e.target.value)}
+                              onChange={(e) => handleVariantItemDetailChange(variantIndex, originalIndex, 'name', e.target.value)}
                               placeholder="e.g., Assembly, Warranty, Weight"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -6098,7 +6294,7 @@ const AdminProductDetail: React.FC = () => {
                             <input
                               type="text"
                               value={spec.value}
-                              onChange={(e) => handleVariantItemDetailChange(variantIndex, specIndex, 'value', e.target.value)}
+                              onChange={(e) => handleVariantItemDetailChange(variantIndex, originalIndex, 'value', e.target.value)}
                               placeholder="e.g., Required, 1 Year, 45 kg"
                               className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                             />
@@ -6109,7 +6305,7 @@ const AdminProductDetail: React.FC = () => {
                           <input
                             type="number"
                             value={spec.sort_order}
-                            onChange={(e) => handleVariantItemDetailChange(variantIndex, specIndex, 'sort_order', parseInt(e.target.value) || 0)}
+                            onChange={(e) => handleVariantItemDetailChange(variantIndex, originalIndex, 'sort_order', parseInt(e.target.value) || 0)}
                             placeholder="0"
                             className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-blue-500 focus:tw-border-transparent tw-text-sm"
                           />
@@ -6118,13 +6314,14 @@ const AdminProductDetail: React.FC = () => {
                           <button
                             type="button"
                             className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
-                            onClick={() => handleRemoveVariantItemDetail(variantIndex, specIndex)}
+                            onClick={() => handleRemoveVariantItemDetail(variantIndex, originalIndex)}
                           >
                             <span className="material-symbols-outlined tw-text-lg">delete</span>
                           </button>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                     {(!variant.item_details || variant.item_details.length === 0) && (
                       <div className="tw-text-center tw-py-6 tw-text-gray-500 tw-border-2 tw-border-dashed tw-border-gray-300 tw-rounded-lg">
                         <span className="material-symbols-outlined tw-text-4xl tw-text-gray-400">inventory_2</span>
