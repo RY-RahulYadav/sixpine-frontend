@@ -431,10 +431,44 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     };
   }, [variants, selectedColor, selectedSize, selectedPattern, selectedQuality, colors, sizes, patterns, qualities]);
 
-  // Smart auto-selection: When user selects one attribute, find first matching variant and auto-select all other attributes
-  const findFirstMatchingVariant = (attributeType: 'color' | 'size' | 'pattern' | 'quality', value: string) => {
+  // Smart auto-selection: When user selects one attribute, find matching variant that preserves other selections
+  const findBestMatchingVariant = (attributeType: 'color' | 'size' | 'pattern' | 'quality', value: string, currentSelections: any) => {
     if (variants.length === 0) return null;
 
+    // First, try to find a variant that matches the new attribute AND all currently selected attributes
+    const exactMatch = variants.find((v: any) => {
+      const variantColor = v.color?.name || v.color_name || '';
+      const variantSize = v.size || '';
+      const variantPattern = v.pattern || '';
+      const variantQuality = v.quality || '';
+
+      // Check if the new attribute matches
+      let newAttributeMatches = false;
+      if (attributeType === 'color') {
+        newAttributeMatches = variantColor === value;
+      } else if (attributeType === 'size') {
+        newAttributeMatches = variantSize === value;
+      } else if (attributeType === 'pattern') {
+        newAttributeMatches = variantPattern === value;
+      } else if (attributeType === 'quality') {
+        newAttributeMatches = variantQuality === value;
+      }
+
+      if (!newAttributeMatches) return false;
+
+      // Check if all other currently selected attributes match
+      const colorMatch = attributeType === 'color' || !currentSelections.color || variantColor === currentSelections.color;
+      const sizeMatch = attributeType === 'size' || !currentSelections.size || variantSize === currentSelections.size;
+      const patternMatch = attributeType === 'pattern' || !currentSelections.pattern || variantPattern === currentSelections.pattern;
+      const qualityMatch = attributeType === 'quality' || !currentSelections.quality || variantQuality === currentSelections.quality;
+
+      return colorMatch && sizeMatch && patternMatch && qualityMatch;
+    });
+
+    // If exact match found, return it
+    if (exactMatch) return exactMatch;
+
+    // Otherwise, find first variant with just the new attribute (fallback)
     return variants.find((v: any) => {
       if (attributeType === 'color') {
         return (v.color?.name || v.color_name) === value;
@@ -477,45 +511,120 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     const changedAttr = userChangedAttribute.current;
     let matchingVariant = null;
 
-    // Find first variant matching the changed attribute
+    // Get current selections (before the change)
+    const currentSelections = {
+      color: changedAttr === 'color' ? selectedColor : prevSelections.current.color,
+      size: changedAttr === 'size' ? selectedSize : prevSelections.current.size,
+      pattern: changedAttr === 'pattern' ? selectedPattern : prevSelections.current.pattern,
+      quality: changedAttr === 'quality' ? selectedQuality : prevSelections.current.quality
+    };
+
+    // Find best matching variant that preserves other selections
     if (changedAttr === 'color' && selectedColor && selectedColor !== prevSelections.current.color) {
-      matchingVariant = findFirstMatchingVariant('color', selectedColor);
+      matchingVariant = findBestMatchingVariant('color', selectedColor, currentSelections);
     } else if (changedAttr === 'size' && selectedSize && selectedSize !== prevSelections.current.size) {
-      matchingVariant = findFirstMatchingVariant('size', selectedSize);
+      matchingVariant = findBestMatchingVariant('size', selectedSize, currentSelections);
     } else if (changedAttr === 'pattern' && selectedPattern && selectedPattern !== prevSelections.current.pattern) {
-      matchingVariant = findFirstMatchingVariant('pattern', selectedPattern);
+      matchingVariant = findBestMatchingVariant('pattern', selectedPattern, currentSelections);
     } else if (changedAttr === 'quality' && selectedQuality && selectedQuality !== prevSelections.current.quality) {
-      matchingVariant = findFirstMatchingVariant('quality', selectedQuality);
+      matchingVariant = findBestMatchingVariant('quality', selectedQuality, currentSelections);
     }
 
     if (matchingVariant) {
       isAutoSelecting.current = true;
 
-      // Auto-select all other attributes from this variant
+      // Auto-select other attributes from this variant, but only if they don't conflict with current selections
       const variantColor = matchingVariant.color?.name || matchingVariant.color_name || '';
       const variantSize = matchingVariant.size || '';
       const variantPattern = matchingVariant.pattern || '';
       const variantQuality = matchingVariant.quality || '';
 
-      if (variantColor && variantColor !== selectedColor && changedAttr !== 'color') {
+      // Only update attributes that don't have a matching variant with current selections
+      // This preserves user's current selections when possible
+      if (variantColor && changedAttr !== 'color' && selectedColor) {
+        // Check if there's a variant with current color + new attribute
+        const hasVariantWithCurrentColor = variants.some((v: any) => {
+          const vColor = v.color?.name || v.color_name || '';
+          const newAttrValue = changedAttr === 'size' ? selectedSize :
+                              changedAttr === 'pattern' ? selectedPattern :
+                              changedAttr === 'quality' ? selectedQuality : '';
+          const vNewAttr = changedAttr === 'size' ? v.size :
+                          changedAttr === 'pattern' ? v.pattern :
+                          changedAttr === 'quality' ? v.quality : '';
+          
+          return vColor === selectedColor && vNewAttr === newAttrValue;
+        });
+        
+        if (!hasVariantWithCurrentColor) {
+          setSelectedColor(variantColor);
+        }
+      } else if (variantColor && changedAttr !== 'color' && !selectedColor) {
         setSelectedColor(variantColor);
       }
-      if (variantSize && variantSize !== selectedSize && changedAttr !== 'size') {
+      
+      if (variantSize && changedAttr !== 'size' && selectedSize) {
+        const hasVariantWithCurrentSize = variants.some((v: any) => {
+          const newAttrValue = changedAttr === 'color' ? selectedColor :
+                              changedAttr === 'pattern' ? selectedPattern :
+                              changedAttr === 'quality' ? selectedQuality : '';
+          const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
+                          changedAttr === 'pattern' ? v.pattern :
+                          changedAttr === 'quality' ? v.quality : '';
+          
+          return v.size === selectedSize && vNewAttr === newAttrValue;
+        });
+        
+        if (!hasVariantWithCurrentSize) {
+          setSelectedSize(variantSize);
+        }
+      } else if (variantSize && changedAttr !== 'size' && !selectedSize) {
         setSelectedSize(variantSize);
       }
-      if (variantPattern && variantPattern !== selectedPattern && changedAttr !== 'pattern') {
+      
+      if (variantPattern && changedAttr !== 'pattern' && selectedPattern) {
+        const hasVariantWithCurrentPattern = variants.some((v: any) => {
+          const newAttrValue = changedAttr === 'color' ? selectedColor :
+                              changedAttr === 'size' ? selectedSize :
+                              changedAttr === 'quality' ? selectedQuality : '';
+          const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
+                          changedAttr === 'size' ? v.size :
+                          changedAttr === 'quality' ? v.quality : '';
+          
+          return v.pattern === selectedPattern && vNewAttr === newAttrValue;
+        });
+        
+        if (!hasVariantWithCurrentPattern) {
+          setSelectedPattern(variantPattern);
+        }
+      } else if (variantPattern && changedAttr !== 'pattern' && !selectedPattern) {
         setSelectedPattern(variantPattern);
       }
-      if (variantQuality && variantQuality !== selectedQuality && changedAttr !== 'quality') {
+      
+      if (variantQuality && changedAttr !== 'quality' && selectedQuality) {
+        const hasVariantWithCurrentQuality = variants.some((v: any) => {
+          const newAttrValue = changedAttr === 'color' ? selectedColor :
+                              changedAttr === 'size' ? selectedSize :
+                              changedAttr === 'pattern' ? selectedPattern : '';
+          const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
+                          changedAttr === 'size' ? v.size :
+                          changedAttr === 'pattern' ? v.pattern : '';
+          
+          return v.quality === selectedQuality && vNewAttr === newAttrValue;
+        });
+        
+        if (!hasVariantWithCurrentQuality) {
+          setSelectedQuality(variantQuality);
+        }
+      } else if (variantQuality && changedAttr !== 'quality' && !selectedQuality) {
         setSelectedQuality(variantQuality);
       }
 
       // Update prevSelections and reset flags
       prevSelections.current = {
-        color: variantColor || selectedColor,
-        size: variantSize || selectedSize,
-        pattern: variantPattern || selectedPattern,
-        quality: variantQuality || selectedQuality
+        color: selectedColor,
+        size: selectedSize,
+        pattern: selectedPattern,
+        quality: selectedQuality
       };
 
       // Reset flag after state updates
