@@ -362,7 +362,13 @@ const AdminProductDetail: React.FC = () => {
                 sort_order: s.sort_order || 0,
                 is_active: s.is_active !== false
               })),
-              style_specs: v.style_specs || [],
+              style_specs: (v.style_specs || []).map((s: any) => ({
+                id: s.id,
+                name: s.name || '',
+                value: s.value || '',
+                sort_order: s.sort_order || 0,
+                is_active: s.is_active !== false
+              })),
               features: v.features || [],
               user_guide: v.user_guide || [],
               item_details: v.item_details || []
@@ -417,6 +423,8 @@ const AdminProductDetail: React.FC = () => {
           // Load subcategories for the selected category
           if (productData.category?.id) {
             fetchSubcategories(productData.category.id);
+            // Fetch templates to sort specifications
+            fetchCategorySpecTemplates(productData.category.id);
           }
           
           // Check if product is a Sixpine product
@@ -559,17 +567,53 @@ const AdminProductDetail: React.FC = () => {
       setCategorySpecTemplates(templatesBySection);
       
       // After templates are loaded, re-sort all existing variants' specifications for all sections
+      // Also update sort_order for specs that match template names
       setVariants(prevVariants => {
         if (prevVariants.length === 0) return prevVariants;
-        return prevVariants.map(variant => ({
-          ...variant,
-          specifications: sortSpecsByTemplate(variant.specifications || [], 'specifications', templatesBySection),
-          measurement_specs: sortSpecsByTemplate(variant.measurement_specs || [], 'measurement_specs', templatesBySection),
-          style_specs: sortSpecsByTemplate(variant.style_specs || [], 'style_specs', templatesBySection),
-          features: sortSpecsByTemplate(variant.features || [], 'features', templatesBySection),
-          user_guide: sortSpecsByTemplate(variant.user_guide || [], 'user_guide', templatesBySection),
-          item_details: sortSpecsByTemplate(variant.item_details || [], 'item_details', templatesBySection)
-        }));
+        return prevVariants.map(variant => {
+          // Update sort_order for style_specs based on template
+          const updatedStyleSpecs = (variant.style_specs || []).map(spec => {
+            const template = templatesBySection.style_specs?.find(
+              t => t.field_name.toLowerCase() === (spec.name || '').toLowerCase()
+            );
+            if (template) {
+              return { ...spec, sort_order: template.sort_order };
+            }
+            return spec;
+          });
+          
+          // Update sort_order for specifications based on template
+          const updatedSpecs = (variant.specifications || []).map(spec => {
+            const template = templatesBySection.specifications?.find(
+              t => t.field_name.toLowerCase() === (spec.name || '').toLowerCase()
+            );
+            if (template) {
+              return { ...spec, sort_order: template.sort_order };
+            }
+            return spec;
+          });
+          
+          // Update sort_order for measurement_specs based on template
+          const updatedMeasurementSpecs = (variant.measurement_specs || []).map(spec => {
+            const template = templatesBySection.measurement_specs?.find(
+              t => t.field_name.toLowerCase() === (spec.name || '').toLowerCase()
+            );
+            if (template) {
+              return { ...spec, sort_order: template.sort_order };
+            }
+            return spec;
+          });
+          
+          return {
+            ...variant,
+            specifications: sortSpecsByTemplate(updatedSpecs, 'specifications', templatesBySection),
+            measurement_specs: sortSpecsByTemplate(updatedMeasurementSpecs, 'measurement_specs', templatesBySection),
+            style_specs: sortSpecsByTemplate(updatedStyleSpecs, 'style_specs', templatesBySection),
+            features: sortSpecsByTemplate(variant.features || [], 'features', templatesBySection),
+            user_guide: sortSpecsByTemplate(variant.user_guide || [], 'user_guide', templatesBySection),
+            item_details: sortSpecsByTemplate(variant.item_details || [], 'item_details', templatesBySection)
+          };
+        });
       });
     } catch (err) {
       console.error('Error fetching category spec templates:', err);
