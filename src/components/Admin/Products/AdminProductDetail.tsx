@@ -663,13 +663,25 @@ const AdminProductDetail: React.FC = () => {
     
     try {
       const uploadedUrls: string[] = [];
+      const failedImages: Array<{ fileName: string; error: string }> = [];
       const totalFiles = filesToUpload.length;
       
       // Upload each image to Cloudinary with progress tracking
       for (let i = 0; i < filesToUpload.length; i++) {
         const file = filesToUpload[i];
         if (!file.type.startsWith('image/')) {
-          showToast(`${file.name} is not an image file`, 'error');
+          failedImages.push({ fileName: file.name, error: 'Not an image file' });
+          // Update progress to account for skipped file
+          const completedFiles = i + 1;
+          const overallProgress = (completedFiles / totalFiles) * 100;
+          setImageUploadProgress(prev => ({
+            ...prev,
+            [variantIndex]: {
+              current: completedFiles,
+              total: totalFiles,
+              percentage: Math.min(Math.round(overallProgress), 99)
+            }
+          }));
           continue;
         }
         
@@ -682,70 +694,102 @@ const AdminProductDetail: React.FC = () => {
         const apiUrl = baseUrl.replace(/\/api$/, '') + '/api/admin/media/upload/';
         const token = localStorage.getItem('access_token') || localStorage.getItem('authToken');
         
-        await new Promise<void>((resolve, reject) => {
-          // Track upload progress
-          xhr.upload.addEventListener('progress', (e) => {
-            if (e.lengthComputable) {
-              const fileProgress = e.loaded / e.total;
-              // Calculate overall progress: (completed files + current file progress) / total files
-              const completedFiles = i;
-              const overallProgress = ((completedFiles + fileProgress) / totalFiles) * 100;
-              setImageUploadProgress(prev => ({
-                ...prev,
-                [variantIndex]: {
-                  current: completedFiles + 1,
-                  total: totalFiles,
-                  percentage: Math.min(Math.round(overallProgress), 99) // Cap at 99% until all files complete
-                }
-              }));
-            }
-          });
-          
-          // Handle completion
-          xhr.addEventListener('load', () => {
-            if (xhr.status === 201) {
-              try {
-                const response = JSON.parse(xhr.responseText);
-                if (response.cloudinary_url) {
-                  uploadedUrls.push(response.cloudinary_url);
-                  // Update progress when file completes
-                  const completedFiles = i + 1;
-                  const overallProgress = (completedFiles / totalFiles) * 100;
-                  setImageUploadProgress(prev => ({
-                    ...prev,
-                    [variantIndex]: {
-                      current: completedFiles,
-                      total: totalFiles,
-                      percentage: Math.round(overallProgress)
-                    }
-                  }));
-                  resolve();
-                } else {
-                  reject(new Error('No URL in response'));
-                }
-              } catch (error) {
-                reject(error);
+        try {
+          await new Promise<void>((resolve, reject) => {
+            // Track upload progress
+            xhr.upload.addEventListener('progress', (e) => {
+              if (e.lengthComputable) {
+                const fileProgress = e.loaded / e.total;
+                // Calculate overall progress: (completed files + current file progress) / total files
+                const completedFiles = i;
+                const overallProgress = ((completedFiles + fileProgress) / totalFiles) * 100;
+                setImageUploadProgress(prev => ({
+                  ...prev,
+                  [variantIndex]: {
+                    current: completedFiles + 1,
+                    total: totalFiles,
+                    percentage: Math.min(Math.round(overallProgress), 99) // Cap at 99% until all files complete
+                  }
+                }));
               }
-            } else {
-              reject(new Error(`Upload failed: ${xhr.status}`));
+            });
+            
+            // Handle completion
+            xhr.addEventListener('load', () => {
+              if (xhr.status === 201) {
+                try {
+                  const response = JSON.parse(xhr.responseText);
+                  if (response.cloudinary_url) {
+                    uploadedUrls.push(response.cloudinary_url);
+                    // Update progress when file completes
+                    const completedFiles = i + 1;
+                    const overallProgress = (completedFiles / totalFiles) * 100;
+                    setImageUploadProgress(prev => ({
+                      ...prev,
+                      [variantIndex]: {
+                        current: completedFiles,
+                        total: totalFiles,
+                        percentage: Math.min(Math.round(overallProgress), 99)
+                      }
+                    }));
+                    resolve();
+                  } else {
+                    reject(new Error('No URL in response'));
+                  }
+                } catch (error) {
+                  reject(error);
+                }
+              } else {
+                let errorMessage = `Upload failed with status ${xhr.status}`;
+                try {
+                  const errorResponse = JSON.parse(xhr.responseText);
+                  errorMessage = errorResponse.error || errorResponse.message || errorMessage;
+                } catch {
+                  // If response is not JSON, use status-based message
+                  if (xhr.status === 413) {
+                    errorMessage = 'File too large';
+                  } else if (xhr.status === 400) {
+                    errorMessage = 'Invalid file format';
+                  }
+                }
+                reject(new Error(errorMessage));
+              }
+            });
+            
+            // Handle errors
+            xhr.addEventListener('error', () => reject(new Error('Network error')));
+            xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+            xhr.addEventListener('timeout', () => reject(new Error('Upload timeout')));
+            
+            // Open and send request
+            xhr.open('POST', apiUrl);
+            if (token) {
+              const authHeader = token.startsWith('Bearer ') || token.startsWith('Token ') 
+                ? token 
+                : `Token ${token}`;
+              xhr.setRequestHeader('Authorization', authHeader);
             }
+            xhr.timeout = 300000; // 5 minutes
+            xhr.send(formData);
           });
-          
-          // Handle errors
-          xhr.addEventListener('error', () => reject(new Error('Network error')));
-          xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
-          
-          // Open and send request
-          xhr.open('POST', apiUrl);
-          if (token) {
-            const authHeader = token.startsWith('Bearer ') || token.startsWith('Token ') 
-              ? token 
-              : `Token ${token}`;
-            xhr.setRequestHeader('Authorization', authHeader);
-          }
-          xhr.timeout = 300000; // 5 minutes
-          xhr.send(formData);
-        });
+        } catch (error: any) {
+          // Track failed image but continue with next ones
+          failedImages.push({ 
+            fileName: file.name, 
+            error: error.message || 'Upload failed' 
+          });
+          // Update progress to account for failed file
+          const completedFiles = i + 1;
+          const overallProgress = (completedFiles / totalFiles) * 100;
+          setImageUploadProgress(prev => ({
+            ...prev,
+            [variantIndex]: {
+              current: completedFiles,
+              total: totalFiles,
+              percentage: Math.min(Math.round(overallProgress), 99)
+            }
+          }));
+        }
       }
       
       // Update progress to 100%
@@ -785,7 +829,21 @@ const AdminProductDetail: React.FC = () => {
         }
         
         setVariants(updated);
+        
+        // Show success message with error summary if any failed
+        if (failedImages.length > 0) {
+          const errorSummary = failedImages.map(f => `${f.fileName}: ${f.error}`).join('; ');
+          showToast(
+            `Uploaded ${uploadedUrls.length} of ${totalFiles} image(s). Failed: ${failedImages.length}. ${errorSummary}`,
+            uploadedUrls.length > 0 ? 'info' : 'error'
+          );
+        } else {
         showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
+        }
+      } else if (failedImages.length > 0) {
+        // All images failed
+        const errorSummary = failedImages.map(f => `${f.fileName}: ${f.error}`).join('; ');
+        showToast(`All uploads failed. ${errorSummary}`, 'error');
       }
     } catch (error: any) {
       console.error('Error uploading images:', error);
@@ -847,7 +905,7 @@ const AdminProductDetail: React.FC = () => {
         image: img.image,
         alt_text: img.alt_text,
         sort_order: idx,
-        is_active: true
+      is_active: true
       }));
     } else {
       variant.image = '';
@@ -1010,18 +1068,18 @@ const AdminProductDetail: React.FC = () => {
                 
                 // Small delay to show 100% before marking as complete
                 setTimeout(() => {
-                  // Update variant with video URL
-                  const updated = [...variants];
-                  updated[variantIndex].video_url = response.cloudinary_url;
-                  setVariants(updated);
-                  
-                  // Show success message
-                  showToast('Video uploaded successfully!', 'success');
-                  
+                // Update variant with video URL
+                const updated = [...variants];
+                updated[variantIndex].video_url = response.cloudinary_url;
+                setVariants(updated);
+                
+                // Show success message
+                showToast('Video uploaded successfully!', 'success');
+                
                   // Mark upload as complete
-                  setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
-                  
-                  resolve();
+                setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
+                
+                resolve();
                 }, 300);
               } else {
                 throw new Error('No URL in response');
@@ -3798,12 +3856,12 @@ const AdminProductDetail: React.FC = () => {
                           marginBottom: '32px',
                           flexWrap: 'wrap'
                         }}>
-                          {/* Bulk Upload Section */}
+                        {/* Bulk Upload Section */}
                           <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column' }}>
-                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cloud_upload</span>
-                              Bulk Upload Images
-                            </h5>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cloud_upload</span>
+                            Bulk Upload Images
+                          </h5>
                           <div
                             onDragOver={(e) => {
                               e.preventDefault();
@@ -3893,14 +3951,14 @@ const AdminProductDetail: React.FC = () => {
                               </>
                             )}
                           </div>
-                          </div>
-                          
-                          {/* Video URL Section */}
+                        </div>
+                        
+                        {/* Video URL Section */}
                           <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column' }}>
-                            <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>videocam</span>
-                              Video URL
-                            </h5>
+                          <h5 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>videocam</span>
+                            Video URL
+                          </h5>
                           
                           {/* Video Upload Section */}
                           <div
@@ -4021,8 +4079,8 @@ const AdminProductDetail: React.FC = () => {
                             )}
                           </div>
                           </div>
-                        </div>
-                        
+                          </div>
+                          
                         {/* Video URL Input and Preview - Full Width Below Upload Sections */}
                         <div style={{ 
                           display: 'flex', 
@@ -4090,21 +4148,21 @@ const AdminProductDetail: React.FC = () => {
                               }}>
                                 Preview
                               </label>
-                              <video
-                                src={variant.video_url}
-                                controls
-                                style={{
-                                  width: '100%',
+                                    <video
+                                      src={variant.video_url}
+                                      controls
+                                      style={{
+                                        width: '100%',
                                   borderRadius: '6px',
                                   backgroundColor: '#000',
                                   maxHeight: '120px',
                                   objectFit: 'contain'
-                                }}
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          )}
+                                      }}
+                                    >
+                                      Your browser does not support the video tag.
+                                    </video>
+                                  </div>
+                                )}
                         </div>
                         
                         {/* Unified Images Section */}
@@ -4361,20 +4419,20 @@ const AdminProductDetail: React.FC = () => {
                                     }}>
                                       Alt Text
                                     </label>
-                                    <input
-                                      type="text"
-                                      value={img.alt_text}
-                                      onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'alt_text', e.target.value)}
-                                      placeholder="Image description"
-                                      className="admin-input"
+                                      <input
+                                        type="text"
+                                        value={img.alt_text}
+                                        onChange={(e) => handleVariantImageChange(variantIndex, imgIndex, 'alt_text', e.target.value)}
+                                        placeholder="Image description"
+                                        className="admin-input"
                                       style={{ 
                                         width: '100%',
                                         padding: '6px 10px',
                                         fontSize: '13px'
                                       }}
-                                    />
-                                  </div>
-                                </div>
+                                      />
+                                    </div>
+                                    </div>
                                 
                                 {/* Delete Button */}
                                 <div style={{ flexShrink: 0, paddingTop: '4px' }}>
