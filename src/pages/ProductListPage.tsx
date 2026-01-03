@@ -61,6 +61,12 @@ interface Product {
     stock_quantity: number;
     is_in_stock: boolean;
     image?: string;
+    images?: Array<{
+      id: number;
+      image: string;
+      alt_text: string;
+      sort_order: number;
+    }>;
   }>;
   variant?: {
     id: number;
@@ -1123,13 +1129,10 @@ const ProductListPage: React.FC = () => {
                         // Get variant data - handles both expanded and non-expanded formats
                         const variantData = getVariantData(product);
                         
-                        // For expanded variants, use variant-specific data
-                        // Prioritize: variant images array > variant image field > product main_image
-                        const displayImage = (
-                          variantData?.images?.length > 0 
-                            ? variantData.images[0].image || variantData.images[0]
-                            : variantData?.image
-                        ) || product.main_image || '/placeholder-image.jpg';
+                        // For product list, use variant.image directly (no fallback to parent)
+                        // Variant always has its own image set by admin
+                        const displayImage = variantData?.image || '/placeholder-image.jpg';
+                        
                         const displayPrice = variantData?.price || product.price;
                         const displayOldPrice = variantData?.old_price || product.old_price;
                         const isOutOfStock = variantData ? !variantData.is_in_stock : false;

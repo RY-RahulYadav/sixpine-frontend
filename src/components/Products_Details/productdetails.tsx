@@ -696,23 +696,56 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   }, [selectedVariant, onVariantChange]);
 
   // Get images from selected variant or first variant, then fallback
-  const images = selectedVariant?.images?.length > 0
-    ? selectedVariant.images.map((img: any) => img.image)
-    : selectedVariant?.image
-      ? [selectedVariant.image]
-      : product?.variants?.[0]?.images?.length > 0
-        ? product.variants[0].images.map((img: any) => img.image)
-        : product?.variants?.[0]?.image
-          ? [product.variants[0].image]
-          : product?.main_image
-            ? [product.main_image]
-            : [
-              "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
-              "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
-              "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
-              "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
-              "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
-            ];
+  // Combine variant.image (main image) with variant.images array
+  // Sort images by sort_order to ensure they display in the same order as admin
+  const sortImagesByOrder = (imgArray: any[]) => {
+    return [...imgArray].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  };
+  
+  const getVariantImages = (variant: any): string[] => {
+    if (!variant) return [];
+    
+    // Get images array sorted by sort_order
+    const sortedImagesArray = variant.images?.length > 0
+      ? sortImagesByOrder(variant.images).map((img: any) => img.image)
+      : [];
+    
+    // If variant has a main image field AND it's not already in the images array, add it first
+    if (variant.image) {
+      // Check if the main image is already in the sorted images array
+      const mainImageInArray = sortedImagesArray.includes(variant.image);
+      if (!mainImageInArray) {
+        // Main image should be first if not in array
+        return [variant.image, ...sortedImagesArray];
+      }
+    }
+    
+    // If images array exists and has items, use it (it should already include all images)
+    if (sortedImagesArray.length > 0) {
+      return sortedImagesArray;
+    }
+    
+    // Fallback to just the main image if no array
+    if (variant.image) {
+      return [variant.image];
+    }
+    
+    return [];
+  };
+  
+  const images = selectedVariant
+    ? getVariantImages(selectedVariant)
+    : product?.variants?.[0]
+      ? getVariantImages(product.variants[0])
+      : product?.main_image
+        ? [product.main_image]
+        : [
+            "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
+            "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
+            "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
+            "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
+            "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
+          ];
 
   // Get video URL from selected variant
   const videoUrl = selectedVariant?.video_url || null;
@@ -807,11 +840,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   // Update main image when variant changes
   useEffect(() => {
     if (selectedVariant) {
-      const variantImages = selectedVariant.images?.length > 0
-        ? selectedVariant.images.map((img: any) => img.image)
-        : selectedVariant.image
-          ? [selectedVariant.image]
-          : [];
+      // Use the same logic as images array to get the first image
+      const variantImages = getVariantImages(selectedVariant);
       if (variantImages.length > 0) {
         setMainImage(variantImages[0]);
       }
