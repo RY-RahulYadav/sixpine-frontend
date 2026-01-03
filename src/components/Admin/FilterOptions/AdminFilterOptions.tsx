@@ -240,11 +240,34 @@ const AdminFilterOptions: React.FC = () => {
 
   const fetchColors = async () => {
     try {
-      const response = await api.getColors();
-      const cols = response.data.results || response.data || [];
-      setColors(cols);
+      let allColors: any[] = [];
+      let hasNext = true;
+      let page = 1;
+      
+      // Fetch all pages until no more pages
+      while (hasNext) {
+        const response = await api.getColors({ page });
+        const data = response.data;
+        
+        if (data.results && Array.isArray(data.results)) {
+          allColors = [...allColors, ...data.results];
+        } else if (Array.isArray(data)) {
+          allColors = [...allColors, ...data];
+          hasNext = false; // Non-paginated response
+          break;
+        }
+        
+        // Check if there's a next page
+        hasNext = !!data.next;
+        if (hasNext) {
+          page++;
+        }
+      }
+      
+      setColors(allColors);
     } catch (error) {
       console.error('Error fetching colors:', error);
+      setColors([]);
     }
   };
 

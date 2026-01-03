@@ -202,10 +202,37 @@ const SellerProductDetail: React.FC = () => {
         setLoading(true);
         setError(null);
         
+        // Helper function to fetch all colors with pagination
+        const fetchAllColors = async () => {
+          let allColors: any[] = [];
+          let hasNext = true;
+          let page = 1;
+          
+          while (hasNext) {
+            const response = await api.getColors({ page });
+            const data = response.data;
+            
+            if (data.results && Array.isArray(data.results)) {
+              allColors = [...allColors, ...data.results];
+            } else if (Array.isArray(data)) {
+              allColors = [...allColors, ...data];
+              hasNext = false;
+              break;
+            }
+            
+            hasNext = !!data.next;
+            if (hasNext) {
+              page++;
+            }
+          }
+          
+          return { data: { results: allColors } };
+        };
+        
         // Fetch dropdown data
         const [categoriesRes, colorsRes, materialsRes, productsRes] = await Promise.all([
           api.getCategories(),
-          api.getColors(),
+          fetchAllColors(),
           api.getMaterials(),
           api.getProducts({ page_size: 1000 }) // Get all products for recommendations
         ]);
