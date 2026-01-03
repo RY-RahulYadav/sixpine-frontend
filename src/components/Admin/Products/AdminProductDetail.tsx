@@ -248,6 +248,7 @@ const AdminProductDetail: React.FC = () => {
   const [originalProduct, setOriginalProduct] = useState<any>(null);
   const [lastSelectedColorId, setLastSelectedColorId] = useState<number | null>(null);
   const [categorySpecDefaults, setCategorySpecDefaults] = useState<any>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   
   // Features
   const [features, setFeatures] = useState<Feature[]>([]);
@@ -1072,7 +1073,14 @@ const AdminProductDetail: React.FC = () => {
             uploadedUrls.length > 0 ? 'info' : 'error'
           );
         } else {
-        showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
+          showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
+        }
+        
+        // Show reminder to save changes
+        if (!isNew) {
+          setTimeout(() => {
+            showToast('Remember to click Save to persist your changes', 'info');
+          }, 2000);
         }
       } else if (failedImages.length > 0) {
         // All images failed
@@ -1195,7 +1203,8 @@ const AdminProductDetail: React.FC = () => {
     const newImage = {
       image: imageUrl.trim(),
       alt_text: altText.trim() || '',
-      sort_order: allImages.length
+      sort_order: allImages.length,
+      is_active: true
     };
 
     // If no main image exists, this becomes the main image
@@ -1218,6 +1227,12 @@ const AdminProductDetail: React.FC = () => {
     }
 
     showSuccess('Image added successfully');
+    // Show reminder to save changes
+    if (!isNew) {
+      setTimeout(() => {
+        showToast('Remember to click Save to persist your changes', 'info');
+      }, 1500);
+    }
   };
   
   const handleVariantImageChange = (variantIndex: number, imageIndex: number, field: string, value: any) => {
@@ -1309,6 +1324,13 @@ const AdminProductDetail: React.FC = () => {
                 
                 // Show success message
                 showToast('Video uploaded successfully!', 'success');
+                
+                // Show reminder to save changes
+                if (!isNew) {
+                  setTimeout(() => {
+                    showToast('Remember to click Save to persist your changes', 'info');
+                  }, 1500);
+                }
                 
                   // Mark upload as complete
                 setUploadingVideo(prev => ({ ...prev, [variantIndex]: false }));
@@ -1855,6 +1877,67 @@ const AdminProductDetail: React.FC = () => {
     return obj1 === obj2;
   };
 
+  // Check if there are any unsaved changes in the form
+  const checkHasUnsavedChanges = (): boolean => {
+    if (isNew) {
+      // For new products, check if any data has been entered
+      return formData.title.trim() !== '' || variants.length > 0;
+    }
+    
+    if (!originalProduct) return false;
+    
+    // Check if any formData field has changed
+    const formFieldsChanged = 
+      formData.title !== originalProduct.title ||
+      formData.slug !== originalProduct.slug ||
+      formData.sku !== originalProduct.sku ||
+      formData.short_description !== originalProduct.short_description ||
+      formData.long_description !== originalProduct.long_description ||
+      parseInt(formData.category_id) !== originalProduct.category?.id ||
+      formData.brand !== originalProduct.brand ||
+      formData.dimensions !== originalProduct.dimensions ||
+      formData.weight !== originalProduct.weight ||
+      formData.warranty !== originalProduct.warranty ||
+      formData.assembly_required !== originalProduct.assembly_required ||
+      formData.estimated_delivery_days !== originalProduct.estimated_delivery_days ||
+      formData.is_featured !== originalProduct.is_featured ||
+      formData.is_active !== originalProduct.is_active;
+    
+    if (formFieldsChanged) return true;
+    
+    // Check if variants have changed
+    if (variants.length !== originalVariants.length) return true;
+    
+    for (let i = 0; i < variants.length; i++) {
+      const original = originalVariants.find(ov => ov.id === variants[i].id);
+      if (hasVariantChanged(variants[i], original)) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+  
+  // Update hasUnsavedChanges whenever relevant state changes
+  useEffect(() => {
+    const hasChanges = checkHasUnsavedChanges();
+    setHasUnsavedChanges(hasChanges);
+  }, [formData, variants, originalProduct, originalVariants, isNew]);
+  
+  // Warn before leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !saving) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges, saving]);
+
   // Helper function to filter out empty specification entries
   const filterSpecArray = (specs: any[] | undefined | null | {}): any[] => {
     // Handle case where it might be an object instead of array
@@ -1939,11 +2022,45 @@ const AdminProductDetail: React.FC = () => {
     if (!original) return true; // New variant
     if (!original.id && current.id) return true; // Variant was just created
     
+    // Quick checks for common changes (more efficient than full deep equal)
+    // Check images array length first
+    const currentImagesCount = (current.images || []).length;
+    const originalImagesCount = (original.images || []).length;
+    if (currentImagesCount !== originalImagesCount) {
+      console.log('Variant changed - images count different:', { current: currentImagesCount, original: originalImagesCount });
+      return true;
+    }
+    
+    // Check main image
+    if (current.image !== original.image) {
+      console.log('Variant changed - main image different');
+      return true;
+    }
+    
+    // Check video URL
+    if ((current.video_url || '') !== (original.video_url || '')) {
+      console.log('Variant changed - video URL different');
+      return true;
+    }
+    
+    // Check if any image URLs changed
+    const currentImageUrls = (current.images || []).map(img => img.image).sort();
+    const originalImageUrls = (original.images || []).map(img => img.image).sort();
+    if (!deepEqual(currentImageUrls, originalImageUrls)) {
+      console.log('Variant changed - image URLs different');
+      return true;
+    }
+    
+    // Full deep comparison for all other fields
     const currentPayload = buildVariantPayload(current);
     const originalPayload = buildVariantPayload(original);
     
     // Compare all fields
-    return !deepEqual(currentPayload, originalPayload);
+    const changed = !deepEqual(currentPayload, originalPayload);
+    if (changed) {
+      console.log('Variant changed - full payload different');
+    }
+    return changed;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -2442,7 +2559,7 @@ const AdminProductDetail: React.FC = () => {
                 justifyContent: 'center',
                 padding: '8px',
                 borderRadius: '8px',
-                border: '1px solid #f97316',
+                border: hasUnsavedChanges ? '2px solid #fbbf24' : '1px solid #f97316',
                 backgroundColor: '#f97316',
                 color: '#ffffff',
                 cursor: saving ? 'not-allowed' : 'pointer',
@@ -2451,13 +2568,30 @@ const AdminProductDetail: React.FC = () => {
                 transition: 'all 0.2s',
                 opacity: saving ? 0.6 : 1,
                 width: '40px',
-                height: '40px'
+                height: '40px',
+                boxShadow: hasUnsavedChanges ? '0 0 8px rgba(251, 191, 36, 0.5)' : 'none',
+                position: 'relative'
               }}
+              title={hasUnsavedChanges ? 'You have unsaved changes - Click to save' : 'Save product'}
             >
               {saving ? (
                 <span className="spinner-small"></span>
               ) : (
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+                  {hasUnsavedChanges && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fbbf24',
+                      border: '2px solid #000'
+                    }}></span>
+                  )}
+                </>
               )}
             </button>
           </div>
@@ -2717,7 +2851,7 @@ const AdminProductDetail: React.FC = () => {
                 justifyContent: 'center',
                 padding: '8px',
                 borderRadius: '8px',
-                border: '1px solid #f97316',
+                border: hasUnsavedChanges ? '2px solid #fbbf24' : '1px solid #f97316',
                 backgroundColor: '#f97316',
                 color: '#ffffff',
                 cursor: saving ? 'not-allowed' : 'pointer',
@@ -2726,13 +2860,30 @@ const AdminProductDetail: React.FC = () => {
                 transition: 'all 0.2s',
                 opacity: saving ? 0.6 : 1,
                 width: '40px',
-                height: '40px'
+                height: '40px',
+                boxShadow: hasUnsavedChanges ? '0 0 8px rgba(251, 191, 36, 0.5)' : 'none',
+                position: 'relative'
               }}
+              title={hasUnsavedChanges ? 'You have unsaved changes - Click to save' : 'Save product'}
             >
               {saving ? (
                 <span className="spinner-small"></span>
               ) : (
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+                <>
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+                  {hasUnsavedChanges && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      width: '12px',
+                      height: '12px',
+                      borderRadius: '50%',
+                      backgroundColor: '#fbbf24',
+                      border: '2px solid #000'
+                    }}></span>
+                  )}
+                </>
               )}
             </button>
           </div>
