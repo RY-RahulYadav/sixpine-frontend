@@ -1124,7 +1124,12 @@ const ProductListPage: React.FC = () => {
                         const variantData = getVariantData(product);
                         
                         // For expanded variants, use variant-specific data
-                        const displayImage = variantData?.image || product.main_image || '/placeholder-image.jpg';
+                        // Prioritize: variant images array > variant image field > product main_image
+                        const displayImage = (
+                          variantData?.images?.length > 0 
+                            ? variantData.images[0].image || variantData.images[0]
+                            : variantData?.image
+                        ) || product.main_image || '/placeholder-image.jpg';
                         const displayPrice = variantData?.price || product.price;
                         const displayOldPrice = variantData?.old_price || product.old_price;
                         const isOutOfStock = variantData ? !variantData.is_in_stock : false;
