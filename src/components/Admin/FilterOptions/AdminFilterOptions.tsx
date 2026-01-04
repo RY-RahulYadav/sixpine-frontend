@@ -987,18 +987,10 @@ const AdminFilterOptions: React.FC = () => {
                             
                             return (
                               <div key={section} style={{ marginBottom: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '12px' }}>
-                                <div 
-                                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
-                                  onClick={() => {
-                                    const newExpanded = isExpanded ? null : { categoryId: category.id, section };
-                                    setExpandedSpecSection(newExpanded);
-                                    // Reset bulk add mode when collapsing
-                                    if (!newExpanded) {
-                                      setBulkAddMode(null);
-                                      setBulkAddInput('');
-                                    }
-                                  }}
-                                >
+                                  <div 
+                                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
+                                    onClick={() => setExpandedSpecSection(isExpanded ? null : { categoryId: category.id, section })}
+                                  >
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>
                                       {isExpanded ? 'expand_less' : 'expand_more'}
