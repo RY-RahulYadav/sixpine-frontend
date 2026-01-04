@@ -92,6 +92,8 @@ const AdminFilterOptions: React.FC = () => {
     is_active: true 
   });
   const [expandedSpecSection, setExpandedSpecSection] = useState<{categoryId: number, section: string} | null>(null);
+  const [bulkAddInput, setBulkAddInput] = useState<string>('');
+  const [useBulkAdd, setUseBulkAdd] = useState<boolean>(false);
   
   // Form data
   const [categoryForm, setCategoryForm] = useState({ name: '', slug: '', description: '', is_active: true });
@@ -432,6 +434,15 @@ const AdminFilterOptions: React.FC = () => {
   // Specification Template handlers
   const handleSpecTemplateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Handle bulk add mode
+    if (useBulkAdd && bulkAddInput.trim()) {
+      const categoryId = parseInt(specTemplateForm.category);
+      await handleBulkAddSpecTemplates(categoryId, specTemplateForm.section);
+      return;
+    }
+    
+    // Handle single item mode
     if (!specTemplateForm.category || !specTemplateForm.field_name) {
       showToast('Please fill in all required fields', 'error');
       return;
@@ -473,6 +484,8 @@ const AdminFilterOptions: React.FC = () => {
     setEditingSpecTemplate(null);
     setSpecTemplateForm({ category: '', section: 'specifications', field_name: '', sort_order: 0, is_active: true });
     setShowSpecTemplateModal(false);
+    setUseBulkAdd(false);
+    setBulkAddInput('');
   };
 
   const handleDeleteSpecTemplate = async (id: number, categoryId: number) => {
@@ -493,6 +506,72 @@ const AdminFilterOptions: React.FC = () => {
       await fetchSpecTemplates(categoryId);
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Failed to delete specification template', 'error');
+    }
+  };
+
+  const handleBulkAddSpecTemplates = async (categoryId: number, section: string) => {
+    if (!bulkAddInput.trim()) {
+      showToast('Please enter at least one field name', 'error');
+      return;
+    }
+
+    // Parse comma-separated values
+    const fieldNames = bulkAddInput
+      .split(',')
+      .map(name => name.trim())
+      .filter(name => name.length > 0);
+
+    if (fieldNames.length === 0) {
+      showToast('Please enter at least one valid field name', 'error');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Get existing templates for this section to determine next sort_order
+      const existingTemplates = getTemplatesBySection(categoryId, section);
+      const maxSortOrder = existingTemplates.length > 0 
+        ? Math.max(...existingTemplates.map(t => t.sort_order || 0))
+        : -1;
+
+      // Create templates in sequence (left to right order)
+      let createdCount = 0;
+      let failedCount = 0;
+      
+      for (let i = 0; i < fieldNames.length; i++) {
+        try {
+          await adminAPI.createCategorySpecificationTemplate({
+            category: categoryId.toString(),
+            section: section,
+            field_name: fieldNames[i],
+            sort_order: maxSortOrder + 1 + i, // Sequential order from left to right
+            is_active: true
+          });
+          createdCount++;
+        } catch (error: any) {
+          console.error(`Failed to create template for "${fieldNames[i]}":`, error);
+          failedCount++;
+        }
+      }
+
+      // Refresh templates
+      await fetchSpecTemplates(categoryId);
+
+      // Show success/error message
+      if (createdCount > 0 && failedCount === 0) {
+        showToast(`Successfully created ${createdCount} field${createdCount !== 1 ? 's' : ''}`, 'success');
+      } else if (createdCount > 0 && failedCount > 0) {
+        showToast(`Created ${createdCount} field${createdCount !== 1 ? 's' : ''}, ${failedCount} failed`, 'error');
+      } else {
+        showToast('Failed to create fields', 'error');
+      }
+
+      // Reset and close modal
+      resetSpecTemplateForm();
+    } catch (error: any) {
+      showToast(error.response?.data?.message || 'Failed to create specification templates', 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -910,7 +989,15 @@ const AdminFilterOptions: React.FC = () => {
                               <div key={section} style={{ marginBottom: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', padding: '12px' }}>
                                 <div 
                                   style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}
-                                  onClick={() => setExpandedSpecSection(isExpanded ? null : { categoryId: category.id, section })}
+                                  onClick={() => {
+                                    const newExpanded = isExpanded ? null : { categoryId: category.id, section };
+                                    setExpandedSpecSection(newExpanded);
+                                    // Reset bulk add mode when collapsing
+                                    if (!newExpanded) {
+                                      setBulkAddMode(null);
+                                      setBulkAddInput('');
+                                    }
+                                  }}
                                 >
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#666' }}>
@@ -927,6 +1014,8 @@ const AdminFilterOptions: React.FC = () => {
                                       e.stopPropagation();
                                       resetSpecTemplateForm();
                                       setSpecTemplateForm(prev => ({ ...prev, category: category.id.toString(), section }));
+                                      setUseBulkAdd(false);
+                                      setBulkAddInput('');
                                       setShowSpecTemplateModal(true);
                                     }}
                                     style={{ fontSize: '12px', padding: '6px 12px' }}
@@ -1151,7 +1240,7 @@ const AdminFilterOptions: React.FC = () => {
                       value={specTemplateForm.category}
                       onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, category: e.target.value })}
                       required
-                      disabled={!!specTemplateForm.category}
+                      disabled={!!specTemplateForm.category || !!editingSpecTemplate}
                     >
                       <option value="">Select category</option>
                       {categories.map((cat) => (
@@ -1167,6 +1256,7 @@ const AdminFilterOptions: React.FC = () => {
                       value={specTemplateForm.section}
                       onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, section: e.target.value })}
                       required
+                      disabled={!!editingSpecTemplate}
                     >
                       <option value="specifications">Specifications</option>
                       <option value="measurement_specs">Measurement Specifications</option>
@@ -1176,44 +1266,105 @@ const AdminFilterOptions: React.FC = () => {
                       <option value="item_details">Item Details</option>
                     </select>
                   </div>
-                  <div className="form-group">
-                    <label>Field Name*</label>
-                    <input
-                      type="text"
-                      value={specTemplateForm.field_name}
-                      onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, field_name: e.target.value })}
-                      placeholder="e.g., Brand, Weight, Bed Type"
-                      required
-                    />
-                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                      This will be the default field name that appears when creating products in this category
-                    </small>
-                  </div>
-                  <div className="form-group">
-                    <label>Sort Order</label>
-                    <input
-                      type="number"
-                      value={specTemplateForm.sort_order}
-                      onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, sort_order: parseInt(e.target.value) || 0 })}
-                      min="0"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={specTemplateForm.is_active}
-                        onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, is_active: e.target.checked })}
-                      />
-                      Active
-                    </label>
-                  </div>
+                  
+                  {/* Toggle between single and bulk add (only for new items) */}
+                  {!editingSpecTemplate && (
+                    <div className="form-group">
+                      <label className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={useBulkAdd}
+                          onChange={(e) => {
+                            setUseBulkAdd(e.target.checked);
+                            if (e.target.checked) {
+                              setBulkAddInput('');
+                            } else {
+                              setSpecTemplateForm({ ...specTemplateForm, field_name: '' });
+                            }
+                          }}
+                        />
+                        Add multiple fields (comma-separated)
+                      </label>
+                    </div>
+                  )}
+                  
+                  {useBulkAdd && !editingSpecTemplate ? (
+                    <>
+                      <div className="form-group">
+                        <label>Field Names (Comma-separated)*</label>
+                        <textarea
+                          value={bulkAddInput}
+                          onChange={(e) => setBulkAddInput(e.target.value)}
+                          placeholder="e.g., Brand, Weight, Bed Type, Material"
+                          rows={4}
+                          required
+                          style={{ 
+                            width: '100%', 
+                            padding: '10px', 
+                            fontSize: '14px',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontFamily: 'inherit',
+                            resize: 'vertical'
+                          }}
+                        />
+                        <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                          Enter multiple field names separated by commas. They will be created in order (left to right).
+                        </small>
+                      </div>
+                      <div className="form-group">
+                        <label className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={specTemplateForm.is_active}
+                            onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, is_active: e.target.checked })}
+                          />
+                          Active (applies to all fields)
+                        </label>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="form-group">
+                        <label>Field Name*</label>
+                        <input
+                          type="text"
+                          value={specTemplateForm.field_name}
+                          onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, field_name: e.target.value })}
+                          placeholder="e.g., Brand, Weight, Bed Type"
+                          required={!useBulkAdd}
+                        />
+                        <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                          This will be the default field name that appears when creating products in this category
+                        </small>
+                      </div>
+                      <div className="form-group">
+                        <label>Sort Order</label>
+                        <input
+                          type="number"
+                          value={specTemplateForm.sort_order}
+                          onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, sort_order: parseInt(e.target.value) || 0 })}
+                          min="0"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={specTemplateForm.is_active}
+                            onChange={(e) => setSpecTemplateForm({ ...specTemplateForm, is_active: e.target.checked })}
+                          />
+                          Active
+                        </label>
+                      </div>
+                    </>
+                  )}
                   <div className="form-actions">
                     <button type="button" className="admin-btn secondary" onClick={resetSpecTemplateForm}>
                       Cancel
                     </button>
                     <button type="submit" className="admin-btn primary" disabled={saving}>
-                      {saving ? 'Saving...' : editingSpecTemplate ? 'Update' : 'Create'}
+                      {saving ? 'Saving...' : editingSpecTemplate ? 'Update' : useBulkAdd ? 'Create All' : 'Create'}
                     </button>
                   </div>
                 </form>

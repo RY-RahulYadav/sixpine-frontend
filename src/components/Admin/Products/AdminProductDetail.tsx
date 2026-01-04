@@ -1073,7 +1073,7 @@ const AdminProductDetail: React.FC = () => {
             uploadedUrls.length > 0 ? 'info' : 'error'
           );
         } else {
-          showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
+        showToast(`Successfully uploaded ${uploadedUrls.length} image(s)`, 'success');
         }
         
         // Show reminder to save changes
@@ -2578,7 +2578,7 @@ const AdminProductDetail: React.FC = () => {
                 <span className="spinner-small"></span>
               ) : (
                 <>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
                   {hasUnsavedChanges && (
                     <span style={{
                       position: 'absolute',
@@ -2870,7 +2870,7 @@ const AdminProductDetail: React.FC = () => {
                 <span className="spinner-small"></span>
               ) : (
                 <>
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>save</span>
                   {hasUnsavedChanges && (
                     <span style={{
                       position: 'absolute',
