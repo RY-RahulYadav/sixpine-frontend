@@ -6,6 +6,7 @@ interface Category {
   id: number;
   name: string;
   slug: string;
+  sort_order?: number;
 }
 
 interface Subcategory {
@@ -75,7 +76,17 @@ const CategoryTabs: React.FC = () => {
           })
         );
         
-        setCategories(categoriesWithSubcategories);
+        // Sort by sort_order, then by name
+        const sortedCategories = [...categoriesWithSubcategories].sort((a, b) => {
+          const orderA = a.sort_order ?? 0;
+          const orderB = b.sort_order ?? 0;
+          if (orderA !== orderB) {
+            return orderA - orderB;
+          }
+          return a.name.localeCompare(b.name);
+        });
+        
+        setCategories(sortedCategories);
       } catch (error) {
         console.error('Error fetching categories:', error);
         setCategories([]);

@@ -12,6 +12,7 @@ interface Category {
   description?: string;
   image?: string;
   is_active: boolean;
+  sort_order?: number;
   subcategories?: Subcategory[];
 }
 
@@ -217,13 +218,152 @@ const AdminFilterOptions: React.FC = () => {
     try {
       const response = await api.getCategories();
       const cats = response.data.results || response.data || [];
-      setCategories(cats);
+      // Sort by sort_order, then by name
+      const sortedCats = [...cats].sort((a, b) => {
+        const orderA = a.sort_order ?? 0;
+        const orderB = b.sort_order ?? 0;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        return a.name.localeCompare(b.name);
+      });
+      setCategories(sortedCats);
       // Fetch subcategories for all categories
-      for (const cat of cats) {
+      for (const cat of sortedCats) {
         fetchSubcategories(cat.id);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
+    }
+  };
+
+  // Move category up in sort order
+  const moveCategoryUp = async (index: number) => {
+    if (index === 0 || saving) return; // Already at top or saving in progress
+    
+    const category = categories[index];
+    const prevCategory = categories[index - 1];
+    
+    try {
+      setSaving(true);
+      
+      // Use index-based sort_order to ensure proper sequential ordering
+      // When moving up, assign the previous index's sort_order to current, and current index to previous
+      const newCurrentOrder = index - 1;
+      const newPrevOrder = index;
+      
+      // Prepare update data with only writable fields
+      const categoryUpdateData: any = {
+        name: category.name,
+        slug: category.slug,
+        description: category.description || '',
+        is_active: category.is_active,
+        sort_order: newCurrentOrder
+      };
+      
+      // Only include image if it exists
+      if (category.image) {
+        categoryUpdateData.image = category.image;
+      }
+      
+      const prevCategoryUpdateData: any = {
+        name: prevCategory.name,
+        slug: prevCategory.slug,
+        description: prevCategory.description || '',
+        is_active: prevCategory.is_active,
+        sort_order: newPrevOrder
+      };
+      
+      // Only include image if it exists
+      if (prevCategory.image) {
+        prevCategoryUpdateData.image = prevCategory.image;
+      }
+      
+      // Optimistically update the UI immediately
+      const newCategories = [...categories];
+      [newCategories[index - 1], newCategories[index]] = [newCategories[index], newCategories[index - 1]];
+      setCategories(newCategories);
+      
+      // Update both categories sequentially to avoid race conditions
+      await api.updateCategory(category.id, categoryUpdateData);
+      await api.updateCategory(prevCategory.id, prevCategoryUpdateData);
+      
+      // Then refresh from server to ensure consistency
+      await fetchCategories();
+      showToast('Category order updated successfully', 'success');
+    } catch (error: any) {
+      console.error('Error updating category order:', error);
+      // Revert optimistic update on error
+      await fetchCategories();
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to update category order';
+      showToast(errorMessage, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Move category down in sort order
+  const moveCategoryDown = async (index: number) => {
+    if (index === categories.length - 1 || saving) return; // Already at bottom or saving in progress
+    
+    const category = categories[index];
+    const nextCategory = categories[index + 1];
+    
+    try {
+      setSaving(true);
+      
+      // Use index-based sort_order to ensure proper sequential ordering
+      // When moving down, assign the next index's sort_order to current, and current index to next
+      const newCurrentOrder = index + 1;
+      const newNextOrder = index;
+      
+      // Prepare update data with only writable fields
+      const categoryUpdateData: any = {
+        name: category.name,
+        slug: category.slug,
+        description: category.description || '',
+        is_active: category.is_active,
+        sort_order: newCurrentOrder
+      };
+      
+      // Only include image if it exists
+      if (category.image) {
+        categoryUpdateData.image = category.image;
+      }
+      
+      const nextCategoryUpdateData: any = {
+        name: nextCategory.name,
+        slug: nextCategory.slug,
+        description: nextCategory.description || '',
+        is_active: nextCategory.is_active,
+        sort_order: newNextOrder
+      };
+      
+      // Only include image if it exists
+      if (nextCategory.image) {
+        nextCategoryUpdateData.image = nextCategory.image;
+      }
+      
+      // Optimistically update the UI immediately - swap only with the next item
+      const newCategories = [...categories];
+      [newCategories[index], newCategories[index + 1]] = [newCategories[index + 1], newCategories[index]];
+      setCategories(newCategories);
+      
+      // Update both categories sequentially to avoid race conditions
+      await api.updateCategory(category.id, categoryUpdateData);
+      await api.updateCategory(nextCategory.id, nextCategoryUpdateData);
+      
+      // Then refresh from server to ensure consistency
+      await fetchCategories();
+      showToast('Category order updated successfully', 'success');
+    } catch (error: any) {
+      console.error('Error updating category order:', error);
+      // Revert optimistic update on error
+      await fetchCategories();
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to update category order';
+      showToast(errorMessage, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -833,7 +973,7 @@ const AdminFilterOptions: React.FC = () => {
               </div>
 
               <div className="categories-list">
-                {categories.map((category) => (
+                {categories.map((category, index) => (
                   <div key={category.id} className="category-item">
                     <div className="category-header" onClick={() => setExpandedCategory(expandedCategory === category.id ? null : category.id)}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
@@ -842,6 +982,36 @@ const AdminFilterOptions: React.FC = () => {
                         {category.is_active && <span className="status-badge active">Active</span>}
                       </div>
                       <div className="category-actions">
+                            <button
+                              className="admin-btn icon"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await moveCategoryUp(index);
+                              }}
+                              title="Move Up"
+                              disabled={index === 0 || saving}
+                              style={{ 
+                                opacity: (index === 0 || saving) ? 0.5 : 1,
+                                cursor: (index === 0 || saving) ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              <span className="material-symbols-outlined">arrow_upward</span>
+                            </button>
+                            <button
+                              className="admin-btn icon"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await moveCategoryDown(index);
+                              }}
+                              title="Move Down"
+                              disabled={index === categories.length - 1 || saving}
+                              style={{ 
+                                opacity: (index === categories.length - 1 || saving) ? 0.5 : 1,
+                                cursor: (index === categories.length - 1 || saving) ? 'not-allowed' : 'pointer'
+                              }}
+                            >
+                              <span className="material-symbols-outlined">arrow_downward</span>
+                            </button>
                             <button
                               className="admin-btn icon"
                               onClick={(e) => {
