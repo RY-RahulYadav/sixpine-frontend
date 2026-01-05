@@ -1,5 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { productAPI } from '../services/api';
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Subcategory {
+  id: number;
+  name: string;
+  slug: string;
+  category_id?: number;
+}
+
+interface CategoryWithSubcategories extends Category {
+  subcategories: Subcategory[];
+}
 
 const CategoryTabs: React.FC = () => {
   const [activeMobileDropdown, setActiveMobileDropdown] = useState<string | null>(null);
@@ -7,36 +25,67 @@ const CategoryTabs: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Helper function to convert category/subcategory names to slugs
-  const nameToSlug = (name: string): string => {
-    return name
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/&/g, 'and')
-      .replace(/[^a-z0-9-]/g, '');
-  };
-
-  // Helper function to create product link with category and subcategory
-  const createProductLink = (categoryName: string, subcategoryName?: string): string => {
-    const categorySlug = nameToSlug(categoryName);
-    if (subcategoryName) {
-      const subcategorySlug = nameToSlug(subcategoryName);
+  // Helper function to create product link with category and subcategory using slugs
+  const createProductLink = (categorySlug: string, subcategorySlug?: string): string => {
+    if (subcategorySlug) {
       return `/products?category=${categorySlug}&subcategory=${subcategorySlug}`;
     }
     return `/products?category=${categorySlug}`;
   };
 
   // Helper function to handle category link clicks
-  const handleCategoryClick = (e: React.MouseEvent<HTMLAnchorElement>, categoryName: string, subcategoryName?: string) => {
+  const handleCategoryClick = (e: React.MouseEvent<HTMLAnchorElement>, categorySlug: string, subcategorySlug?: string) => {
     // If already on products page, use navigate to ensure proper URL update
     if (location.pathname === '/products') {
       e.preventDefault();
-      const link = createProductLink(categoryName, subcategoryName);
+      const link = createProductLink(categorySlug, subcategorySlug);
       navigate(link, { replace: false });
     }
     // Otherwise, let Link handle it normally
   };
+
+  // Fetch categories and their subcategories
+  useEffect(() => {
+    const fetchCategoriesData = async () => {
+      try {
+        setLoading(true);
+        const categoriesResponse = await productAPI.getCategories();
+        const categoriesData: Category[] = categoriesResponse.data.results || categoriesResponse.data || [];
+        
+        // Fetch subcategories for each category
+        const categoriesWithSubcategories = await Promise.all(
+          categoriesData.map(async (category) => {
+            try {
+              const subcategoriesResponse = await productAPI.getSubcategories(category.slug);
+              const subcategories: Subcategory[] = subcategoriesResponse.data.results || subcategoriesResponse.data || [];
+              return {
+                ...category,
+                subcategories
+              };
+            } catch (error) {
+              console.error(`Error fetching subcategories for ${category.name}:`, error);
+              return {
+                ...category,
+                subcategories: []
+              };
+            }
+          })
+        );
+        
+        setCategories(categoriesWithSubcategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategoriesData();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -72,131 +121,36 @@ const CategoryTabs: React.FC = () => {
       setActiveMobileDropdown(category);
     }
   };
-  const allCategories = [
-    {
-      title: 'Sofas',
-      items: ['3 Seater', '2 Seater', '1 Seater', 'Sofa Sets']
-    },
-    {
-      title: 'Recliners',
-      items: ['1 Seater Recliners', '2 Seater Recliners', '3 Seater Recliners', 'Recliners Sets']
-    },
-    {
-      title: 'Rocking Chairs',
-      items: ['Modern', 'Relax in Motion', 'Classic']
-    },
-    {
-      title: 'Beds',
-      items: ['Queen Size Beds', 'King Size Beds', 'Single Size Beds', 'Poster Beds', 'Folding Beds']
-    },
-    {
-      title: 'Centre Tables',
-      items: ['Coffee Tables', 'Coffee Tables Set']
-    },
-    {
-      title: 'Sectional Sofas',
-      items: ['LHS Sectionals', 'RHS Sectionals', 'Corner Sofas']
-    },
-    {
-      title: 'Chaise Loungers',
-      items: ['3 Seater Chaise Loungers', '2 Seater Chaise Loungers']
-    },
-    {
-      title: 'Chairs',
-      items: ['Arm Chairs', 'Accent Chairs']
-    },
-    {
-      title: 'Sofa Cum Beds',
-      items: ['Pull Out Type', 'Convertible Type']
-    },
-    {
-      title: 'Shoe Racks',
-      items: ['Shoe Cabinets', 'Shoe Racks']
-    },
-    {
-      title: 'Settees & Benches',
-      items: ['Settees', 'Benches']
-    },
-    {
-      title: 'Ottomans',
-      items: ['Ottomans with Storage', 'Decorative Ottomans']
-    },
-    {
-      title: 'Sofa Chairs',
-      items: ['Lounge Chairs', 'Wing Chairs']
-    },
-    {
-      title: 'Stool & Pouffes',
-      items: ['Foot Stools', 'Seating Stools', 'Pouffes']
-    }
-  ];
 
-  const sofaCouchesMega = [
-    {
-      title: 'Sofa & Couches',
-      items: ['3 Seater Sofas', '2 Seater Sofas', '1 Seater Sofas', 'Sofa Sets']
-    },
-    {
-      title: 'Sectional Sofas',
-      items: ['Sectional Sofas', 'LHS Sectional Sofas', 'RHS Sectional Sofas', 'Corner Sofas']
-    },
-    {
-      title: 'Chaise Loungers',
-      items: ['3 Seater Chaise Loungers', '2 Seater Chaise Loungers']
-    }
-  ];
+  // Build "All" categories menu from all categories and their subcategories
+  const getAllCategoriesMenu = () => {
+    return categories.map(category => ({
+      title: category.name,
+      items: category.subcategories.map(sub => sub.name),
+      categorySlug: category.slug,
+      subcategories: category.subcategories
+    }));
+  };
 
-  // Convert sofa chairs into a mini mega-menu (two columns) matching the provided image
-  const sofaChairsMega = [
-    {
-      title: 'Sofa Chairs',
-      items: ['Lounge Chairs', 'Wing Chairs']
-    },
-    {
-      title: 'Chairs',
-      items: ['Arm Chairs', 'Accent Chairs']
-    }
-  ];
+  // Get limited categories for header (max 8 categories + All = 9 total)
+  const getHeaderCategories = () => {
+    return categories.slice(0, 8); // Get first 8 categories
+  };
 
-  // Rocking Chairs as a mini mega-menu (single column) matching the provided image
-  const rockingChairsMega = [
-    {
-      title: 'Rocking Chairs',
-      items: ['Modern', 'Relax in Motion', 'Classic']
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="tab-categories mb-0">
+        <ul className="nav nav-tabs d-none d-md-flex">
+          <li className="nav-item">
+            <span className="nav-link">Loading...</span>
+          </li>
+        </ul>
+      </div>
+    );
+  }
 
-  // Ottomans as a mini mega-menu with two columns matching the provided image
-  const ottomansMega = [
-    {
-      title: 'Ottomans',
-      items: ['Ottomans with Storage', 'Decorative Ottomans']
-    },
-    {
-      title: 'Stool & Pouffes',
-      items: ['Foot Stools', 'Seating Stools', 'Pouffes']
-    }
-  ];
-
-  // Beds & Sofa Cum Beds as a two-column mega-menu matching the provided image
-  const bedsMega = [
-    {
-      title: 'Beds',
-      items: ['Queen Size Beds', 'King Size Beds', 'Single Size Beds', 'Poster Beds', 'Folding Beds']
-    },
-    {
-      title: 'Sofa Cum Beds',
-      items: ['Pull Out Type', 'Convertible Type']
-    }
-  ];
-
-  // Luxury as single-column mega-menu (items from provided image)
-  const luxuryMega = [
-    {
-      title: 'Luxury',
-      items: ['Sofas', 'Recliners', 'Chairs', 'Coffee Tables', 'Bedside Tables', 'Beds', 'Chest of Drawers']
-    }
-  ];
+  const allCategoriesMenu = getAllCategoriesMenu();
+  const headerCategories = getHeaderCategories(); // Max 8 categories
 
   return (
     <div className="tab-categories mb-0">
@@ -206,20 +160,34 @@ const CategoryTabs: React.FC = () => {
           <Link className="nav-link" to="/">All</Link>
           <div className="dropdown-menu mega-menu mega-menu-all">
             <div className="mega-menu-grid">
-              {allCategories.map((category, idx) => (
+              {allCategoriesMenu.map((category, idx) => (
                 <div className="mega-menu-column" key={idx}>
                   <h6 className="mega-menu-title">{category.title}</h6>
                   <ul className="mega-menu-list">
-                    {category.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>
+                    {category.items.length > 0 ? (
+                      category.items.map((item, itemIdx) => {
+                        const subcategory = category.subcategories.find(sub => sub.name === item);
+                        return (
+                          <li key={itemIdx}>
+                            <Link 
+                              to={createProductLink(category.categorySlug, subcategory?.slug)}
+                              onClick={(e) => handleCategoryClick(e, category.categorySlug, subcategory?.slug)}
+                            >
+                              {item}
+                            </Link>
+                          </li>
+                        );
+                      })
+                    ) : (
+                      <li>
                         <Link 
-                          to={createProductLink(category.title, item)}
-                          onClick={(e) => handleCategoryClick(e, category.title, item)}
+                          to={createProductLink(category.categorySlug)}
+                          onClick={(e) => handleCategoryClick(e, category.categorySlug)}
                         >
-                          {item}
+                          View All
                         </Link>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
               ))}
@@ -227,197 +195,48 @@ const CategoryTabs: React.FC = () => {
           </div>
         </li>
 
-        {/* Sofa & Couches as Mega Menu (same style as All) */}
-        <li className="nav-item dropdown">
-          <Link 
-            className="nav-link" 
-            to={createProductLink('Sofa & Couches')}
-            onClick={(e) => handleCategoryClick(e, 'Sofa & Couches')}
-          >
-            Sofa & Couches
-          </Link>
-          <div className="dropdown-menu mega-menu">
-            <div className="mega-menu-grid">
-              {sofaCouchesMega.map((col, idx) => (
-                <div className="mega-menu-column" key={idx}>
-                  <h6 className="mega-menu-title">{col.title}</h6>
+        {/* Dynamic Category Tabs - Limited to 8 categories (9 total with All) */}
+        {headerCategories.map((category) => (
+          <li key={category.id} className="nav-item dropdown">
+            <Link 
+              className="nav-link" 
+              to={createProductLink(category.slug)}
+              onClick={(e) => handleCategoryClick(e, category.slug)}
+            >
+              {category.name}
+            </Link>
+            <div className="dropdown-menu mega-menu">
+              <div className="mega-menu-grid">
+                <div className="mega-menu-column">
+                  <h6 className="mega-menu-title">{category.name}</h6>
                   <ul className="mega-menu-list">
-                    {col.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>
+                    {category.subcategories.length > 0 ? (
+                      category.subcategories.map((subcategory) => (
+                        <li key={subcategory.id}>
+                          <Link 
+                            to={createProductLink(category.slug, subcategory.slug)}
+                            onClick={(e) => handleCategoryClick(e, category.slug, subcategory.slug)}
+                          >
+                            {subcategory.name}
+                          </Link>
+                        </li>
+                      ))
+                    ) : (
+                      <li>
                         <Link 
-                          to={createProductLink(col.title, item)}
-                          onClick={(e) => handleCategoryClick(e, col.title, item)}
+                          to={createProductLink(category.slug)}
+                          onClick={(e) => handleCategoryClick(e, category.slug)}
                         >
-                          {item}
+                          View All
                         </Link>
                       </li>
-                    ))}
+                    )}
                   </ul>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        </li>
-
-        {/* Sofa Chairs as mini Mega Menu (same design as All) */}
-        <li className="nav-item dropdown">
-          <Link 
-            className="nav-link" 
-            to={createProductLink('Sofa Chairs')}
-            onClick={(e) => handleCategoryClick(e, 'Sofa Chairs')}
-          >
-            Sofa Chairs
-          </Link>
-          <div className="dropdown-menu mega-menu">
-            <div className="mega-menu-grid">
-              {sofaChairsMega.map((col, idx) => (
-                <div className="mega-menu-column" key={idx}>
-                  <h6 className="mega-menu-title">{col.title}</h6>
-                  <ul className="mega-menu-list">
-                    {col.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>
-                        <Link 
-                          to={createProductLink(col.title, item)}
-                          onClick={(e) => handleCategoryClick(e, col.title, item)}
-                        >
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </li>
-
-        {/* Rocking Chairs as mini Mega Menu (same design as All) */}
-        <li className="nav-item dropdown">
-          <Link 
-            className="nav-link" 
-            to={createProductLink('Rocking Chairs')}
-            onClick={(e) => handleCategoryClick(e, 'Rocking Chairs')}
-          >
-            Rocking Chairs
-          </Link>
-          <div className="dropdown-menu mega-menu">
-            <div className="mega-menu-grid">
-              {rockingChairsMega.map((col, idx) => (
-                <div className="mega-menu-column" key={idx}>
-                  <h6 className="mega-menu-title">{col.title}</h6>
-                  <ul className="mega-menu-list">
-                    {col.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>
-                        <Link 
-                          to={createProductLink(col.title, item)}
-                          onClick={(e) => handleCategoryClick(e, col.title, item)}
-                        >
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </li>
-
-        {/* Ottomans as mini Mega Menu (same design as All) */}
-        <li className="nav-item dropdown">
-          <Link 
-            className="nav-link" 
-            to={createProductLink('Ottomans')}
-            onClick={(e) => handleCategoryClick(e, 'Ottomans')}
-          >
-            Ottomans
-          </Link>
-          <div className="dropdown-menu mega-menu">
-            <div className="mega-menu-grid">
-              {ottomansMega.map((col, idx) => (
-                <div className="mega-menu-column" key={idx}>
-                  <h6 className="mega-menu-title">{col.title}</h6>
-                  <ul className="mega-menu-list">
-                    {col.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>
-                        <Link 
-                          to={createProductLink(col.title, item)}
-                          onClick={(e) => handleCategoryClick(e, col.title, item)}
-                        >
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </li>
-
-        {/* Beds & Sofa Cum Beds as mega-menu (two columns) */}
-        <li className="nav-item dropdown">
-          <Link 
-            className="nav-link" 
-            to={createProductLink('Beds')}
-            onClick={(e) => handleCategoryClick(e, 'Beds')}
-          >
-            Beds & Sofa Cum Beds
-          </Link>
-          <div className="dropdown-menu mega-menu">
-            <div className="mega-menu-grid">
-              {bedsMega.map((col, idx) => (
-                <div className="mega-menu-column" key={idx}>
-                  <h6 className="mega-menu-title">{col.title}</h6>
-                  <ul className="mega-menu-list">
-                    {col.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>
-                        <Link 
-                          to={createProductLink(col.title, item)}
-                          onClick={(e) => handleCategoryClick(e, col.title, item)}
-                        >
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </li>
-
-        {/* Luxury as mini Mega Menu (matching design) */}
-        <li className="nav-item dropdown">
-          <Link 
-            className="nav-link" 
-            to={createProductLink('Luxury')}
-            onClick={(e) => handleCategoryClick(e, 'Luxury')}
-          >
-            Luxury
-          </Link>
-          <div className="dropdown-menu mega-menu">
-            <div className="mega-menu-grid">
-              {luxuryMega.map((col, idx) => (
-                <div className="mega-menu-column" key={idx}>
-                  <h6 className="mega-menu-title">{col.title}</h6>
-                  <ul className="mega-menu-list">
-                    {col.items.map((item, itemIdx) => (
-                      <li key={itemIdx}>
-                        <Link 
-                          to={createProductLink(col.title, item)}
-                          onClick={(e) => handleCategoryClick(e, col.title, item)}
-                        >
-                          {item}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </li>
+          </li>
+        ))}
       </ul>
 
       {/* Mobile/Tablet Scrollable Tabs */}
@@ -441,24 +260,42 @@ const CategoryTabs: React.FC = () => {
               }}
             >
               <div className="mobile-mega-menu-grid">
-                {allCategories.map((category, idx) => (
+                {allCategoriesMenu.map((category, idx) => (
                   <div className="mobile-mega-menu-column" key={idx}>
                     <h6 className="mobile-mega-menu-title">{category.title}</h6>
                     <ul className="mobile-mega-menu-list">
-                      {category.items.map((item, itemIdx) => (
-                        <li key={itemIdx}>
+                      {category.items.length > 0 ? (
+                        category.items.map((item, itemIdx) => {
+                          const subcategory = category.subcategories.find(sub => sub.name === item);
+                          return (
+                            <li key={itemIdx}>
+                              <Link 
+                                to={createProductLink(category.categorySlug, subcategory?.slug)} 
+                                onClick={(e) => {
+                                  handleCategoryClick(e, category.categorySlug, subcategory?.slug);
+                                  setActiveMobileDropdown(null);
+                                  setDropdownPosition(null);
+                                }}
+                              >
+                                {item}
+                              </Link>
+                            </li>
+                          );
+                        })
+                      ) : (
+                        <li>
                           <Link 
-                            to={createProductLink(category.title, item)} 
+                            to={createProductLink(category.categorySlug)} 
                             onClick={(e) => {
-                              handleCategoryClick(e, category.title, item);
+                              handleCategoryClick(e, category.categorySlug);
                               setActiveMobileDropdown(null);
                               setDropdownPosition(null);
                             }}
                           >
-                            {item}
+                            View All
                           </Link>
                         </li>
-                      ))}
+                      )}
                     </ul>
                   </div>
                 ))}
@@ -467,275 +304,66 @@ const CategoryTabs: React.FC = () => {
           )}
         </div>
         
-        <div className="mobile-category-item">
-          <button 
-            className="mobile-category-link"
-            onClick={(e) => toggleMobileDropdown('sofa', e)}
-          >
-            Sofa & Couches
-            <i className={`bi bi-chevron-${activeMobileDropdown === 'sofa' ? 'up' : 'down'} ms-1`}></i>
-          </button>
-          {activeMobileDropdown === 'sofa' && dropdownPosition && (
-            <div 
-              className="mobile-dropdown-menu"
-              style={{
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                right: 'auto',
-                width: `min(500px, calc(100vw - ${dropdownPosition.left * 2}px))`
-              }}
+        {/* Dynamic Mobile Category Items - Limited to 8 categories */}
+        {headerCategories.map((category) => (
+          <div key={category.id} className="mobile-category-item">
+            <button 
+              className="mobile-category-link"
+              onClick={(e) => toggleMobileDropdown(`cat-${category.id}`, e)}
             >
-              <div className="mobile-mega-menu-grid">
-                {sofaCouchesMega.map((col, idx) => (
-                  <div className="mobile-mega-menu-column" key={idx}>
-                    <h6 className="mobile-mega-menu-title">{col.title}</h6>
+              {category.name}
+              <i className={`bi bi-chevron-${activeMobileDropdown === `cat-${category.id}` ? 'up' : 'down'} ms-1`}></i>
+            </button>
+            {activeMobileDropdown === `cat-${category.id}` && dropdownPosition && (
+              <div 
+                className="mobile-dropdown-menu"
+                style={{
+                  top: `${dropdownPosition.top}px`,
+                  left: `${dropdownPosition.left}px`,
+                  right: 'auto',
+                  width: `min(500px, calc(100vw - ${dropdownPosition.left * 2}px))`
+                }}
+              >
+                <div className="mobile-mega-menu-grid">
+                  <div className="mobile-mega-menu-column">
+                    <h6 className="mobile-mega-menu-title">{category.name}</h6>
                     <ul className="mobile-mega-menu-list">
-                      {col.items.map((item, itemIdx) => (
-                        <li key={itemIdx}>
+                      {category.subcategories.length > 0 ? (
+                        category.subcategories.map((subcategory) => (
+                          <li key={subcategory.id}>
+                            <Link 
+                              to={createProductLink(category.slug, subcategory.slug)} 
+                              onClick={(e) => {
+                                handleCategoryClick(e, category.slug, subcategory.slug);
+                                setActiveMobileDropdown(null);
+                                setDropdownPosition(null);
+                              }}
+                            >
+                              {subcategory.name}
+                            </Link>
+                          </li>
+                        ))
+                      ) : (
+                        <li>
                           <Link 
-                            to={createProductLink(col.title, item)} 
+                            to={createProductLink(category.slug)} 
                             onClick={(e) => {
-                              handleCategoryClick(e, col.title, item);
+                              handleCategoryClick(e, category.slug);
                               setActiveMobileDropdown(null);
                               setDropdownPosition(null);
                             }}
                           >
-                            {item}
+                            View All
                           </Link>
                         </li>
-                      ))}
+                      )}
                     </ul>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mobile-category-item">
-          <button 
-            className="mobile-category-link"
-            onClick={(e) => toggleMobileDropdown('sofa-chairs', e)}
-          >
-            Sofa Chairs
-            <i className={`bi bi-chevron-${activeMobileDropdown === 'sofa-chairs' ? 'up' : 'down'} ms-1`}></i>
-          </button>
-          {activeMobileDropdown === 'sofa-chairs' && dropdownPosition && (
-            <div 
-              className="mobile-dropdown-menu"
-              style={{
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                right: 'auto',
-                width: `min(500px, calc(100vw - ${dropdownPosition.left * 2}px))`
-              }}
-            >
-              <div className="mobile-mega-menu-grid">
-                {sofaChairsMega.map((col, idx) => (
-                  <div className="mobile-mega-menu-column" key={idx}>
-                    <h6 className="mobile-mega-menu-title">{col.title}</h6>
-                    <ul className="mobile-mega-menu-list">
-                      {col.items.map((item, itemIdx) => (
-                        <li key={itemIdx}>
-                          <Link 
-                            to={createProductLink(col.title, item)} 
-                            onClick={(e) => {
-                              handleCategoryClick(e, col.title, item);
-                              setActiveMobileDropdown(null);
-                              setDropdownPosition(null);
-                            }}
-                          >
-                            {item}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mobile-category-item">
-          <button 
-            className="mobile-category-link"
-            onClick={(e) => toggleMobileDropdown('rocking', e)}
-          >
-            Rocking Chairs
-            <i className={`bi bi-chevron-${activeMobileDropdown === 'rocking' ? 'up' : 'down'} ms-1`}></i>
-          </button>
-          {activeMobileDropdown === 'rocking' && dropdownPosition && (
-            <div 
-              className="mobile-dropdown-menu"
-              style={{
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                right: 'auto',
-                width: `min(500px, calc(100vw - ${dropdownPosition.left * 2}px))`
-              }}
-            >
-              <div className="mobile-mega-menu-grid">
-                {rockingChairsMega.map((col, idx) => (
-                  <div className="mobile-mega-menu-column" key={idx}>
-                    <h6 className="mobile-mega-menu-title">{col.title}</h6>
-                    <ul className="mobile-mega-menu-list">
-                      {col.items.map((item, itemIdx) => (
-                        <li key={itemIdx}>
-                          <Link 
-                            to={createProductLink(col.title, item)} 
-                            onClick={(e) => {
-                              handleCategoryClick(e, col.title, item);
-                              setActiveMobileDropdown(null);
-                              setDropdownPosition(null);
-                            }}
-                          >
-                            {item}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mobile-category-item">
-          <button 
-            className="mobile-category-link"
-            onClick={(e) => toggleMobileDropdown('ottomans', e)}
-          >
-            Ottomans
-            <i className={`bi bi-chevron-${activeMobileDropdown === 'ottomans' ? 'up' : 'down'} ms-1`}></i>
-          </button>
-          {activeMobileDropdown === 'ottomans' && dropdownPosition && (
-            <div 
-              className="mobile-dropdown-menu"
-              style={{
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                right: 'auto',
-                width: `min(500px, calc(100vw - ${dropdownPosition.left * 2}px))`
-              }}
-            >
-              <div className="mobile-mega-menu-grid">
-                {ottomansMega.map((col, idx) => (
-                  <div className="mobile-mega-menu-column" key={idx}>
-                    <h6 className="mobile-mega-menu-title">{col.title}</h6>
-                    <ul className="mobile-mega-menu-list">
-                      {col.items.map((item, itemIdx) => (
-                        <li key={itemIdx}>
-                          <Link 
-                            to={createProductLink(col.title, item)} 
-                            onClick={(e) => {
-                              handleCategoryClick(e, col.title, item);
-                              setActiveMobileDropdown(null);
-                              setDropdownPosition(null);
-                            }}
-                          >
-                            {item}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mobile-category-item">
-          <button 
-            className="mobile-category-link"
-            onClick={(e) => toggleMobileDropdown('beds', e)}
-          >
-            Beds & Sofa Cum Beds
-            <i className={`bi bi-chevron-${activeMobileDropdown === 'beds' ? 'up' : 'down'} ms-1`}></i>
-          </button>
-          {activeMobileDropdown === 'beds' && dropdownPosition && (
-            <div 
-              className="mobile-dropdown-menu"
-              style={{
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                right: 'auto',
-                width: `min(500px, calc(100vw - ${dropdownPosition.left * 2}px))`
-              }}
-            >
-              <div className="mobile-mega-menu-grid">
-                {bedsMega.map((col, idx) => (
-                  <div className="mobile-mega-menu-column" key={idx}>
-                    <h6 className="mobile-mega-menu-title">{col.title}</h6>
-                    <ul className="mobile-mega-menu-list">
-                      {col.items.map((item, itemIdx) => (
-                        <li key={itemIdx}>
-                          <Link 
-                            to={createProductLink(col.title, item)} 
-                            onClick={(e) => {
-                              handleCategoryClick(e, col.title, item);
-                              setActiveMobileDropdown(null);
-                              setDropdownPosition(null);
-                            }}
-                          >
-                            {item}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="mobile-category-item">
-          <button 
-            className="mobile-category-link"
-            onClick={(e) => toggleMobileDropdown('luxury', e)}
-          >
-            Luxury
-            <i className={`bi bi-chevron-${activeMobileDropdown === 'luxury' ? 'up' : 'down'} ms-1`}></i>
-          </button>
-          {activeMobileDropdown === 'luxury' && dropdownPosition && (
-            <div 
-              className="mobile-dropdown-menu"
-              style={{
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`,
-                right: 'auto',
-                width: `min(500px, calc(100vw - ${dropdownPosition.left * 2}px))`
-              }}
-            >
-              <div className="mobile-mega-menu-grid">
-                {luxuryMega.map((col, idx) => (
-                  <div className="mobile-mega-menu-column" key={idx}>
-                    <h6 className="mobile-mega-menu-title">{col.title}</h6>
-                    <ul className="mobile-mega-menu-list">
-                      {col.items.map((item, itemIdx) => (
-                        <li key={itemIdx}>
-                          <Link 
-                            to={createProductLink(col.title, item)} 
-                            onClick={(e) => {
-                              handleCategoryClick(e, col.title, item);
-                              setActiveMobileDropdown(null);
-                              setDropdownPosition(null);
-                            }}
-                          >
-                            {item}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
