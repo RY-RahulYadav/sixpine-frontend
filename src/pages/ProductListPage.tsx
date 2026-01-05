@@ -455,12 +455,17 @@ const ProductListPage: React.FC = () => {
         params.material = selectedFilters.materials.join(',');
       }
 
-      // Add price range filter
-      if (selectedFilters.priceRange[0] > 135) { // Use default min price instead of filterOptions
+      // Add price range filter - always send if different from default or if explicitly set
+      const defaultMinPrice = filterOptions.priceRange?.min_price || 135;
+      const defaultMaxPrice = filterOptions.priceRange?.max_price || 25000;
+      
+      // Send min_price if it's greater than default or if explicitly set
+      if (selectedFilters.priceRange[0] > defaultMinPrice || selectedFilters.priceRange[0] !== defaultMinPrice) {
         params.min_price = selectedFilters.priceRange[0];
       }
       
-      if (selectedFilters.priceRange[1] < 100000) { // Use default max price instead of filterOptions
+      // Send max_price if it's less than default or if explicitly set
+      if (selectedFilters.priceRange[1] < defaultMaxPrice || selectedFilters.priceRange[1] !== defaultMaxPrice) {
         params.max_price = selectedFilters.priceRange[1];
       }
 
@@ -471,7 +476,10 @@ const ProductListPage: React.FC = () => {
 
       // Add discount filter (minimum discount percentage)
       if (selectedFilters.discount) {
+        console.log('Adding min_discount filter to API params:', selectedFilters.discount);
         params.min_discount = selectedFilters.discount;
+      } else {
+        console.log('No discount filter selected (discount is null or 0)');
       }
 
       // Add vendor filter
@@ -605,11 +613,14 @@ const ProductListPage: React.FC = () => {
   };
 
   const handleFilterChange = (filterType: string, value: any, shouldCloseOnMobile: boolean = true) => {
-    console.log('Filter changed:', filterType, value);
-    setSelectedFilters((prev) => ({
-      ...prev,
-      [filterType]: value,
-    }));
+    console.log(`Filter changed - ${filterType}:`, value);
+    setSelectedFilters((prev) => {
+      const newFilters = {
+        ...prev,
+        [filterType]: value,
+      };
+      return newFilters;
+    });
     
     // Close filter sidebar on mobile after filter change (except for price inputs)
     if (shouldCloseOnMobile && window.innerWidth <= 991 && showFilters) {
@@ -1034,7 +1045,11 @@ const ProductListPage: React.FC = () => {
                                   type="radio"
                                   name="discount"
                                   checked={selectedFilters.discount === pct}
-                                  onChange={() => handleFilterChange('discount', pct)}
+                                  onChange={() => {
+                                    console.log('Discount filter selected:', pct);
+                                    handleFilterChange('discount', pct);
+                                    setCurrentPage(1); // Reset to first page
+                                  }}
                                 />
                                 <span className="ms-2">{label} & above</span>
                               </label>
@@ -1045,7 +1060,11 @@ const ProductListPage: React.FC = () => {
                               type="radio"
                               name="discount"
                               checked={selectedFilters.discount === null}
-                              onChange={() => handleFilterChange('discount', null)}
+                              onChange={() => {
+                                console.log('Discount filter cleared');
+                                handleFilterChange('discount', null);
+                                setCurrentPage(1); // Reset to first page
+                              }}
                             />
                             <span className="ms-2">All Discounts</span>
                           </label>
