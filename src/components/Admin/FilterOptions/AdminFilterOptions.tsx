@@ -285,8 +285,8 @@ const AdminFilterOptions: React.FC = () => {
       setCategories(newCategories);
       
       // Update both categories sequentially to avoid race conditions
-      await api.updateCategory(category.id, categoryUpdateData);
-      await api.updateCategory(prevCategory.id, prevCategoryUpdateData);
+      await adminAPI.updateCategory(category.id, categoryUpdateData);
+      await adminAPI.updateCategory(prevCategory.id, prevCategoryUpdateData);
       
       // Then refresh from server to ensure consistency
       await fetchCategories();
@@ -350,8 +350,8 @@ const AdminFilterOptions: React.FC = () => {
       setCategories(newCategories);
       
       // Update both categories sequentially to avoid race conditions
-      await api.updateCategory(category.id, categoryUpdateData);
-      await api.updateCategory(nextCategory.id, nextCategoryUpdateData);
+      await adminAPI.updateCategory(category.id, categoryUpdateData);
+      await adminAPI.updateCategory(nextCategory.id, nextCategoryUpdateData);
       
       // Then refresh from server to ensure consistency
       await fetchCategories();
