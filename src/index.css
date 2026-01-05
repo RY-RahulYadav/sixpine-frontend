@@ -95,6 +95,14 @@ button {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Buy Now button theme colors - applies to all Buy Now buttons */
+button.btn-buy-now,
+.btn-buy-now {
+  background-color: var(--theme-buy-button-bg, var(--primary-color)) !important;
+  color: var(--theme-buy-button-text, #ffffff) !important;
+  border-color: var(--theme-buy-button-bg, var(--primary-color)) !important;
+}
+
 img {
   max-width: 100%;
 }

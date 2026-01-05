@@ -673,8 +673,8 @@
   min-width: 0;
   max-width: calc(100% - 52px);
   padding: 12px;
-  background: var(--sixpine-primary);
-  color: var(--sixpine-white);
+  background: var(--theme-buy-button-bg, var(--sixpine-primary));
+  color: var(--theme-buy-button-text, var(--sixpine-white));
   border: none;
   border-radius: 8px;
   font-size: 14px;

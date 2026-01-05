@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import ProductListPage from './pages/ProductListPage';
@@ -57,12 +58,14 @@ import ManagePaymentPage from './pages/ManagePaymentPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CartSidebar from './components/CartSidebar/CartSidebar';
 import UserLayout from './components/UserLayout';
+import RightClickProtection from './components/RightClickProtection';
 
 function AppContent() {
   const { state, closeCartSidebar } = useApp();
 
   return (
     <Router>
+      <RightClickProtection />
       <div className="app-wrapper">
         <CartSidebar isOpen={state.cartSidebarOpen} onClose={closeCartSidebar} />
         <UserLayout>
@@ -152,7 +155,9 @@ function App() {
   return (
     <AppProvider>
       <NotificationProvider>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </NotificationProvider>
     </AppProvider>
   );

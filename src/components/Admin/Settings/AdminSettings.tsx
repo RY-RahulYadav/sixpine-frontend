@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../../context/AppContext';
+import { useTheme } from '../../../context/ThemeContext';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
 
 const AdminSettings: React.FC = () => {
   const { state } = useApp();
+  const { colors: themeColors, refreshColors } = useTheme();
   const currentUser = state.user;
   
   const [passwordForm, setPasswordForm] = useState({
@@ -29,15 +31,50 @@ const AdminSettings: React.FC = () => {
   
   const [saving, setSaving] = useState<boolean>(false);
   const [savingFooter, setSavingFooter] = useState<boolean>(false);
+  const [savingTheme, setSavingTheme] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [footerError, setFooterError] = useState<string | null>(null);
   const [footerSuccess, setFooterSuccess] = useState<string | null>(null);
+  const [themeError, setThemeError] = useState<string | null>(null);
+  const [themeSuccess, setThemeSuccess] = useState<string | null>(null);
+  
+  // Theme color state
+  const [themeSettings, setThemeSettings] = useState({
+    header_bg_color: themeColors.header_bg_color,
+    header_text_color: themeColors.header_text_color,
+    subnav_bg_color: themeColors.subnav_bg_color,
+    subnav_text_color: themeColors.subnav_text_color,
+    category_tabs_bg_color: themeColors.category_tabs_bg_color,
+    category_tabs_text_color: themeColors.category_tabs_text_color,
+    footer_bg_color: themeColors.footer_bg_color,
+    footer_text_color: themeColors.footer_text_color,
+    buy_button_bg_color: themeColors.buy_button_bg_color,
+    buy_button_text_color: themeColors.buy_button_text_color,
+    logo_url: themeColors.logo_url,
+  });
   
   // Fetch footer settings on mount
   useEffect(() => {
     fetchFooterSettings();
   }, []);
+  
+  // Update theme settings when theme colors change
+  useEffect(() => {
+    setThemeSettings({
+      header_bg_color: themeColors.header_bg_color,
+      header_text_color: themeColors.header_text_color,
+      subnav_bg_color: themeColors.subnav_bg_color,
+      subnav_text_color: themeColors.subnav_text_color,
+      category_tabs_bg_color: themeColors.category_tabs_bg_color,
+      category_tabs_text_color: themeColors.category_tabs_text_color,
+      footer_bg_color: themeColors.footer_bg_color,
+      footer_text_color: themeColors.footer_text_color,
+      buy_button_bg_color: themeColors.buy_button_bg_color,
+      buy_button_text_color: themeColors.buy_button_text_color,
+      logo_url: themeColors.logo_url,
+    });
+  }, [themeColors]);
   
   const fetchFooterSettings = async () => {
     try {
@@ -62,6 +99,103 @@ const AdminSettings: React.FC = () => {
       setAdminEmail(settingsMap['admin_email'] || '');
     } catch (error) {
       console.error('Error fetching footer settings:', error);
+    }
+  };
+  
+  const handleThemeSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setThemeSettings({ ...themeSettings, [name]: value });
+    setThemeError(null);
+    setThemeSuccess(null);
+  };
+  
+  const handleThemeSettingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setSavingTheme(true);
+      setThemeError(null);
+      
+      // Update each theme setting
+      await Promise.all([
+        adminAPI.updateGlobalSetting('header_bg_color', themeSettings.header_bg_color, 'Header background color'),
+        adminAPI.updateGlobalSetting('header_text_color', themeSettings.header_text_color, 'Header text color'),
+        adminAPI.updateGlobalSetting('subnav_bg_color', themeSettings.subnav_bg_color, 'Sub navigation background color'),
+        adminAPI.updateGlobalSetting('subnav_text_color', themeSettings.subnav_text_color, 'Sub navigation text color'),
+        adminAPI.updateGlobalSetting('category_tabs_bg_color', themeSettings.category_tabs_bg_color, 'Category tabs background color'),
+        adminAPI.updateGlobalSetting('category_tabs_text_color', themeSettings.category_tabs_text_color, 'Category tabs text color'),
+        adminAPI.updateGlobalSetting('footer_bg_color', themeSettings.footer_bg_color, 'Footer background color'),
+        adminAPI.updateGlobalSetting('footer_text_color', themeSettings.footer_text_color, 'Footer text color'),
+        adminAPI.updateGlobalSetting('buy_button_bg_color', themeSettings.buy_button_bg_color, 'Buy button background color'),
+        adminAPI.updateGlobalSetting('buy_button_text_color', themeSettings.buy_button_text_color, 'Buy button text color'),
+        adminAPI.updateGlobalSetting('logo_url', themeSettings.logo_url, 'Logo URL for header and footer'),
+      ]);
+      
+      // Refresh theme colors to apply changes
+      await refreshColors();
+      
+      setThemeSuccess('Theme colors updated successfully');
+      showToast('Theme colors updated successfully', 'success');
+      
+      setTimeout(() => setThemeSuccess(null), 5000);
+    } catch (err: any) {
+      console.error('Error updating theme settings:', err);
+      const errorMessage = err.response?.data?.error || 'Failed to update theme colors';
+      setThemeError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setSavingTheme(false);
+    }
+  };
+  
+  const handleResetTheme = async () => {
+    const defaultTheme = {
+      header_bg_color: '#212121',
+      header_text_color: '#ffffff',
+      subnav_bg_color: '#1a3ba9',
+      subnav_text_color: '#ffffff',
+      category_tabs_bg_color: '#eeeeee',
+      category_tabs_text_color: '#333333',
+      footer_bg_color: '#212121',
+      footer_text_color: '#ffffff',
+      buy_button_bg_color: '#ff6f00',
+      buy_button_text_color: '#ffffff',
+      logo_url: '/logo.png',
+    };
+    
+    setThemeSettings(defaultTheme);
+    
+    try {
+      setSavingTheme(true);
+      setThemeError(null);
+      
+      await Promise.all([
+        adminAPI.updateGlobalSetting('header_bg_color', defaultTheme.header_bg_color, 'Header background color'),
+        adminAPI.updateGlobalSetting('header_text_color', defaultTheme.header_text_color, 'Header text color'),
+        adminAPI.updateGlobalSetting('subnav_bg_color', defaultTheme.subnav_bg_color, 'Sub navigation background color'),
+        adminAPI.updateGlobalSetting('subnav_text_color', defaultTheme.subnav_text_color, 'Sub navigation text color'),
+        adminAPI.updateGlobalSetting('category_tabs_bg_color', defaultTheme.category_tabs_bg_color, 'Category tabs background color'),
+        adminAPI.updateGlobalSetting('category_tabs_text_color', defaultTheme.category_tabs_text_color, 'Category tabs text color'),
+        adminAPI.updateGlobalSetting('footer_bg_color', defaultTheme.footer_bg_color, 'Footer background color'),
+        adminAPI.updateGlobalSetting('footer_text_color', defaultTheme.footer_text_color, 'Footer text color'),
+        adminAPI.updateGlobalSetting('buy_button_bg_color', defaultTheme.buy_button_bg_color, 'Buy button background color'),
+        adminAPI.updateGlobalSetting('buy_button_text_color', defaultTheme.buy_button_text_color, 'Buy button text color'),
+        adminAPI.updateGlobalSetting('logo_url', defaultTheme.logo_url, 'Logo URL for header and footer'),
+      ]);
+      
+      await refreshColors();
+      
+      setThemeSuccess('Theme colors reset to defaults');
+      showToast('Theme colors reset to defaults', 'success');
+      
+      setTimeout(() => setThemeSuccess(null), 5000);
+    } catch (err: any) {
+      console.error('Error resetting theme settings:', err);
+      const errorMessage = err.response?.data?.error || 'Failed to reset theme colors';
+      setThemeError(errorMessage);
+      showToast(errorMessage, 'error');
+    } finally {
+      setSavingTheme(false);
     }
   };
   
@@ -630,6 +764,394 @@ const AdminSettings: React.FC = () => {
                     Save Admin Email
                   </>
                 )}
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        {/* Theme Colors Settings Card */}
+        <div className="tw-bg-white tw-rounded-xl tw-shadow-lg tw-border-2 tw-border-indigo-100 tw-overflow-hidden hover:tw-shadow-xl tw-transition-all">
+          <div className="tw-bg-gradient-to-r tw-from-indigo-50 tw-via-indigo-100 tw-to-indigo-50 tw-px-6 tw-py-4 tw-border-b-2 tw-border-indigo-200">
+            <h3 className="tw-flex tw-items-center tw-gap-3 tw-text-xl tw-font-bold tw-text-gray-800">
+              <span className="material-symbols-outlined tw-text-indigo-600 tw-text-2xl">palette</span>
+              Theme Colors Settings
+            </h3>
+          </div>
+          
+          {/* Theme success message */}
+          {themeSuccess && (
+            <div className="tw-mx-6 tw-mt-4 tw-p-4 tw-bg-green-50 tw-border-l-4 tw-border-green-500 tw-rounded-lg tw-flex tw-items-center tw-gap-3 tw-shadow-md">
+              <span className="material-symbols-outlined tw-text-green-600 tw-text-2xl">check_circle</span>
+              <span className="tw-text-green-800 tw-font-medium">{themeSuccess}</span>
+            </div>
+          )}
+          
+          {/* Theme error message */}
+          {themeError && (
+            <div className="tw-mx-6 tw-mt-4 tw-p-4 tw-bg-red-50 tw-border-l-4 tw-border-red-500 tw-rounded-lg tw-flex tw-items-center tw-gap-3 tw-shadow-md">
+              <span className="material-symbols-outlined tw-text-red-600 tw-text-2xl">error</span>
+              <span className="tw-text-red-800 tw-font-medium">{themeError}</span>
+            </div>
+          )}
+          
+          <form onSubmit={handleThemeSettingsSubmit} className="tw-p-6">
+            {/* Header Colors */}
+            <div className="tw-mb-6">
+              <h4 className="tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+                <span className="material-symbols-outlined tw-text-indigo-600">menu</span>
+                Header Colors (Top Navigation)
+              </h4>
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                <div className="tw-space-y-2">
+                  <label htmlFor="header_bg_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Background Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="header_bg_color"
+                      name="header_bg_color"
+                      value={themeSettings.header_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.header_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      name="header_bg_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="tw-space-y-2">
+                  <label htmlFor="header_text_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Text Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="header_text_color"
+                      name="header_text_color"
+                      value={themeSettings.header_text_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.header_text_color}
+                      onChange={handleThemeSettingsChange}
+                      name="header_text_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* SubNav Colors */}
+            <div className="tw-mb-6">
+              <h4 className="tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+                <span className="material-symbols-outlined tw-text-indigo-600">navigation</span>
+                Sub Navigation Colors
+              </h4>
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                <div className="tw-space-y-2">
+                  <label htmlFor="subnav_bg_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Background Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="subnav_bg_color"
+                      name="subnav_bg_color"
+                      value={themeSettings.subnav_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.subnav_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      name="subnav_bg_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="tw-space-y-2">
+                  <label htmlFor="subnav_text_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Text Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="subnav_text_color"
+                      name="subnav_text_color"
+                      value={themeSettings.subnav_text_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.subnav_text_color}
+                      onChange={handleThemeSettingsChange}
+                      name="subnav_text_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Category Tabs Colors */}
+            <div className="tw-mb-6">
+              <h4 className="tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+                <span className="material-symbols-outlined tw-text-indigo-600">category</span>
+                Category Tabs Colors
+              </h4>
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                <div className="tw-space-y-2">
+                  <label htmlFor="category_tabs_bg_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Background Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="category_tabs_bg_color"
+                      name="category_tabs_bg_color"
+                      value={themeSettings.category_tabs_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.category_tabs_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      name="category_tabs_bg_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="tw-space-y-2">
+                  <label htmlFor="category_tabs_text_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Text Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="category_tabs_text_color"
+                      name="category_tabs_text_color"
+                      value={themeSettings.category_tabs_text_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.category_tabs_text_color}
+                      onChange={handleThemeSettingsChange}
+                      name="category_tabs_text_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer Colors */}
+            <div className="tw-mb-6">
+              <h4 className="tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+                <span className="material-symbols-outlined tw-text-indigo-600">web</span>
+                Footer Colors
+              </h4>
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                <div className="tw-space-y-2">
+                  <label htmlFor="footer_bg_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Background Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="footer_bg_color"
+                      name="footer_bg_color"
+                      value={themeSettings.footer_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.footer_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      name="footer_bg_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="tw-space-y-2">
+                  <label htmlFor="footer_text_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Text Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="footer_text_color"
+                      name="footer_text_color"
+                      value={themeSettings.footer_text_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.footer_text_color}
+                      onChange={handleThemeSettingsChange}
+                      name="footer_text_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Logo URL */}
+            <div className="tw-mb-6">
+              <h4 className="tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+                <span className="material-symbols-outlined tw-text-indigo-600">image</span>
+                Logo Settings
+              </h4>
+              <div className="tw-space-y-2">
+                <label htmlFor="logo_url" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                  Logo URL (used in header and footer)
+                </label>
+                <input
+                  type="text"
+                  id="logo_url"
+                  name="logo_url"
+                  value={themeSettings.logo_url}
+                  onChange={handleThemeSettingsChange}
+                  placeholder="/logo.png or https://example.com/logo.png"
+                  disabled={savingTheme}
+                  className="tw-w-full tw-px-4 tw-py-3 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500 focus:tw-border-transparent disabled:tw-bg-gray-100 disabled:tw-cursor-not-allowed"
+                />
+                <small className="tw-text-xs tw-text-gray-500 tw-flex tw-items-center tw-gap-1">
+                  <span className="material-symbols-outlined tw-text-xs">info</span>
+                  Enter a relative path (e.g., /logo.png) or full URL (e.g., https://example.com/logo.png)
+                </small>
+                {themeSettings.logo_url && (
+                  <div className="tw-mt-4 tw-p-4 tw-bg-gray-50 tw-rounded-lg tw-border tw-border-gray-200">
+                    <p className="tw-text-sm tw-font-semibold tw-text-gray-700 tw-mb-2">Preview:</p>
+                    <img 
+                      src={themeSettings.logo_url} 
+                      alt="Logo Preview" 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                      className="tw-max-h-20 tw-w-auto"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Buy Button Colors */}
+            <div className="tw-mb-6">
+              <h4 className="tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+                <span className="material-symbols-outlined tw-text-indigo-600">shopping_cart</span>
+                Buy Button Colors (Product Tiles)
+              </h4>
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                <div className="tw-space-y-2">
+                  <label htmlFor="buy_button_bg_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Background Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="buy_button_bg_color"
+                      name="buy_button_bg_color"
+                      value={themeSettings.buy_button_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.buy_button_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      name="buy_button_bg_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="tw-space-y-2">
+                  <label htmlFor="buy_button_text_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Text Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="buy_button_text_color"
+                      name="buy_button_text_color"
+                      value={themeSettings.buy_button_text_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.buy_button_text_color}
+                      onChange={handleThemeSettingsChange}
+                      name="buy_button_text_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="tw-flex tw-gap-4 tw-mt-6">
+              <button
+                type="submit"
+                className="tw-flex-1 tw-px-6 tw-py-3 tw-bg-indigo-600 tw-text-white tw-rounded-lg hover:tw-bg-indigo-700 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-base tw-flex tw-items-center tw-justify-center tw-gap-2 disabled:tw-bg-gray-400 disabled:tw-cursor-not-allowed hover:tw-scale-[1.02] active:tw-scale-95"
+                disabled={savingTheme}
+              >
+                {savingTheme ? (
+                  <>
+                    <span className="spinner-small"></span>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined">save</span>
+                    Save Theme Colors
+                  </>
+                )}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleResetTheme}
+                className="tw-px-6 tw-py-3 tw-bg-gray-200 tw-text-gray-700 tw-rounded-lg hover:tw-bg-gray-300 hover:tw-shadow-md tw-transition-all tw-duration-200 tw-font-semibold tw-text-base tw-flex tw-items-center tw-justify-center tw-gap-2 disabled:tw-cursor-not-allowed"
+                disabled={savingTheme}
+              >
+                <span className="material-symbols-outlined">restart_alt</span>
+                Reset to Defaults
               </button>
             </div>
           </form>

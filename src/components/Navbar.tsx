@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useTheme } from '../context/ThemeContext';
 import { productAPI, addressAPI } from '../services/api';
 
 interface SearchSuggestion {
@@ -20,6 +21,7 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { state, openCartSidebar, logout } = useApp();
+  const { colors: themeColors } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
@@ -292,7 +294,7 @@ const Navbar: React.FC = () => {
         <div className="d-flex align-items-center me-2 flex-shrink-0">
           <Link className="navbar-brand me-2" to="/" style={{ display: 'flex', alignItems: 'center' }}>
             <img 
-              src="/logo.png" 
+              src={themeColors.logo_url || '/logo.png'} 
               alt="Sixpine" 
               style={{ 
                 height: '50px', 
@@ -300,6 +302,9 @@ const Navbar: React.FC = () => {
                 maxWidth: '250px',
                 objectFit: 'contain'
               }} 
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/logo.png';
+              }}
             />
           </Link>
           <div className="pin-code d-none d-lg-flex align-items-center border rounded px-2 py-1">

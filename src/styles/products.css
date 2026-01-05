@@ -130,7 +130,10 @@
     font-weight: 500;
 }
 
-.product-details-page .btn-warning {
+.product-details-page .btn-warning,
+.product-details-page .btn-buy-now {
+  background-color: var(--theme-buy-button-bg, #ff9900) !important;
+  color: var(--theme-buy-button-text, #ffffff) !important;
     background-color: #ff9900;
     border: none;
 }

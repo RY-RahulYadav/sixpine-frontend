@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import styles from "../styles/footer.module.css";
 import API from '../services/api';
 import { useFooterSettings } from '../hooks/useFooterSettings';
+import { useTheme } from '../context/ThemeContext';
 
 interface FooterSettings {
   footer_phone_number: string;
@@ -14,6 +15,7 @@ interface FooterSettings {
 
 export default function Footer() {
   const { whatsAppNumber } = useFooterSettings();
+  const { colors: themeColors } = useTheme();
   const [footerSettings, setFooterSettings] = useState<FooterSettings>({
     footer_phone_number: '',
     footer_linkedin_url: '',
@@ -202,7 +204,7 @@ export default function Footer() {
         <div className={styles.logo}>
           <Link to="/">
             <img 
-              src="/logo.png" 
+              src={themeColors.logo_url || '/logo.png'} 
               alt="Sixpine" 
               style={{ 
                 height: '60px', 
@@ -210,6 +212,9 @@ export default function Footer() {
                 maxWidth: '300px',
                 objectFit: 'contain'
               }} 
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/logo.png';
+              }}
             />
           </Link>
         </div>
