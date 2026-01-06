@@ -3,7 +3,6 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
 import adminAPI from '../../../services/adminApi';
 import { showToast } from '../utils/adminUtils';
-import { useNotification } from '../../../context/NotificationContext';
 
 interface ProductImage {
   id?: number;
@@ -130,7 +129,6 @@ const AdminProductDetail: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const api = useAdminAPI();
-  const { showConfirmation } = useNotification();
   const isSellerPanel = location.pathname.startsWith('/seller');
   const basePath = isSellerPanel ? '/seller' : '/admin';
   const isNew = id === 'new' || !id;

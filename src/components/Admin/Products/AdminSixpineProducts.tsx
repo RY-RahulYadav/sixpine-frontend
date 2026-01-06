@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAdminAPI } from '../../../hooks/useAdminAPI';
 import { formatCurrency, showToast } from '../utils/adminUtils';
-import { useNotification } from '../../../context/NotificationContext';
 import '../../../styles/admin-theme.css';
 
 interface Variant {
