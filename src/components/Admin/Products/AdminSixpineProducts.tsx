@@ -57,6 +57,10 @@ const AdminSixpineProducts: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState<string>(searchParams.get('category') || '');
   const [filterStock, setFilterStock] = useState<string>(searchParams.get('stock_status') || '');
   const [filterActive, setFilterActive] = useState<string>(searchParams.get('is_active') || '');
+  const [selectedProducts, setSelectedProducts] = useState<Set<number>>(new Set());
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState<string>('');
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   
   // Fetch categories for filter dropdown
   useEffect(() => {
@@ -153,26 +157,59 @@ const AdminSixpineProducts: React.FC = () => {
     }
   };
   
-  const handleDeleteProduct = async (id: number) => {
-    const confirmed = await showConfirmation({
-      title: 'Delete Product',
-      message: 'Are you sure you want to delete this product?',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      confirmButtonStyle: 'danger',
+  const handleSelectProduct = (productId: number) => {
+    setSelectedProducts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
     });
+  };
 
-    if (!confirmed) {
+  const handleSelectAll = () => {
+    if (selectedProducts.size === products.length) {
+      setSelectedProducts(new Set());
+    } else {
+      setSelectedProducts(new Set(products.map(p => p.id)));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedProducts.size === 0) {
+      showToast('Please select at least one product to delete', 'warning');
+      return;
+    }
+    setShowDeleteModal(true);
+    setDeleteConfirmText('');
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    if (deleteConfirmText.toLowerCase() !== 'delete product') {
+      showToast('Please type "delete product" to confirm', 'error');
       return;
     }
 
+    const selectedCount = selectedProducts.size;
+    const selectedIds = Array.from(selectedProducts);
+    
+    setIsDeleting(true);
     try {
-      await api.deleteProduct(id);
-      setProducts(products.filter(product => product.id !== id));
-      showToast('Product deleted successfully', 'success');
+      const deletePromises = selectedIds.map(id => api.deleteProduct(id));
+      await Promise.all(deletePromises);
+      
+      setProducts(products.filter(product => !selectedProducts.has(product.id)));
+      setSelectedProducts(new Set());
+      setShowDeleteModal(false);
+      setDeleteConfirmText('');
+      showToast(`${selectedCount} product(s) deleted successfully`, 'success');
     } catch (err) {
-      console.error('Error deleting product:', err);
-      showToast('Failed to delete product', 'error');
+      console.error('Error deleting products:', err);
+      showToast('Failed to delete some products', 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
   
@@ -280,10 +317,35 @@ const AdminSixpineProducts: React.FC = () => {
       
       {/* Products Table */}
       <div className="admin-modern-card">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', 
+          marginBottom: '16px',
+          alignItems: 'center'
+        }}>
+          {selectedProducts.size > 0 && (
+            <button 
+              onClick={handleBulkDelete}
+              className="admin-modern-btn danger"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <span className="material-symbols-outlined">delete</span>
+              Delete Selected ({selectedProducts.size})
+            </button>
+          )}
+        </div>
         <div style={{ overflowX: 'auto' }}>
           <table className="admin-modern-table">
             <thead>
               <tr>
+                <th style={{ width: '50px', textAlign: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={products.length > 0 && selectedProducts.size === products.length}
+                    onChange={handleSelectAll}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th style={{ width: '80px' }}>Image</th>
                 <th>Product</th>
                 <th style={{ width: '120px' }}>Price</th>
@@ -291,12 +353,20 @@ const AdminSixpineProducts: React.FC = () => {
                 <th style={{ width: '200px' }}>Variants</th>
                 <th style={{ width: '150px' }}>Category</th>
                 <th style={{ width: '100px' }}>Status</th>
-                <th style={{ width: '180px', textAlign: 'center' }}>Actions</th>
+                <th style={{ width: '120px', textAlign: 'center' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {products.map((product) => (
                 <tr key={product.id}>
+                  <td style={{ textAlign: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.has(product.id)}
+                      onChange={() => handleSelectProduct(product.id)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
                   <td>
                     {(() => {
                       // Try main_image first, then first variant image
@@ -423,12 +493,6 @@ const AdminSixpineProducts: React.FC = () => {
                       <Link to={`${basePath}/products/${product.id}`} className="admin-modern-btn secondary icon-only">
                         <span className="material-symbols-outlined">edit</span>
                       </Link>
-                      <button 
-                        className="admin-modern-btn danger icon-only"
-                        onClick={() => handleDeleteProduct(product.id)}
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -436,7 +500,7 @@ const AdminSixpineProducts: React.FC = () => {
               
               {products.length === 0 && !loading && (
                 <tr>
-                  <td colSpan={8} style={{ 
+                  <td colSpan={9} style={{ 
                     textAlign: 'center', 
                     padding: '80px 20px',
                     verticalAlign: 'middle',
@@ -492,6 +556,118 @@ const AdminSixpineProducts: React.FC = () => {
             Next
             <span className="material-symbols-outlined">chevron_right</span>
           </button>
+        </div>
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDeleteModal(false);
+              setDeleteConfirmText('');
+            }
+          }}
+        >
+          <div 
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '500px',
+              width: '90%',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>
+              Delete Products
+            </h3>
+            <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '14px' }}>
+              You are about to delete <strong>{selectedProducts.size}</strong> product(s). This action cannot be undone.
+            </p>
+            <p style={{ margin: '0 0 16px 0', color: '#ef4444', fontSize: '14px', fontWeight: '600' }}>
+              Type <strong>"delete product"</strong> to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type 'delete product' to confirm"
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                marginBottom: '20px',
+                boxSizing: 'border-box'
+              }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText('');
+                }}
+                disabled={isDeleting}
+                style={{
+                  padding: '10px 20px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  backgroundColor: 'white',
+                  color: '#374151',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmBulkDelete}
+                disabled={isDeleting || deleteConfirmText.toLowerCase() !== 'delete product'}
+                style={{
+                  padding: '10px 20px',
+                  border: 'none',
+                  borderRadius: '8px',
+                  backgroundColor: isDeleting || deleteConfirmText.toLowerCase() !== 'delete product' ? '#fca5a5' : '#ef4444',
+                  color: 'white',
+                  cursor: isDeleting || deleteConfirmText.toLowerCase() !== 'delete product' ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="spinner-small"></span>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+                    Delete Products
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

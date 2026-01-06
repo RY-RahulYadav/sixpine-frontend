@@ -2814,28 +2814,6 @@ const AdminProductDetail: React.FC = () => {
             >
               {formData.is_featured ? 'Unmark Featured' : 'Mark Featured'}
             </button>
-            <button 
-              className="admin-btn danger" 
-              onClick={handleDelete}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '8px',
-                borderRadius: '8px',
-                border: '1px solid #dc2626',
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-                transition: 'all 0.2s',
-                width: '40px',
-                height: '40px'
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
-            </button>
             <button
               type="button"
               onClick={() => {
