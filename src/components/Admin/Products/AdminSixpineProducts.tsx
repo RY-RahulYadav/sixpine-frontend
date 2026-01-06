@@ -41,7 +41,6 @@ interface Product {
 
 const AdminSixpineProducts: React.FC = () => {
   const api = useAdminAPI();
-  const { showConfirmation } = useNotification();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const isSellerPanel = location.pathname.startsWith('/seller');
@@ -179,7 +178,7 @@ const AdminSixpineProducts: React.FC = () => {
 
   const handleBulkDelete = () => {
     if (selectedProducts.size === 0) {
-      showToast('Please select at least one product to delete', 'warning');
+      showToast('Please select at least one product to delete', 'error');
       return;
     }
     setShowDeleteModal(true);

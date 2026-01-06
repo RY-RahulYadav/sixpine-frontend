@@ -2351,29 +2351,6 @@ const AdminProductDetail: React.FC = () => {
     }
   };
   
-  const handleDelete = async () => {
-    if (!product) return;
-    
-    const confirmed = await showConfirmation({
-      title: 'Delete Product',
-      message: 'Are you sure you want to delete this product?',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      confirmButtonStyle: 'danger',
-    });
-
-    if (!confirmed) {
-      return;
-    }
-    
-    try {
-      await api.deleteProduct(product.id);
-      showSuccess('Product deleted successfully');
-      navigate(`${basePath}/products`);
-    } catch (err) {
-      setError('Failed to delete product');
-    }
-  };
   
   if (loading) {
     return (
