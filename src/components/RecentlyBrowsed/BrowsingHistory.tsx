@@ -4,6 +4,7 @@ import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { productAPI, wishlistAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useTheme } from '../../context/ThemeContext';
 import styles from './RecentlyBrowsed.module.css';
 import cardStyles from '../Products_Details/productdetails_slider1.module.css';
 
@@ -41,6 +42,7 @@ const BrowsingHistory = () => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
   const { showError } = useNotification();
+  const { colors: themeColors } = useTheme();
 
   useEffect(() => {
     fetchBrowsingHistory();
@@ -312,7 +314,7 @@ const BrowsingHistory = () => {
                     onClick={(e) => handleWishlistToggle(item.product.id, e)}
                     title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                     style={{ 
-                      color: isInWishlist ? '#ff6f00' : '#999',
+                      color: isInWishlist ? themeColors.wishlist_icon_color : themeColors.wishlist_icon_inactive_color,
                       cursor: 'pointer'
                     }}
                   />
@@ -338,6 +340,7 @@ const BrowsingHistory = () => {
                       }
                     }}
                     style={{ 
+                      color: themeColors.cart_icon_color,
                       cursor: isCartLoadingForThis ? 'wait' : 'pointer',
                       opacity: isCartLoadingForThis ? 0.6 : 1
                     }}

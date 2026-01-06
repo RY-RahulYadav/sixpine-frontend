@@ -4,6 +4,7 @@ import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import { wishlistAPI } from "../../services/api";
 import { useApp } from "../../context/AppContext";
 import { useNotification } from "../../context/NotificationContext";
+import { useTheme } from "../../context/ThemeContext";
 import styles from "./bannerCards.module.css";
 
 interface ProductCardProps {
@@ -56,6 +57,7 @@ const ProductCard = ({
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
   const { showError } = useNotification();
+  const { colors: themeColors } = useTheme();
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistItemId, setWishlistItemId] = useState<number | null>(null);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
@@ -302,7 +304,7 @@ const ProductCard = ({
             onClick={handleWishlist}
             title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
             style={{ 
-              color: isInWishlist ? '#ff6f00' : '#999',
+              color: isInWishlist ? themeColors.wishlist_icon_color : themeColors.wishlist_icon_inactive_color,
               cursor: isWishlistLoading ? 'wait' : 'pointer',
               opacity: isWishlistLoading ? 0.6 : 1
             }}
@@ -311,6 +313,7 @@ const ProductCard = ({
             onClick={handleAddToCart}
             title="Add to Cart"
             style={{ 
+              color: themeColors.cart_icon_color,
               cursor: isCartLoading ? 'wait' : 'pointer',
               opacity: isCartLoading ? 0.6 : 1
             }}

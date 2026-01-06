@@ -4,6 +4,7 @@ import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { homepageAPI, wishlistAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useTheme } from '../../context/ThemeContext';
 import styles from './Trending.module.css';
 import cardStyles from '../Products_Details/productdetails_slider1.module.css';
 
@@ -82,6 +83,7 @@ const TrendingProducts = () => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
   const { showError } = useNotification();
+  const { colors: themeColors } = useTheme();
   const [trendingProducts, setTrendingProducts] = useState<TrendingProduct[]>(defaultProducts);
   const [, setSectionTitle] = useState('Trending Right Now');
   const [sectionSubtitle, setSectionSubtitle] = useState('Discover what customers are loving this week');
@@ -346,7 +348,7 @@ const TrendingProducts = () => {
                     onClick={handleWishlist}
                     title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                     style={{ 
-                      color: isInWishlist ? '#ff6f00' : '#999',
+                      color: isInWishlist ? themeColors.wishlist_icon_color : themeColors.wishlist_icon_inactive_color,
                       cursor: isWishlistLoadingForThis ? 'wait' : 'pointer',
                       opacity: isWishlistLoadingForThis ? 0.6 : 1
                     }}
@@ -354,6 +356,7 @@ const TrendingProducts = () => {
                   <FaShoppingCart 
                     onClick={handleAddToCart}
                     style={{ 
+                      color: themeColors.cart_icon_color,
                       cursor: isCartLoadingForThis ? 'wait' : 'pointer',
                       opacity: isCartLoadingForThis ? 0.6 : 1
                     }}

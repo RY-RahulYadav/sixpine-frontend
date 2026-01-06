@@ -4,6 +4,7 @@ import { FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { wishlistAPI } from '../../services/api';
 import { useApp } from '../../context/AppContext';
 import { useNotification } from '../../context/NotificationContext';
+import { useTheme } from '../../context/ThemeContext';
 import styles from './RecentlyBrowsed.module.css';
 import cardStyles from '../Products_Details/productdetails_slider1.module.css';
 
@@ -264,7 +265,7 @@ const Wishlist = () => {
                     }}
                     title="Remove from Wishlist"
                     style={{ 
-                      color: '#ff6f00',
+                      color: themeColors.wishlist_icon_color,
                       cursor: 'pointer'
                     }}
                   />
@@ -290,6 +291,7 @@ const Wishlist = () => {
                       }
                     }}
                     style={{ 
+                      color: themeColors.cart_icon_color,
                       cursor: isCartLoadingForThis ? 'wait' : 'pointer',
                       opacity: isCartLoadingForThis ? 0.6 : 1
                     }}

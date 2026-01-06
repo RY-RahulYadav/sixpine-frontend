@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import adminAPI from '../services/adminApi';
+import { productAPI } from '../services/api';
 
 interface ThemeColors {
   // Header colors (all 3 sections)
@@ -18,6 +18,11 @@ interface ThemeColors {
   // Buy button colors
   buy_button_bg_color: string;
   buy_button_text_color: string;
+  
+  // Icon colors
+  cart_icon_color: string;
+  wishlist_icon_color: string;
+  wishlist_icon_inactive_color: string;
   
   // Logo URL
   logo_url: string;
@@ -46,6 +51,11 @@ const defaultColors: ThemeColors = {
   buy_button_bg_color: '#ff6f00', // --primary-color
   buy_button_text_color: '#ffffff',
   
+  // Icon defaults
+  cart_icon_color: '#999999',
+  wishlist_icon_color: '#ff6f00',
+  wishlist_icon_inactive_color: '#999999',
+  
   // Logo default
   logo_url: '/logo.png',
 };
@@ -59,14 +69,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const fetchColors = async () => {
     try {
       setLoading(true);
-      const settings = await adminAPI.getGlobalSettings();
-      const settingsMap: { [key: string]: string } = {};
-      
-      if (Array.isArray(settings.data)) {
-        settings.data.forEach((setting: any) => {
-          settingsMap[setting.key] = setting.value;
-        });
-      }
+      const response = await productAPI.getThemeColors();
+      const settingsMap = response.data || {};
       
       setColors({
         header_bg_color: settingsMap['header_bg_color'] || defaultColors.header_bg_color,
@@ -79,6 +83,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         footer_text_color: settingsMap['footer_text_color'] || defaultColors.footer_text_color,
         buy_button_bg_color: settingsMap['buy_button_bg_color'] || defaultColors.buy_button_bg_color,
         buy_button_text_color: settingsMap['buy_button_text_color'] || defaultColors.buy_button_text_color,
+        cart_icon_color: settingsMap['cart_icon_color'] || defaultColors.cart_icon_color,
+        wishlist_icon_color: settingsMap['wishlist_icon_color'] || defaultColors.wishlist_icon_color,
+        wishlist_icon_inactive_color: settingsMap['wishlist_icon_inactive_color'] || defaultColors.wishlist_icon_inactive_color,
         logo_url: settingsMap['logo_url'] || defaultColors.logo_url,
       });
     } catch (error) {
@@ -106,6 +113,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     root.style.setProperty('--theme-footer-text', colors.footer_text_color);
     root.style.setProperty('--theme-buy-button-bg', colors.buy_button_bg_color);
     root.style.setProperty('--theme-buy-button-text', colors.buy_button_text_color);
+    root.style.setProperty('--theme-cart-icon-color', colors.cart_icon_color);
+    root.style.setProperty('--theme-wishlist-icon-color', colors.wishlist_icon_color);
+    root.style.setProperty('--theme-wishlist-icon-inactive-color', colors.wishlist_icon_inactive_color);
   }, [colors]);
 
   return (

@@ -51,6 +51,9 @@ const AdminSettings: React.FC = () => {
     footer_text_color: themeColors.footer_text_color,
     buy_button_bg_color: themeColors.buy_button_bg_color,
     buy_button_text_color: themeColors.buy_button_text_color,
+    cart_icon_color: themeColors.cart_icon_color,
+    wishlist_icon_color: themeColors.wishlist_icon_color,
+    wishlist_icon_inactive_color: themeColors.wishlist_icon_inactive_color,
     logo_url: themeColors.logo_url,
   });
   
@@ -72,6 +75,9 @@ const AdminSettings: React.FC = () => {
       footer_text_color: themeColors.footer_text_color,
       buy_button_bg_color: themeColors.buy_button_bg_color,
       buy_button_text_color: themeColors.buy_button_text_color,
+      cart_icon_color: themeColors.cart_icon_color,
+      wishlist_icon_color: themeColors.wishlist_icon_color,
+      wishlist_icon_inactive_color: themeColors.wishlist_icon_inactive_color,
       logo_url: themeColors.logo_url,
     });
   }, [themeColors]);
@@ -128,6 +134,9 @@ const AdminSettings: React.FC = () => {
         adminAPI.updateGlobalSetting('footer_text_color', themeSettings.footer_text_color, 'Footer text color'),
         adminAPI.updateGlobalSetting('buy_button_bg_color', themeSettings.buy_button_bg_color, 'Buy button background color'),
         adminAPI.updateGlobalSetting('buy_button_text_color', themeSettings.buy_button_text_color, 'Buy button text color'),
+        adminAPI.updateGlobalSetting('cart_icon_color', themeSettings.cart_icon_color, 'Cart icon color'),
+        adminAPI.updateGlobalSetting('wishlist_icon_color', themeSettings.wishlist_icon_color, 'Wishlist icon color (active)'),
+        adminAPI.updateGlobalSetting('wishlist_icon_inactive_color', themeSettings.wishlist_icon_inactive_color, 'Wishlist icon color (inactive)'),
         adminAPI.updateGlobalSetting('logo_url', themeSettings.logo_url, 'Logo URL for header and footer'),
       ]);
       
@@ -160,6 +169,9 @@ const AdminSettings: React.FC = () => {
       footer_text_color: '#ffffff',
       buy_button_bg_color: '#ff6f00',
       buy_button_text_color: '#ffffff',
+      cart_icon_color: '#999999',
+      wishlist_icon_color: '#ff6f00',
+      wishlist_icon_inactive_color: '#999999',
       logo_url: '/logo.png',
     };
     
@@ -180,6 +192,9 @@ const AdminSettings: React.FC = () => {
         adminAPI.updateGlobalSetting('footer_text_color', defaultTheme.footer_text_color, 'Footer text color'),
         adminAPI.updateGlobalSetting('buy_button_bg_color', defaultTheme.buy_button_bg_color, 'Buy button background color'),
         adminAPI.updateGlobalSetting('buy_button_text_color', defaultTheme.buy_button_text_color, 'Buy button text color'),
+        adminAPI.updateGlobalSetting('cart_icon_color', defaultTheme.cart_icon_color, 'Cart icon color'),
+        adminAPI.updateGlobalSetting('wishlist_icon_color', defaultTheme.wishlist_icon_color, 'Wishlist icon color (active)'),
+        adminAPI.updateGlobalSetting('wishlist_icon_inactive_color', defaultTheme.wishlist_icon_inactive_color, 'Wishlist icon color (inactive)'),
         adminAPI.updateGlobalSetting('logo_url', defaultTheme.logo_url, 'Logo URL for header and footer'),
       ]);
       
@@ -1117,6 +1132,96 @@ const AdminSettings: React.FC = () => {
                       value={themeSettings.buy_button_text_color}
                       onChange={handleThemeSettingsChange}
                       name="buy_button_text_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Icon Colors Section */}
+            <div className="tw-mt-8 tw-p-6 tw-bg-white tw-rounded-xl tw-shadow-sm tw-border tw-border-gray-200">
+              <div className="tw-flex tw-items-center tw-gap-3 tw-mb-6">
+                <span className="material-symbols-outlined tw-text-2xl tw-text-indigo-600">favorite</span>
+                <h3 className="tw-text-xl tw-font-bold tw-text-gray-800">Icon Colors</h3>
+              </div>
+              
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6">
+                {/* Cart Icon Color */}
+                <div className="tw-space-y-2">
+                  <label htmlFor="cart_icon_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Cart Icon Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="cart_icon_color"
+                      name="cart_icon_color"
+                      value={themeSettings.cart_icon_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.cart_icon_color}
+                      onChange={handleThemeSettingsChange}
+                      name="cart_icon_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                
+                {/* Wishlist Icon Color (Active) */}
+                <div className="tw-space-y-2">
+                  <label htmlFor="wishlist_icon_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Wishlist Icon Color (Active)
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="wishlist_icon_color"
+                      name="wishlist_icon_color"
+                      value={themeSettings.wishlist_icon_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.wishlist_icon_color}
+                      onChange={handleThemeSettingsChange}
+                      name="wishlist_icon_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6 tw-mt-6">
+                {/* Wishlist Icon Color (Inactive) */}
+                <div className="tw-space-y-2">
+                  <label htmlFor="wishlist_icon_inactive_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Wishlist Icon Color (Inactive)
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="wishlist_icon_inactive_color"
+                      name="wishlist_icon_inactive_color"
+                      value={themeSettings.wishlist_icon_inactive_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.wishlist_icon_inactive_color}
+                      onChange={handleThemeSettingsChange}
+                      name="wishlist_icon_inactive_color"
                       disabled={savingTheme}
                       className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
                     />

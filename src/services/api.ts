@@ -44,8 +44,16 @@ API.interceptors.response.use(
         // Token expired or invalid (not a timeout)
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
-        // Only redirect if not already on login page
-        if (!window.location.pathname.includes('/login')) {
+        
+        // Define public routes that should not redirect to login
+        const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/products', '/products-details', '/about', '/career', '/global-selling', '/press-release', '/privacy-policy', '/contact', '/trending', '/best-deals', '/terms-and-conditions', '/warranty-policy', '/faqs', '/help', '/help-center'];
+        
+        // Only redirect to login if not on a public route and not already on login page
+        const currentPath = window.location.pathname;
+        const isPublicRoute = publicRoutes.some(route => currentPath === route || currentPath.startsWith(route + '/'));
+        const isLoginPage = currentPath.includes('/login');
+        
+        if (!isPublicRoute && !isLoginPage) {
           window.location.href = '/login';
         }
       }
@@ -229,6 +237,8 @@ export const productAPI = {
     API.get(`/search/suggestions/?q=${encodeURIComponent(query)}`),
   
   getHomeData: () => API.get('/home-data/'),
+  
+  getThemeColors: () => API.get('/theme-colors/'),
   
   getProductReviews: (slug: string) => API.get(`/products/${slug}/reviews/`),
   
