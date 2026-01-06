@@ -166,10 +166,10 @@
 }
 
 .buyBtn {
-  background: #ff7a00;
+  background: var(--theme-buy-button-bg, #ff7a00);
   border: none;
   padding: 8px 12px;
-  color: #fff;
+  color: var(--theme-buy-button-text, #fff);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -179,7 +179,8 @@
 }
 
 .buyBtn:hover {
-  background: #e66800;
+  background: var(--theme-buy-button-bg, #e66800);
+  opacity: 0.9;
 }
 .actionRow {
   display: flex;
@@ -193,11 +194,15 @@
   display: flex;
   justify-content: space-around; 
   gap: 20px;
-  color: #444;
+  color: var(--theme-cart-icon-color, #444);
   font-size: 1.5rem;
   cursor: pointer;
   margin-top: 10px;
   padding-top: 5px;
+}
+
+.productIcons svg {
+  color: inherit;
 }
 
 /* Slider Arrows */

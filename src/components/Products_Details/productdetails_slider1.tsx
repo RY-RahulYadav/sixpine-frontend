@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 import { useNotification } from "../../context/NotificationContext";
+import { useTheme } from "../../context/ThemeContext";
 import { wishlistAPI } from "../../services/api";
 import styles from "./productdetails_slider1.module.css";
 import {
@@ -40,6 +41,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
   const { showError } = useNotification();
+  const { colors: themeColors } = useTheme();
   const slider1 = useRef<HTMLDivElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [hearts, setHearts] = useState(() => products.map(() => false));
@@ -340,7 +342,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
                 onClick={(e) => handleWishlist(e, p, idx)}
                 title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                 style={{ 
-                  color: isInWishlist ? '#ff6f00' : '#999',
+                  color: isInWishlist ? themeColors.wishlist_icon_color : themeColors.wishlist_icon_inactive_color,
                   cursor: isWishlistLoadingForThis ? 'wait' : 'pointer',
                   opacity: isWishlistLoadingForThis ? 0.6 : 1
                 }}
@@ -348,6 +350,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
               <FaShoppingCart 
                 onClick={(e) => handleAddToCart(e, p)}
                 style={{ 
+                  color: themeColors.cart_icon_color,
                   cursor: isCartLoadingForThis ? 'wait' : 'pointer',
                   opacity: isCartLoadingForThis ? 0.6 : 1
                 }}

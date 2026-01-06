@@ -825,9 +825,19 @@
 }
 
 .btn-danger {
-    color: #fff;
-    background-color: var(--blue01) !important;
-    border-color: var(--blue01) !important;
+    color: var(--theme-buy-button-text, #fff) !important;
+    background-color: var(--theme-buy-button-bg, var(--blue01)) !important;
+    border-color: var(--theme-buy-button-bg, var(--blue01)) !important;
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+/* Cart icon color for Bootstrap icons */
+.product-details-page .bi-cart-plus,
+.product-details-page .bi-cart {
+    color: var(--theme-cart-icon-color, inherit) !important;
 }
 
 

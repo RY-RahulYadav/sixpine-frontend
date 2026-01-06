@@ -40,6 +40,7 @@ const Wishlist = () => {
   const navigate = useNavigate();
   const { state, addToCart } = useApp();
   const { showError } = useNotification();
+  const { colors: themeColors } = useTheme();
 
   useEffect(() => {
     if (state.isAuthenticated) {

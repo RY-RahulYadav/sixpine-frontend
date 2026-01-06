@@ -930,7 +930,7 @@
   border-radius: 20%;
   border: 1px solid #e6e6e6;
   background: #ffffff;
-  color: #0f1111;
+  color: var(--theme-cart-icon-color, #0f1111);
   font-size: 1.1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   cursor: pointer;
@@ -943,6 +943,7 @@
 
 .btn-cart-icon i {
   pointer-events: none;
+  color: inherit;
 }
 
 @media (max-width: 576px) {

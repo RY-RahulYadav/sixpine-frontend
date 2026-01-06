@@ -1621,13 +1621,14 @@
 }
 
 .buyNow {
-  background: #ffa41c;
-  border: 1px solid #ff8f00;
-  color: #0f1111;
+  background: var(--theme-buy-button-bg, #ffa41c);
+  border: 1px solid var(--theme-buy-button-bg, #ff8f00);
+  color: var(--theme-buy-button-text, #0f1111);
 }
 
 .buyNow:hover {
-  background: #fa8900;
+  background: var(--theme-buy-button-bg, #fa8900);
+  opacity: 0.9;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 

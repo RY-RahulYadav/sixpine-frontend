@@ -134,12 +134,13 @@
 .product-details-page .btn-buy-now {
   background-color: var(--theme-buy-button-bg, #ff9900) !important;
   color: var(--theme-buy-button-text, #ffffff) !important;
-    background-color: #ff9900;
-    border: none;
+  border: none;
 }
 
-.product-details-page .btn-warning:hover {
-    background-color: #e68900;
+.product-details-page .btn-warning:hover,
+.product-details-page .btn-buy-now:hover {
+  background-color: var(--theme-buy-button-bg, #e68900) !important;
+  opacity: 0.9;
 }
 
 
