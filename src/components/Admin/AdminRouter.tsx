@@ -25,6 +25,7 @@ import AdminBrands from './Brands/AdminBrands';
 import AdminOrders from './Orders/AdminOrders';
 import AdminOrderDetail from './Orders/AdminOrderDetail';
 import AdminFilterOptions from './FilterOptions/AdminFilterOptions';
+import AdminNavbarCategories from './NavbarCategories/AdminNavbarCategories';
 import AdminCommunication from './Communication/AdminCommunication';
 import AdminSixpineProducts from './Products/AdminSixpineProducts';
 import AdminProductDetail from './Products/AdminProductDetail';
@@ -107,6 +108,7 @@ const AdminRouter = () => {
         {/* Settings Section */}
         <Route path="payment-charges" element={<AdminPaymentCharges />} />
         <Route path="filter-options" element={<AdminFilterOptions />} />
+        <Route path="navbar-categories" element={<AdminNavbarCategories />} />
         <Route path="settings" element={<AdminSettings />} />
       </Route>
     </Routes>

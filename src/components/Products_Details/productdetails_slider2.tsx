@@ -11,6 +11,7 @@ interface Product {
   reviews: number;
   oldPrice: string;
   newPrice: string;
+  parent_main_image?: string;
 }
 
 // Slider Product Data
@@ -156,7 +157,7 @@ const Crafted = () => {
   const renderProducts = (products: Product[]) =>
     products.map((p: Product, idx: number) => (
       <div className={styles.craftedProductCard} key={idx}>
-        <img src={p.img} alt={p.title} className={styles.productImg1} />
+        <img src={p.parent_main_image || p.img} alt={p.title} className={styles.productImg1} />
         <h4 className={styles.productTitle}>{p.title}</h4>
         <p className={styles.productDesc}>{p.desc}</p>
 

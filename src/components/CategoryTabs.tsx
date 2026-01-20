@@ -2,22 +2,23 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { productAPI } from '../services/api';
 
-interface Category {
+interface NavbarSubcategory {
   id: number;
   name: string;
   slug: string;
-  sort_order?: number;
+  link?: string;
+  is_active: boolean;
+  sort_order: number;
 }
 
-interface Subcategory {
+interface NavbarCategory {
   id: number;
   name: string;
   slug: string;
-  category_id?: number;
-}
-
-interface CategoryWithSubcategories extends Category {
-  subcategories: Subcategory[];
+  image?: string;
+  is_active: boolean;
+  sort_order: number;
+  subcategories: NavbarSubcategory[];
 }
 
 const CategoryTabs: React.FC = () => {
@@ -26,7 +27,7 @@ const CategoryTabs: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  const [categories, setCategories] = useState<NavbarCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Helper function to create product link with category and subcategory using slugs
@@ -48,54 +49,23 @@ const CategoryTabs: React.FC = () => {
     // Otherwise, let Link handle it normally
   };
 
-  // Fetch categories and their subcategories
+  // Fetch navbar categories with subcategories
   useEffect(() => {
-    const fetchCategoriesData = async () => {
+    const fetchNavbarCategories = async () => {
       try {
         setLoading(true);
-        const categoriesResponse = await productAPI.getCategories();
-        const categoriesData: Category[] = categoriesResponse.data.results || categoriesResponse.data || [];
-        
-        // Fetch subcategories for each category
-        const categoriesWithSubcategories = await Promise.all(
-          categoriesData.map(async (category) => {
-            try {
-              const subcategoriesResponse = await productAPI.getSubcategories(category.slug);
-              const subcategories: Subcategory[] = subcategoriesResponse.data.results || subcategoriesResponse.data || [];
-              return {
-                ...category,
-                subcategories
-              };
-            } catch (error) {
-              console.error(`Error fetching subcategories for ${category.name}:`, error);
-              return {
-                ...category,
-                subcategories: []
-              };
-            }
-          })
-        );
-        
-        // Sort by sort_order, then by name
-        const sortedCategories = [...categoriesWithSubcategories].sort((a, b) => {
-          const orderA = a.sort_order ?? 0;
-          const orderB = b.sort_order ?? 0;
-          if (orderA !== orderB) {
-            return orderA - orderB;
-          }
-          return a.name.localeCompare(b.name);
-        });
-        
-        setCategories(sortedCategories);
+        const response = await productAPI.getNavbarCategories();
+        const navbarCategories: NavbarCategory[] = response.data.results || response.data || [];
+        setCategories(navbarCategories);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching navbar categories:', error);
         setCategories([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCategoriesData();
+    fetchNavbarCategories();
   }, []);
 
   useEffect(() => {

@@ -11,6 +11,7 @@ interface DailyDeal {
   id: number;
   name: string;
   image: string;
+  parent_main_image?: string;
   originalPrice: string;
   salePrice: string;
   discount: string;
@@ -341,7 +342,7 @@ const DailyDeals = () => {
             >
               <div className={cardStyles.imageWrapper}>
                 <img 
-                  src={deal.image} 
+                  src={deal.parent_main_image || deal.image} 
                   alt={deal.name} 
                   className={cardStyles.productImg1}
                   onClick={(e) => {

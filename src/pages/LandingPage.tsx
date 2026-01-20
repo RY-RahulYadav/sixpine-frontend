@@ -10,6 +10,7 @@ import FurnitureInfoSection from "../components/Home/FurnitureInfoSection";
 import FurnitureCategories from "../components/Home/furnitureCategories";
 import FurnitureSections from "../components/Home/furnitureSections";
 import FurnitureOfferSection from "../components/Home/furnitureOfferSections";
+import PromotionalBanner from "../components/Home/PromotionalBanner";
 // import HomepageText from "../components/Home/HomepageText";
 import FeatureCard from "../components/Home/FeatureCard";
 import { productAPI } from '../services/api';
@@ -99,6 +100,7 @@ const LandingPage: React.FC = () => {
 
       <div className="homepage_container">
           <HeroSection />
+          <PromotionalBanner />
           <HeroSection2 />
 
           <HeroSection3 />

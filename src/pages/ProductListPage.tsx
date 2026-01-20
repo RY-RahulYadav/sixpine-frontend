@@ -495,6 +495,12 @@ const ProductListPage: React.FC = () => {
         case 'price_high':
           params.sort = 'price_high_to_low';
           break;
+        case 'date_new':
+          params.sort = 'date_new_to_old';
+          break;
+        case 'date_old':
+          params.sort = 'date_old_to_new';
+          break;
         case 'relevance':
         default:
           params.sort = 'relevance';
@@ -722,6 +728,8 @@ const ProductListPage: React.FC = () => {
                     <option value="relevance">Sort: Relevance</option>
                     <option value="price_low">Price: Low to High</option>
                     <option value="price_high">Price: High to Low</option>
+                    <option value="date_new">Date: New to Old</option>
+                    <option value="date_old">Date: Old to New</option>
                   </select>
                 </div>
               </div>

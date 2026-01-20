@@ -87,6 +87,21 @@ interface Recommendation {
   is_active: boolean;
 }
 
+interface Review {
+  id?: number;
+  user?: number;
+  user_name?: string;
+  reviewer_name?: string;
+  rating: number;
+  title: string;
+  comment: string;
+  attachments?: any[];
+  is_verified_purchase?: boolean;
+  is_approved: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface Product {
   id: number;
   title: string;
@@ -95,6 +110,7 @@ interface Product {
   short_description: string;
   long_description: string;
   main_image: string;
+  parent_main_image?: string;
   category: { id: number; name: string };
   subcategory?: { id: number; name: string } | null;
   material?: { id: number; name: string } | null;
@@ -120,6 +136,7 @@ interface Product {
   about_items: Feature[];
   offers: Offer[];
   recommendations: Recommendation[];
+  reviews?: Review[];
   created_at: string;
   updated_at: string;
 }
@@ -155,7 +172,7 @@ const AdminProductDetail: React.FC = () => {
   const [updateProgress, setUpdateProgress] = useState<string>('');
   const [updateResult, setUpdateResult] = useState<{success: boolean, message: string, variants_created?: number, variants_updated?: number, errors?: string[]} | null>(null);
   // New sidebar navigation state
-  type NavigationSection = 'basic' | 'variant' | 'variants' | 'variants-old' | 'variant-details' | 'variant-images' | 'variant-specs' | 'details';
+  type NavigationSection = 'basic' | 'variant' | 'variants' | 'variants-old' | 'variant-details' | 'variant-images' | 'variant-specs' | 'details' | 'reviews';
   const [activeSection, setActiveSection] = useState<NavigationSection>('basic');
   const [activeVariantIndex, setActiveVariantIndex] = useState<number | null>(null);
   const [expandedVariants, setExpandedVariants] = useState<Set<number>>(new Set());
@@ -211,6 +228,7 @@ const AdminProductDetail: React.FC = () => {
     user_guide: string;
     care_instructions: string;
     what_in_box: string;
+    parent_main_image: string;
     meta_title: string;
     meta_description: string;
     is_featured: boolean;
@@ -234,6 +252,7 @@ const AdminProductDetail: React.FC = () => {
     user_guide: '',
     care_instructions: '',
     what_in_box: '',
+    parent_main_image: '',
     meta_title: '',
     meta_description: '',
     is_featured: false,
@@ -257,6 +276,9 @@ const AdminProductDetail: React.FC = () => {
   // Recommendations
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [allProducts, setAllProducts] = useState<any[]>([]);
+  
+  // Reviews
+  const [reviews, setReviews] = useState<Review[]>([]);
   
   // Fetch all data
   useEffect(() => {
@@ -345,6 +367,7 @@ const AdminProductDetail: React.FC = () => {
             user_guide: productData.user_guide || '',
             care_instructions: productData.care_instructions || '',
             what_in_box: productData.what_in_box || '',
+            parent_main_image: productData.parent_main_image || '',
             meta_title: productData.meta_title || '',
             meta_description: productData.meta_description || '',
             is_featured: productData.is_featured || false,
@@ -445,6 +468,9 @@ const AdminProductDetail: React.FC = () => {
             };
           });
           setRecommendations(normalizedRecommendations);
+          
+          // Set reviews
+          setReviews(productData.reviews || []);
           
           // Load subcategories for the selected category
           if (productData.category?.id) {
@@ -1848,6 +1874,27 @@ const AdminProductDetail: React.FC = () => {
     setRecommendations(updated);
   };
   
+  // Review management
+  const handleAddReview = () => {
+    setReviews([...reviews, {
+      rating: 5,
+      title: '',
+      comment: '',
+      is_approved: true,
+      is_verified_purchase: false
+    }]);
+  };
+  
+  const handleRemoveReview = (index: number) => {
+    setReviews(reviews.filter((_, i) => i !== index));
+  };
+  
+  const handleReviewChange = (index: number, field: string, value: any) => {
+    const updated = [...reviews];
+    updated[index] = { ...updated[index], [field]: value };
+    setReviews(updated);
+  };
+  
   const showSuccess = (message: string) => {
     setSuccess(message);
     showToast(message, 'success');
@@ -2114,6 +2161,7 @@ const AdminProductDetail: React.FC = () => {
         payload.user_guide = formData.user_guide;
         payload.care_instructions = formData.care_instructions;
         payload.what_in_box = formData.what_in_box;
+        payload.parent_main_image = formData.parent_main_image;
         payload.meta_title = formData.meta_title;
         payload.meta_description = formData.meta_description;
         payload.is_featured = formData.is_featured;
@@ -2136,6 +2184,15 @@ const AdminProductDetail: React.FC = () => {
           recommendation_type: r.recommendation_type,
           sort_order: r.sort_order || 0,
           is_active: r.is_active !== false
+        }));
+        payload.reviews = reviews.map(rev => ({
+          id: rev.id,
+          rating: rev.rating,
+          title: rev.title,
+          comment: rev.comment,
+          reviewer_name: rev.reviewer_name || '',
+          is_approved: rev.is_approved !== false,
+          is_verified_purchase: rev.is_verified_purchase === true
         }));
       } else {
         // For updates, only send changed fields
@@ -2161,43 +2218,58 @@ const AdminProductDetail: React.FC = () => {
           if (formData.user_guide !== originalProduct.user_guide) payload.user_guide = formData.user_guide;
           if (formData.care_instructions !== originalProduct.care_instructions) payload.care_instructions = formData.care_instructions;
           if (formData.what_in_box !== originalProduct.what_in_box) payload.what_in_box = formData.what_in_box;
+          if (formData.parent_main_image !== originalProduct.parent_main_image) payload.parent_main_image = formData.parent_main_image;
           if (formData.meta_title !== originalProduct.meta_title) payload.meta_title = formData.meta_title;
           if (formData.meta_description !== originalProduct.meta_description) payload.meta_description = formData.meta_description;
           if (formData.is_featured !== originalProduct.is_featured) payload.is_featured = formData.is_featured;
           if (formData.is_active !== originalProduct.is_active) payload.is_active = formData.is_active;
         }
         
-        // IMPORTANT: Always send ALL variants to prevent deletion of unchanged variants
-        // For unchanged variants, send minimal data (just ID and essential fields) to reduce payload size
-        // For changed variants, send full payload
-        // This significantly reduces payload size and processing time for products with many variants (90+)
-        payload.variants = variants.map(v => {
+        // Check if any variants have actually changed
+        const hasAnyVariantChanged = variants.some(v => {
           const original = originalVariants.find(ov => ov.id === v.id);
-          
-          // If variant hasn't changed, send minimal data to reduce payload size
-          if (original && !hasVariantChanged(v, original)) {
-            // Send only ID and essential fields - backend will skip update if nothing changed
-            return {
-              id: v.id,
-              color_id: v.color_id || v.color?.id,
-              sku: v.sku || '',
-              // Minimal required fields to satisfy serializer validation
-              size: v.size || '',
-              pattern: v.pattern || '',
-              quality: v.quality || '',
-              price: v.price ? parseFloat(v.price.toString()) : null,
-              stock_quantity: parseInt(v.stock_quantity.toString()) || 0,
-              is_in_stock: v.is_in_stock !== false,
-              is_active: v.is_active !== false,
-              subcategory_ids: v.subcategory_ids || []
-              // Don't send images, specifications, measurement_specs, style_specs, etc. for unchanged variants
-              // Backend will skip processing these if not provided
-            };
-          }
-          
-          // If variant has changed, send full payload
-          return buildVariantPayload(v);
+          if (!original) return true; // New variant
+          return hasVariantChanged(v, original);
         });
+        
+        // Check if variant count changed (variant added/deleted)
+        const variantCountChanged = variants.length !== originalVariants.length;
+        
+        // Only send variants if they changed or count changed
+        // This significantly reduces payload size and processing time
+        if (hasAnyVariantChanged || variantCountChanged) {
+          // IMPORTANT: Always send ALL variants to prevent deletion of unchanged variants
+          // For unchanged variants, send minimal data (just ID and essential fields) to reduce payload size
+          // For changed variants, send full payload
+          payload.variants = variants.map(v => {
+            const original = originalVariants.find(ov => ov.id === v.id);
+            
+            // If variant hasn't changed, send minimal data to reduce payload size
+            if (original && !hasVariantChanged(v, original)) {
+              // Send only ID and essential fields - backend will skip update if nothing changed
+              return {
+                id: v.id,
+                color_id: v.color_id || v.color?.id,
+                sku: v.sku || '',
+                // Minimal required fields to satisfy serializer validation
+                size: v.size || '',
+                pattern: v.pattern || '',
+                quality: v.quality || '',
+                price: v.price ? parseFloat(v.price.toString()) : null,
+                stock_quantity: parseInt(v.stock_quantity.toString()) || 0,
+                is_in_stock: v.is_in_stock !== false,
+                is_active: v.is_active !== false,
+                subcategory_ids: v.subcategory_ids || []
+                // Don't send images, specifications, measurement_specs, style_specs, etc. for unchanged variants
+                // Backend will skip processing these if not provided
+              };
+            }
+            
+            // If variant has changed, send full payload
+            return buildVariantPayload(v);
+          });
+        }
+        // If no variants changed, don't send variants at all - this saves massive amounts of processing time
         
         // Only send changed features, about_items, recommendations if they changed
         if (!deepEqual(features, originalProduct?.features || [])) {
@@ -2225,6 +2297,18 @@ const AdminProductDetail: React.FC = () => {
             is_active: r.is_active !== false
           }));
         }
+        
+        if (!deepEqual(reviews, originalProduct?.reviews || [])) {
+          payload.reviews = reviews.map(rev => ({
+            id: rev.id,
+            rating: rev.rating,
+            title: rev.title,
+            comment: rev.comment,
+            reviewer_name: rev.reviewer_name || '',
+            is_approved: rev.is_approved !== false,
+            is_verified_purchase: rev.is_verified_purchase === true
+          }));
+        }
       }
       
       console.log('Saving product with payload (optimized):', payload);
@@ -2236,6 +2320,8 @@ const AdminProductDetail: React.FC = () => {
           return current && hasVariantChanged(current, original);
         }).length;
         console.log(`Sending ${payload.variants.length} variant(s) (${changedCount} changed, ${payload.variants.length - changedCount} unchanged)`);
+      } else {
+        console.log('No variants changed - skipping variant update (huge performance boost!)');
       }
       
       let response;
@@ -3950,6 +4036,29 @@ const AdminProductDetail: React.FC = () => {
               </span>
               <span>Details</span>
             </div>
+
+            {/* Reviews Section */}
+            <div 
+              onClick={() => setActiveSection('reviews')}
+              style={{
+                padding: '12px 20px',
+                cursor: 'pointer',
+                backgroundColor: activeSection === 'reviews' ? '#eff6ff' : 'transparent',
+                borderLeft: activeSection === 'reviews' ? '3px solid #3b82f6' : '3px solid transparent',
+                color: activeSection === 'reviews' ? '#1e40af' : '#374151',
+                fontWeight: activeSection === 'reviews' ? '600' : '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginTop: '8px',
+                transition: 'all 0.2s'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                star_rate
+              </span>
+              <span>Reviews</span>
+            </div>
           </div>
 
           {/* Right Content Panel */}
@@ -4028,6 +4137,38 @@ const AdminProductDetail: React.FC = () => {
                 className="tw-w-full"
                 />
               </div>
+            
+            <div className="form-group">
+              <label htmlFor="meta_title">Meta Title</label>
+              <input
+                type="text"
+                id="meta_title"
+                name="meta_title"
+                value={formData.meta_title}
+                onChange={handleChange}
+                placeholder="SEO title for search engines (optional)"
+                className="tw-w-full"
+              />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Custom title for search engines and browser tabs. If left empty, product title will be used.
+              </p>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="meta_description">Meta Description</label>
+              <textarea
+                id="meta_description"
+                name="meta_description"
+                value={formData.meta_description}
+                onChange={handleChange}
+                rows={3}
+                placeholder="SEO description for search engines (optional)"
+                className="tw-w-full"
+              />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Custom description for search engine results. If left empty, short description will be used.
+              </p>
+            </div>
             
             <div className="form-row">
               <div className="form-group">
@@ -4148,6 +4289,22 @@ const AdminProductDetail: React.FC = () => {
                   <span>Assembly Required</span>
                 </label>
                 </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="parent_main_image">Parent Main Image URL</label>
+                <input
+                  type="text"
+                  id="parent_main_image"
+                  name="parent_main_image"
+                  value={formData.parent_main_image}
+                  onChange={handleChange}
+                  placeholder="https://example.com/image.jpg"
+                  className="tw-w-full"
+                />
+                <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  This image will be displayed in product tiles when variants reference this parent product
+                </p>
               </div>
               
               <div className="form-row checkbox-row">
@@ -6792,6 +6949,128 @@ const AdminProductDetail: React.FC = () => {
               )}
             </div>
             
+          </div>
+        )}
+        
+        {/* Reviews Section */}
+        {activeSection === 'reviews' && (
+          <div className="admin-card tw-space-y-3">
+            <div className="tw-flex tw-justify-between tw-items-center tw-mb-4">
+              <div>
+                <h3 className="tw-text-2xl tw-font-bold tw-text-gray-800">Product Reviews</h3>
+                <p className="tw-text-sm tw-text-gray-600 tw-mt-1">Add reviews that will be shown for all variants of this product</p>
+              </div>
+              <button 
+                type="button" 
+                className="tw-flex tw-items-center tw-gap-2 tw-px-5 tw-py-2.5 tw-bg-yellow-500 tw-text-white tw-rounded-lg hover:tw-bg-yellow-600 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-sm hover:tw-scale-105 active:tw-scale-95"
+                onClick={handleAddReview}
+              >
+                <span className="material-symbols-outlined tw-text-lg tw-font-bold">add</span>
+                Add Review
+              </button>
+            </div>
+
+            {reviews.length === 0 ? (
+              <div className="tw-text-center tw-py-12 tw-bg-gray-50 tw-rounded-lg tw-border-2 tw-border-dashed tw-border-gray-300">
+                <span className="material-symbols-outlined tw-text-6xl tw-text-gray-400">star_rate</span>
+                <p className="tw-text-gray-500 tw-mt-4 tw-text-lg">No reviews added yet</p>
+                <p className="tw-text-gray-400 tw-text-sm tw-mt-1">Click "Add Review" to create your first review</p>
+              </div>
+            ) : (
+              <div className="tw-space-y-4">
+                {reviews.map((review, index) => (
+                  <div key={index} className="tw-p-5 tw-bg-gray-50 tw-border-2 tw-border-yellow-200 tw-rounded-lg hover:tw-shadow-md tw-transition-shadow">
+                    <div className="tw-flex tw-justify-between tw-items-start tw-mb-4">
+                      <div className="tw-flex tw-items-center tw-gap-4">
+                        <div>
+                          <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Rating</label>
+                          <div className="tw-flex tw-gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => handleReviewChange(index, 'rating', star)}
+                                className="tw-transition-transform hover:tw-scale-110"
+                              >
+                                <span 
+                                  className="material-symbols-outlined tw-text-2xl"
+                                  style={{ 
+                                    color: star <= review.rating ? '#fbbf24' : '#d1d5db',
+                                    fontVariationSettings: '"FILL" 1'
+                                  }}
+                                >
+                                  star
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="tw-flex tw-gap-4">
+                          <label className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-bg-white tw-border tw-border-gray-300 tw-rounded-md tw-cursor-pointer hover:tw-bg-gray-50">
+                            <input
+                              type="checkbox"
+                              checked={review.is_approved !== false}
+                              onChange={(e) => handleReviewChange(index, 'is_approved', e.target.checked)}
+                              className="tw-w-4 tw-h-4 tw-text-green-600 tw-rounded focus:tw-ring-2 focus:tw-ring-green-500"
+                            />
+                            <span className="tw-text-sm tw-font-medium tw-text-gray-700">Approved</span>
+                          </label>
+                          <label className="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-bg-white tw-border tw-border-gray-300 tw-rounded-md tw-cursor-pointer hover:tw-bg-gray-50">
+                            <input
+                              type="checkbox"
+                              checked={review.is_verified_purchase === true}
+                              onChange={(e) => handleReviewChange(index, 'is_verified_purchase', e.target.checked)}
+                              className="tw-w-4 tw-h-4 tw-text-blue-600 tw-rounded focus:tw-ring-2 focus:tw-ring-blue-500"
+                            />
+                            <span className="tw-text-sm tw-font-medium tw-text-gray-700">Verified Purchase</span>
+                          </label>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="tw-px-3 tw-py-2 tw-bg-red-50 tw-text-red-600 tw-rounded-md hover:tw-bg-red-100 tw-transition-colors tw-flex tw-items-center tw-justify-center"
+                        onClick={() => handleRemoveReview(index)}
+                      >
+                        <span className="material-symbols-outlined tw-text-lg">delete</span>
+                      </button>
+                    </div>
+
+                    <div className="tw-grid tw-grid-cols-1 tw-gap-4">
+                      <div>
+                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Review Title</label>
+                        <input
+                          type="text"
+                          value={review.title || ''}
+                          onChange={(e) => handleReviewChange(index, 'title', e.target.value)}
+                          placeholder="Enter review title..."
+                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-yellow-500 focus:tw-border-transparent tw-text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Review Comment</label>
+                        <textarea
+                          value={review.comment || ''}
+                          onChange={(e) => handleReviewChange(index, 'comment', e.target.value)}
+                          placeholder="Enter review comment..."
+                          rows={4}
+                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-yellow-500 focus:tw-border-transparent tw-text-sm tw-resize-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="tw-block tw-text-xs tw-font-medium tw-text-gray-600 tw-mb-1">Reviewer Name (Optional)</label>
+                        <input
+                          type="text"
+                          value={review.reviewer_name || ''}
+                          onChange={(e) => handleReviewChange(index, 'reviewer_name', e.target.value)}
+                          placeholder="Enter reviewer name (leave empty for 'Anonymous')..."
+                          className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-md focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-yellow-500 focus:tw-border-transparent tw-text-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         

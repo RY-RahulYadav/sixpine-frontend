@@ -17,6 +17,38 @@ import Footer from "../components/Footer";
 import { productAPI, authAPI } from "../services/api";
 import { useApp } from "../context/AppContext";
 
+// Helper function to update meta tags
+const updateMetaTags = (title: string, description: string) => {
+  // Update page title
+  document.title = title || 'Product Details';
+  
+  // Update or create meta description
+  let metaDescription = document.querySelector('meta[name="description"]');
+  if (!metaDescription) {
+    metaDescription = document.createElement('meta');
+    metaDescription.setAttribute('name', 'description');
+    document.head.appendChild(metaDescription);
+  }
+  metaDescription.setAttribute('content', description || '');
+  
+  // Update or create Open Graph tags
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement('meta');
+    ogTitle.setAttribute('property', 'og:title');
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.setAttribute('content', title || '');
+  
+  let ogDescription = document.querySelector('meta[property="og:description"]');
+  if (!ogDescription) {
+    ogDescription = document.createElement('meta');
+    ogDescription.setAttribute('property', 'og:description');
+    document.head.appendChild(ogDescription);
+  }
+  ogDescription.setAttribute('content', description || '');
+};
+
 
 const NewProductDetails: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -100,6 +132,17 @@ const NewProductDetails: React.FC = () => {
         const productResponse = await productAPI.getProductDetail(slug);
         const productData = productResponse.data;
         
+        // Update meta tags if product has custom meta title and description
+        if (productData.meta_title || productData.meta_description) {
+          updateMetaTags(
+            productData.meta_title || productData.title,
+            productData.meta_description || productData.short_description
+          );
+        } else {
+          // Fallback to product title and short description
+          updateMetaTags(productData.title, productData.short_description);
+        }
+        
         // If product has variants and no variant is selected in URL, redirect to first variant
         if (productData.variants && productData.variants.length > 0) {
           const firstVariant = productData.variants.find((v: any) => v.is_active) || productData.variants[0];
@@ -177,6 +220,18 @@ const NewProductDetails: React.FC = () => {
 
     fetchProductData();
   }, [slug]);
+
+  // Cleanup meta tags when component unmounts
+  useEffect(() => {
+    return () => {
+      // Reset to default meta tags when leaving the page
+      document.title = 'Sixpine';
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', '');
+      }
+    };
+  }, []);
 
   if (loading) {
     return (

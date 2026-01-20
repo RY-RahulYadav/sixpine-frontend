@@ -46,6 +46,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, sortBy, onSortChang
             <option value="price-high">Price: High to Low</option>
             <option value="rating">Avg. Customer Review</option>
             <option value="newest">Newest Arrivals</option>
+            <option value="date-new">Date: New to Old</option>
+            <option value="date-old">Date: Old to New</option>
           </select>
         </div>
       </div>

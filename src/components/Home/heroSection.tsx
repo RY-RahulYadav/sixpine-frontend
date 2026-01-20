@@ -58,7 +58,7 @@ const HeroSection = () => {
   const [, setLoading] = useState(true);
   const [specialDealBanner, setSpecialDealBanner] = useState<any>(null);
   const [mattressBanner, setMattressBanner] = useState<any>(null);
-  const [bottomBanner, setBottomBanner] = useState<any>(null);
+  const [, setBottomBanner] = useState<any>(null);
   const contactFormRef = useRef<HTMLFormElement>(null);
 
   // Fetch hero section data from API
@@ -465,25 +465,6 @@ const HeroSection = () => {
           </div>
         </div>
       )}
-      </div>
-
-
-      {/* Bottom Banner */}
-      <div 
-        className={styles.bannerContainer}
-        onClick={() => {
-          const url = bottomBanner?.navigateUrl;
-          if (url && url.trim()) {
-            navigate(url);
-          }
-        }}
-        style={{ cursor: bottomBanner?.navigateUrl ? 'pointer' : 'default' }}
-      >
-        <img
-          src={bottomBanner?.imageUrl || 'https://ii1.pepperfry.com/assets/a08eed1c-bbbd-4e8b-b381-07df5fbfe959.jpg'}
-          alt={bottomBanner?.altText || 'Sixpine Banner'}
-          className={styles.bannerImage}
-        />
       </div>
 
     </div>

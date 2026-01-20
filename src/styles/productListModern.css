@@ -558,7 +558,7 @@
 /* Variant Info */
 .product-variant-info {
   margin: 0;
-  margin-bottom: 8px;
+  /* margin-bottom: 8px; */
 }
 
 .product-variant-info small {

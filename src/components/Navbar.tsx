@@ -11,6 +11,26 @@ interface SearchSuggestion {
   label?: string;
 }
 
+interface NavbarSubcategory {
+  id: number;
+  name: string;
+  slug: string;
+  link?: string;
+  is_active: boolean;
+  sort_order: number;
+}
+
+interface NavbarCategory {
+  id: number;
+  name: string;
+  slug: string;
+  image?: string;
+  is_active: boolean;
+  sort_order: number;
+  subcategories: NavbarSubcategory[];
+}
+
+// Keep old Category interface for search dropdown compatibility
 interface Category {
   id: number;
   name: string;
@@ -25,6 +45,7 @@ const Navbar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [, setNavbarCategories] = useState<NavbarCategory[]>([]);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,7 +59,21 @@ const Navbar: React.FC = () => {
   const debounceRef = useRef<number | null>(null);
   const defaultAddressFoundRef = useRef<boolean>(false);
 
-  // Fetch categories from backend
+  // Fetch navbar categories for navigation dropdown
+  useEffect(() => {
+    const fetchNavbarCategories = async () => {
+      try {
+        const response = await productAPI.getNavbarCategories();
+        setNavbarCategories(response.data.results || response.data || []);
+      } catch (error) {
+        console.error('Error fetching navbar categories:', error);
+      }
+    };
+    
+    fetchNavbarCategories();
+  }, []);
+
+  // Fetch categories for search dropdown (from filter options)
   useEffect(() => {
     const fetchCategories = async () => {
       try {

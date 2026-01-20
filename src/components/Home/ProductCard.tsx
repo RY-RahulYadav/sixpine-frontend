@@ -14,6 +14,7 @@ interface ProductCardProps {
   desc?: string;
   image: string;
   img?: string;
+  parentMainImage?: string;
   rating: number;
   reviews: number;
   price: string;
@@ -38,6 +39,7 @@ const ProductCard = ({
   desc,
   image,
   img,
+  parentMainImage,
   rating,
   reviews,
   price,
@@ -230,7 +232,8 @@ const ProductCard = ({
     return stars;
   };
 
-  const imageSrc = image || img || '/images/placeholder-product.png';
+  // Use parent_main_image if available, otherwise use regular image
+  const imageSrc = parentMainImage || image || img || '/images/placeholder-product.png';
   const displayPrice = newPrice || price;
   const displayDesc = desc || subtitle || '';
 

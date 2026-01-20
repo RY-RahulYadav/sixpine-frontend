@@ -281,6 +281,50 @@ interface FurnitureInfoContent {
   };
 }
 
+interface PromotionalBannerBadge {
+  icon: string;
+  iconUrl: string;
+  topText: string;
+  bottomText: string;
+}
+
+interface PromotionalBannerData {
+  isActive: boolean;
+  // Left Box - Sale Timer or Text
+  useTimerMode: boolean;
+  // Timer Mode fields
+  saleText: string;
+  saleTextColor: string;
+  countdownEndDate: string;
+  timerTextColor: string;
+  endsInText: string;
+  endsInColor: string;
+  // Text Mode fields
+  mainHeadingText: string;
+  mainHeadingColor: string;
+  subHeadingText: string;
+  subHeadingColor: string;
+  leftBoxBackground: string;
+  // Middle Section - Offer
+  showOfferSection: boolean;
+  offerIconUrl: string;
+  offerIconColor: string;
+  offerText: string;
+  offerTextColor: string;
+  discountText: string;
+  discountTextColor: string;
+  // Right Section - Info Badges
+  showInfoBadges: boolean;
+  infoBadges: PromotionalBannerBadge[];
+  badgeIconColor: string;
+  badgeTextColor: string;
+  // Container
+  containerBackground: string;
+  innerBoxBackground: string;
+  // Navigate URL
+  navigateUrl: string;
+}
+
 const AdminHomePageManagement: React.FC = () => {
   const [, setSections] = useState<HomePageContent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -514,6 +558,8 @@ const AdminHomePageManagement: React.FC = () => {
 
   const [furnitureSectionsData, setFurnitureSectionsData] = useState<FurnitureSectionsData>(defaultFurnitureSections);
   const [editingFurnitureSections, setEditingFurnitureSections] = useState<HomePageContent | null>(null);
+  const [discoverSectionEnabled, setDiscoverSectionEnabled] = useState<boolean>(true);
+  const [topRatedSectionEnabled, setTopRatedSectionEnabled] = useState<boolean>(true);
 
   // Default Furniture Offer Sections data - exactly 3 sections
   const defaultFurnitureOfferSections: FurnitureOfferSectionsData = {
@@ -629,6 +675,8 @@ const AdminHomePageManagement: React.FC = () => {
 
   const [bannerCardsData, setBannerCardsData] = useState<BannerCardsData>(defaultBannerCardsData);
   const [editingBannerCards, setEditingBannerCards] = useState<HomePageContent | null>(null);
+  const [slider1Enabled, setSlider1Enabled] = useState<boolean>(true);
+  const [slider2Enabled, setSlider2Enabled] = useState<boolean>(true);
 
   // Default Furniture Info Section data
   const defaultFurnitureInfoContent: FurnitureInfoContent = {
@@ -731,6 +779,53 @@ const AdminHomePageManagement: React.FC = () => {
 
   const [furnitureInfoContent, setFurnitureInfoContent] = useState<FurnitureInfoContent>(defaultFurnitureInfoContent);
   const [editingFurnitureInfo, setEditingFurnitureInfo] = useState<HomePageContent | null>(null);
+
+  // Default Promotional Banner data
+  const defaultPromotionalBannerData: PromotionalBannerData = {
+    isActive: true,
+    // Left Box - Sale Timer or Text
+    useTimerMode: false,
+    // Timer Mode fields
+    saleText: 'SALE',
+    saleTextColor: '#d60f0f',
+    countdownEndDate: '2026-02-15T23:59:59',
+    timerTextColor: '#d60f0f',
+    endsInText: 'ENDS IN',
+    endsInColor: '#d60f0f',
+    // Text Mode fields
+    mainHeadingText: 'New Year Sale',
+    mainHeadingColor: '#d60f0f',
+    subHeadingText: 'Limited Time Offer',
+    subHeadingColor: '#374151',
+    leftBoxBackground: '#ffffff',
+    // Middle Section - Offer
+    showOfferSection: true,
+    offerIconUrl: '',
+    offerIconColor: '#f97316',
+    offerText: 'Visit Your Nearest Store & Get Extra UPTO',
+    offerTextColor: '#6b7280',
+    discountText: '₹ 25,000 INSTANT DISCOUNT',
+    discountTextColor: '#f97316',
+    // Right Section - Info Badges
+    showInfoBadges: true,
+    infoBadges: [
+      { icon: 'Users', iconUrl: '', topText: '20 Lakh+', bottomText: 'Customers' },
+      { icon: 'Package', iconUrl: '', topText: 'Free', bottomText: 'Delivery' },
+      { icon: 'CheckCircle', iconUrl: '', topText: 'Best', bottomText: 'Warranty*' },
+      { icon: 'Building2', iconUrl: '', topText: '15 Lakh sq. ft.', bottomText: 'Mfg. Unit' }
+    ],
+    badgeIconColor: '#f97316',
+    badgeTextColor: '#374151',
+    // Container
+    containerBackground: '#f0f0f0',
+    innerBoxBackground: '#ffffff',
+    // Navigate URL
+    navigateUrl: ''
+  };
+
+  const [promotionalBannerData, setPromotionalBannerData] = useState<PromotionalBannerData>(defaultPromotionalBannerData);
+  const [editingPromotionalBanner, setEditingPromotionalBanner] = useState<HomePageContent | null>(null);
+
   const [products, setProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState<boolean>(false);
 
@@ -874,9 +969,14 @@ const AdminHomePageManagement: React.FC = () => {
           discover: furnitureSections.content.discover || defaultFurnitureSections.discover,
           topRated: furnitureSections.content.topRated || defaultFurnitureSections.topRated
         });
+        // Load individual enabled states from content
+        setDiscoverSectionEnabled(furnitureSections.content.discoverEnabled !== undefined ? furnitureSections.content.discoverEnabled : true);
+        setTopRatedSectionEnabled(furnitureSections.content.topRatedEnabled !== undefined ? furnitureSections.content.topRatedEnabled : true);
       } else {
         setEditingFurnitureSections(null);
         setFurnitureSectionsData(defaultFurnitureSections);
+        setDiscoverSectionEnabled(true);
+        setTopRatedSectionEnabled(true);
       }
 
       // Load Furniture Offer Sections if it exists
@@ -939,9 +1039,14 @@ const AdminHomePageManagement: React.FC = () => {
           slider2ViewAllUrl: bannerCards.content.slider2ViewAllUrl || defaultBannerCardsData.slider2ViewAllUrl,
           slider2Products: bannerCards.content.slider2Products || defaultBannerCardsData.slider2Products
         });
+        // Load individual enabled states from content
+        setSlider1Enabled(bannerCards.content.slider1Enabled !== undefined ? bannerCards.content.slider1Enabled : true);
+        setSlider2Enabled(bannerCards.content.slider2Enabled !== undefined ? bannerCards.content.slider2Enabled : true);
       } else {
         setEditingBannerCards(null);
         setBannerCardsData(defaultBannerCardsData);
+        setSlider1Enabled(true);
+        setSlider2Enabled(true);
       }
 
       // Load Furniture Info Section if it exists
@@ -965,6 +1070,44 @@ const AdminHomePageManagement: React.FC = () => {
         setEditingFurnitureInfo(null);
         setFurnitureInfoContent(defaultFurnitureInfoContent);
       }
+
+      // Load Promotional Banner if it exists
+      const promotionalBanner = sectionsData.find((s: HomePageContent) => s.section_key === 'promotional-banner');
+      if (promotionalBanner && promotionalBanner.content) {
+        setEditingPromotionalBanner(promotionalBanner);
+        setPromotionalBannerData({
+          isActive: promotionalBanner.content.isActive !== undefined ? promotionalBanner.content.isActive : defaultPromotionalBannerData.isActive,
+          useTimerMode: promotionalBanner.content.useTimerMode !== undefined ? promotionalBanner.content.useTimerMode : defaultPromotionalBannerData.useTimerMode,
+          saleText: promotionalBanner.content.saleText || defaultPromotionalBannerData.saleText,
+          saleTextColor: promotionalBanner.content.saleTextColor || defaultPromotionalBannerData.saleTextColor,
+          countdownEndDate: promotionalBanner.content.countdownEndDate || defaultPromotionalBannerData.countdownEndDate,
+          timerTextColor: promotionalBanner.content.timerTextColor || defaultPromotionalBannerData.timerTextColor,
+          endsInText: promotionalBanner.content.endsInText || defaultPromotionalBannerData.endsInText,
+          endsInColor: promotionalBanner.content.endsInColor || defaultPromotionalBannerData.endsInColor,
+          mainHeadingText: promotionalBanner.content.mainHeadingText || defaultPromotionalBannerData.mainHeadingText,
+          mainHeadingColor: promotionalBanner.content.mainHeadingColor || defaultPromotionalBannerData.mainHeadingColor,
+          subHeadingText: promotionalBanner.content.subHeadingText || defaultPromotionalBannerData.subHeadingText,
+          subHeadingColor: promotionalBanner.content.subHeadingColor || defaultPromotionalBannerData.subHeadingColor,
+          leftBoxBackground: promotionalBanner.content.leftBoxBackground || defaultPromotionalBannerData.leftBoxBackground,
+          showOfferSection: promotionalBanner.content.showOfferSection !== undefined ? promotionalBanner.content.showOfferSection : defaultPromotionalBannerData.showOfferSection,
+          offerIconUrl: promotionalBanner.content.offerIconUrl || defaultPromotionalBannerData.offerIconUrl,
+          offerIconColor: promotionalBanner.content.offerIconColor || defaultPromotionalBannerData.offerIconColor,
+          offerText: promotionalBanner.content.offerText || defaultPromotionalBannerData.offerText,
+          offerTextColor: promotionalBanner.content.offerTextColor || defaultPromotionalBannerData.offerTextColor,
+          discountText: promotionalBanner.content.discountText || defaultPromotionalBannerData.discountText,
+          discountTextColor: promotionalBanner.content.discountTextColor || defaultPromotionalBannerData.discountTextColor,
+          showInfoBadges: promotionalBanner.content.showInfoBadges !== undefined ? promotionalBanner.content.showInfoBadges : defaultPromotionalBannerData.showInfoBadges,
+          infoBadges: promotionalBanner.content.infoBadges || defaultPromotionalBannerData.infoBadges,
+          badgeIconColor: promotionalBanner.content.badgeIconColor || defaultPromotionalBannerData.badgeIconColor,
+          badgeTextColor: promotionalBanner.content.badgeTextColor || defaultPromotionalBannerData.badgeTextColor,
+          containerBackground: promotionalBanner.content.containerBackground || defaultPromotionalBannerData.containerBackground,
+          innerBoxBackground: promotionalBanner.content.innerBoxBackground || defaultPromotionalBannerData.innerBoxBackground,
+          navigateUrl: promotionalBanner.content.navigateUrl || defaultPromotionalBannerData.navigateUrl
+        });
+      } else {
+        setEditingPromotionalBanner(null);
+        setPromotionalBannerData(defaultPromotionalBannerData);
+      }
       
       setError(null);
     } catch (err: any) {
@@ -980,6 +1123,7 @@ const AdminHomePageManagement: React.FC = () => {
       setFeatureCardData(defaultFeatureCardData);
       setBannerCardsData(defaultBannerCardsData);
       setFurnitureInfoContent(defaultFurnitureInfoContent);
+      setPromotionalBannerData(defaultPromotionalBannerData);
     } finally {
       setLoading(false);
     }
@@ -1463,7 +1607,9 @@ const AdminHomePageManagement: React.FC = () => {
         section_name: 'Furniture Sections - Discover & Top Rated',
         content: {
           discover: furnitureSectionsData.discover,
-          topRated: furnitureSectionsData.topRated
+          topRated: furnitureSectionsData.topRated,
+          discoverEnabled: discoverSectionEnabled,
+          topRatedEnabled: topRatedSectionEnabled
         },
         is_active: true,
         order: 5
@@ -1570,7 +1716,9 @@ const AdminHomePageManagement: React.FC = () => {
           slider1Products: bannerCardsData.slider1Products,
           slider2Title: bannerCardsData.slider2Title,
           slider2ViewAllUrl: bannerCardsData.slider2ViewAllUrl,
-          slider2Products: bannerCardsData.slider2Products
+          slider2Products: bannerCardsData.slider2Products,
+          slider1Enabled: slider1Enabled,
+          slider2Enabled: slider2Enabled
         },
         is_active: true,
         order: 8
@@ -1617,6 +1765,35 @@ const AdminHomePageManagement: React.FC = () => {
     } catch (err: any) {
       console.error('Error saving furniture info section:', err);
       showToast(err.response?.data?.error || 'Failed to save furniture info section', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSavePromotionalBanner = async () => {
+    try {
+      setSaving(true);
+      
+      const promotionalBannerDataSave = {
+        section_key: 'promotional-banner',
+        section_name: 'Promotional Banner',
+        content: promotionalBannerData,
+        is_active: true,
+        order: 10
+      };
+
+      if (editingPromotionalBanner) {
+        await adminAPI.patchHomepageContent(editingPromotionalBanner.id, promotionalBannerDataSave);
+        showToast('Promotional banner updated successfully', 'success');
+      } else {
+        await adminAPI.createHomepageContent(promotionalBannerDataSave);
+        showToast('Promotional banner created successfully', 'success');
+      }
+      
+      await fetchSections();
+    } catch (err: any) {
+      console.error('Error saving promotional banner:', err);
+      showToast(err.response?.data?.error || 'Failed to save promotional banner', 'error');
     } finally {
       setSaving(false);
     }
@@ -1944,6 +2121,22 @@ const AdminHomePageManagement: React.FC = () => {
               }}
             >
               9. Info Section
+            </button>
+            <span>→</span>
+            <button
+              onClick={() => setActiveTab('promotional-banner')}
+              style={{
+                padding: '6px 12px',
+                backgroundColor: activeTab === 'promotional-banner' ? 'var(--admin-primary)' : 'transparent',
+                color: activeTab === 'promotional-banner' ? 'white' : 'var(--admin-primary)',
+                border: `1px solid ${activeTab === 'promotional-banner' ? 'var(--admin-primary)' : 'var(--admin-border)'}`,
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: activeTab === 'promotional-banner' ? 600 : 400,
+                transition: 'all 0.2s ease'
+              }}
+            >
+              10. Promo Banner
             </button>
           </div>
         </div>
@@ -3268,8 +3461,22 @@ const AdminHomePageManagement: React.FC = () => {
 
             {/* Discover Section */}
             <div className="banner-editor-card">
-              <div className="banner-editor-header">
+              <div className="banner-editor-header" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 className="banner-editor-title">Discover What's New Section</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 16px', backgroundColor: discoverSectionEnabled ? 'var(--admin-success-light, #d4edda)' : 'var(--admin-danger-light, #f8d7da)', borderRadius: '6px', border: `1px solid ${discoverSectionEnabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)'}`}}>
+                  <label className="admin-form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: discoverSectionEnabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)' }}>
+                    <input
+                      type="checkbox"
+                      checked={discoverSectionEnabled}
+                      onChange={(e) => setDiscoverSectionEnabled(e.target.checked)}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>{discoverSectionEnabled ? 'Section Enabled' : 'Section Disabled'}</span>
+                  </label>
+                  <span style={{ fontSize: '12px', color: 'var(--admin-text-secondary)' }}>
+                    {discoverSectionEnabled ? '(Visible on homepage)' : '(Hidden from homepage)'}
+                  </span>
+                </div>
               </div>
               <div className="banner-editor-form">
                 <div className="admin-form-row">
@@ -3379,8 +3586,22 @@ const AdminHomePageManagement: React.FC = () => {
 
             {/* Top Rated Section */}
             <div className="banner-editor-card" style={{ marginTop: 'var(--spacing-xl)' }}>
-              <div className="banner-editor-header">
+              <div className="banner-editor-header" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 className="banner-editor-title">Top-Rated by Indian Homes Section</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 16px', backgroundColor: topRatedSectionEnabled ? 'var(--admin-success-light, #d4edda)' : 'var(--admin-danger-light, #f8d7da)', borderRadius: '6px', border: `1px solid ${topRatedSectionEnabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)'}`}}>
+                  <label className="admin-form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: topRatedSectionEnabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)' }}>
+                    <input
+                      type="checkbox"
+                      checked={topRatedSectionEnabled}
+                      onChange={(e) => setTopRatedSectionEnabled(e.target.checked)}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>{topRatedSectionEnabled ? 'Section Enabled' : 'Section Disabled'}</span>
+                  </label>
+                  <span style={{ fontSize: '12px', color: 'var(--admin-text-secondary)' }}>
+                    {topRatedSectionEnabled ? '(Visible on homepage)' : '(Hidden from homepage)'}
+                  </span>
+                </div>
               </div>
               <div className="banner-editor-form">
                 <div className="admin-form-row">
@@ -3879,14 +4100,16 @@ const AdminHomePageManagement: React.FC = () => {
             </div>
             <div className="admin-section-header">
               <h2 className="admin-section-title">Banner Cards & Product Sliders</h2>
-              <button
-                onClick={handleSaveBannerCards}
-                className="admin-modern-btn primary"
-                disabled={saving}
-                type="button"
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="admin-section-actions">
+                <button
+                  onClick={handleSaveBannerCards}
+                  className="admin-modern-btn primary"
+                  disabled={saving}
+                  type="button"
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
             <div className="banner-editor-form">
               <div className="banner-editor-card">
@@ -3937,7 +4160,23 @@ const AdminHomePageManagement: React.FC = () => {
                 ))}
               </div>
               <div className="banner-editor-card">
-                <h3 className="banner-editor-title">Slider 1</h3>
+                <div className="banner-editor-header" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 className="banner-editor-title">Slider 1 - {bannerCardsData.slider1Title}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 16px', backgroundColor: slider1Enabled ? 'var(--admin-success-light, #d4edda)' : 'var(--admin-danger-light, #f8d7da)', borderRadius: '6px', border: `1px solid ${slider1Enabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)'}`}}>
+                    <label className="admin-form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: slider1Enabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)' }}>
+                      <input
+                        type="checkbox"
+                        checked={slider1Enabled}
+                        onChange={(e) => setSlider1Enabled(e.target.checked)}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      <span>{slider1Enabled ? 'Slider Enabled' : 'Slider Disabled'}</span>
+                    </label>
+                    <span style={{ fontSize: '12px', color: 'var(--admin-text-secondary)' }}>
+                      {slider1Enabled ? '(Visible on homepage)' : '(Hidden from homepage)'}
+                    </span>
+                  </div>
+                </div>
                 <div className="admin-form-row">
                   <div className="admin-form-group">
                     <label className="admin-form-label">Title</label>
@@ -4006,7 +4245,23 @@ const AdminHomePageManagement: React.FC = () => {
                 ))}
               </div>
               <div className="banner-editor-card">
-                <h3 className="banner-editor-title">Slider 2</h3>
+                <div className="banner-editor-header" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 className="banner-editor-title">Slider 2 - {bannerCardsData.slider2Title}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 16px', backgroundColor: slider2Enabled ? 'var(--admin-success-light, #d4edda)' : 'var(--admin-danger-light, #f8d7da)', borderRadius: '6px', border: `1px solid ${slider2Enabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)'}`}}>
+                    <label className="admin-form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: slider2Enabled ? 'var(--admin-success, #28a745)' : 'var(--admin-danger, #dc3545)' }}>
+                      <input
+                        type="checkbox"
+                        checked={slider2Enabled}
+                        onChange={(e) => setSlider2Enabled(e.target.checked)}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      <span>{slider2Enabled ? 'Slider Enabled' : 'Slider Disabled'}</span>
+                    </label>
+                    <span style={{ fontSize: '12px', color: 'var(--admin-text-secondary)' }}>
+                      {slider2Enabled ? '(Visible on homepage)' : '(Hidden from homepage)'}
+                    </span>
+                  </div>
+                </div>
                 <div className="admin-form-row">
                   <div className="admin-form-group">
                     <label className="admin-form-label">Title</label>
@@ -4867,6 +5122,538 @@ const AdminHomePageManagement: React.FC = () => {
                     })}
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Promotional Banner Tab */}
+        {activeTab === 'promotional-banner' && (
+          <div className="hero-section-editor">
+            <div style={{
+              padding: 'var(--spacing-lg)',
+              backgroundColor: 'var(--admin-bg-light)',
+              borderBottom: '2px solid var(--admin-primary)',
+              marginBottom: 'var(--spacing-lg)',
+              borderRadius: '8px 8px 0 0'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-sm)' }}>
+                <span style={{
+                  backgroundColor: 'var(--admin-primary)',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}>10</span>
+                <div>
+                  <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 600, color: 'var(--admin-text)' }}>
+                    Promotional Banner - Sale Timer & Info Badges
+                  </h2>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: 'var(--admin-text-secondary)' }}>
+                    Customize the sale countdown timer, offer text, and info badges
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="admin-section-header">
+              <h2 className="admin-section-title">Promotional Banner Settings</h2>
+              <button
+                onClick={handleSavePromotionalBanner}
+                className="admin-modern-btn primary"
+                disabled={saving}
+                type="button"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+            <div className="banner-editor-form">
+              {/* Active Toggle */}
+              <div className="banner-editor-card">
+                <h3 className="banner-editor-title">Banner Status</h3>
+                <div className="admin-form-group">
+                  <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={promotionalBannerData.isActive}
+                      onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, isActive: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>Show Promotional Banner</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Container Colors */}
+              <div className="banner-editor-card">
+                <h3 className="banner-editor-title">Container Colors</h3>
+                <div className="admin-form-row">
+                  <div className="admin-form-group">
+                    <label className="admin-form-label">Container Background (Outer)</label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <input
+                        type="color"
+                        value={promotionalBannerData.containerBackground}
+                        onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, containerBackground: e.target.value })}
+                        style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                      />
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        value={promotionalBannerData.containerBackground}
+                        onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, containerBackground: e.target.value })}
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                  </div>
+                  <div className="admin-form-group">
+                    <label className="admin-form-label">Inner Box Background</label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <input
+                        type="color"
+                        value={promotionalBannerData.innerBoxBackground}
+                        onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, innerBoxBackground: e.target.value })}
+                        style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                      />
+                      <input
+                        type="text"
+                        className="admin-form-input"
+                        value={promotionalBannerData.innerBoxBackground}
+                        onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, innerBoxBackground: e.target.value })}
+                        style={{ flex: 1 }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="admin-form-group">
+                  <label className="admin-form-label">Navigate URL (optional)</label>
+                  <input
+                    type="text"
+                    className="admin-form-input"
+                    value={promotionalBannerData.navigateUrl}
+                    onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, navigateUrl: e.target.value })}
+                    placeholder="/products or https://example.com"
+                  />
+                </div>
+              </div>
+
+              {/* Left Section - Timer or Text Mode */}
+              <div className="banner-editor-card">
+                <h3 className="banner-editor-title">Left Section - Timer or Text</h3>
+                <div className="admin-form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+                  <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={promotionalBannerData.useTimerMode}
+                      onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, useTimerMode: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>Use Countdown Timer Mode (uncheck for text mode like "New Year Sale")</span>
+                  </label>
+                </div>
+
+                {promotionalBannerData.useTimerMode ? (
+                  <>
+                    {/* Timer Mode Settings */}
+                    <h4 style={{ margin: '0 0 var(--spacing-sm)', color: 'var(--admin-text-secondary)', fontSize: '14px' }}>Timer Mode Settings</h4>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Sale Text</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={promotionalBannerData.saleText}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, saleText: e.target.value })}
+                          placeholder="SALE"
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Sale Text Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.saleTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, saleTextColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.saleTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, saleTextColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Countdown End Date</label>
+                        <input
+                          type="datetime-local"
+                          className="admin-form-input"
+                          value={promotionalBannerData.countdownEndDate.slice(0, 16)}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, countdownEndDate: e.target.value + ':00' })}
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Timer Numbers Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.timerTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, timerTextColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.timerTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, timerTextColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">"Ends In" Text</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={promotionalBannerData.endsInText}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, endsInText: e.target.value })}
+                          placeholder="ENDS IN"
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">"Ends In" Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.endsInColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, endsInColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.endsInColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, endsInColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Text Mode Settings */}
+                    <h4 style={{ margin: '0 0 var(--spacing-sm)', color: 'var(--admin-text-secondary)', fontSize: '14px' }}>Text Mode Settings</h4>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Main Heading (e.g., "New Year Sale")</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={promotionalBannerData.mainHeadingText}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, mainHeadingText: e.target.value })}
+                          placeholder="New Year Sale"
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Main Heading Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.mainHeadingColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, mainHeadingColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.mainHeadingColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, mainHeadingColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Sub Heading (e.g., "Limited Time Offer")</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={promotionalBannerData.subHeadingText}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, subHeadingText: e.target.value })}
+                          placeholder="Limited Time Offer"
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Sub Heading Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.subHeadingColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, subHeadingColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.subHeadingColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, subHeadingColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Offer Section Settings */}
+              <div className="banner-editor-card">
+                <h3 className="banner-editor-title">Offer Section (Center)</h3>
+                <div className="admin-form-group">
+                  <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={promotionalBannerData.showOfferSection}
+                      onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, showOfferSection: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>Show Offer Section</span>
+                  </label>
+                </div>
+                {promotionalBannerData.showOfferSection && (
+                  <>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Offer Icon URL (leave empty for default pin icon)</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={promotionalBannerData.offerIconUrl}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, offerIconUrl: e.target.value })}
+                          placeholder="https://example.com/icon.png or /images/icon.svg"
+                        />
+                        <small style={{ color: '#6b7280', fontSize: '12px', marginTop: '5px', display: 'block' }}>
+                          Enter image URL for custom icon. If empty, default MapPin icon will be used.
+                        </small>
+                      </div>
+                    </div>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Offer Icon Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.offerIconColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, offerIconColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.offerIconColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, offerIconColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Offer Text</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={promotionalBannerData.offerText}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, offerText: e.target.value })}
+                          placeholder="Visit Your Nearest Store & Get Extra UPTO"
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Offer Text Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.offerTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, offerTextColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.offerTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, offerTextColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Discount Text</label>
+                        <input
+                          type="text"
+                          className="admin-form-input"
+                          value={promotionalBannerData.discountText}
+                          onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, discountText: e.target.value })}
+                          placeholder="₹ 25,000 INSTANT DISCOUNT"
+                        />
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Discount Text Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.discountTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, discountTextColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.discountTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, discountTextColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Info Badges Settings */}
+              <div className="banner-editor-card">
+                <h3 className="banner-editor-title">Info Badges (Right Section)</h3>
+                <div className="admin-form-group">
+                  <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={promotionalBannerData.showInfoBadges}
+                      onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, showInfoBadges: e.target.checked })}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                    />
+                    <span>Show Info Badges</span>
+                  </label>
+                </div>
+                {promotionalBannerData.showInfoBadges && (
+                  <>
+                    <div className="admin-form-row">
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Badge Icon Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.badgeIconColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, badgeIconColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.badgeIconColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, badgeIconColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                      <div className="admin-form-group">
+                        <label className="admin-form-label">Badge Text Color</label>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <input
+                            type="color"
+                            value={promotionalBannerData.badgeTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, badgeTextColor: e.target.value })}
+                            style={{ width: '50px', height: '35px', cursor: 'pointer', border: '1px solid var(--admin-border)', borderRadius: '4px' }}
+                          />
+                          <input
+                            type="text"
+                            className="admin-form-input"
+                            value={promotionalBannerData.badgeTextColor}
+                            onChange={(e) => setPromotionalBannerData({ ...promotionalBannerData, badgeTextColor: e.target.value })}
+                            style={{ flex: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <h4 style={{ margin: 'var(--spacing-md) 0 var(--spacing-sm)', color: 'var(--admin-text)' }}>Badges (4 badges)</h4>
+                    {promotionalBannerData.infoBadges.map((badge, index) => (
+                      <div key={index} className="banner-editor-card" style={{ marginBottom: 'var(--spacing-sm)', padding: 'var(--spacing-sm)' }}>
+                        <div className="admin-form-row">
+                          <div className="admin-form-group" style={{ flex: '0 0 100px' }}>
+                            <label className="admin-form-label">Icon</label>
+                            <select
+                              className="admin-form-input"
+                              value={badge.icon}
+                              onChange={(e) => {
+                                const updated = [...promotionalBannerData.infoBadges];
+                                updated[index].icon = e.target.value;
+                                setPromotionalBannerData({ ...promotionalBannerData, infoBadges: updated });
+                              }}
+                            >
+                              <option value="Users">Users</option>
+                              <option value="Package">Package</option>
+                              <option value="CheckCircle">CheckCircle</option>
+                              <option value="Building2">Building2</option>
+                              <option value="MapPin">MapPin</option>
+                            </select>
+                          </div>
+                          <div className="admin-form-group">
+                            <label className="admin-form-label">Icon URL (optional)</label>
+                            <input
+                              type="text"
+                              className="admin-form-input"
+                              value={badge.iconUrl || ''}
+                              onChange={(e) => {
+                                const updated = [...promotionalBannerData.infoBadges];
+                                updated[index].iconUrl = e.target.value;
+                                setPromotionalBannerData({ ...promotionalBannerData, infoBadges: updated });
+                              }}
+                              placeholder="https://example.com/icon.png"
+                            />
+                          </div>
+                          <div className="admin-form-group">
+                            <label className="admin-form-label">Top Text</label>
+                            <input
+                              type="text"
+                              className="admin-form-input"
+                              value={badge.topText}
+                              onChange={(e) => {
+                                const updated = [...promotionalBannerData.infoBadges];
+                                updated[index].topText = e.target.value;
+                                setPromotionalBannerData({ ...promotionalBannerData, infoBadges: updated });
+                              }}
+                            />
+                          </div>
+                          <div className="admin-form-group">
+                            <label className="admin-form-label">Bottom Text</label>
+                            <input
+                              type="text"
+                              className="admin-form-input"
+                              value={badge.bottomText}
+                              onChange={(e) => {
+                                const updated = [...promotionalBannerData.infoBadges];
+                                updated[index].bottomText = e.target.value;
+                                setPromotionalBannerData({ ...promotionalBannerData, infoBadges: updated });
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           </div>

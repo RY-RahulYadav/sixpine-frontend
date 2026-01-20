@@ -15,12 +15,13 @@
 .backToTop {
   text-align: center;
   padding: 12px;
-  background-color: #37475a;
+  background-color: var(--theme-back-to-top-bg, #37475a);
+  color: var(--theme-back-to-top-text, #ffffff);
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 .backToTop:hover {
- background-color: #232f3e;
+  opacity: 0.85;
 }
 
 /* Footer Links */

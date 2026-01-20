@@ -14,6 +14,7 @@ interface Product {
   rating: number;
   reviews: number;
   image: string;
+  parent_main_image?: string;
   productId?: number;
   productSlug?: string;
   navigateUrl?: string;
@@ -216,6 +217,7 @@ const Section = ({ title, subtitle, products, extraClass, sectionKey }: {
               title={p.title}
               subtitle={p.subtitle}
               image={p.image}
+              parentMainImage={p.parent_main_image}
               rating={p.rating}
               reviews={p.reviews}
               price={p.price}
@@ -242,6 +244,8 @@ const Section = ({ title, subtitle, products, extraClass, sectionKey }: {
 const FurnitureSections = () => {
   const [data, setData] = useState<FurnitureSectionsData>(defaultData);
   const [loading, setLoading] = useState(true);
+  const [discoverEnabled, setDiscoverEnabled] = useState(true);
+  const [topRatedEnabled, setTopRatedEnabled] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -254,11 +258,16 @@ const FurnitureSections = () => {
             discover: response.data.content.discover || defaultData.discover,
             topRated: response.data.content.topRated || defaultData.topRated
           });
+          // Check if individual sections are enabled
+          setDiscoverEnabled(response.data.content.discoverEnabled !== undefined ? response.data.content.discoverEnabled : true);
+          setTopRatedEnabled(response.data.content.topRatedEnabled !== undefined ? response.data.content.topRatedEnabled : true);
         }
       } catch (error) {
         console.error('Error fetching furniture sections data:', error);
         // Keep default data if API fails
         setData(defaultData);
+        setDiscoverEnabled(true);
+        setTopRatedEnabled(true);
       } finally {
         setLoading(false);
       }
@@ -279,21 +288,29 @@ const FurnitureSections = () => {
 
   return (
     <div className={styles.furnitureContainer}>
-      <Section
-        title={data.discover.title}
-        subtitle={data.discover.subtitle}
-        products={discoverProducts}
-        extraClass={styles.discoverSection}
-        sectionKey="discover"
-      />
-      <div style={{ marginTop: "40px" }}>
-      <Section
-        title={data.topRated.title}
-        subtitle={data.topRated.subtitle}
-        products={topRatedProducts}
-        extraClass={styles.discoverSection}
-        sectionKey="topRated"
-      /></div>
+      {/* Render Discover section only if enabled */}
+      {discoverEnabled && (
+        <Section
+          title={data.discover.title}
+          subtitle={data.discover.subtitle}
+          products={discoverProducts}
+          extraClass={styles.discoverSection}
+          sectionKey="discover"
+        />
+      )}
+      
+      {/* Render Top Rated section only if enabled */}
+      {topRatedEnabled && (
+        <div style={{ marginTop: discoverEnabled ? "40px" : "0" }}>
+          <Section
+            title={data.topRated.title}
+            subtitle={data.topRated.subtitle}
+            products={topRatedProducts}
+            extraClass={styles.discoverSection}
+            sectionKey="topRated"
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -21,6 +21,7 @@ export interface Product {
   reviews: number;
   oldPrice: string;
   newPrice: string;
+  parent_main_image?: string;
   id?: number;
   productId?: number;
   slug?: string;
@@ -261,7 +262,7 @@ const Crafted: React.FC<ProductDetailsSliderProps> = ({ title, products }) => {
         >
           <div className={styles.imageWrapper}>
             <img 
-              src={p.img} 
+              src={p.parent_main_image || p.img} 
               alt={p.title} 
               className={styles.productImg1}
               onClick={(e) => {

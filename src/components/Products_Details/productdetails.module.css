@@ -260,19 +260,13 @@
   position: absolute;
   left: calc(100% + 10px);
   top: 0;
-  width: 52vw;
-  height: 450.611px;
-  max-width: 52vw;
-  max-height: 450.611px;
+  /* Width and height are set dynamically via JS to match image aspect ratio */
   background-color: #ffffff;
   background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
   border: 1px solid #e3e6e6;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   pointer-events: none;
-  padding: 20px 50px;
   box-sizing: border-box;
 }
 

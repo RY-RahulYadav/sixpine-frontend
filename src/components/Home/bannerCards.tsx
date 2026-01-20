@@ -20,6 +20,7 @@ interface Product {
   reviews: number;
   oldPrice: string;
   newPrice: string;
+  parent_main_image?: string;
   productId?: number;
   productSlug?: string;
   navigateUrl?: string;
@@ -168,6 +169,8 @@ const BannerCards = () => {
   const [slider2ViewAllUrl, setSlider2ViewAllUrl] = useState("#");
   const [slider2Products, setSlider2Products] = useState<Product[]>(defaultProducts2);
   const [loading, setLoading] = useState(true);
+  const [slider1Enabled, setSlider1Enabled] = useState(true);
+  const [slider2Enabled, setSlider2Enabled] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -194,10 +197,15 @@ const BannerCards = () => {
           setSlider2Title(response.data.content.slider2Title || slider2Title);
           setSlider2ViewAllUrl(response.data.content.slider2ViewAllUrl || "#");
           setSlider2Products(response.data.content.slider2Products || defaultProducts2);
+          // Check if individual sliders are enabled
+          setSlider1Enabled(response.data.content.slider1Enabled !== undefined ? response.data.content.slider1Enabled : true);
+          setSlider2Enabled(response.data.content.slider2Enabled !== undefined ? response.data.content.slider2Enabled : true);
         }
       } catch (error) {
         console.error('Error fetching banner cards data:', error);
         // Keep default data if API fails
+        setSlider1Enabled(true);
+        setSlider2Enabled(true);
       } finally {
         setLoading(false);
       }
@@ -225,6 +233,7 @@ const BannerCards = () => {
         desc={p.desc}
         img={p.img}
         image={p.img}
+        parentMainImage={p.parent_main_image}
         rating={p.rating}
         reviews={p.reviews}
         price={p.newPrice}
@@ -242,6 +251,11 @@ const BannerCards = () => {
     return (
       <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
     );
+  }
+
+  // Don't render anything if both sliders are disabled
+  if (!slider1Enabled && !slider2Enabled) {
+    return null;
   }
 
   return (
@@ -272,47 +286,51 @@ const BannerCards = () => {
         ))}
       </div>
 
-      {/* Slider 1 */}
-      <div className={styles.craftedSliderSection}>
-        <div className={styles.sectionHeader}>
-          <h3 className={styles.sliderTitle}>{slider1Title}</h3>
-          <a href={slider1ViewAllUrl} className={styles.viewAllBtn}>
-            View All <FaChevronRight />
-          </a>
-        </div>
-        <div className={styles.sliderWrapper}>
-          <button className={`${styles.sliderArrow} ${styles.left}`} onClick={() => scroll(slider1, "left")}>
-            <FaChevronLeft />
-          </button>
-          <div className={styles.craftedSlider} ref={slider1}>
-            {renderProducts(slider1Products, 1)}
+      {/* Slider 1 - Only render if enabled */}
+      {slider1Enabled && (
+        <div className={styles.craftedSliderSection}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sliderTitle}>{slider1Title}</h3>
+            <a href={slider1ViewAllUrl} className={styles.viewAllBtn}>
+              View All <FaChevronRight />
+            </a>
           </div>
-          <button className={`${styles.sliderArrow} ${styles.right}`} onClick={() => scroll(slider1, "right")}>
-            <FaChevronRight />
-          </button>
+          <div className={styles.sliderWrapper}>
+            <button className={`${styles.sliderArrow} ${styles.left}`} onClick={() => scroll(slider1, "left")}>
+              <FaChevronLeft />
+            </button>
+            <div className={styles.craftedSlider} ref={slider1}>
+              {renderProducts(slider1Products, 1)}
+            </div>
+            <button className={`${styles.sliderArrow} ${styles.right}`} onClick={() => scroll(slider1, "right")}>
+              <FaChevronRight />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Slider 2 */}
-      <div className={styles.craftedSliderSection}>
-        <div className={styles.sectionHeader}>
-          <h3 className={styles.sliderTitle}>{slider2Title}</h3>
-          <a href={slider2ViewAllUrl} className={styles.viewAllBtn}>
-            View All <FaChevronRight />
-          </a>
-        </div>
-        <div className={styles.sliderWrapper}>
-          <button className={`${styles.sliderArrow} ${styles.left}`} onClick={() => scroll(slider2, "left")}>
-            <FaChevronLeft />
-          </button>
-          <div className={styles.craftedSlider} ref={slider2}>
-            {renderProducts(slider2Products, 2)}
+      {/* Slider 2 - Only render if enabled */}
+      {slider2Enabled && (
+        <div className={styles.craftedSliderSection}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sliderTitle}>{slider2Title}</h3>
+            <a href={slider2ViewAllUrl} className={styles.viewAllBtn}>
+              View All <FaChevronRight />
+            </a>
           </div>
-          <button className={`${styles.sliderArrow} ${styles.right}`} onClick={() => scroll(slider2, "right")}>
-            <FaChevronRight />
-          </button>
+          <div className={styles.sliderWrapper}>
+            <button className={`${styles.sliderArrow} ${styles.left}`} onClick={() => scroll(slider2, "left")}>
+              <FaChevronLeft />
+            </button>
+            <div className={styles.craftedSlider} ref={slider2}>
+              {renderProducts(slider2Products, 2)}
+            </div>
+            <button className={`${styles.sliderArrow} ${styles.right}`} onClick={() => scroll(slider2, "right")}>
+              <FaChevronRight />
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

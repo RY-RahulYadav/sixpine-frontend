@@ -220,12 +220,8 @@ export default function Footer() {
         </div>
         <div className={styles.languageSelector}>
           <select>
-  <option>English</option>
-  <option>Hindi</option>
-  <option>French</option>
-  <option>Spanish</option>
-</select>
-
+            <option>English</option>
+          </select>
           <span>🌍 India</span>
         </div>
       </div>

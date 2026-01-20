@@ -36,6 +36,7 @@ interface OrderItem {
     price: number;
     old_price?: number | null;
   };
+  product_image?: string;
   variant?: {
     id: number;
     color: { name: string };
@@ -62,6 +63,8 @@ interface Order {
   shipping_address?: any;
   razorpay_order_id?: string;
   items?: OrderItem[];
+  is_return_allowed?: boolean;
+  delivered_at?: string;
 }
 
 const OrdersPage: React.FC = () => {
@@ -410,6 +413,7 @@ const OrdersPage: React.FC = () => {
         price: orderItem.product?.price || orderItem.price || orderItem.unitPrice || 0,
         old_price: orderItem.product?.old_price || orderItem.old_price || null
       },
+      product_image: orderItem.product_image || orderItem.image || orderItem.product?.main_image || '',
       variant: orderItem.variant,
       variant_color: orderItem.variant_color || orderItem.variantColor,
       variant_size: orderItem.variant_size || orderItem.variantSize,
@@ -645,7 +649,7 @@ const OrdersPage: React.FC = () => {
                         <div key={order.order_id} className="order-item">
                           <div className="item-image-container">
                             <img
-                              src={order.items[0].product.main_image || 'https://via.placeholder.com/150'}
+                              src={order.items[0].product_image || order.items[0].product.main_image || 'https://via.placeholder.com/150'}
                               alt={order.items[0].product.title}
                               className="item-image"
                             />
@@ -866,7 +870,7 @@ const OrdersPage: React.FC = () => {
                                   </div>
                                 )} */}
                                 
-                                {order.status === 'delivered' && (
+                                {order.status === 'delivered' && order.is_return_allowed && (
                                   <div className="d-flex gap-2 mt-2">
                                     <button 
                                       className="btn btn-warning btn-buy-now"
@@ -891,6 +895,17 @@ const OrdersPage: React.FC = () => {
                                         Return/Replace
                                       </button>
                                     )}
+                                  </div>
+                                )}
+                                {order.status === 'delivered' && !order.is_return_allowed && (
+                                  <div className="mt-2">
+                                    <button 
+                                      className="btn btn-warning btn-buy-now"
+                                      onClick={() => handleBuyAgain(order, true)}
+                                      disabled={buyAgainLoading === order.order_id}
+                                    >
+                                      {buyAgainLoading === order.order_id ? 'Adding...' : 'Buy Again'}
+                                    </button>
                                   </div>
                                 )}
                                 {['pending', 'confirmed', 'processing', 'shipped'].includes(order.status) && order.payment_status === 'paid' && (

@@ -261,6 +261,18 @@
   align-items: flex-start;
 }
 
+.bedroomPanel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+  z-index: 1;
+  border-radius: 10px;
+}
+
 .bedroomContent {
   display: flex;
   justify-content: space-between;
@@ -268,7 +280,9 @@
   align-items: flex-start;
   position: relative;
   width: 100%;
-  padding-top: 47px;}
+  padding-top: 47px;
+  z-index: 2;
+}
 
 .bedroomText {
   flex: 1;
@@ -333,7 +347,6 @@
 /* Mattress Panel */
 .mattressPanel {
   background-image: url("/images/metress.png");
-
   background-size: cover;
   background-position: center;
   border-radius: 10px;
@@ -343,6 +356,18 @@
   flex: 1; /* Make it take available height */
   display: flex;
   align-items: flex-start;
+}
+
+.mattressPanel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 100%);
+  z-index: 1;
+  border-radius: 10px;
 }
 
 .shipsBadge {
@@ -359,6 +384,7 @@
   align-items: center;
   gap: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 2;
 }
 
 .mattressContent {
@@ -369,6 +395,8 @@
   padding-top: 35px;
   width: 100%;
   color: #333;
+  z-index: 2;
+  position: relative;
 }
 
 .mattressText {

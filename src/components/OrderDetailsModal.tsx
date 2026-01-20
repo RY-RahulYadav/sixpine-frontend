@@ -370,7 +370,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ orderId, show, on
                                         <img
                                           src={it.image}
                                           alt={it.name}
-                                          style={{ width: '50px', height: '50px', objectFit: 'cover', marginRight: '10px' }}
+                                          style={{ width: '80px', height: '80px', objectFit: 'contain', marginRight: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
                                         />
                                       ) : null}
                                       <div>

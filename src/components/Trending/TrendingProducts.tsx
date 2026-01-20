@@ -16,6 +16,7 @@ interface TrendingProduct {
   rating: number;
   reviewCount: number;
   image: string;
+  parent_main_image?: string;
   tag: string;
   discount?: string | null;
   navigateUrl?: string;
@@ -110,6 +111,7 @@ const TrendingProducts = () => {
               rating: product.rating || 4.0,
               reviewCount: product.reviewCount || product.reviews || 0,
               image: product.image || product.img || '/images/Home/sofa1.jpg',
+              parent_main_image: product.parent_main_image || undefined,
               tag: product.tag || 'Trending',
               discount: product.discount || null,
               navigateUrl: product.navigateUrl || '#',
@@ -278,7 +280,7 @@ const TrendingProducts = () => {
             >
               <div className={cardStyles.imageWrapper}>
                 <img 
-                  src={product.image} 
+                  src={product.parent_main_image || product.image} 
                   alt={product.name} 
                   className={cardStyles.productImg1}
                   onClick={(e) => {

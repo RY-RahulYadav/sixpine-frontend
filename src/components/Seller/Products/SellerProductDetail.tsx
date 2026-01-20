@@ -1215,6 +1215,38 @@ const SellerProductDetail: React.FC = () => {
                 />
               </div>
             
+            <div className="form-group">
+              <label htmlFor="meta_title">Meta Title</label>
+              <input
+                type="text"
+                id="meta_title"
+                name="meta_title"
+                value={formData.meta_title}
+                onChange={handleChange}
+                placeholder="SEO title for search engines (optional)"
+                className="tw-w-full"
+              />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Custom title for search engines and browser tabs. If left empty, product title will be used.
+              </p>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="meta_description">Meta Description</label>
+              <textarea
+                id="meta_description"
+                name="meta_description"
+                value={formData.meta_description}
+                onChange={handleChange}
+                rows={3}
+                placeholder="SEO description for search engines (optional)"
+                className="tw-w-full"
+              />
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                Custom description for search engine results. If left empty, short description will be used.
+              </p>
+            </div>
+            
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="category_id">Category*</label>

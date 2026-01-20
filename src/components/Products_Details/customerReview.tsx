@@ -14,7 +14,7 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
     rating: 0,
     title: "",
     comment: "",
-    user_name: ""
+    reviewer_name: ""
   });
   const [attachments, setAttachments] = useState<File[]>([]);
   const [attachmentPreviews, setAttachmentPreviews] = useState<string[]>([]);
@@ -97,7 +97,7 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
       formData.append('rating', newReview.rating.toString());
       formData.append('title', newReview.title);
       formData.append('comment', newReview.comment);
-      formData.append('user_name', newReview.user_name);
+      formData.append('reviewer_name', newReview.reviewer_name);
 
       // Append attachments
       attachments.forEach((file, index) => {
@@ -108,7 +108,7 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
       // Refresh reviews
       const response = await productAPI.getProductReviews(product.slug);
       setReviews(response.data.results || response.data || []);
-      setNewReview({ rating: 0, title: "", comment: "", user_name: "" });
+      setNewReview({ rating: 0, title: "", comment: "", reviewer_name: "" });
       setAttachments([]);
       setAttachmentPreviews([]);
     } catch (error) {
@@ -164,8 +164,8 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
               <input 
                 type="text" 
                 placeholder="Your Name" 
-                value={newReview.user_name}
-                onChange={(e) => setNewReview({...newReview, user_name: e.target.value})}
+                value={newReview.reviewer_name}
+                onChange={(e) => setNewReview({...newReview, reviewer_name: e.target.value})}
                 required
               />
               <input 

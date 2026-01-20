@@ -218,6 +218,20 @@ export const adminAPI = {
   rejectReview: (id: number) => API.post(`/admin/reviews/${id}/reject/`),
   deleteReview: (id: number) => API.delete(`/admin/reviews/${id}/delete/`),
   deleteAllReviews: (status?: string) => API.post('/admin/reviews/delete-all/', { status }),
+  
+  // Navbar Categories
+  getNavbarCategories: (params?: any) => API.get('/admin/navbar-categories/', { params }),
+  getNavbarCategory: (id: number) => API.get(`/admin/navbar-categories/${id}/`),
+  createNavbarCategory: (data: any) => API.post('/admin/navbar-categories/', data),
+  updateNavbarCategory: (id: number, data: any) => API.patch(`/admin/navbar-categories/${id}/`, data),
+  deleteNavbarCategory: (id: number) => API.delete(`/admin/navbar-categories/${id}/`),
+  
+  // Navbar Subcategories
+  getNavbarSubcategories: (params?: any) => API.get('/admin/navbar-subcategories/', { params }),
+  getNavbarSubcategory: (id: number) => API.get(`/admin/navbar-subcategories/${id}/`),
+  createNavbarSubcategory: (data: any) => API.post('/admin/navbar-subcategories/', data),
+  updateNavbarSubcategory: (id: number, data: any) => API.patch(`/admin/navbar-subcategories/${id}/`, data),
+  deleteNavbarSubcategory: (id: number) => API.delete(`/admin/navbar-subcategories/${id}/`),
 };
 
 export default adminAPI;

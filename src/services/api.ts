@@ -211,6 +211,8 @@ export const sellerAPI = {
 export const productAPI = {
   getCategories: () => API.get('/categories/'),
   
+  getNavbarCategories: () => API.get('/navbar-categories/'),
+  
   getSubcategories: (categorySlug?: string) => 
     categorySlug ? API.get(`/categories/${categorySlug}/subcategories/`) : API.get('/subcategories/'),
   
@@ -359,6 +361,20 @@ export const orderAPI = {
     payment_method?: string;
     coupon_id?: number;
   }) => API.post('/orders/razorpay/verify-payment/', data),
+  
+  // Cashfree Payment Gateway
+  createCashfreeOrder: (data: { amount: number; shipping_address_id: number; payment_method?: string; coupon_id?: number; return_url?: string }) =>
+    API.post('/orders/cashfree/create-order/', data),
+  
+  verifyCashfreePayment: (data: {
+    cf_order_id?: string;
+    order_id: string;
+    shipping_address_id: number;
+    payment_method?: string;
+    coupon_id?: number;
+  }) => API.post('/orders/cashfree/verify-payment/', data),
+  
+  getActivePaymentGateway: () => API.get('/payment-gateway/'),
   
   checkoutWithCOD: (data: { shipping_address_id: number; order_notes?: string; coupon_id?: number }) =>
     API.post('/orders/checkout/cod/', data),

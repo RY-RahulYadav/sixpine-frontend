@@ -49,6 +49,8 @@ const AdminSettings: React.FC = () => {
     category_tabs_text_color: themeColors.category_tabs_text_color,
     footer_bg_color: themeColors.footer_bg_color,
     footer_text_color: themeColors.footer_text_color,
+    back_to_top_bg_color: themeColors.back_to_top_bg_color,
+    back_to_top_text_color: themeColors.back_to_top_text_color,
     buy_button_bg_color: themeColors.buy_button_bg_color,
     buy_button_text_color: themeColors.buy_button_text_color,
     cart_icon_color: themeColors.cart_icon_color,
@@ -73,6 +75,8 @@ const AdminSettings: React.FC = () => {
       category_tabs_text_color: themeColors.category_tabs_text_color,
       footer_bg_color: themeColors.footer_bg_color,
       footer_text_color: themeColors.footer_text_color,
+      back_to_top_bg_color: themeColors.back_to_top_bg_color,
+      back_to_top_text_color: themeColors.back_to_top_text_color,
       buy_button_bg_color: themeColors.buy_button_bg_color,
       buy_button_text_color: themeColors.buy_button_text_color,
       cart_icon_color: themeColors.cart_icon_color,
@@ -132,6 +136,8 @@ const AdminSettings: React.FC = () => {
         adminAPI.updateGlobalSetting('category_tabs_text_color', themeSettings.category_tabs_text_color, 'Category tabs text color'),
         adminAPI.updateGlobalSetting('footer_bg_color', themeSettings.footer_bg_color, 'Footer background color'),
         adminAPI.updateGlobalSetting('footer_text_color', themeSettings.footer_text_color, 'Footer text color'),
+        adminAPI.updateGlobalSetting('back_to_top_bg_color', themeSettings.back_to_top_bg_color, 'Back to top button background color'),
+        adminAPI.updateGlobalSetting('back_to_top_text_color', themeSettings.back_to_top_text_color, 'Back to top button text color'),
         adminAPI.updateGlobalSetting('buy_button_bg_color', themeSettings.buy_button_bg_color, 'Buy button background color'),
         adminAPI.updateGlobalSetting('buy_button_text_color', themeSettings.buy_button_text_color, 'Buy button text color'),
         adminAPI.updateGlobalSetting('cart_icon_color', themeSettings.cart_icon_color, 'Cart icon color'),
@@ -167,6 +173,8 @@ const AdminSettings: React.FC = () => {
       category_tabs_text_color: '#333333',
       footer_bg_color: '#212121',
       footer_text_color: '#ffffff',
+      back_to_top_bg_color: '#37475a',
+      back_to_top_text_color: '#ffffff',
       buy_button_bg_color: '#ff6f00',
       buy_button_text_color: '#ffffff',
       cart_icon_color: '#999999',
@@ -190,6 +198,8 @@ const AdminSettings: React.FC = () => {
         adminAPI.updateGlobalSetting('category_tabs_text_color', defaultTheme.category_tabs_text_color, 'Category tabs text color'),
         adminAPI.updateGlobalSetting('footer_bg_color', defaultTheme.footer_bg_color, 'Footer background color'),
         adminAPI.updateGlobalSetting('footer_text_color', defaultTheme.footer_text_color, 'Footer text color'),
+        adminAPI.updateGlobalSetting('back_to_top_bg_color', defaultTheme.back_to_top_bg_color, 'Back to top button background color'),
+        adminAPI.updateGlobalSetting('back_to_top_text_color', defaultTheme.back_to_top_text_color, 'Back to top button text color'),
         adminAPI.updateGlobalSetting('buy_button_bg_color', defaultTheme.buy_button_bg_color, 'Buy button background color'),
         adminAPI.updateGlobalSetting('buy_button_text_color', defaultTheme.buy_button_text_color, 'Buy button text color'),
         adminAPI.updateGlobalSetting('cart_icon_color', defaultTheme.cart_icon_color, 'Cart icon color'),
@@ -225,8 +235,8 @@ const AdminSettings: React.FC = () => {
     e.preventDefault();
     
     // Validation
-    if (!passwordForm.current_password || !passwordForm.new_password || !passwordForm.confirm_password) {
-      setError('All fields are required');
+    if (!passwordForm.new_password || !passwordForm.confirm_password) {
+      setError('New password and confirm password are required');
       return;
     }
     
@@ -434,27 +444,7 @@ const AdminSettings: React.FC = () => {
           </div>
           
           <form onSubmit={handlePasswordSubmit} className="tw-p-6">
-            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
-              <div className="tw-space-y-2">
-                <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
-                  <span className="material-symbols-outlined tw-text-purple-600">key</span>
-                  <label htmlFor="current_password" className="tw-text-sm tw-font-semibold tw-text-gray-700">
-                    Current Password
-                  </label>
-                </div>
-                <input
-                  type="password"
-                  id="current_password"
-                  name="current_password"
-                  value={passwordForm.current_password}
-                  onChange={handlePasswordChange}
-                  placeholder="Enter current password"
-                  required
-                  disabled={saving}
-                  className="tw-w-full tw-px-4 tw-py-3 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-purple-500 focus:tw-border-transparent disabled:tw-bg-gray-100 disabled:tw-cursor-not-allowed"
-                />
-              </div>
-              
+            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6">
               <div className="tw-space-y-2">
                 <div className="tw-flex tw-items-center tw-gap-2 tw-mb-2">
                   <span className="material-symbols-outlined tw-text-purple-600">lock_reset</span>
@@ -506,7 +496,7 @@ const AdminSettings: React.FC = () => {
               <button
                 type="submit"
                 className="tw-flex-1 tw-px-6 tw-py-3 tw-bg-purple-600 tw-text-white tw-rounded-lg hover:tw-bg-purple-700 hover:tw-shadow-lg tw-transition-all tw-duration-200 tw-font-semibold tw-text-base tw-flex tw-items-center tw-justify-center tw-gap-2 disabled:tw-bg-gray-400 disabled:tw-cursor-not-allowed hover:tw-scale-[1.02] active:tw-scale-95"
-                disabled={saving || !passwordForm.current_password || !passwordForm.new_password || !passwordForm.confirm_password}
+                disabled={saving || !passwordForm.new_password || !passwordForm.confirm_password}
               >
                 {saving ? (
                   <>
@@ -1034,6 +1024,64 @@ const AdminSettings: React.FC = () => {
                       value={themeSettings.footer_text_color}
                       onChange={handleThemeSettingsChange}
                       name="footer_text_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Back to Top Button Colors */}
+            <div className="tw-mb-6">
+              <h4 className="tw-text-lg tw-font-semibold tw-text-gray-700 tw-mb-4 tw-flex tw-items-center tw-gap-2">
+                <span className="material-symbols-outlined tw-text-indigo-600">arrow_upward</span>
+                Back to Top Button Colors
+              </h4>
+              <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+                <div className="tw-space-y-2">
+                  <label htmlFor="back_to_top_bg_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Background Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="back_to_top_bg_color"
+                      name="back_to_top_bg_color"
+                      value={themeSettings.back_to_top_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.back_to_top_bg_color}
+                      onChange={handleThemeSettingsChange}
+                      name="back_to_top_bg_color"
+                      disabled={savingTheme}
+                      className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="tw-space-y-2">
+                  <label htmlFor="back_to_top_text_color" className="tw-text-sm tw-font-semibold tw-text-gray-700">
+                    Text Color
+                  </label>
+                  <div className="tw-flex tw-gap-2">
+                    <input
+                      type="color"
+                      id="back_to_top_text_color"
+                      name="back_to_top_text_color"
+                      value={themeSettings.back_to_top_text_color}
+                      onChange={handleThemeSettingsChange}
+                      disabled={savingTheme}
+                      className="tw-w-16 tw-h-10 tw-border-2 tw-border-gray-300 tw-rounded-lg tw-cursor-pointer disabled:tw-opacity-50"
+                    />
+                    <input
+                      type="text"
+                      value={themeSettings.back_to_top_text_color}
+                      onChange={handleThemeSettingsChange}
+                      name="back_to_top_text_color"
                       disabled={savingTheme}
                       className="tw-flex-1 tw-px-4 tw-py-2 tw-border-2 tw-border-gray-300 tw-rounded-lg focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-indigo-500"
                     />

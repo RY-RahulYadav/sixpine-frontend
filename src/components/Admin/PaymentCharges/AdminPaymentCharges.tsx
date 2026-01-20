@@ -11,6 +11,8 @@ interface PaymentChargesSettings {
   tax_rate: string;
   razorpay_enabled: boolean;
   cod_enabled: boolean;
+  active_payment_gateway: 'razorpay' | 'cashfree';
+  return_window_days: number;
 }
 
 const AdminPaymentCharges: React.FC = () => {
@@ -24,7 +26,9 @@ const AdminPaymentCharges: React.FC = () => {
     platform_fee_cod: '0.00',
     tax_rate: '5.00',
     razorpay_enabled: true,
-    cod_enabled: true
+    cod_enabled: true,
+    active_payment_gateway: 'razorpay',
+    return_window_days: 7
   });
 
   useEffect(() => {
@@ -202,6 +206,89 @@ const AdminPaymentCharges: React.FC = () => {
             </div>
           </div>
 
+          {/* Return Window Configuration */}
+          <div className="tw-mb-6">
+            <h3 className="tw-text-lg tw-font-semibold tw-mb-4">Return Policy Configuration</h3>
+            <div>
+              <label className="tw-block tw-text-sm tw-font-medium tw-text-gray-700 tw-mb-2">
+                <span className="material-symbols-outlined tw-text-sm tw-align-middle tw-mr-1">assignment_return</span>
+                Return Window (Days)
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="90"
+                value={formData.return_window_days}
+                onChange={(e) => setFormData({ ...formData, return_window_days: parseInt(e.target.value) || 7 })}
+                className="tw-w-full tw-px-3 tw-py-2 tw-border tw-border-gray-300 tw-rounded-lg tw-focus:outline-none tw-focus:ring-2 tw-focus:ring-blue-500"
+                required
+              />
+              <p className="tw-text-xs tw-text-gray-500 tw-mt-1">
+                Number of days after delivery during which customers can request returns. After this period, the return option will be hidden.
+              </p>
+            </div>
+          </div>
+
+          {/* Payment Gateway Selection */}
+          <div className="tw-mb-6">
+            <h3 className="tw-text-lg tw-font-semibold tw-mb-4">Active Payment Gateway</h3>
+            <p className="tw-text-sm tw-text-gray-600 tw-mb-4">
+              Select the payment gateway to use for online payments. Only one gateway can be active at a time.
+            </p>
+            <div className="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-4">
+              <label 
+                className={`tw-flex tw-items-center tw-gap-4 tw-p-4 tw-border-2 tw-rounded-lg tw-cursor-pointer tw-transition-all ${
+                  formData.active_payment_gateway === 'razorpay' 
+                    ? 'tw-border-blue-500 tw-bg-blue-50' 
+                    : 'tw-border-gray-200 hover:tw-border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="active_payment_gateway"
+                  value="razorpay"
+                  checked={formData.active_payment_gateway === 'razorpay'}
+                  onChange={(e) => setFormData({ ...formData, active_payment_gateway: e.target.value as 'razorpay' | 'cashfree' })}
+                  className="tw-w-5 tw-h-5 tw-text-blue-600"
+                />
+                <div className="tw-flex-1">
+                  <div className="tw-flex tw-items-center tw-gap-2">
+                    <span className="tw-font-semibold tw-text-gray-900">Razorpay</span>
+                    {formData.active_payment_gateway === 'razorpay' && (
+                      <span className="tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-bg-green-100 tw-text-green-800 tw-rounded-full">Active</span>
+                    )}
+                  </div>
+                  <p className="tw-text-xs tw-text-gray-500 tw-mt-1">Popular payment gateway with UPI, Cards, Net Banking support</p>
+                </div>
+              </label>
+              <label 
+                className={`tw-flex tw-items-center tw-gap-4 tw-p-4 tw-border-2 tw-rounded-lg tw-cursor-pointer tw-transition-all ${
+                  formData.active_payment_gateway === 'cashfree' 
+                    ? 'tw-border-blue-500 tw-bg-blue-50' 
+                    : 'tw-border-gray-200 hover:tw-border-gray-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="active_payment_gateway"
+                  value="cashfree"
+                  checked={formData.active_payment_gateway === 'cashfree'}
+                  onChange={(e) => setFormData({ ...formData, active_payment_gateway: e.target.value as 'razorpay' | 'cashfree' })}
+                  className="tw-w-5 tw-h-5 tw-text-blue-600"
+                />
+                <div className="tw-flex-1">
+                  <div className="tw-flex tw-items-center tw-gap-2">
+                    <span className="tw-font-semibold tw-text-gray-900">Cashfree</span>
+                    {formData.active_payment_gateway === 'cashfree' && (
+                      <span className="tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-bg-green-100 tw-text-green-800 tw-rounded-full">Active</span>
+                    )}
+                  </div>
+                  <p className="tw-text-xs tw-text-gray-500 tw-mt-1">Fast checkout with 120+ payment methods supported</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
           {/* Payment Methods */}
           <div className="tw-mb-6">
             <h3 className="tw-text-lg tw-font-semibold tw-mb-4">Payment Methods</h3>
@@ -214,8 +301,10 @@ const AdminPaymentCharges: React.FC = () => {
                   className="tw-rounded tw-text-blue-600 tw-focus:ring-blue-500 tw-w-5 tw-h-5"
                 />
                 <div className="tw-flex-1">
-                  <span className="tw-text-sm tw-font-medium tw-text-gray-900">Razorpay Payment Gateway</span>
-                  <p className="tw-text-xs tw-text-gray-500">Enable online payments via Razorpay</p>
+                  <span className="tw-text-sm tw-font-medium tw-text-gray-900">Online Payment Gateway</span>
+                  <p className="tw-text-xs tw-text-gray-500">
+                    Enable online payments via {formData.active_payment_gateway === 'razorpay' ? 'Razorpay' : 'Cashfree'}
+                  </p>
                 </div>
               </label>
               <label className="tw-flex tw-items-center tw-gap-3 tw-p-3 tw-border tw-border-gray-200 tw-rounded-lg hover:tw-bg-gray-50 tw-cursor-pointer">

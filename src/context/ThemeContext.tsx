@@ -15,6 +15,10 @@ interface ThemeColors {
   footer_bg_color: string;
   footer_text_color: string;
   
+  // Back to Top button colors
+  back_to_top_bg_color: string;
+  back_to_top_text_color: string;
+  
   // Buy button colors
   buy_button_bg_color: string;
   buy_button_text_color: string;
@@ -46,6 +50,10 @@ const defaultColors: ThemeColors = {
   // Footer defaults
   footer_bg_color: '#212121',
   footer_text_color: '#ffffff',
+  
+  // Back to Top button defaults
+  back_to_top_bg_color: '#37475a',
+  back_to_top_text_color: '#ffffff',
   
   // Buy button defaults
   buy_button_bg_color: '#ff6f00', // --primary-color
@@ -81,6 +89,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         category_tabs_text_color: settingsMap['category_tabs_text_color'] || defaultColors.category_tabs_text_color,
         footer_bg_color: settingsMap['footer_bg_color'] || defaultColors.footer_bg_color,
         footer_text_color: settingsMap['footer_text_color'] || defaultColors.footer_text_color,
+        back_to_top_bg_color: settingsMap['back_to_top_bg_color'] || defaultColors.back_to_top_bg_color,
+        back_to_top_text_color: settingsMap['back_to_top_text_color'] || defaultColors.back_to_top_text_color,
         buy_button_bg_color: settingsMap['buy_button_bg_color'] || defaultColors.buy_button_bg_color,
         buy_button_text_color: settingsMap['buy_button_text_color'] || defaultColors.buy_button_text_color,
         cart_icon_color: settingsMap['cart_icon_color'] || defaultColors.cart_icon_color,
@@ -111,6 +121,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     root.style.setProperty('--theme-category-tabs-text', colors.category_tabs_text_color);
     root.style.setProperty('--theme-footer-bg', colors.footer_bg_color);
     root.style.setProperty('--theme-footer-text', colors.footer_text_color);
+    root.style.setProperty('--theme-back-to-top-bg', colors.back_to_top_bg_color);
+    root.style.setProperty('--theme-back-to-top-text', colors.back_to_top_text_color);
     root.style.setProperty('--theme-buy-button-bg', colors.buy_button_bg_color);
     root.style.setProperty('--theme-buy-button-text', colors.buy_button_text_color);
     root.style.setProperty('--theme-cart-icon-color', colors.cart_icon_color);

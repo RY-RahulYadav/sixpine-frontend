@@ -75,6 +75,7 @@ const AdminLayout: React.FC = () => {
     // Settings Section
     { path: '/admin/payment-charges', icon: 'payments', label: 'Payment Settings', section: 'settings' },
     { path: '/admin/filter-options', icon: 'tune', label: 'Filter Options', section: 'settings' },
+    { path: '/admin/navbar-categories', icon: 'category', label: 'Navbar Categories', section: 'settings' },
     { path: '/admin/settings', icon: 'settings', label: 'Settings', section: 'settings' },
   ];
   

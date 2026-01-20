@@ -127,6 +127,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const [isZooming, setIsZooming] = useState(false);
   const [lensPosition, setLensPosition] = useState({ x: 0, y: 0 });
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [lensSize, setLensSize] = useState({ width: 180, height: 180 });
+  const [zoomPanelSize, setZoomPanelSize] = useState({ width: 600, height: 485 });
   const imageWrapperRef = useRef<HTMLDivElement>(null);
   const mainImageRef = useRef<HTMLImageElement>(null);
   const imageSectionContainerRef = useRef<HTMLDivElement>(null);
@@ -135,7 +137,6 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const [zoomPanelTop, setZoomPanelTop] = useState(0);
 
   // Zoom configuration
-  const LENS_SIZE = 180; // Size of the lens square in pixels
   const ZOOM_FACTOR = 2.5; // How much to zoom in
 
   // Fetch active advertisements
@@ -238,17 +239,43 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     const topOffset = wrapperRect.top - containerRect.top;
     setZoomPanelTop(topOffset);
 
+    // Calculate image aspect ratio and determine lens/panel dimensions
+    const imageAspectRatio = imageRect.width / imageRect.height;
+    
+    // Zoom panel should match the wrapper height and maintain image aspect ratio
+    // This creates a large zoom panel similar to Amazon's style
+    const panelHeight = wrapperRect.height;
+    const panelWidth = panelHeight * imageAspectRatio;
+    
+    // Calculate lens dimensions - use a larger base size (180px) maintaining aspect ratio
+    const BASE_LENS_SIZE = 180;
+    let currentLensWidth: number;
+    let currentLensHeight: number;
+    
+    if (imageAspectRatio >= 1) {
+      // Wider image: lens width is base size, height is proportionally smaller
+      currentLensWidth = BASE_LENS_SIZE;
+      currentLensHeight = BASE_LENS_SIZE / imageAspectRatio;
+    } else {
+      // Taller image: lens height is base size, width is proportionally smaller
+      currentLensHeight = BASE_LENS_SIZE;
+      currentLensWidth = BASE_LENS_SIZE * imageAspectRatio;
+    }
+    
+    setLensSize({ width: currentLensWidth, height: currentLensHeight });
+    setZoomPanelSize({ width: panelWidth, height: panelHeight });
+
     // Calculate mouse position relative to image
     const mouseX = e.clientX - imageRect.left;
     const mouseY = e.clientY - imageRect.top;
 
     // Calculate lens position (centered on cursor)
-    let lensX = mouseX - LENS_SIZE / 2;
-    let lensY = mouseY - LENS_SIZE / 2;
+    let lensX = mouseX - currentLensWidth / 2;
+    let lensY = mouseY - currentLensHeight / 2;
 
     // Constrain lens within image bounds
-    const maxLensX = imageRect.width - LENS_SIZE;
-    const maxLensY = imageRect.height - LENS_SIZE;
+    const maxLensX = imageRect.width - currentLensWidth;
+    const maxLensY = imageRect.height - currentLensHeight;
 
     lensX = Math.max(0, Math.min(lensX, maxLensX));
     lensY = Math.max(0, Math.min(lensY, maxLensY));
@@ -259,9 +286,9 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
     setLensPosition({ x: lensLeft, y: lensTop });
 
-    // Calculate zoom background position (percentage)
-    const zoomX = (lensX / imageRect.width) * 100;
-    const zoomY = (lensY / imageRect.height) * 100;
+    // Calculate zoom background position (percentage based on lens position within image)
+    const zoomX = (lensX / (imageRect.width - currentLensWidth)) * 100;
+    const zoomY = (lensY / (imageRect.height - currentLensHeight)) * 100;
 
     setZoomPosition({ x: zoomX, y: zoomY });
   };
@@ -272,18 +299,48 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   // Extract variant options from product.variants
   const variants = product?.variants || [];
 
-  // Get unique colors, sizes, patterns, qualities from variants
-  const availableColors = Array.from(new Set(variants.map((v: any) => v.color?.name || v.color_name).filter(Boolean)));
-  const availableSizes = Array.from(new Set(variants.map((v: any) => v.size).filter(Boolean)));
-  const availablePatterns = Array.from(new Set(variants.map((v: any) => v.pattern).filter(Boolean)));
-  const availableQualities = Array.from(new Set(variants.map((v: any) => v.quality).filter(Boolean)));
+  // Smart sorting function for variant options
+  // Handles: "1 Seater", "2 Seater", "3 Seater" (number first)
+  // Handles: "Seater 1", "Seater 2" (alphabetically with numbers)
+  // Handles: Pure alphabetic strings
+  const smartSort = (items: string[]): string[] => {
+    return [...items].sort((a, b) => {
+      // Extract leading numbers
+      const aMatch = a.match(/^(\d+)/);
+      const bMatch = b.match(/^(\d+)/);
+      
+      // Both have leading numbers - sort numerically
+      if (aMatch && bMatch) {
+        const aNum = parseInt(aMatch[1]);
+        const bNum = parseInt(bMatch[1]);
+        if (aNum !== bNum) return aNum - bNum;
+        // If numbers are equal, sort by remaining text
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      }
+      
+      // Only a has leading number - it comes first
+      if (aMatch) return -1;
+      
+      // Only b has leading number - it comes first
+      if (bMatch) return 1;
+      
+      // Neither has leading number - alphanumeric sort (handles "Seater 1" vs "Seater 2")
+      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+    });
+  };
+
+  // Get unique colors, sizes, patterns, qualities from variants and sort them
+  const availableColors = smartSort(Array.from(new Set(variants.map((v: any) => v.color?.name || v.color_name).filter(Boolean))));
+  const availableSizes = smartSort(Array.from(new Set(variants.map((v: any) => v.size).filter(Boolean))));
+  const availablePatterns = smartSort(Array.from(new Set(variants.map((v: any) => v.pattern).filter(Boolean))));
+  const availableQualities = smartSort(Array.from(new Set(variants.map((v: any) => v.quality).filter(Boolean))));
 
   // Fallback to available_colors if variants not available (backward compatibility)
   const colors = availableColors.length > 0 ? availableColors :
-    (product?.available_colors?.map((c: any) => c.color__name || c.name) || []);
-  const sizes = availableSizes.length > 0 ? availableSizes : (product?.available_sizes || []);
-  const patterns = availablePatterns.length > 0 ? availablePatterns : (product?.available_patterns || []);
-  const qualities = availableQualities.length > 0 ? availableQualities : (product?.available_qualities || []);
+    smartSort(product?.available_colors?.map((c: any) => c.color__name || c.name) || []);
+  const sizes = availableSizes.length > 0 ? availableSizes : smartSort(product?.available_sizes || []);
+  const patterns = availablePatterns.length > 0 ? availablePatterns : smartSort(product?.available_patterns || []);
+  const qualities = availableQualities.length > 0 ? availableQualities : smartSort(product?.available_qualities || []);
 
   // Auto-select variant from URL if provided
   const getInitialVariant = () => {
@@ -342,24 +399,24 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     }
 
     // Show ALL unique colors from ALL variants
-    const allAvailableColors = Array.from(new Set(
+    const allAvailableColors = smartSort(Array.from(new Set(
       variants.map((v: any) => v.color?.name || v.color_name).filter(Boolean)
-    ));
+    )));
 
     // Show ALL unique sizes from ALL variants
-    const allAvailableSizes = Array.from(new Set(
+    const allAvailableSizes = smartSort(Array.from(new Set(
       variants.map((v: any) => v.size).filter(Boolean)
-    ));
+    )));
 
     // Show ALL unique patterns from ALL variants
-    const allAvailablePatterns = Array.from(new Set(
+    const allAvailablePatterns = smartSort(Array.from(new Set(
       variants.map((v: any) => v.pattern).filter(Boolean)
-    ));
+    )));
 
     // Show ALL unique qualities from ALL variants
-    const allAvailableQualities = Array.from(new Set(
+    const allAvailableQualities = smartSort(Array.from(new Set(
       variants.map((v: any) => v.quality).filter(Boolean)
-    ));
+    )));
 
     return {
       colors: allAvailableColors.length > 0 ? allAvailableColors : colors,
@@ -1324,8 +1381,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   style={{
                     left: `${lensPosition.x}px`,
                     top: `${lensPosition.y}px`,
-                    width: `${LENS_SIZE}px`,
-                    height: `${LENS_SIZE}px`,
+                    width: `${lensSize.width}px`,
+                    height: `${lensSize.height}px`,
                   }}
                 />
               )}
@@ -1486,6 +1543,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                 backgroundSize: `${ZOOM_FACTOR * 100}%`,
                 backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
                 top: `${zoomPanelTop}px`,
+                width: `${zoomPanelSize.width}px`,
+                height: `${zoomPanelSize.height}px`,
               }}
             />
           )}
@@ -1710,8 +1769,10 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             {selectedVariant ? (
               <div className={styles.variantInfo} key={`stock-${selectedVariant.id || 'default'}`}>
                 <small className="text-muted">
-                  {selectedVariant.stock_quantity > 0
-                    ? `${selectedVariant.stock_quantity} in stock`
+                  {selectedVariant.stock_quantity > 10
+                    ? 'In Stock'
+                    : selectedVariant.stock_quantity > 0
+                    ? `${selectedVariant.stock_quantity} left only`
                     : 'Out of stock'}
                 </small>
               </div>

@@ -183,7 +183,7 @@ const ProductInformation = ({ product, selectedVariant }: ProductInformationProp
         
         
 
-        <p>
+        <p style={{ marginTop: '1.5em' }}>
           <strong>What is in box:</strong> 
           <br/>
           {product?.what_in_box || `${product?.title || "Product"}, Assembly parts, User manual`}
