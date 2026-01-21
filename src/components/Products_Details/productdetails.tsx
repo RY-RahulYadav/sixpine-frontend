@@ -15,6 +15,8 @@ import {
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import ShareModal from "../ShareModal";
 import OfferInfoModal from "./OfferInfoModal";
+import RazorpayAffordabilityWidget from "./RazorpayAffordabilityWidget";
+import CashfreeWidget from "./CashfreeWidget";
 
 interface ProductDetailsProps {
   product: any;
@@ -1606,6 +1608,14 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <AiOutlineInfoCircle className={styles.infoIcon} />
               <span>EMI option available after checkout</span>
             </div>
+
+            {/* Payment Widgets - Shows Razorpay or Cashfree based on active gateway */}
+            {selectedVariant?.price && selectedVariant.price > 0 && (
+              <>
+                <RazorpayAffordabilityWidget amount={selectedVariant.price} />
+                <CashfreeWidget amount={selectedVariant.price} />
+              </>
+            )}
           </div>
 
 
