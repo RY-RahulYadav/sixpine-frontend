@@ -243,27 +243,34 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
     // Zoom panel should be wider like Amazon's style
     // Width extends to fill more space on the right (approximately 550px like Amazon)
-    // Height matches the imageWrapper container height
     const panelWidth = 900; // Fixed width like Amazon's zoom panel
-    const panelHeight = wrapperRect.height;
 
-    // Calculate the aspect ratio of the zoom panel
-    const panelAspectRatio = panelWidth / panelHeight;
+    // Calculate panel height to extend to bottom of viewport (with margin) when scrolled
+    // This ensures no empty black space at the bottom of the zoom panel
+    const viewportHeight = window.innerHeight;
+    const bottomMargin = 20; // Margin from bottom of viewport
+    const availableHeight = viewportHeight - wrapperRect.top - bottomMargin;
 
-    // Calculate lens dimensions - the lens should have the same aspect ratio as the zoom panel
-    // Use a larger base size (180px) maintaining panel aspect ratio
+    // Use the larger of: image wrapper height OR available viewport space
+    // This ensures the zoom panel fills the space when scrolled down
+    const panelHeight = Math.max(wrapperRect.height, availableHeight);
+
+    // Calculate lens dimensions - keep lens size constant (don't change based on panel height)
+    // Use a fixed base size (180px) maintaining panel aspect ratio based on original wrapper height
     const BASE_LENS_SIZE = 180;
+    // Use wrapper height for lens aspect ratio to keep lens consistent
+    const lensAspectRatio = panelWidth / wrapperRect.height;
     let currentLensWidth: number;
     let currentLensHeight: number;
 
-    if (panelAspectRatio >= 1) {
+    if (lensAspectRatio >= 1) {
       // Wider panel: lens width is base size, height is proportionally smaller
       currentLensWidth = BASE_LENS_SIZE;
-      currentLensHeight = BASE_LENS_SIZE / panelAspectRatio;
+      currentLensHeight = BASE_LENS_SIZE / lensAspectRatio;
     } else {
       // Taller panel: lens height is base size, width is proportionally smaller
       currentLensHeight = BASE_LENS_SIZE;
-      currentLensWidth = BASE_LENS_SIZE * panelAspectRatio;
+      currentLensWidth = BASE_LENS_SIZE * lensAspectRatio;
     }
 
     setLensSize({ width: currentLensWidth, height: currentLensHeight });
@@ -913,6 +920,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const [cartQty, setCartQty] = useState(1);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [addToCartLoading, setAddToCartLoading] = useState(false);
+  const [buyNowLoading, setBuyNowLoading] = useState(false);
 
   // Fetch default address
   useEffect(() => {
@@ -1036,25 +1045,20 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     }
     if (!product?.id) return;
 
+    // Optimistic update - update UI immediately for instant feedback
+    const previousState = isInWishlist;
+    setIsInWishlist(!previousState);
     setWishlistLoading(true);
+
     try {
-      if (isInWishlist) {
-        const response = await wishlistAPI.getWishlist();
-        if (response.data && response.data.results) {
-          const wishlistItem = response.data.results.find(
-            (item: any) => (item.product?.id || item.product_id) === product.id
-          );
-          if (wishlistItem) {
-            await wishlistAPI.removeFromWishlist(wishlistItem.id);
-            setIsInWishlist(false);
-          }
-        }
-      } else {
-        await wishlistAPI.addToWishlist(product.id);
-        setIsInWishlist(true);
-      }
+      // Use the new toggle API - single call handles both add and remove
+      const response = await wishlistAPI.toggleWishlist(product.id);
+      // Sync with server response (in case of any discrepancy)
+      setIsInWishlist(response.data.is_in_wishlist);
       window.dispatchEvent(new CustomEvent('wishlistUpdated'));
     } catch (error: any) {
+      // Revert optimistic update on error
+      setIsInWishlist(previousState);
       console.error('Wishlist error:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to update wishlist';
       showError(errorMsg);
@@ -1105,19 +1109,22 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     }
 
     if (product?.id) {
-      try {
-        // If product has variants, variant_id is required
-        if (variants.length > 0 && !selectedVariant) {
-          showWarning('Please select a variant (color, size, or pattern)');
-          return;
-        }
+      // If product has variants, variant_id is required
+      if (variants.length > 0 && !selectedVariant) {
+        showWarning('Please select a variant (color, size, or pattern)');
+        return;
+      }
 
+      setAddToCartLoading(true);
+      try {
         await addToCart(product.id, cartQty, selectedVariant?.id);
         // Sidebar will open automatically via context
       } catch (error: any) {
         console.error('Error adding to cart:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
         showError(errorMsg);
+      } finally {
+        setAddToCartLoading(false);
       }
     }
   };
@@ -1129,19 +1136,22 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     }
 
     if (product?.id) {
-      try {
-        // If product has variants, variant_id is required
-        if (variants.length > 0 && !selectedVariant) {
-          showWarning('Please select a variant (color, size, or pattern)');
-          return;
-        }
+      // If product has variants, variant_id is required
+      if (variants.length > 0 && !selectedVariant) {
+        showWarning('Please select a variant (color, size, or pattern)');
+        return;
+      }
 
+      setBuyNowLoading(true);
+      try {
         await addToCart(product.id, cartQty, selectedVariant?.id);
         navigate('/cart');
       } catch (error: any) {
         console.error('Error adding to cart:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to add to cart';
         showError(errorMsg);
+      } finally {
+        setBuyNowLoading(false);
       }
     }
   };
@@ -1953,14 +1963,26 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             </div>
 
             {/* Action Buttons */}
-            <button className={styles.addCart} onClick={handleAddToCart}>Add to Cart</button>
-            <button className={styles.buyNow} onClick={handleBuyNow}>Buy Now</button>
+            <button
+              className={styles.addCart}
+              onClick={handleAddToCart}
+              disabled={addToCartLoading || buyNowLoading}
+            >
+              {addToCartLoading ? 'Adding...' : 'Add to Cart'}
+            </button>
+            <button
+              className={styles.buyNow}
+              onClick={handleBuyNow}
+              disabled={addToCartLoading || buyNowLoading}
+            >
+              {buyNowLoading ? 'Processing...' : 'Buy Now'}
+            </button>
             <button
               className={styles.wishlistBtn}
               onClick={handleWishlist}
               disabled={wishlistLoading}
             >
-              {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+              {wishlistLoading ? 'Updating...' : (isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist')}
             </button>
           </div>
 

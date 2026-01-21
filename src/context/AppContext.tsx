@@ -121,7 +121,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const user = localStorage.getItem('user');
-    
+
     if (token && user) {
       try {
         const parsedUser = JSON.parse(user);
@@ -148,31 +148,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null }); // Clear previous errors
-      
+
       const response = await authAPI.login(credentials);
       const { user, token } = response.data;
-      
+
       // Additional validation: Check if user is staff or vendor (shouldn't happen due to backend validation)
       if (user.is_staff || user.is_superuser) {
         const errorMessage = 'Admin users must login through the admin login page';
         dispatch({ type: 'SET_ERROR', payload: errorMessage });
         throw new Error(errorMessage);
       }
-      
+
       // Check if user has vendor profile (shouldn't happen due to backend validation)
       // Note: We can't check vendor_profile from user object directly, backend handles this
-      
+
       localStorage.setItem('authToken', token);
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
     } catch (error: any) {
       // Enhanced error extraction to handle backend validation messages
       let errorMessage = 'Login failed';
-      
+
       if (error.response?.data) {
         const errorData = error.response.data;
-        
+
         // Check for non_field_errors (from serializer validation)
         if (errorData.non_field_errors && Array.isArray(errorData.non_field_errors)) {
           errorMessage = errorData.non_field_errors[0];
@@ -191,7 +191,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       // Backend returns messages like:
       // "Admin users must login through the admin login page"
       // "Vendor users must login through the seller login page"
@@ -226,8 +226,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addToCart = async (productId: number, quantity: number = 1, variantId?: number) => {
     try {
       await cartAPI.addToCart({ product_id: productId, quantity, variant_id: variantId });
-      await fetchCart(); // Refresh cart
-      dispatch({ type: 'OPEN_CART_SIDEBAR' }); // Open sidebar after adding to cart
+      // Open sidebar immediately for instant feedback (don't wait for cart fetch)
+      dispatch({ type: 'OPEN_CART_SIDEBAR' });
+      // Refresh cart in background (non-blocking) - user doesn't wait for this
+      fetchCart().catch(err => console.error('Background cart fetch error:', err));
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to add to cart';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
