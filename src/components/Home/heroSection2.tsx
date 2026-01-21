@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./heroSection2.module.css";
-import { homepageAPI } from '../../services/api';
 
 interface SectionItem {
   id: number;
@@ -20,7 +18,12 @@ interface Section {
   isSpecial?: boolean;
 }
 
-// Default data
+interface HeroSection2Props {
+  data?: { sections?: Section[] } | null;
+  isLoading?: boolean;
+}
+
+// Default data for immediate render
 const defaultSections: Section[] = [
   {
     id: 1,
@@ -74,39 +77,11 @@ const defaultSections: Section[] = [
   }
 ];
 
-const HomePage = () => {
+const HeroSection2: React.FC<HeroSection2Props> = ({ data, isLoading: _isLoading = false }) => {
   const navigate = useNavigate();
-  const [sections, setSections] = useState<Section[]>(defaultSections);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('hero2');
-        
-        if (response.data && response.data.content && response.data.content.sections) {
-          setSections(response.data.content.sections);
-        }
-      } catch (error) {
-        console.error('Error fetching hero section 2 data:', error);
-        // Keep default sections if API fails
-        setSections(defaultSections);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className={styles.homepage}>
-        <div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>
-      </div>
-    );
-  }
+  // Use passed data or defaults (no loading state blocking render)
+  const sections = data?.sections || defaultSections;
 
   return (
     <div className={styles.homepage}>
@@ -115,8 +90,8 @@ const HomePage = () => {
           <h3>{section.title}</h3>
           <div className={styles.grid}>
             {section.items.map((item) => (
-              <div 
-                key={item.id} 
+              <div
+                key={item.id}
                 className={styles.item}
                 onClick={() => {
                   const url = item.navigateUrl;
@@ -138,4 +113,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default HeroSection2;

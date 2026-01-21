@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Users, Package, CheckCircle, Building2 } from 'lucide-react';
 import styles from './PromotionalBanner.module.css';
-import { homepageAPI } from '../../services/api';
 
 interface InfoBadge {
   icon: string;
@@ -13,22 +12,18 @@ interface InfoBadge {
 
 interface PromotionalBannerData {
   isActive: boolean;
-  // Left Box - Sale Timer or Text
   useTimerMode: boolean;
-  // Timer Mode fields
   saleText: string;
   saleTextColor: string;
   countdownEndDate: string;
   timerTextColor: string;
   endsInText: string;
   endsInColor: string;
-  // Text Mode fields
   mainHeadingText: string;
   mainHeadingColor: string;
   subHeadingText: string;
   subHeadingColor: string;
   leftBoxBackground: string;
-  // Middle Section - Offer
   showOfferSection: boolean;
   offerIconUrl: string;
   offerIconColor: string;
@@ -36,36 +31,34 @@ interface PromotionalBannerData {
   offerTextColor: string;
   discountText: string;
   discountTextColor: string;
-  // Right Section - Info Badges
   showInfoBadges: boolean;
   infoBadges: InfoBadge[];
   badgeIconColor: string;
   badgeTextColor: string;
-  // Container
   containerBackground: string;
   innerBoxBackground: string;
-  // Navigate URL
   navigateUrl: string;
+}
+
+interface PromotionalBannerProps {
+  data?: Partial<PromotionalBannerData> | null;
+  isLoading?: boolean;
 }
 
 const defaultData: PromotionalBannerData = {
   isActive: true,
-  // Left Box - Sale Timer or Text
   useTimerMode: false,
-  // Timer Mode fields
   saleText: 'SALE',
   saleTextColor: '#d60f0f',
   countdownEndDate: '2026-02-15T23:59:59',
   timerTextColor: '#d60f0f',
   endsInText: 'ENDS IN',
   endsInColor: '#d60f0f',
-  // Text Mode fields
   mainHeadingText: 'New Year Sale',
   mainHeadingColor: '#d60f0f',
   subHeadingText: 'Limited Time Offer',
   subHeadingColor: '#374151',
   leftBoxBackground: '#ffffff',
-  // Middle Section - Offer
   showOfferSection: true,
   offerIconUrl: '',
   offerIconColor: '#f97316',
@@ -73,7 +66,6 @@ const defaultData: PromotionalBannerData = {
   offerTextColor: '#6b7280',
   discountText: '₹ 25,000 INSTANT DISCOUNT',
   discountTextColor: '#f97316',
-  // Right Section - Info Badges
   showInfoBadges: true,
   infoBadges: [
     { icon: 'Users', iconUrl: '', topText: '20 Lakh+', bottomText: 'Customers' },
@@ -83,10 +75,8 @@ const defaultData: PromotionalBannerData = {
   ],
   badgeIconColor: '#f97316',
   badgeTextColor: '#374151',
-  // Container
   containerBackground: '#f0f0f0',
   innerBoxBackground: '#ffffff',
-  // Navigate URL
   navigateUrl: ''
 };
 
@@ -98,10 +88,15 @@ const iconMap: { [key: string]: any } = {
   MapPin
 };
 
-const PromotionalBanner = () => {
+const PromotionalBanner: React.FC<PromotionalBannerProps> = ({ data: propData, isLoading: _isLoading = false }) => {
   const navigate = useNavigate();
-  const [data, setData] = useState<PromotionalBannerData>(defaultData);
-  const [loading, setLoading] = useState(true);
+
+  // Merge prop data with defaults
+  const bannerData: PromotionalBannerData = {
+    ...defaultData,
+    ...(propData || {})
+  };
+
   const [timeLeft, setTimeLeft] = useState({
     days: '00',
     hours: '00',
@@ -109,58 +104,11 @@ const PromotionalBanner = () => {
     seconds: '00'
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('promotional-banner');
-        
-        if (response.data && response.data.content) {
-          setData({
-            isActive: response.data.content.isActive !== undefined ? response.data.content.isActive : defaultData.isActive,
-            useTimerMode: response.data.content.useTimerMode !== undefined ? response.data.content.useTimerMode : defaultData.useTimerMode,
-            saleText: response.data.content.saleText || defaultData.saleText,
-            saleTextColor: response.data.content.saleTextColor || defaultData.saleTextColor,
-            countdownEndDate: response.data.content.countdownEndDate || defaultData.countdownEndDate,
-            timerTextColor: response.data.content.timerTextColor || defaultData.timerTextColor,
-            endsInText: response.data.content.endsInText || defaultData.endsInText,
-            endsInColor: response.data.content.endsInColor || defaultData.endsInColor,
-            mainHeadingText: response.data.content.mainHeadingText || defaultData.mainHeadingText,
-            mainHeadingColor: response.data.content.mainHeadingColor || defaultData.mainHeadingColor,
-            subHeadingText: response.data.content.subHeadingText || defaultData.subHeadingText,
-            subHeadingColor: response.data.content.subHeadingColor || defaultData.subHeadingColor,
-            leftBoxBackground: response.data.content.leftBoxBackground || defaultData.leftBoxBackground,
-            showOfferSection: response.data.content.showOfferSection !== undefined ? response.data.content.showOfferSection : defaultData.showOfferSection,
-            offerIconUrl: response.data.content.offerIconUrl || defaultData.offerIconUrl,
-            offerIconColor: response.data.content.offerIconColor || defaultData.offerIconColor,
-            offerText: response.data.content.offerText || defaultData.offerText,
-            offerTextColor: response.data.content.offerTextColor || defaultData.offerTextColor,
-            discountText: response.data.content.discountText || defaultData.discountText,
-            discountTextColor: response.data.content.discountTextColor || defaultData.discountTextColor,
-            showInfoBadges: response.data.content.showInfoBadges !== undefined ? response.data.content.showInfoBadges : defaultData.showInfoBadges,
-            infoBadges: response.data.content.infoBadges || defaultData.infoBadges,
-            badgeIconColor: response.data.content.badgeIconColor || defaultData.badgeIconColor,
-            badgeTextColor: response.data.content.badgeTextColor || defaultData.badgeTextColor,
-            containerBackground: response.data.content.containerBackground || defaultData.containerBackground,
-            innerBoxBackground: response.data.content.innerBoxBackground || defaultData.innerBoxBackground,
-            navigateUrl: response.data.content.navigateUrl || defaultData.navigateUrl
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching promotional banner data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   // Countdown timer logic
   const calculateTimeLeft = () => {
-    const endDate = new Date(data.countdownEndDate);
+    const endDate = new Date(bannerData.countdownEndDate);
     const difference = +endDate - +new Date();
-    
+
     if (difference > 0) {
       return {
         days: String(Math.floor(difference / (1000 * 60 * 60 * 24))).padStart(2, '0'),
@@ -173,57 +121,49 @@ const PromotionalBanner = () => {
   };
 
   useEffect(() => {
-    if (!data.isActive || !data.useTimerMode) return;
-    
+    if (!bannerData.isActive || !bannerData.useTimerMode) return;
+
     setTimeLeft(calculateTimeLeft());
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [data.countdownEndDate, data.isActive, data.useTimerMode]);
+  }, [bannerData.countdownEndDate, bannerData.isActive, bannerData.useTimerMode]);
 
-  if (loading) {
-    return (
-      <div className={styles.bannerContainer} style={{ padding: '20px', textAlign: 'center' }}>
-        Loading...
-      </div>
-    );
-  }
-
-  if (!data.isActive) {
+  if (!bannerData.isActive) {
     return null;
   }
 
   const handleClick = () => {
-    if (data.navigateUrl && data.navigateUrl.trim()) {
-      if (data.navigateUrl.startsWith('http')) {
-        window.location.href = data.navigateUrl;
+    if (bannerData.navigateUrl && bannerData.navigateUrl.trim()) {
+      if (bannerData.navigateUrl.startsWith('http')) {
+        window.location.href = bannerData.navigateUrl;
       } else {
-        navigate(data.navigateUrl);
+        navigate(bannerData.navigateUrl);
       }
     }
   };
 
   return (
     <div className={styles.bannerContainer}>
-      <div 
+      <div
         className={styles.bannerWrapper}
-        style={{ backgroundColor: data.containerBackground }}
+        style={{ backgroundColor: bannerData.containerBackground }}
       >
         <div className={styles.bannerContent}>
           {/* Left Box - Sale Timer and Offer */}
-          <div 
+          <div
             className={styles.leftCombinedBox}
-            style={{ backgroundColor: data.innerBoxBackground }}
+            style={{ backgroundColor: bannerData.innerBoxBackground }}
           >
             {/* Timer or Text Section */}
             <div className={styles.timerBox}>
-              {data.useTimerMode ? (
+              {bannerData.useTimerMode ? (
                 <>
-                  <div className={styles.timerNumbers} style={{ color: data.timerTextColor }}>
-                    <span className={styles.saleLabel} style={{ color: data.saleTextColor }}>
-                      {data.saleText}
+                  <div className={styles.timerNumbers} style={{ color: bannerData.timerTextColor }}>
+                    <span className={styles.saleLabel} style={{ color: bannerData.saleTextColor }}>
+                      {bannerData.saleText}
                     </span>
                     <span>{timeLeft.days}</span>
                     <span className={styles.colon}>:</span>
@@ -234,8 +174,8 @@ const PromotionalBanner = () => {
                     <span>{timeLeft.seconds}</span>
                   </div>
                   <div className={styles.timerLabels}>
-                    <span className={styles.endsIn} style={{ color: data.endsInColor }}>
-                      {data.endsInText}
+                    <span className={styles.endsIn} style={{ color: bannerData.endsInColor }}>
+                      {bannerData.endsInText}
                     </span>
                     <span>DAYS</span>
                     <span>HRS</span>
@@ -245,34 +185,33 @@ const PromotionalBanner = () => {
                 </>
               ) : (
                 <div className={styles.textModeContent}>
-                  <span className={styles.mainHeading} style={{ color: data.mainHeadingColor }}>
-                    {data.mainHeadingText}
+                  <span className={styles.mainHeading} style={{ color: bannerData.mainHeadingColor }}>
+                    {bannerData.mainHeadingText}
                   </span>
-                  <span className={styles.subHeading} style={{ color: data.subHeadingColor }}>
-                    {data.subHeadingText}
+                  <span className={styles.subHeading} style={{ color: bannerData.subHeadingColor }}>
+                    {bannerData.subHeadingText}
                   </span>
                 </div>
               )}
             </div>
 
             {/* Divider */}
-            {data.showOfferSection && <div className={styles.divider}></div>}
+            {bannerData.showOfferSection && <div className={styles.divider}></div>}
 
             {/* Offer Section */}
-            {data.showOfferSection && (
-              <div 
+            {bannerData.showOfferSection && (
+              <div
                 className={styles.offerBox}
                 onClick={handleClick}
-                style={{ cursor: data.navigateUrl ? 'pointer' : 'default' }}
+                style={{ cursor: bannerData.navigateUrl ? 'pointer' : 'default' }}
               >
-                <div className={styles.offerIcon} style={{ color: data.offerIconColor }}>
-                  {data.offerIconUrl ? (
-                    <img 
-                      src={data.offerIconUrl} 
-                      alt="Offer icon" 
+                <div className={styles.offerIcon} style={{ color: bannerData.offerIconColor }}>
+                  {bannerData.offerIconUrl ? (
+                    <img
+                      src={bannerData.offerIconUrl}
+                      alt="Offer icon"
                       style={{ width: '32px', height: '32px', objectFit: 'contain' }}
                       onError={(e) => {
-                        // Fallback to default icon if image fails to load
                         e.currentTarget.style.display = 'none';
                         e.currentTarget.parentElement!.innerHTML = '<svg></svg>';
                       }}
@@ -282,11 +221,11 @@ const PromotionalBanner = () => {
                   )}
                 </div>
                 <div className={styles.offerContent}>
-                  <span className={styles.offerText} style={{ color: data.offerTextColor }}>
-                    {data.offerText}
+                  <span className={styles.offerText} style={{ color: bannerData.offerTextColor }}>
+                    {bannerData.offerText}
                   </span>
-                  <span className={styles.discountText} style={{ color: data.discountTextColor }}>
-                    {data.discountText}
+                  <span className={styles.discountText} style={{ color: bannerData.discountTextColor }}>
+                    {bannerData.discountText}
                   </span>
                 </div>
               </div>
@@ -294,23 +233,22 @@ const PromotionalBanner = () => {
           </div>
 
           {/* Right Box - Info Badges */}
-          {data.showInfoBadges && (
-            <div 
+          {bannerData.showInfoBadges && (
+            <div
               className={styles.infoBadgesBox}
-              style={{ backgroundColor: data.innerBoxBackground }}
+              style={{ backgroundColor: bannerData.innerBoxBackground }}
             >
-              {data.infoBadges.map((badge, index) => {
+              {bannerData.infoBadges.map((badge, index) => {
                 const IconComponent = iconMap[badge.icon] || Users;
                 return (
                   <div key={index} className={styles.badgeItem}>
-                    <div className={styles.badgeIcon} style={{ color: data.badgeIconColor }}>
+                    <div className={styles.badgeIcon} style={{ color: bannerData.badgeIconColor }}>
                       {badge.iconUrl ? (
-                        <img 
-                          src={badge.iconUrl} 
-                          alt={`${badge.topText} icon`} 
+                        <img
+                          src={badge.iconUrl}
+                          alt={`${badge.topText} icon`}
                           style={{ width: '28px', height: '28px', objectFit: 'contain' }}
                           onError={(e) => {
-                            // Fallback to default icon if image fails to load
                             e.currentTarget.style.display = 'none';
                           }}
                         />
@@ -318,7 +256,7 @@ const PromotionalBanner = () => {
                         <IconComponent size={28} />
                       )}
                     </div>
-                    <div className={styles.badgeTextContent} style={{ color: data.badgeTextColor }}>
+                    <div className={styles.badgeTextContent} style={{ color: bannerData.badgeTextColor }}>
                       <span className={styles.badgeTopText}>{badge.topText}</span>
                       <span className={styles.badgeBottomText}>{badge.bottomText}</span>
                     </div>

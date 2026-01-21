@@ -1,8 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./bannerCards.module.css"; // Import CSS module
+import styles from "./bannerCards.module.css";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { homepageAPI } from '../../services/api';
 import ProductCard from './ProductCard';
 
 interface BannerCard {
@@ -30,14 +29,28 @@ interface Product {
   color_count?: number;
 }
 
+interface BannerCardsData {
+  heading?: string;
+  bannerCards?: BannerCard[];
+  slider1Title?: string;
+  slider1ViewAllUrl?: string;
+  slider1Products?: Product[];
+  slider1Enabled?: boolean;
+  slider2Title?: string;
+  slider2ViewAllUrl?: string;
+  slider2Products?: Product[];
+  slider2Enabled?: boolean;
+}
+
+interface BannerCardsProps {
+  data?: BannerCardsData | null;
+  isLoading?: boolean;
+}
+
 // Default Banner Data
 const defaultBannerCards: BannerCard[] = [
-  {
-    img: "/images/Home/bannerCards.webp",
-  },
-  {
-    img: "/images/Home/bannerCards.webp",
-  },
+  { img: "/images/Home/bannerCards.webp" },
+  { img: "/images/Home/bannerCards.webp" },
 ];
 
 // Default Slider Product Data
@@ -78,24 +91,6 @@ const defaultProducts1: Product[] = [
     oldPrice: "₹14,999",
     newPrice: "₹10,999",
   },
-  {
-    img: "/images/Home/sofa1.jpg",
-    title: "Designer Sofa",
-    desc: "Sophisticated design with plush seating and durable frame",
-    rating: 4.7,
-    reviews: 250,
-    oldPrice: "₹17,999",
-    newPrice: "₹14,999",
-  },
-  {
-    img: "/images/Home/sofa2.jpg",
-    title: "Bedroom Set",
-    desc: "Complete bedroom solution with bed and side tables",
-    rating: 4.3,
-    reviews: 150,
-    oldPrice: "₹25,999",
-    newPrice: "₹19,999",
-  },
 ];
 
 const defaultProducts2: Product[] = [
@@ -135,88 +130,39 @@ const defaultProducts2: Product[] = [
     oldPrice: "₹4,999",
     newPrice: "₹3,499",
   },
-  {
-    img: "/images/Home/sofa4.jpg",
-    title: "Coffee Table",
-    desc: "Modern coffee table with storage space",
-    rating: 4.5,
-    reviews: 130,
-    oldPrice: "₹7,999",
-    newPrice: "₹5,999",
-  },
-  {
-    img: "/images/Home/sofa3.jpg",
-    title: "Study Desk",
-    desc: "Compact study desk perfect for home office",
-    rating: 4.2,
-    reviews: 80,
-    oldPrice: "₹6,999",
-    newPrice: "₹4,999",
-  },
 ];
 
-const BannerCards = () => {
+const BannerCards: React.FC<BannerCardsProps> = ({ data: propData, isLoading: _isLoading = false }) => {
   const navigate = useNavigate();
   const slider1 = useRef<HTMLDivElement>(null);
   const slider2 = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [heading, setHeading] = useState("Crafted In India");
-  const [bannerCards, setBannerCards] = useState<BannerCard[]>(defaultBannerCards);
-  const [slider1Title, setSlider1Title] = useState("Customers frequently viewed | Popular products in the last 7 days");
-  const [slider1ViewAllUrl, setSlider1ViewAllUrl] = useState("#");
-  const [slider1Products, setSlider1Products] = useState<Product[]>(defaultProducts1);
-  const [slider2Title, setSlider2Title] = useState("Inspired by your browsing history");
-  const [slider2ViewAllUrl, setSlider2ViewAllUrl] = useState("#");
-  const [slider2Products, setSlider2Products] = useState<Product[]>(defaultProducts2);
-  const [loading, setLoading] = useState(true);
-  const [slider1Enabled, setSlider1Enabled] = useState(true);
-  const [slider2Enabled, setSlider2Enabled] = useState(true);
+
+  // Use passed data or defaults (no loading state blocking render)
+  const heading = propData?.heading || "Crafted In India";
+  const bannerCards = propData?.bannerCards || defaultBannerCards;
+  const slider1Title = propData?.slider1Title || "Customers frequently viewed | Popular products in the last 7 days";
+  const slider1ViewAllUrl = propData?.slider1ViewAllUrl || "#";
+  const slider1Products = propData?.slider1Products || defaultProducts1;
+  const slider1Enabled = propData?.slider1Enabled !== undefined ? propData.slider1Enabled : true;
+  const slider2Title = propData?.slider2Title || "Inspired by your browsing history";
+  const slider2ViewAllUrl = propData?.slider2ViewAllUrl || "#";
+  const slider2Products = propData?.slider2Products || defaultProducts2;
+  const slider2Enabled = propData?.slider2Enabled !== undefined ? propData.slider2Enabled : true;
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 425); // Set breakpoint for mobile view
+      setIsMobile(window.innerWidth <= 425);
     };
 
-    handleResize(); // Set initial value
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('banner-cards');
-        
-        if (response.data && response.data.content) {
-          setHeading(response.data.content.heading || "Crafted In India");
-          setBannerCards(response.data.content.bannerCards || defaultBannerCards);
-          setSlider1Title(response.data.content.slider1Title || slider1Title);
-          setSlider1ViewAllUrl(response.data.content.slider1ViewAllUrl || "#");
-          setSlider1Products(response.data.content.slider1Products || defaultProducts1);
-          setSlider2Title(response.data.content.slider2Title || slider2Title);
-          setSlider2ViewAllUrl(response.data.content.slider2ViewAllUrl || "#");
-          setSlider2Products(response.data.content.slider2Products || defaultProducts2);
-          // Check if individual sliders are enabled
-          setSlider1Enabled(response.data.content.slider1Enabled !== undefined ? response.data.content.slider1Enabled : true);
-          setSlider2Enabled(response.data.content.slider2Enabled !== undefined ? response.data.content.slider2Enabled : true);
-        }
-      } catch (error) {
-        console.error('Error fetching banner cards data:', error);
-        // Keep default data if API fails
-        setSlider1Enabled(true);
-        setSlider2Enabled(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   const scroll = (ref: React.RefObject<HTMLDivElement | null>, dir: 'left' | 'right') => {
     if (ref.current) {
-      const scrollAmount = isMobile ? ref.current.offsetWidth : 300; // Scroll one card width on mobile, else 300px
+      const scrollAmount = isMobile ? ref.current.offsetWidth : 300;
       ref.current.scrollBy({
         left: dir === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -247,12 +193,6 @@ const BannerCards = () => {
       />
     ));
 
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
-    );
-  }
-
   // Don't render anything if both sliders are disabled
   if (!slider1Enabled && !slider2Enabled) {
     return null;
@@ -266,7 +206,7 @@ const BannerCards = () => {
         {bannerCards.map((b, i) => (
           <div
             className={styles.bannerCard}
-            style={{ 
+            style={{
               backgroundImage: `url(${b.img})`,
               cursor: b.navigateUrl ? 'pointer' : 'default'
             }}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./furnitureCategories.module.css";
-import { homepageAPI } from '../../services/api';
 
 interface CategoryItem {
   id: number;
@@ -28,6 +27,11 @@ interface FurnitureCategoriesData {
   sliderItems: SliderItem[];
 }
 
+interface FurnitureCategoriesProps {
+  data?: Partial<FurnitureCategoriesData> | null;
+  isLoading?: boolean;
+}
+
 // Default data
 const defaultData: FurnitureCategoriesData = {
   sectionTitle: "Shop By Categories",
@@ -49,87 +53,61 @@ const defaultData: FurnitureCategoriesData = {
   sliderTitle: "India's Finest Online Furniture Brand",
   shortDescription: "Buy Furniture Online from our extensive collection of wooden furniture units to give your home an elegant touch at affordable prices.",
   fullDescription: "Buy Furniture Online from our extensive collection of wooden furniture units to give your home an elegant touch at affordable prices. We offer a wide range of Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus deleniti dolor a aspernatur esse necessitatibus nihil blanditiis repellat ipsa ut praesentium qui, neque quidem soluta earum impedit eveniet corrupti fugit.",
-    sliderItems: [
-      { id: 1, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
-      { id: 2, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
-      { id: 3, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" },
-      { id: 4, title: "Study", img: "/images/Home/studytable.jpg", navigateUrl: "" },
-      { id: 5, title: "Outdoor", img: "/images/Home/outdoor.jpg", navigateUrl: "" },
-      { id: 6, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
-      { id: 7, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
-      { id: 8, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" }
-    ]
+  sliderItems: [
+    { id: 1, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
+    { id: 2, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
+    { id: 3, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" },
+    { id: 4, title: "Study", img: "/images/Home/studytable.jpg", navigateUrl: "" },
+    { id: 5, title: "Outdoor", img: "/images/Home/outdoor.jpg", navigateUrl: "" },
+    { id: 6, title: "Living Room", img: "/images/Home/livingroom.jpg", navigateUrl: "" },
+    { id: 7, title: "Bedroom", img: "/images/Home/bedroom.jpg", navigateUrl: "" },
+    { id: 8, title: "Dining Room", img: "/images/Home/diningroom.jpg", navigateUrl: "" }
+  ]
 };
 
-export default function FurnitureCategories() {
+const FurnitureCategories: React.FC<FurnitureCategoriesProps> = ({ data: propData, isLoading: _isLoading = false }) => {
   const navigate = useNavigate();
-  const [data, setData] = useState<FurnitureCategoriesData>(defaultData);
-  const [loading, setLoading] = useState(true);
+
+  // Merge prop data with defaults
+  const sectionData: FurnitureCategoriesData = {
+    sectionTitle: propData?.sectionTitle || defaultData.sectionTitle,
+    filterButtons: propData?.filterButtons || defaultData.filterButtons,
+    categories: propData?.categories || defaultData.categories,
+    sliderTitle: propData?.sliderTitle || defaultData.sliderTitle,
+    shortDescription: propData?.shortDescription || defaultData.shortDescription,
+    fullDescription: propData?.fullDescription || defaultData.fullDescription,
+    sliderItems: (propData?.sliderItems || defaultData.sliderItems).map((item: any) => ({
+      ...item,
+      navigateUrl: item.navigateUrl || item.url || ''
+    }))
+  };
+
   const [filter, setFilter] = useState("All");
   const [startIndex, setStartIndex] = useState(0);
   const [showMore, setShowMore] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('categories');
-        
-        if (response.data && response.data.content) {
-          setData({
-            sectionTitle: response.data.content.sectionTitle || defaultData.sectionTitle,
-            filterButtons: response.data.content.filterButtons || defaultData.filterButtons,
-            categories: response.data.content.categories || defaultData.categories,
-            sliderTitle: response.data.content.sliderTitle || defaultData.sliderTitle,
-            shortDescription: response.data.content.shortDescription || defaultData.shortDescription,
-            fullDescription: response.data.content.fullDescription || defaultData.fullDescription,
-            sliderItems: (response.data.content.sliderItems || defaultData.sliderItems).map((item: any) => ({
-              ...item,
-              navigateUrl: item.navigateUrl || item.url || ''
-            }))
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching categories section data:', error);
-        // Keep default data if API fails
-        setData(defaultData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   // Detect mobile device for horizontal scrolling
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
-    );
-  }
-
   const filteredCategories =
     filter === "All"
-      ? data.categories
-      : data.categories.filter((item) => item.category === filter);
+      ? sectionData.categories
+      : sectionData.categories.filter((item) => item.category === filter);
 
-  const visibleCount = 5; // show 5 cards like screenshot
+  const visibleCount = 5;
 
   const nextSlide = () => {
-    if (startIndex + visibleCount < data.sliderItems.length) {
+    if (startIndex + visibleCount < sectionData.sliderItems.length) {
       setStartIndex(startIndex + 1);
     }
   };
@@ -142,53 +120,53 @@ export default function FurnitureCategories() {
 
   return (
     <>
-    <section className="category-section">
-    <div className={styles.container}>
-      {/* Section 1 - Categories */}
-      <h2 className={styles.title}>{data.sectionTitle}</h2>
-      <div className={styles.filterButtons}>
-        {data.filterButtons.map((btn) => (
-          <button
-            key={btn}
-            className={filter === btn ? styles.active : ""}
-            onClick={() => setFilter(btn)}
-          >
-            {btn}
-          </button>
-        ))}
-      </div>
-
-      <div className={styles.gridContainer}>
-        {filteredCategories.map((item) => (
-          <div 
-            key={item.id} 
-            className={styles.card}
-            onClick={() => {
-              const url = item.navigateUrl;
-              if (url && url.trim()) {
-                navigate(url);
-              }
-            }}
-            style={{ cursor: item.navigateUrl ? 'pointer' : 'default' }}
-          >
-            <img src={item.img} alt={item.title} />
-            <p>{item.title}</p>
+      <section className="category-section">
+        <div className={styles.container}>
+          {/* Section 1 - Categories */}
+          <h2 className={styles.title}>{sectionData.sectionTitle}</h2>
+          <div className={styles.filterButtons}>
+            {sectionData.filterButtons.map((btn) => (
+              <button
+                key={btn}
+                className={filter === btn ? styles.active : ""}
+                onClick={() => setFilter(btn)}
+              >
+                {btn}
+              </button>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
-    </section>
-    <div className={styles.sliderSection}>
-        <h2 className={styles.title2}>{data.sliderTitle}</h2>
-         <p className={styles.subtitle2}>
-        {showMore ? data.fullDescription : data.shortDescription}{" "}
-        <span
-          className={styles.moreLink}
-          onClick={() => setShowMore(!showMore)}
-        >
-          {showMore ? " Show less" : "...more"}
-        </span>
-      </p>
+
+          <div className={styles.gridContainer}>
+            {filteredCategories.map((item) => (
+              <div
+                key={item.id}
+                className={styles.card}
+                onClick={() => {
+                  const url = item.navigateUrl;
+                  if (url && url.trim()) {
+                    navigate(url);
+                  }
+                }}
+                style={{ cursor: item.navigateUrl ? 'pointer' : 'default' }}
+              >
+                <img src={item.img} alt={item.title} />
+                <p>{item.title}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <div className={styles.sliderSection}>
+        <h2 className={styles.title2}>{sectionData.sliderTitle}</h2>
+        <p className={styles.subtitle2}>
+          {showMore ? sectionData.fullDescription : sectionData.shortDescription}{" "}
+          <span
+            className={styles.moreLink}
+            onClick={() => setShowMore(!showMore)}
+          >
+            {showMore ? " Show less" : "...more"}
+          </span>
+        </p>
 
         <div className={styles.sliderWrapper}>
           <button
@@ -200,7 +178,7 @@ export default function FurnitureCategories() {
           </button>
 
           <div className={styles.sliderTrack}>
-            {(isMobile ? data.sliderItems : data.sliderItems.slice(startIndex, startIndex + visibleCount))
+            {(isMobile ? sectionData.sliderItems : sectionData.sliderItems.slice(startIndex, startIndex + visibleCount))
               .map((item) => {
                 const handleSliderClick = () => {
                   const url = item.navigateUrl;
@@ -209,8 +187,8 @@ export default function FurnitureCategories() {
                   }
                 };
                 return (
-                  <div 
-                    key={item.id} 
+                  <div
+                    key={item.id}
                     className={styles.sliderCard}
                     onClick={handleSliderClick}
                     style={{ cursor: item.navigateUrl ? 'pointer' : 'default' }}
@@ -225,11 +203,13 @@ export default function FurnitureCategories() {
           <button
             className={`${styles.navBtn} ${styles.right}`}
             onClick={nextSlide}
-            disabled={startIndex + visibleCount >= data.sliderItems.length}
+            disabled={startIndex + visibleCount >= sectionData.sliderItems.length}
           >
             &#8250;
           </button>
         </div>
       </div>
-  </>);
-}
+    </>);
+};
+
+export default FurnitureCategories;

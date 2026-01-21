@@ -1,7 +1,5 @@
 
-import { useState, useEffect } from "react";
 import styles from "./FurnitureInfoSection.module.css";
-import { homepageAPI } from '../../services/api';
 
 interface FurnitureInfoContent {
   mainHeading: string;
@@ -48,6 +46,11 @@ interface FurnitureInfoContent {
     paragraphs: string[];
     highlightText: string;
   };
+}
+
+interface FurnitureInfoSectionProps {
+  data?: Partial<FurnitureInfoContent> | null;
+  isLoading?: boolean;
 }
 
 const defaultContent: FurnitureInfoContent = {
@@ -148,35 +151,21 @@ const defaultContent: FurnitureInfoContent = {
   },
 };
 
-const FurnitureInfoSection = () => {
-  const [content, setContent] = useState<FurnitureInfoContent>(defaultContent);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('furniture-info-section');
-        
-        if (response.data && response.data.content) {
-          setContent(response.data.content);
-        }
-      } catch (error) {
-        console.error('Error fetching furniture info section data:', error);
-        // Keep default data if API fails
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
-    );
-  }
+const FurnitureInfoSection: React.FC<FurnitureInfoSectionProps> = ({ data: propData, isLoading: _isLoading = false }) => {
+  // Merge prop data with defaults
+  const content: FurnitureInfoContent = {
+    mainHeading: propData?.mainHeading || defaultContent.mainHeading,
+    introParagraphs: propData?.introParagraphs || defaultContent.introParagraphs,
+    materialsSection: propData?.materialsSection || defaultContent.materialsSection,
+    shopByRoomSection: propData?.shopByRoomSection || defaultContent.shopByRoomSection,
+    exploreMoreSection: propData?.exploreMoreSection || defaultContent.exploreMoreSection,
+    upholsterySection: propData?.upholsterySection || defaultContent.upholsterySection,
+    buyingTipsSection: propData?.buyingTipsSection || defaultContent.buyingTipsSection,
+    careTipsSection: propData?.careTipsSection || defaultContent.careTipsSection,
+    whyChooseSection: propData?.whyChooseSection || defaultContent.whyChooseSection,
+    experienceStoresSection: propData?.experienceStoresSection || defaultContent.experienceStoresSection,
+    ctaSection: propData?.ctaSection || defaultContent.ctaSection,
+  };
 
   return (
     <div className={styles.infoContainer}>

@@ -21,14 +21,18 @@ interface NavbarCategory {
   subcategories: NavbarSubcategory[];
 }
 
-const CategoryTabs: React.FC = () => {
+interface CategoryTabsProps {
+  preloadedCategories?: NavbarCategory[];
+}
+
+const CategoryTabs: React.FC<CategoryTabsProps> = ({ preloadedCategories }) => {
   const [activeMobileDropdown, setActiveMobileDropdown] = useState<string | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const [categories, setCategories] = useState<NavbarCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<NavbarCategory[]>(preloadedCategories || []);
+  const [loading, setLoading] = useState(!preloadedCategories || preloadedCategories.length === 0);
 
   // Helper function to create product link with category and subcategory using slugs
   const createProductLink = (categorySlug: string, subcategorySlug?: string): string => {
@@ -49,8 +53,14 @@ const CategoryTabs: React.FC = () => {
     // Otherwise, let Link handle it normally
   };
 
-  // Fetch navbar categories with subcategories
+  // Only fetch if no preloaded categories
   useEffect(() => {
+    if (preloadedCategories && preloadedCategories.length > 0) {
+      setCategories(preloadedCategories);
+      setLoading(false);
+      return;
+    }
+
     const fetchNavbarCategories = async () => {
       try {
         setLoading(true);
@@ -66,7 +76,7 @@ const CategoryTabs: React.FC = () => {
     };
 
     fetchNavbarCategories();
-  }, []);
+  }, [preloadedCategories]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -83,7 +93,7 @@ const CategoryTabs: React.FC = () => {
   const toggleMobileDropdown = (category: string, event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     if (activeMobileDropdown === category) {
       setActiveMobileDropdown(null);
       setDropdownPosition(null);
@@ -91,10 +101,10 @@ const CategoryTabs: React.FC = () => {
       const button = event.currentTarget;
       const rect = button.getBoundingClientRect();
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      
+
       const maxWidth = Math.min(500, window.innerWidth - 20);
       const left = Math.max(10, Math.min(rect.left, window.innerWidth - maxWidth - 10));
-      
+
       setDropdownPosition({
         top: rect.bottom + scrollTop + 8,
         left: left
@@ -118,12 +128,13 @@ const CategoryTabs: React.FC = () => {
     return categories.slice(0, 8); // Get first 8 categories
   };
 
-  if (loading) {
+  // Show minimal skeleton while loading, but don't block render
+  if (loading && categories.length === 0) {
     return (
       <div className="tab-categories mb-0">
         <ul className="nav nav-tabs d-none d-md-flex">
           <li className="nav-item">
-            <span className="nav-link">Loading...</span>
+            <span className="nav-link" style={{ opacity: 0.5 }}>All</span>
           </li>
         </ul>
       </div>
@@ -150,7 +161,7 @@ const CategoryTabs: React.FC = () => {
                         const subcategory = category.subcategories.find(sub => sub.name === item);
                         return (
                           <li key={itemIdx}>
-                            <Link 
+                            <Link
                               to={createProductLink(category.categorySlug, subcategory?.slug)}
                               onClick={(e) => handleCategoryClick(e, category.categorySlug, subcategory?.slug)}
                             >
@@ -161,7 +172,7 @@ const CategoryTabs: React.FC = () => {
                       })
                     ) : (
                       <li>
-                        <Link 
+                        <Link
                           to={createProductLink(category.categorySlug)}
                           onClick={(e) => handleCategoryClick(e, category.categorySlug)}
                         >
@@ -179,8 +190,8 @@ const CategoryTabs: React.FC = () => {
         {/* Dynamic Category Tabs - Limited to 8 categories (9 total with All) */}
         {headerCategories.map((category) => (
           <li key={category.id} className="nav-item dropdown">
-            <Link 
-              className="nav-link" 
+            <Link
+              className="nav-link"
               to={createProductLink(category.slug)}
               onClick={(e) => handleCategoryClick(e, category.slug)}
             >
@@ -194,7 +205,7 @@ const CategoryTabs: React.FC = () => {
                     {category.subcategories.length > 0 ? (
                       category.subcategories.map((subcategory) => (
                         <li key={subcategory.id}>
-                          <Link 
+                          <Link
                             to={createProductLink(category.slug, subcategory.slug)}
                             onClick={(e) => handleCategoryClick(e, category.slug, subcategory.slug)}
                           >
@@ -204,7 +215,7 @@ const CategoryTabs: React.FC = () => {
                       ))
                     ) : (
                       <li>
-                        <Link 
+                        <Link
                           to={createProductLink(category.slug)}
                           onClick={(e) => handleCategoryClick(e, category.slug)}
                         >
@@ -223,7 +234,7 @@ const CategoryTabs: React.FC = () => {
       {/* Mobile/Tablet Scrollable Tabs */}
       <div className="scroll-tabs d-flex d-md-none" ref={dropdownRef}>
         <div className="mobile-category-item">
-          <button 
+          <button
             className="mobile-category-link"
             onClick={(e) => toggleMobileDropdown('all', e)}
           >
@@ -231,7 +242,7 @@ const CategoryTabs: React.FC = () => {
             <i className={`bi bi-chevron-${activeMobileDropdown === 'all' ? 'up' : 'down'} ms-1`}></i>
           </button>
           {activeMobileDropdown === 'all' && dropdownPosition && (
-            <div 
+            <div
               className="mobile-dropdown-menu"
               style={{
                 top: `${dropdownPosition.top}px`,
@@ -250,8 +261,8 @@ const CategoryTabs: React.FC = () => {
                           const subcategory = category.subcategories.find(sub => sub.name === item);
                           return (
                             <li key={itemIdx}>
-                              <Link 
-                                to={createProductLink(category.categorySlug, subcategory?.slug)} 
+                              <Link
+                                to={createProductLink(category.categorySlug, subcategory?.slug)}
                                 onClick={(e) => {
                                   handleCategoryClick(e, category.categorySlug, subcategory?.slug);
                                   setActiveMobileDropdown(null);
@@ -265,8 +276,8 @@ const CategoryTabs: React.FC = () => {
                         })
                       ) : (
                         <li>
-                          <Link 
-                            to={createProductLink(category.categorySlug)} 
+                          <Link
+                            to={createProductLink(category.categorySlug)}
                             onClick={(e) => {
                               handleCategoryClick(e, category.categorySlug);
                               setActiveMobileDropdown(null);
@@ -284,11 +295,11 @@ const CategoryTabs: React.FC = () => {
             </div>
           )}
         </div>
-        
+
         {/* Dynamic Mobile Category Items - Limited to 8 categories */}
         {headerCategories.map((category) => (
           <div key={category.id} className="mobile-category-item">
-            <button 
+            <button
               className="mobile-category-link"
               onClick={(e) => toggleMobileDropdown(`cat-${category.id}`, e)}
             >
@@ -296,7 +307,7 @@ const CategoryTabs: React.FC = () => {
               <i className={`bi bi-chevron-${activeMobileDropdown === `cat-${category.id}` ? 'up' : 'down'} ms-1`}></i>
             </button>
             {activeMobileDropdown === `cat-${category.id}` && dropdownPosition && (
-              <div 
+              <div
                 className="mobile-dropdown-menu"
                 style={{
                   top: `${dropdownPosition.top}px`,
@@ -312,8 +323,8 @@ const CategoryTabs: React.FC = () => {
                       {category.subcategories.length > 0 ? (
                         category.subcategories.map((subcategory) => (
                           <li key={subcategory.id}>
-                            <Link 
-                              to={createProductLink(category.slug, subcategory.slug)} 
+                            <Link
+                              to={createProductLink(category.slug, subcategory.slug)}
                               onClick={(e) => {
                                 handleCategoryClick(e, category.slug, subcategory.slug);
                                 setActiveMobileDropdown(null);
@@ -326,8 +337,8 @@ const CategoryTabs: React.FC = () => {
                         ))
                       ) : (
                         <li>
-                          <Link 
-                            to={createProductLink(category.slug)} 
+                          <Link
+                            to={createProductLink(category.slug)}
                             onClick={(e) => {
                               handleCategoryClick(e, category.slug);
                               setActiveMobileDropdown(null);

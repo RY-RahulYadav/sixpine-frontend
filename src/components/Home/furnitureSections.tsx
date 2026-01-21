@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import styles from "./furnitureSections.module.css";
-import { homepageAPI } from '../../services/api';
 import ProductCard from './ProductCard';
 
 interface Product {
@@ -35,6 +34,13 @@ interface FurnitureSectionsData {
     subtitle: string;
     products: Product[];
   };
+  discoverEnabled?: boolean;
+  topRatedEnabled?: boolean;
+}
+
+interface FurnitureSectionsProps {
+  data?: Partial<FurnitureSectionsData> | null;
+  isLoading?: boolean;
 }
 
 // Default data
@@ -142,10 +148,10 @@ const defaultData: FurnitureSectionsData = {
 };
 
 
-const Section = ({ title, subtitle, products, extraClass, sectionKey }: { 
-  title: string; 
-  subtitle: string; 
-  products: Product[]; 
+const Section = ({ title, subtitle, products, extraClass, sectionKey }: {
+  title: string;
+  subtitle: string;
+  products: Product[];
   extraClass?: string;
   sectionKey?: string;
 }) => {
@@ -154,16 +160,14 @@ const Section = ({ title, subtitle, products, extraClass, sectionKey }: {
 
   const scrollAmount = () => {
     if (listRef.current) {
-      // ProductCard uses craftedProductCard class from bannerCards.module.css
       const card = listRef.current.querySelector('[class*="craftedProductCard"]') as HTMLElement;
       if (card) {
-        // Calculate card width + gap
         const cardWidth = card.offsetWidth;
         const gap = parseInt(window.getComputedStyle(listRef.current).getPropertyValue('gap')) || 20;
         return cardWidth + gap;
       }
     }
-    return 300; // Fallback scroll amount
+    return 300;
   };
 
   const scrollLeft = () => {
@@ -206,9 +210,8 @@ const Section = ({ title, subtitle, products, extraClass, sectionKey }: {
 
         <div
           ref={listRef}
-          className={`${styles.productList} ${
-            viewAll ? styles.grid : styles.scroll
-          }`}
+          className={`${styles.productList} ${viewAll ? styles.grid : styles.scroll
+            }`}
         >
           {products.map((p, idx) => (
             <ProductCard
@@ -241,70 +244,38 @@ const Section = ({ title, subtitle, products, extraClass, sectionKey }: {
   );
 };
 
-const FurnitureSections = () => {
-  const [data, setData] = useState<FurnitureSectionsData>(defaultData);
-  const [loading, setLoading] = useState(true);
-  const [discoverEnabled, setDiscoverEnabled] = useState(true);
-  const [topRatedEnabled, setTopRatedEnabled] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('furniture-sections');
-        
-        if (response.data && response.data.content) {
-          setData({
-            discover: response.data.content.discover || defaultData.discover,
-            topRated: response.data.content.topRated || defaultData.topRated
-          });
-          // Check if individual sections are enabled
-          setDiscoverEnabled(response.data.content.discoverEnabled !== undefined ? response.data.content.discoverEnabled : true);
-          setTopRatedEnabled(response.data.content.topRatedEnabled !== undefined ? response.data.content.topRatedEnabled : true);
-        }
-      } catch (error) {
-        console.error('Error fetching furniture sections data:', error);
-        // Keep default data if API fails
-        setData(defaultData);
-        setDiscoverEnabled(true);
-        setTopRatedEnabled(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
-    );
-  }
+const FurnitureSections: React.FC<FurnitureSectionsProps> = ({ data: propData, isLoading: _isLoading = false }) => {
+  // Merge prop data with defaults
+  const sectionData = {
+    discover: propData?.discover || defaultData.discover,
+    topRated: propData?.topRated || defaultData.topRated,
+    discoverEnabled: propData?.discoverEnabled !== undefined ? propData.discoverEnabled : true,
+    topRatedEnabled: propData?.topRatedEnabled !== undefined ? propData.topRatedEnabled : true
+  };
 
   // Use API data if available, otherwise use defaults
-  const discoverProducts = data.discover.products.length > 0 ? data.discover.products : defaultData.discover.products;
-  const topRatedProducts = data.topRated.products.length > 0 ? data.topRated.products : defaultData.topRated.products;
+  const discoverProducts = sectionData.discover.products.length > 0 ? sectionData.discover.products : defaultData.discover.products;
+  const topRatedProducts = sectionData.topRated.products.length > 0 ? sectionData.topRated.products : defaultData.topRated.products;
 
   return (
     <div className={styles.furnitureContainer}>
       {/* Render Discover section only if enabled */}
-      {discoverEnabled && (
+      {sectionData.discoverEnabled && (
         <Section
-          title={data.discover.title}
-          subtitle={data.discover.subtitle}
+          title={sectionData.discover.title}
+          subtitle={sectionData.discover.subtitle}
           products={discoverProducts}
           extraClass={styles.discoverSection}
           sectionKey="discover"
         />
       )}
-      
+
       {/* Render Top Rated section only if enabled */}
-      {topRatedEnabled && (
-        <div style={{ marginTop: discoverEnabled ? "40px" : "0" }}>
+      {sectionData.topRatedEnabled && (
+        <div style={{ marginTop: sectionData.discoverEnabled ? "40px" : "0" }}>
           <Section
-            title={data.topRated.title}
-            subtitle={data.topRated.subtitle}
+            title={sectionData.topRated.title}
+            subtitle={sectionData.topRated.subtitle}
             products={topRatedProducts}
             extraClass={styles.discoverSection}
             sectionKey="topRated"

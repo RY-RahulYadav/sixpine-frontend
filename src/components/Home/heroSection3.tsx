@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import Slider from "react-slick";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import styles from "./heroSection3.module.css";
-import { homepageAPI } from '../../services/api';
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -38,6 +37,11 @@ interface HeroSection3Data {
   };
   categoryItems: CategoryItem[];
   sliderCards: SliderCard[];
+}
+
+interface HeroSection3Props {
+  data?: Partial<HeroSection3Data> | null;
+  isLoading?: boolean;
 }
 
 // Default data - exactly 8 category items
@@ -87,59 +91,20 @@ const defaultData: HeroSection3Data = {
   ]
 };
 
-const HeroSection3 = () => {
+const HeroSection3: React.FC<HeroSection3Props> = ({ data: propData, isLoading: _isLoading = false }) => {
   const navigate = useNavigate();
-  const [data, setData] = useState<HeroSection3Data>(defaultData);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('hero3');
-        
-        if (response.data && response.data.content) {
-          // Ensure exactly 8 category items
-          const categoryItems = response.data.content.categoryItems || [];
-          if (categoryItems.length !== 8) {
-            // If not 8, use defaults or pad/trim to 8
-            if (categoryItems.length < 8) {
-              const defaultItems = [...defaultData.categoryItems];
-              const merged = [...categoryItems, ...defaultItems.slice(categoryItems.length, 8)];
-              categoryItems.splice(0, categoryItems.length, ...merged.slice(0, 8));
-            } else {
-              categoryItems.splice(8);
-            }
-          }
-          
-          setData({
-            title: response.data.content.title || defaultData.title,
-            subtitle: response.data.content.subtitle || defaultData.subtitle,
-            offerBadge: response.data.content.offerBadge || defaultData.offerBadge,
-            leftProductCard: response.data.content.leftProductCard || defaultData.leftProductCard,
-            categoryItems: categoryItems.slice(0, 8), // Ensure exactly 8
-            sliderCards: response.data.content.sliderCards || defaultData.sliderCards
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching hero section 3 data:', error);
-        // Keep default data if API fails
-        setData(defaultData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className={styles.hero3Container}>
-        <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
-      </section>
-    );
-  }
+  // Merge prop data with defaults
+  const sectionData: HeroSection3Data = {
+    title: propData?.title || defaultData.title,
+    subtitle: propData?.subtitle || defaultData.subtitle,
+    offerBadge: propData?.offerBadge || defaultData.offerBadge,
+    leftProductCard: propData?.leftProductCard || defaultData.leftProductCard,
+    categoryItems: (propData?.categoryItems && propData.categoryItems.length > 0)
+      ? propData.categoryItems.slice(0, 8)
+      : defaultData.categoryItems,
+    sliderCards: propData?.sliderCards || defaultData.sliderCards
+  };
 
   const settings = {
     dots: false,
@@ -156,41 +121,41 @@ const HeroSection3 = () => {
   };
 
   // Ensure exactly 8 items for display
-  const displayItems = data.categoryItems.slice(0, 8);
+  const displayItems = sectionData.categoryItems.slice(0, 8);
 
   return (
     <section className={styles.hero3Container}>
       <div className={styles.topSection}>
         <div className={styles.leftText}>
           <div className={styles.leftTextContent}>
-            <h2>{data.title}</h2>
-            <p>{data.subtitle}</p>
-            <span className={styles.offer}>{data.offerBadge}</span>
+            <h2>{sectionData.title}</h2>
+            <p>{sectionData.subtitle}</p>
+            <span className={styles.offer}>{sectionData.offerBadge}</span>
           </div>
 
-          <div 
+          <div
             className={styles.leftProductCard}
             onClick={() => {
-              const url = data.leftProductCard.navigateUrl;
+              const url = sectionData.leftProductCard.navigateUrl;
               if (url && url.trim()) {
                 navigate(url);
               }
             }}
-            style={{ cursor: data.leftProductCard.navigateUrl ? 'pointer' : 'default' }}
+            style={{ cursor: sectionData.leftProductCard.navigateUrl ? 'pointer' : 'default' }}
           >
             <img
-              src={data.leftProductCard.img}
-              alt={data.leftProductCard.name}
+              src={sectionData.leftProductCard.img}
+              alt={sectionData.leftProductCard.name}
               className={styles.leftProductImg}
             />
-            <div className={styles.leftProductName}>{data.leftProductCard.name}</div>
+            <div className={styles.leftProductName}>{sectionData.leftProductCard.name}</div>
           </div>
         </div>
 
         <div className={styles.rightGrid}>
           {displayItems.map((card) => (
-            <div 
-              key={card.id} 
+            <div
+              key={card.id}
               className={styles.productCard}
               onClick={() => {
                 const url = card.navigateUrl;
@@ -209,7 +174,7 @@ const HeroSection3 = () => {
 
       <div className={styles.bottomSection}>
         <Slider {...settings} className={styles.slider}>
-          {data.sliderCards.map((s) => {
+          {sectionData.sliderCards.map((s) => {
             const handleClick = () => {
               const url = s.navigateUrl || (s.productSlug ? `/products-details/${s.productSlug}` : null);
               if (url) {

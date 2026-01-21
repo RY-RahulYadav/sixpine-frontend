@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Store, Truck, ThumbsUp, BadgeDollarSign, Shield, MapPin, Users, Package, CheckCircle, Building2 } from 'lucide-react';
 import styles from './FeatureCard.module.css';
-import { homepageAPI } from '../../services/api';
 
 interface FeatureCardData {
   featuresBar: Array<{
@@ -18,6 +17,11 @@ interface FeatureCardData {
     topText: string;
     bottomText: string;
   }>;
+}
+
+interface FeatureCardProps {
+  data?: Partial<FeatureCardData> | null;
+  isLoading?: boolean;
 }
 
 const defaultData: FeatureCardData = {
@@ -53,40 +57,19 @@ const iconMap: { [key: string]: any } = {
   Building2,
 };
 
-const FeaturesAndCTA = () => {
-  const [data, setData] = useState<FeatureCardData>(defaultData);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await homepageAPI.getHomepageContent('feature-card');
-        
-        if (response.data && response.data.content) {
-          setData({
-            featuresBar: response.data.content.featuresBar || defaultData.featuresBar,
-            saleTimerActive: response.data.content.saleTimerActive !== undefined ? response.data.content.saleTimerActive : defaultData.saleTimerActive,
-            countdownEndDate: response.data.content.countdownEndDate || defaultData.countdownEndDate,
-            offerText: response.data.content.offerText || defaultData.offerText,
-            discountText: response.data.content.discountText || defaultData.discountText,
-            infoBadges: response.data.content.infoBadges || defaultData.infoBadges
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching feature card data:', error);
-        // Keep default data if API fails
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+const FeatureCard: React.FC<FeatureCardProps> = ({ data: propData, isLoading: _isLoading = false }) => {
+  // Merge prop data with defaults
+  const featureData: FeatureCardData = {
+    featuresBar: propData?.featuresBar || defaultData.featuresBar,
+    saleTimerActive: propData?.saleTimerActive !== undefined ? propData.saleTimerActive : defaultData.saleTimerActive,
+    countdownEndDate: propData?.countdownEndDate || defaultData.countdownEndDate,
+    offerText: propData?.offerText || defaultData.offerText,
+    discountText: propData?.discountText || defaultData.discountText,
+    infoBadges: propData?.infoBadges || defaultData.infoBadges
+  };
 
   const calculateTimeLeft = () => {
-    // Set your target end date here
-    const endDate = new Date(data.countdownEndDate);
+    const endDate = new Date(featureData.countdownEndDate);
     const difference = +endDate - +new Date();
     let timeLeft = {
       days: "00",
@@ -110,7 +93,7 @@ const FeaturesAndCTA = () => {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   useEffect(() => {
-    if (!data.saleTimerActive) {
+    if (!featureData.saleTimerActive) {
       return;
     }
     const timer = setInterval(() => {
@@ -118,19 +101,13 @@ const FeaturesAndCTA = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [data.saleTimerActive, data.countdownEndDate]);
-
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>
-    );
-  }
+  }, [featureData.saleTimerActive, featureData.countdownEndDate]);
 
   return (
     <div className={styles.FeatureCardcontainer}>
       {/* Top Features Bar */}
       <div className={styles.featuresBar}>
-        {data.featuresBar.map((feature, index) => {
+        {featureData.featuresBar.map((feature, index) => {
           const IconComponent = iconMap[feature.icon] || Store;
           return (
             <div key={index} className={styles.featureItem}>
@@ -149,9 +126,9 @@ const FeaturesAndCTA = () => {
       {/* Bottom CTA Bar */}
       <div className={styles.ctaBar}>
         {/* Combined Timer and Offer Box */}
-        <div className={styles.combinedBox} style={{ display: 'flex', gap: data.saleTimerActive ? 'var(--spacing-md)' : 0 }}>
+        <div className={styles.combinedBox} style={{ display: 'flex', gap: featureData.saleTimerActive ? 'var(--spacing-md)' : 0 }}>
           {/* Timer - Only show if active */}
-          {data.saleTimerActive && (
+          {featureData.saleTimerActive && (
             <div className={styles.timerBox}>
               <div className={styles.timerNumbers}>
                 <div className={styles.saleLabel}>SALE</div>
@@ -174,20 +151,20 @@ const FeaturesAndCTA = () => {
           )}
 
           {/* Store Offer */}
-          <div className={styles.offerBox} style={{ flex: data.saleTimerActive ? 'none' : 1 }}>
+          <div className={styles.offerBox} style={{ flex: featureData.saleTimerActive ? 'none' : 1 }}>
             <div className={styles.iconOrange}>
               <MapPin className={styles.iconMedium} />
             </div>
             <div>
-              <div className={styles.offerText}>{data.offerText}</div>
-              <div className={styles.discountText}>{data.discountText}</div>
+              <div className={styles.offerText}>{featureData.offerText}</div>
+              <div className={styles.discountText}>{featureData.discountText}</div>
             </div>
           </div>
         </div>
 
         {/* Info Badges */}
         <div className={styles.infoBadges}>
-          {data.infoBadges.map((badge, index) => {
+          {featureData.infoBadges.map((badge, index) => {
             const IconComponent = iconMap[badge.icon] || Users;
             return (
               <div key={index} className={styles.badgeItem}>
@@ -207,4 +184,4 @@ const FeaturesAndCTA = () => {
   );
 };
 
-export default FeaturesAndCTA;
+export default FeatureCard;
