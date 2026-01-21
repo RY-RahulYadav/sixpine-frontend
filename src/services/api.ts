@@ -392,6 +392,12 @@ export const orderAPI = {
   
   getPaymentCharges: () => API.get('/payment-charges/'),
   
+  // Get Razorpay key for affordability widget
+  getRazorpayKey: () => API.get('/razorpay-key/'),
+  
+  // Get Cashfree App ID for BNPL widget
+  getCashfreeAppId: () => API.get('/cashfree-app-id/'),
+  
   // Return requests
   submitReturnRequest: (data: {
     order_id: string;

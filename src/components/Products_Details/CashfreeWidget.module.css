@@ -1,0 +1,88 @@
+/* Cashfree Widget Styles */
+/* Theme colors matching product details page: #007185 (primary), #c45500 (accent), #0f1111 (text) */
+
+.widgetContainer {
+  width: 100%;
+  margin: 0px 0 0 0;
+  margin-top: 10px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.widgetWrapper {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Override default Cashfree widget styles to match page theme */
+.widgetWrapper :global(#cashfree-widget) {
+  width: 100%;
+  display: block;
+  height: 89px;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  color: #565959;
+  font-size: 13px;
+}
+
+.loadingSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e3e6e6;
+  border-top-color: #007185;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error State */
+.errorState {
+  padding: 12px 0;
+  color: #cc0c39;
+  font-size: 13px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .widgetContainer {
+    margin: 10px 0;
+  }
+  
+  .loadingState {
+    padding: 10px 0;
+    font-size: 12px;
+  }
+  
+  .loadingSpinner {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .widgetContainer {
+    margin: 8px 0;
+  }
+  
+  .loadingState {
+    padding: 8px 0;
+    font-size: 11px;
+  }
+  
+  .loadingSpinner {
+    width: 12px;
+    height: 12px;
+  }
+}

@@ -31,7 +31,7 @@ const VideoThumbnailGenerator = ({ videoUrl }: { videoUrl: string }) => {
     if (videoRef.current && canvasRef.current && videoUrl) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      
+
       const captureFrame = () => {
         try {
           video.currentTime = 0.1; // Seek to 0.1 seconds
@@ -57,7 +57,7 @@ const VideoThumbnailGenerator = ({ videoUrl }: { videoUrl: string }) => {
 
       video.addEventListener('loadeddata', onLoadedData);
       video.addEventListener('seeked', onLoadedData);
-      
+
       // Try to load and capture
       video.load();
       captureFrame();
@@ -80,7 +80,7 @@ const VideoThumbnailGenerator = ({ videoUrl }: { videoUrl: string }) => {
         />
         <div className={styles.videoPlayButtonOverlay}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-            <path d="M8 5v14l11-7z"/>
+            <path d="M8 5v14l11-7z" />
           </svg>
         </div>
       </div>
@@ -100,7 +100,7 @@ const VideoThumbnailGenerator = ({ videoUrl }: { videoUrl: string }) => {
       <div className={styles.videoThumbnail}>
         <div className={styles.videoPlayButton}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-            <path d="M8 5v14l11-7z"/>
+            <path d="M8 5v14l11-7z" />
           </svg>
         </div>
       </div>
@@ -128,7 +128,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const [lensPosition, setLensPosition] = useState({ x: 0, y: 0 });
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [lensSize, setLensSize] = useState({ width: 180, height: 180 });
-  const [zoomPanelSize, setZoomPanelSize] = useState({ width: 600, height: 485 });
+  const [zoomPanelSize, setZoomPanelSize] = useState({ width: 550, height: 484.611 });
   const imageWrapperRef = useRef<HTMLDivElement>(null);
   const mainImageRef = useRef<HTMLImageElement>(null);
   const imageSectionContainerRef = useRef<HTMLDivElement>(null);
@@ -239,29 +239,31 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     const topOffset = wrapperRect.top - containerRect.top;
     setZoomPanelTop(topOffset);
 
-    // Calculate image aspect ratio and determine lens/panel dimensions
-    const imageAspectRatio = imageRect.width / imageRect.height;
-    
-    // Zoom panel should match the wrapper height and maintain image aspect ratio
-    // This creates a large zoom panel similar to Amazon's style
+    // Zoom panel should be wider like Amazon's style
+    // Width extends to fill more space on the right (approximately 550px like Amazon)
+    // Height matches the imageWrapper container height
+    const panelWidth = 900; // Fixed width like Amazon's zoom panel
     const panelHeight = wrapperRect.height;
-    const panelWidth = panelHeight * imageAspectRatio;
-    
-    // Calculate lens dimensions - use a larger base size (180px) maintaining aspect ratio
+
+    // Calculate the aspect ratio of the zoom panel
+    const panelAspectRatio = panelWidth / panelHeight;
+
+    // Calculate lens dimensions - the lens should have the same aspect ratio as the zoom panel
+    // Use a larger base size (180px) maintaining panel aspect ratio
     const BASE_LENS_SIZE = 180;
     let currentLensWidth: number;
     let currentLensHeight: number;
-    
-    if (imageAspectRatio >= 1) {
-      // Wider image: lens width is base size, height is proportionally smaller
+
+    if (panelAspectRatio >= 1) {
+      // Wider panel: lens width is base size, height is proportionally smaller
       currentLensWidth = BASE_LENS_SIZE;
-      currentLensHeight = BASE_LENS_SIZE / imageAspectRatio;
+      currentLensHeight = BASE_LENS_SIZE / panelAspectRatio;
     } else {
-      // Taller image: lens height is base size, width is proportionally smaller
+      // Taller panel: lens height is base size, width is proportionally smaller
       currentLensHeight = BASE_LENS_SIZE;
-      currentLensWidth = BASE_LENS_SIZE * imageAspectRatio;
+      currentLensWidth = BASE_LENS_SIZE * panelAspectRatio;
     }
-    
+
     setLensSize({ width: currentLensWidth, height: currentLensHeight });
     setZoomPanelSize({ width: panelWidth, height: panelHeight });
 
@@ -308,7 +310,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       // Extract leading numbers
       const aMatch = a.match(/^(\d+)/);
       const bMatch = b.match(/^(\d+)/);
-      
+
       // Both have leading numbers - sort numerically
       if (aMatch && bMatch) {
         const aNum = parseInt(aMatch[1]);
@@ -317,13 +319,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         // If numbers are equal, sort by remaining text
         return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
       }
-      
+
       // Only a has leading number - it comes first
       if (aMatch) return -1;
-      
+
       // Only b has leading number - it comes first
       if (bMatch) return 1;
-      
+
       // Neither has leading number - alphanumeric sort (handles "Seater 1" vs "Seater 2")
       return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     });
@@ -603,72 +605,72 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         const hasVariantWithCurrentColor = variants.some((v: any) => {
           const vColor = v.color?.name || v.color_name || '';
           const newAttrValue = changedAttr === 'size' ? selectedSize :
-                              changedAttr === 'pattern' ? selectedPattern :
-                              changedAttr === 'quality' ? selectedQuality : '';
+            changedAttr === 'pattern' ? selectedPattern :
+              changedAttr === 'quality' ? selectedQuality : '';
           const vNewAttr = changedAttr === 'size' ? v.size :
-                          changedAttr === 'pattern' ? v.pattern :
-                          changedAttr === 'quality' ? v.quality : '';
-          
+            changedAttr === 'pattern' ? v.pattern :
+              changedAttr === 'quality' ? v.quality : '';
+
           return vColor === selectedColor && vNewAttr === newAttrValue;
         });
-        
+
         if (!hasVariantWithCurrentColor) {
           setSelectedColor(variantColor);
         }
       } else if (variantColor && changedAttr !== 'color' && !selectedColor) {
         setSelectedColor(variantColor);
       }
-      
+
       if (variantSize && changedAttr !== 'size' && selectedSize) {
         const hasVariantWithCurrentSize = variants.some((v: any) => {
           const newAttrValue = changedAttr === 'color' ? selectedColor :
-                              changedAttr === 'pattern' ? selectedPattern :
-                              changedAttr === 'quality' ? selectedQuality : '';
+            changedAttr === 'pattern' ? selectedPattern :
+              changedAttr === 'quality' ? selectedQuality : '';
           const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
-                          changedAttr === 'pattern' ? v.pattern :
-                          changedAttr === 'quality' ? v.quality : '';
-          
+            changedAttr === 'pattern' ? v.pattern :
+              changedAttr === 'quality' ? v.quality : '';
+
           return v.size === selectedSize && vNewAttr === newAttrValue;
         });
-        
+
         if (!hasVariantWithCurrentSize) {
           setSelectedSize(variantSize);
         }
       } else if (variantSize && changedAttr !== 'size' && !selectedSize) {
         setSelectedSize(variantSize);
       }
-      
+
       if (variantPattern && changedAttr !== 'pattern' && selectedPattern) {
         const hasVariantWithCurrentPattern = variants.some((v: any) => {
           const newAttrValue = changedAttr === 'color' ? selectedColor :
-                              changedAttr === 'size' ? selectedSize :
-                              changedAttr === 'quality' ? selectedQuality : '';
+            changedAttr === 'size' ? selectedSize :
+              changedAttr === 'quality' ? selectedQuality : '';
           const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
-                          changedAttr === 'size' ? v.size :
-                          changedAttr === 'quality' ? v.quality : '';
-          
+            changedAttr === 'size' ? v.size :
+              changedAttr === 'quality' ? v.quality : '';
+
           return v.pattern === selectedPattern && vNewAttr === newAttrValue;
         });
-        
+
         if (!hasVariantWithCurrentPattern) {
           setSelectedPattern(variantPattern);
         }
       } else if (variantPattern && changedAttr !== 'pattern' && !selectedPattern) {
         setSelectedPattern(variantPattern);
       }
-      
+
       if (variantQuality && changedAttr !== 'quality' && selectedQuality) {
         const hasVariantWithCurrentQuality = variants.some((v: any) => {
           const newAttrValue = changedAttr === 'color' ? selectedColor :
-                              changedAttr === 'size' ? selectedSize :
-                              changedAttr === 'pattern' ? selectedPattern : '';
+            changedAttr === 'size' ? selectedSize :
+              changedAttr === 'pattern' ? selectedPattern : '';
           const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
-                          changedAttr === 'size' ? v.size :
-                          changedAttr === 'pattern' ? v.pattern : '';
-          
+            changedAttr === 'size' ? v.size :
+              changedAttr === 'pattern' ? v.pattern : '';
+
           return v.quality === selectedQuality && vNewAttr === newAttrValue;
         });
-        
+
         if (!hasVariantWithCurrentQuality) {
           setSelectedQuality(variantQuality);
         }
@@ -758,15 +760,15 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
   const sortImagesByOrder = (imgArray: any[]) => {
     return [...imgArray].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   };
-  
+
   const getVariantImages = (variant: any): string[] => {
     if (!variant) return [];
-    
+
     // Get images array sorted by sort_order
     const sortedImagesArray = variant.images?.length > 0
       ? sortImagesByOrder(variant.images).map((img: any) => img.image)
       : [];
-    
+
     // If variant has a main image field AND it's not already in the images array, add it first
     if (variant.image) {
       // Check if the main image is already in the sorted images array
@@ -776,20 +778,20 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         return [variant.image, ...sortedImagesArray];
       }
     }
-    
+
     // If images array exists and has items, use it (it should already include all images)
     if (sortedImagesArray.length > 0) {
       return sortedImagesArray;
     }
-    
+
     // Fallback to just the main image if no array
     if (variant.image) {
       return [variant.image];
     }
-    
+
     return [];
   };
-  
+
   const images = selectedVariant
     ? getVariantImages(selectedVariant)
     : product?.variants?.[0]
@@ -797,12 +799,12 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       : product?.main_image
         ? [product.main_image]
         : [
-            "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
-            "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
-            "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
-            "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
-            "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
-          ];
+          "https://m.media-amazon.com/images/I/61zwcSVl3YL._SX679_.jpg",
+          "https://m.media-amazon.com/images/I/614YRo2ONvL._SX679_.jpg",
+          "https://m.media-amazon.com/images/I/81B1YNHqwCL._SL1500_.jpg",
+          "https://m.media-amazon.com/images/I/717-CNGEtTL._SX679_.jpg",
+          "https://m.media-amazon.com/images/I/71HBQDGu1EL._SX679_.jpg"
+        ];
 
   // Get video URL from selected variant
   const videoUrl = selectedVariant?.video_url || null;
@@ -814,7 +816,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     // YouTube URL patterns
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       let videoId = '';
-      
+
       // Extract video ID from different YouTube URL formats
       if (url.includes('youtu.be/')) {
         videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
@@ -823,7 +825,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       } else if (url.includes('youtube.com/embed/')) {
         videoId = url.split('embed/')[1]?.split('?')[0] || '';
       }
-      
+
       if (videoId) {
         return {
           type: 'youtube',
@@ -836,11 +838,11 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     // Vimeo URL patterns
     if (url.includes('vimeo.com')) {
       let videoId = '';
-      
+
       if (url.includes('vimeo.com/')) {
         videoId = url.split('vimeo.com/')[1]?.split('?')[0] || '';
       }
-      
+
       if (videoId) {
         return {
           type: 'vimeo',
@@ -856,10 +858,10 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       // Cloudinary allows generating image thumbnails from videos using transformations
       // Format: /video/upload/[transformations]/[public_id]
       // For thumbnail: add w_300,h_300,c_fill,q_auto,f_jpg,so_0 (start offset 0 = first frame)
-      
+
       // Check if URL already has transformations
       const hasTransformations = url.match(/\/video\/upload\/v\d+\//);
-      
+
       let thumbnailUrl = '';
       if (hasTransformations) {
         // URL has version: /video/upload/v1234567890/path/to/video
@@ -870,7 +872,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         // Insert transformations after /video/upload/
         thumbnailUrl = url.replace(/\/video\/upload\//, '/video/upload/w_300,h_300,c_fill,q_auto,f_jpg,so_0/');
       }
-      
+
       return {
         type: 'direct',
         embedUrl: url,
@@ -919,13 +921,13 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       }
       try {
         const response = await addressAPI.getAddresses();
-        const addressesData = Array.isArray(response.data) 
-          ? response.data 
+        const addressesData = Array.isArray(response.data)
+          ? response.data
           : (response.data.results || response.data.data || []);
-        
+
         const addresses = Array.isArray(addressesData) ? addressesData : [];
         const defaultAddr = addresses.find((addr: any) => addr.is_default) || addresses[0];
-        
+
         if (defaultAddr && defaultAddr.city && defaultAddr.postal_code) {
           setDefaultAddress({
             city: defaultAddr.city,
@@ -970,7 +972,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
 
     // Sync on mount and when content changes
     syncHeights();
-    
+
     // Use ResizeObserver to sync when details section height changes
     const resizeObserver = new ResizeObserver(() => {
       syncHeights();
@@ -995,7 +997,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       if (imageWrapperRef.current && imageSectionContainerRef.current && isZooming) {
         const wrapperRect = imageWrapperRef.current.getBoundingClientRect();
         const containerRect = imageSectionContainerRef.current.getBoundingClientRect();
-        
+
         // Calculate top position relative to container
         const topOffset = wrapperRect.top - containerRect.top;
         setZoomPanelTop(topOffset);
@@ -1262,20 +1264,20 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                 {/* Left Side - Main Image */}
                 <div className={styles.modalImageSection}>
                   <div className={styles.modalImageWrapper}>
-                <img
-                  src={mainImage}
-                      className={styles.modalMainImage} 
+                    <img
+                      src={mainImage}
+                      className={styles.modalMainImage}
                       alt="Main product view"
-                  onContextMenu={handleContextMenu}
-                  draggable={false}
-                />
+                      onContextMenu={handleContextMenu}
+                      draggable={false}
+                    />
                     {/* Amazon logo overlay */}
                     <div className={styles.amazonLogoOverlay}>
-                      
+
 
                     </div>
                   </div>
-              </div>
+                </div>
 
                 {/* Right Side - Product Info & Thumbnails */}
                 <div className={styles.modalSidebar}>
@@ -1314,18 +1316,18 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   </div>
 
                   <div className={styles.modalThumbnailGrid}>
-                {images.map((img: string, index: number) => (
+                    {images.map((img: string, index: number) => (
                       <div
-                    key={index}
+                        key={index}
                         className={`${styles.modalThumbnailBox} ${mainImage === img ? styles.modalThumbnailActive : ""}`}
-                    onClick={() => handleImageClick(img)}
+                        onClick={() => handleImageClick(img)}
                       >
-                        <div 
+                        <div
                           className={styles.modalThumbnailImage}
                           style={{ backgroundImage: `url(${img})` }}
-                  />
+                        />
                       </div>
-                ))}
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1495,7 +1497,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                           />
                           <div className={styles.videoPlayButtonOverlay}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                              <path d="M8 5v14l11-7z"/>
+                              <path d="M8 5v14l11-7z" />
                             </svg>
                           </div>
                         </div>
@@ -1507,7 +1509,7 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                           <div className={styles.videoThumbnail}>
                             <div className={styles.videoPlayButton}>
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-                                <path d="M8 5v14l11-7z"/>
+                                <path d="M8 5v14l11-7z" />
                               </svg>
                             </div>
                           </div>
@@ -1658,27 +1660,27 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Color:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.colors.map((color: string, index: number) => {
-                  const isSelected = selectedColor === color;
-                  const isAvailable = getAvailableOptionsForAttribute.colors.has(color);
-                  const className = isSelected 
-                    ? styles.active 
-                    : isAvailable 
-                      ? styles.available 
-                      : "";
-                  return (
-                  <button
-                    key={`color-${index}-${color}`}
-                      className={className}
-                    onClick={() => {
-                      userChangedAttribute.current = 'color';
-                      setSelectedColor(color);
-                    }}
-                  >
-                    {color}
-                  </button>
-                  );
-                })}
+                  {availableOptions.colors.map((color: string, index: number) => {
+                    const isSelected = selectedColor === color;
+                    const isAvailable = getAvailableOptionsForAttribute.colors.has(color);
+                    const className = isSelected
+                      ? styles.active
+                      : isAvailable
+                        ? styles.available
+                        : "";
+                    return (
+                      <button
+                        key={`color-${index}-${color}`}
+                        className={className}
+                        onClick={() => {
+                          userChangedAttribute.current = 'color';
+                          setSelectedColor(color);
+                        }}
+                      >
+                        {color}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1686,27 +1688,27 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Size:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.sizes.map((size: string, index: number) => {
-                  const isSelected = selectedSize === size;
-                  const isAvailable = getAvailableOptionsForAttribute.sizes.has(size);
-                  const className = isSelected 
-                    ? styles.active 
-                    : isAvailable 
-                      ? styles.available 
-                      : "";
-                  return (
-                  <button
-                    key={`size-${index}-${size}`}
-                      className={className}
-                    onClick={() => {
-                      userChangedAttribute.current = 'size';
-                      setSelectedSize(size);
-                    }}
-                  >
-                    {size}
-                  </button>
-                  );
-                })}
+                  {availableOptions.sizes.map((size: string, index: number) => {
+                    const isSelected = selectedSize === size;
+                    const isAvailable = getAvailableOptionsForAttribute.sizes.has(size);
+                    const className = isSelected
+                      ? styles.active
+                      : isAvailable
+                        ? styles.available
+                        : "";
+                    return (
+                      <button
+                        key={`size-${index}-${size}`}
+                        className={className}
+                        onClick={() => {
+                          userChangedAttribute.current = 'size';
+                          setSelectedSize(size);
+                        }}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1714,27 +1716,27 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Pattern:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.patterns.map((pattern: string, index: number) => {
-                  const isSelected = selectedPattern === pattern;
-                  const isAvailable = getAvailableOptionsForAttribute.patterns.has(pattern);
-                  const className = isSelected 
-                    ? styles.active 
-                    : isAvailable 
-                      ? styles.available 
-                      : "";
-                  return (
-                  <button
-                    key={`pattern-${index}-${pattern}`}
-                      className={className}
-                    onClick={() => {
-                      userChangedAttribute.current = 'pattern';
-                      setSelectedPattern(pattern);
-                    }}
-                  >
-                    {pattern}
-                  </button>
-                  );
-                })}
+                  {availableOptions.patterns.map((pattern: string, index: number) => {
+                    const isSelected = selectedPattern === pattern;
+                    const isAvailable = getAvailableOptionsForAttribute.patterns.has(pattern);
+                    const className = isSelected
+                      ? styles.active
+                      : isAvailable
+                        ? styles.available
+                        : "";
+                    return (
+                      <button
+                        key={`pattern-${index}-${pattern}`}
+                        className={className}
+                        onClick={() => {
+                          userChangedAttribute.current = 'pattern';
+                          setSelectedPattern(pattern);
+                        }}
+                      >
+                        {pattern}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1742,27 +1744,27 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
               <div className={styles.optionGroup}>
                 <strong className={styles.optionLabel}>Quality:</strong>
                 <div className={styles.optionButtons}>
-                {availableOptions.qualities.map((quality: string, index: number) => {
-                  const isSelected = selectedQuality === quality;
-                  const isAvailable = getAvailableOptionsForAttribute.qualities.has(quality);
-                  const className = isSelected 
-                    ? styles.active 
-                    : isAvailable 
-                      ? styles.available 
-                      : "";
-                  return (
-                  <button
-                    key={`quality-${index}-${quality}`}
-                      className={className}
-                    onClick={() => {
-                      userChangedAttribute.current = 'quality';
-                      setSelectedQuality(quality);
-                    }}
-                  >
-                    {quality}
-                  </button>
-                  );
-                })}
+                  {availableOptions.qualities.map((quality: string, index: number) => {
+                    const isSelected = selectedQuality === quality;
+                    const isAvailable = getAvailableOptionsForAttribute.qualities.has(quality);
+                    const className = isSelected
+                      ? styles.active
+                      : isAvailable
+                        ? styles.available
+                        : "";
+                    return (
+                      <button
+                        key={`quality-${index}-${quality}`}
+                        className={className}
+                        onClick={() => {
+                          userChangedAttribute.current = 'quality';
+                          setSelectedQuality(quality);
+                        }}
+                      >
+                        {quality}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1772,8 +1774,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   {selectedVariant.stock_quantity > 10
                     ? 'In Stock'
                     : selectedVariant.stock_quantity > 0
-                    ? `${selectedVariant.stock_quantity} left only`
-                    : 'Out of stock'}
+                      ? `${selectedVariant.stock_quantity} left only`
+                      : 'Out of stock'}
                 </small>
               </div>
             ) : (
@@ -1902,8 +1904,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
                   {defaultAddress ? `${defaultAddress.city} ${defaultAddress.postal_code}` : 'Select location'}
                 </strong>
                 {' - '}
-                <a 
-                  href="#" 
+                <a
+                  href="#"
                   className={styles.updateLink}
                   onClick={(e) => {
                     e.preventDefault();
@@ -1943,8 +1945,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
             {/* Action Buttons */}
             <button className={styles.addCart} onClick={handleAddToCart}>Add to Cart</button>
             <button className={styles.buyNow} onClick={handleBuyNow}>Buy Now</button>
-            <button 
-              className={styles.wishlistBtn} 
+            <button
+              className={styles.wishlistBtn}
               onClick={handleWishlist}
               disabled={wishlistLoading}
             >
