@@ -1,4 +1,5 @@
 import React from 'react';
+import { getDisplayPrices, formatINR } from '../../utils/priceUtils';
 
 interface Product {
   id: number;
@@ -67,11 +68,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
 
             <div className="product-pricing">
-              <span className="current-price">₹{product.price.toLocaleString()}</span>
-              <span className="original-price">
-                M.R.P: <del>₹{product.originalPrice.toLocaleString()}</del>
-              </span>
-              <span className="discount">({product.discount}% off)</span>
+              {(() => {
+                const prices = getDisplayPrices(product as any);
+                return (
+                  <>
+                    <span className="current-price">{formatINR(prices.price)}</span>
+                    {prices.old_price ? (
+                      <span className="original-price">M.R.P: <del>{formatINR(prices.old_price)}</del></span>
+                    ) : (
+                      product.originalPrice ? <span className="original-price">M.R.P: <del>₹{product.originalPrice.toLocaleString()}</del></span> : null
+                    )}
+                    <span className="discount">({product.discount}% off)</span>
+                  </>
+                );
+              })()}
             </div>
 
             <div className="product-offers">

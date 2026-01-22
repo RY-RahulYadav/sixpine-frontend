@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useNotification } from '../context/NotificationContext';
+import { getDisplayPrices, formatINR } from '../utils/priceUtils';
 
 interface Product {
   id?: number;
@@ -159,7 +160,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products, caro
                   </div>
                 </div>
                 <p className="product-price">
-                  &#8377;{product?.price} <span className="old-price">&#8377;{product?.oldPrice}</span>
+                  {formatINR(getDisplayPrices(product).price)} {getDisplayPrices(product).old_price ? <span className="old-price">{formatINR(getDisplayPrices(product).old_price)}</span> : null}
                 </p>
                 <div className="d-flex gap-2">
                   <button 

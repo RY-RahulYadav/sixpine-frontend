@@ -231,6 +231,8 @@ const AdminProductDetail: React.FC = () => {
     parent_main_image: string;
     meta_title: string;
     meta_description: string;
+    price?: string | number | null;
+    old_price?: string | number | null;
     is_featured: boolean;
     is_active: boolean;
   }>({
@@ -253,6 +255,8 @@ const AdminProductDetail: React.FC = () => {
     care_instructions: '',
     what_in_box: '',
     parent_main_image: '',
+    price: '',
+    old_price: '',
     meta_title: '',
     meta_description: '',
     is_featured: false,
@@ -368,6 +372,8 @@ const AdminProductDetail: React.FC = () => {
             care_instructions: productData.care_instructions || '',
             what_in_box: productData.what_in_box || '',
             parent_main_image: productData.parent_main_image || '',
+            price: productData.price ?? '',
+            old_price: productData.old_price ?? '',
             meta_title: productData.meta_title || '',
             meta_description: productData.meta_description || '',
             is_featured: productData.is_featured || false,
@@ -2168,6 +2174,17 @@ const AdminProductDetail: React.FC = () => {
         payload.is_active = formData.is_active;
         // Send all variants for new products
         payload.variants = variants.map(v => buildVariantPayload(v));
+        // If parent-level price/old_price provided, apply to first variant (common UX expectation)
+        try {
+          if ((formData.price !== undefined && formData.price !== null && formData.price !== '') && payload.variants.length > 0) {
+            payload.variants[0].price = formData.price !== '' && formData.price !== null ? parseFloat(String(formData.price)) : payload.variants[0].price;
+          }
+          if ((formData.old_price !== undefined && formData.old_price !== null && formData.old_price !== '') && payload.variants.length > 0) {
+            payload.variants[0].old_price = formData.old_price !== '' && formData.old_price !== null ? parseFloat(String(formData.old_price)) : payload.variants[0].old_price;
+          }
+        } catch (e) {
+          // ignore parse errors here
+        }
         payload.features = features.map(f => ({
           feature: f.feature,
           sort_order: f.sort_order,
@@ -2237,7 +2254,9 @@ const AdminProductDetail: React.FC = () => {
         
         // Only send variants if they changed or count changed
         // This significantly reduces payload size and processing time
-        if (hasAnyVariantChanged || variantCountChanged) {
+        const parentPriceChanged = originalProduct && String(formData.price ?? '') !== String(originalProduct.price ?? '');
+        const parentOldPriceChanged = originalProduct && String(formData.old_price ?? '') !== String(originalProduct.old_price ?? '');
+        if (hasAnyVariantChanged || variantCountChanged || parentPriceChanged || parentOldPriceChanged) {
           // IMPORTANT: Always send ALL variants to prevent deletion of unchanged variants
           // For unchanged variants, send minimal data (just ID and essential fields) to reduce payload size
           // For changed variants, send full payload
@@ -2268,6 +2287,15 @@ const AdminProductDetail: React.FC = () => {
             // If variant has changed, send full payload
             return buildVariantPayload(v);
           });
+          // If parent price fields changed, ensure first variant reflects new parent-level price values
+          if (payload.variants.length > 0) {
+            try {
+              if (parentPriceChanged) payload.variants[0].price = formData.price !== '' && formData.price !== null ? parseFloat(String(formData.price)) : payload.variants[0].price;
+            } catch (e) {}
+            try {
+              if (parentOldPriceChanged) payload.variants[0].old_price = formData.old_price !== '' && formData.old_price !== null ? parseFloat(String(formData.old_price)) : payload.variants[0].old_price;
+            } catch (e) {}
+          }
         }
         // If no variants changed, don't send variants at all - this saves massive amounts of processing time
         
@@ -4109,6 +4137,35 @@ const AdminProductDetail: React.FC = () => {
                     onChange={handleChange}
                     placeholder="Stock Keeping Unit"
                   className="tw-w-full"
+                  />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="price">Price</label>
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    value={formData.price ?? ''}
+                    onChange={handleChange}
+                    step="0.01"
+                    className="tw-w-full"
+                    placeholder="e.g., 14999"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="old_price">Old Price</label>
+                  <input
+                    type="number"
+                    id="old_price"
+                    name="old_price"
+                    value={formData.old_price ?? ''}
+                    onChange={handleChange}
+                    step="0.01"
+                    className="tw-w-full"
+                    placeholder="e.g., 19999"
                   />
                 </div>
               </div>

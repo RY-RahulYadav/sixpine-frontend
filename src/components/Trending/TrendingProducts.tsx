@@ -7,6 +7,7 @@ import { useNotification } from '../../context/NotificationContext';
 import { useTheme } from '../../context/ThemeContext';
 import styles from './Trending.module.css';
 import cardStyles from '../Products_Details/productdetails_slider1.module.css';
+import { getDisplayPrices, formatINR } from '../../utils/priceUtils';
 
 interface TrendingProduct {
   id: number;
@@ -23,6 +24,7 @@ interface TrendingProduct {
   variantCount?: number;
   colorCount?: number;
   color_count?: number;
+  old_price?: string | null;
 }
 
 const defaultProducts: TrendingProduct[] = [
@@ -107,7 +109,17 @@ const TrendingProducts = () => {
               id: product.id || product.productId || 0,
               name: product.name || product.title || '',
               description: product.description || product.short_description || product.desc || '',
-              price: product.price || '₹0',
+              // Determine display prices (prefer parent-level prices when available)
+              price: ((): string => {
+                const firstVariant = Array.isArray(product.variants) ? product.variants[0] : undefined;
+                const prices = getDisplayPrices(product, firstVariant);
+                return formatINR(prices.price) || (product.price || '₹0');
+              })(),
+              old_price: ((): string | null => {
+                const firstVariant = Array.isArray(product.variants) ? product.variants[0] : undefined;
+                const prices = getDisplayPrices(product, firstVariant);
+                return prices.old_price !== null ? formatINR(prices.old_price) : (product.old_price || null);
+              })(),
               rating: product.rating || 4.0,
               reviewCount: product.reviewCount || product.reviews || 0,
               image: product.image || product.img || '/images/Home/sofa1.jpg',
@@ -335,6 +347,9 @@ const TrendingProducts = () => {
 
               <div className={cardStyles.productPrices}>
                 <span className={cardStyles.newPrice}>{product.price}</span>
+                {product?.old_price && (
+                  <span className={cardStyles.oldPrice}>{product.old_price}</span>
+                )}
               </div>
 
               <div className={cardStyles.actionRow}>

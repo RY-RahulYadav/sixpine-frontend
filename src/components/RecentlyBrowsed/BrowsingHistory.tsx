@@ -7,6 +7,7 @@ import { useNotification } from '../../context/NotificationContext';
 import { useTheme } from '../../context/ThemeContext';
 import styles from './RecentlyBrowsed.module.css';
 import cardStyles from '../Products_Details/productdetails_slider1.module.css';
+import { getDisplayPrices, formatINR } from '../../utils/priceUtils';
 
 interface BrowsingHistoryItem {
   id: number;
@@ -121,8 +122,10 @@ const BrowsingHistory = () => {
   //   }
   // };
 
-  const formatPrice = (price: string) => {
-    return `₹${parseFloat(price).toLocaleString('en-IN')}`;
+  // Use price utils to display either parent-level or variant price
+  const formatPrice = (product: any, variant?: any) => {
+    const prices = getDisplayPrices(product, variant);
+    return formatINR(prices.price);
   };
 
 
@@ -282,9 +285,9 @@ const BrowsingHistory = () => {
               </div>
 
               <div className={cardStyles.productPrices}>
-                <span className={cardStyles.newPrice}>{formatPrice(item.product.price)}</span>
+                <span className={cardStyles.newPrice}>{formatPrice(item.product)}</span>
                 {item.product.old_price && (
-                  <span className={cardStyles.oldPrice}>{formatPrice(item.product.old_price)}</span>
+                  <span className={cardStyles.oldPrice}>{formatINR(getDisplayPrices(item.product).old_price)}</span>
                 )}
               </div>
 

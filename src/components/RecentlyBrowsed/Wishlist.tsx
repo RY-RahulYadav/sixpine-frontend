@@ -7,6 +7,7 @@ import { useNotification } from '../../context/NotificationContext';
 import { useTheme } from '../../context/ThemeContext';
 import styles from './RecentlyBrowsed.module.css';
 import cardStyles from '../Products_Details/productdetails_slider1.module.css';
+import { getDisplayPrices, formatINR } from '../../utils/priceUtils';
 
 interface WishlistItem {
   id: number;
@@ -94,8 +95,9 @@ const Wishlist = () => {
     }
   };
 
-  const formatPrice = (price: string) => {
-    return `₹${parseFloat(price).toLocaleString('en-IN')}`;
+  const formatPrice = (product: any, variant?: any) => {
+    const prices = getDisplayPrices(product, variant);
+    return formatINR(prices.price);
   };
 
   const handleRemoveFromWishlist = async (itemId: number, e: React.MouseEvent) => {
@@ -231,9 +233,9 @@ const Wishlist = () => {
               </div>
 
               <div className={cardStyles.productPrices}>
-                <span className={cardStyles.newPrice}>{formatPrice(item.product.price)}</span>
+                <span className={cardStyles.newPrice}>{formatPrice(item.product)}</span>
                 {item.product.old_price && (
-                  <span className={cardStyles.oldPrice}>{formatPrice(item.product.old_price)}</span>
+                  <span className={cardStyles.oldPrice}>{formatINR(getDisplayPrices(item.product).old_price)}</span>
                 )}
               </div>
 
