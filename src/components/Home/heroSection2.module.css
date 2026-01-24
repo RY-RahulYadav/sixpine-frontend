@@ -4,23 +4,31 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
   font-family: Arial, sans-serif;
-  margin: 0px auto 0; /* top 30px, bottom 0 */
+  margin: 0px auto 0;
+  /* top 30px, bottom 0 */
 }
 
 .special {
-  background-color: #f3f3f3; /* light grey background for cards 2, 3, 4 */
+  background-color: #f3f3f3;
+  /* light grey background for cards 2, 3, 4 */
 }
+
 .card {
-  background-color: #fff; /* white background for first card */
+  background-color: #fff;
+  /* white background for first card */
   padding: 20px;
   /* consistent 4px border on all sides for every card */
   border: 4px solid #e7e7e7;
   border-radius: 6px;
-  display: flex; /* make it flex */
-  flex-direction: column; /* stack vertically */
-  min-height: 400px; /* increased height for better tile display */
+  display: flex;
+  /* make it flex */
+  flex-direction: column;
+  /* stack vertically */
+  min-height: 400px;
+  /* increased height for better tile display */
   max-height: 500px;
 }
+
 .card h3 {
   font-size: 18px;
   margin-bottom: 15px;
@@ -33,7 +41,8 @@
   display: inline-block;
   margin-top: auto;
   font-size: 13px;
-  color: #007185; /* Amazon teal-blue */
+  color: #007185;
+  /* Amazon teal-blue */
   text-decoration: none;
   align-self: flex-start;
 }
@@ -46,7 +55,8 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  margin-bottom: 10px; /* Added margin to separate grid from the "See more" link */
+  margin-bottom: 10px;
+  /* Added margin to separate grid from the "See more" link */
 }
 
 .item {
@@ -55,13 +65,15 @@
 
 .grid img {
   width: 100%;
-  height: 140px; /* increased height */
+  height: 140px;
+  /* increased height */
   border-radius: 4px;
   border: 1px solid #e3e6e6;
   object-fit: cover;
-  cursor: pointer; 
+  cursor: pointer;
   transition: transform 0.2s ease-in-out;
-  background-color: #fff; /* white bg for images */
+  background-color: #fff;
+  /* white bg for images */
 }
 
 .item p {
@@ -99,13 +111,16 @@
     gap: 16px;
     padding: 0 15px;
   }
+
   .card {
     min-height: 380px;
     padding: 18px;
   }
+
   .card h3 {
     font-size: 17px;
   }
+
   .grid img {
     height: 130px;
   }
@@ -118,6 +133,7 @@
     gap: 15px;
     padding: 0 12px;
   }
+
   .card {
     min-height: 360px;
     padding: 16px;
@@ -131,28 +147,35 @@
     gap: 15px;
     padding: 0 10px;
   }
+
   .card {
     min-height: 350px;
     max-height: 450px;
     padding: 15px;
   }
+
   .grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
+
   .grid img {
     height: 120px;
   }
+
   .card h3 {
     font-size: 15px;
     margin-bottom: 12px;
   }
+
   .item p {
     font-size: 11px;
   }
+
   .item span {
     font-size: 12px;
   }
+
   .card a {
     font-size: 12px;
   }
@@ -165,10 +188,12 @@
     gap: 12px;
     padding: 0 10px;
   }
+
   .card {
     min-height: 320px;
     padding: 12px;
   }
+
   .grid img {
     height: 110px;
   }
@@ -181,29 +206,36 @@
     gap: 12px;
     padding: 0 8px;
   }
+
   .card {
     min-height: 300px;
     max-height: 400px;
     padding: 12px;
   }
+
   .grid {
     gap: 6px;
     margin-bottom: 8px;
   }
+
   .grid img {
     height: 100px;
   }
+
   .card h3 {
     font-size: 14px;
     margin-bottom: 10px;
   }
+
   .item p {
     font-size: 11px;
     margin: 4px 0;
   }
+
   .item span {
     font-size: 11px;
   }
+
   .card a {
     font-size: 12px;
   }
@@ -215,27 +247,34 @@
     padding: 0 6px;
     gap: 10px;
   }
+
   .card {
     min-height: 280px;
     padding: 10px;
   }
+
   .grid {
     gap: 5px;
   }
+
   .grid img {
     height: 90px;
   }
+
   .card h3 {
     font-size: 13px;
     margin-bottom: 8px;
   }
+
   .item p {
     font-size: 10px;
     margin: 3px 0;
   }
+
   .item span {
     font-size: 10px;
   }
+
   .card a {
     font-size: 11px;
   }
@@ -247,27 +286,34 @@
     padding: 0 5px;
     gap: 8px;
   }
+
   .card {
     min-height: 260px;
     padding: 8px;
   }
+
   .grid {
     gap: 4px;
   }
+
   .grid img {
     height: 80px;
   }
+
   .card h3 {
     font-size: 12px;
     margin-bottom: 6px;
   }
+
   .item p {
     font-size: 9px;
     margin: 2px 0;
   }
+
   .item span {
     font-size: 9px;
   }
+
   .card a {
     font-size: 10px;
   }

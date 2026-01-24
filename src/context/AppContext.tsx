@@ -102,7 +102,15 @@ function appReducer(state: AppState, action: AppAction): AppState {
         cartSidebarOpen: false,
       };
     case 'SET_CART':
-      return { ...state, cart: action.payload };
+      return {
+        ...state,
+        cart: {
+          ...action.payload,
+          items: action.payload.items?.length > 0
+            ? [...action.payload.items].sort((a, b) => a.id - b.id)
+            : []
+        }
+      };
     case 'CLEAR_CART':
       return { ...state, cart: null };
     case 'OPEN_CART_SIDEBAR':

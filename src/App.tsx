@@ -69,7 +69,7 @@ function AppContent() {
       <div className="app-wrapper">
         <CartSidebar isOpen={state.cartSidebarOpen} onClose={closeCartSidebar} />
         <UserLayout>
-        <Routes>
+          <Routes>
             {/* Public routes - accessible without login */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -94,7 +94,7 @@ function AppContent() {
             <Route path="/purchaseProtection" element={<PurchaseProtectionPage />} />
             <Route path="/your-app" element={<SixpineAppPage />} />
             <Route path="/advertising-preferece" element={<AdvertisingPreferecePage />} />
-        <Route path="/your-account" element={<AccountPage />} />
+            <Route path="/your-account" element={<AccountPage />} />
 
             <Route path="/advertise" element={<AdvertisePage />} />
             <Route path="/privacy-policy" element={<PrivacyPage />} />
@@ -118,15 +118,15 @@ function AppContent() {
             {/* <Route path='/email-subscribe' element={<EmailSubscriptionsPage/>}  /> */}
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/shopping-preferences" element={<ProfilePage />} />
-            <Route path ='/manage-payment' element={<ManagePaymentPage/>} />
-          
+            <Route path='/manage-payment' element={<ManagePaymentPage />} />
+
             {/* Protected routes - require authentication */}
             <Route path="/cart" element={
               <ProtectedRoute>
                 <CartPage />
               </ProtectedRoute>
             } />
-           
+
             <Route path="/orders" element={
               <ProtectedRoute>
                 <OrdersPage />
@@ -141,10 +141,10 @@ function AppContent() {
             {/* Admin routes */}
             <Route path="/admin/*" element={<AdminRouter />} />
             <Route path="/seller/*" element={<SellerRouter />} />
-            
+
             {/* 404 - Catch all unmatched routes */}
             <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+          </Routes>
         </UserLayout>
       </div>
     </Router>

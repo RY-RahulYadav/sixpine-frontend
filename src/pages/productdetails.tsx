@@ -21,7 +21,7 @@ import { useApp } from "../context/AppContext";
 const updateMetaTags = (title: string, description: string) => {
   // Update page title
   document.title = title || 'Product Details';
-  
+
   // Update or create meta description
   let metaDescription = document.querySelector('meta[name="description"]');
   if (!metaDescription) {
@@ -30,7 +30,7 @@ const updateMetaTags = (title: string, description: string) => {
     document.head.appendChild(metaDescription);
   }
   metaDescription.setAttribute('content', description || '');
-  
+
   // Update or create Open Graph tags
   let ogTitle = document.querySelector('meta[property="og:title"]');
   if (!ogTitle) {
@@ -39,7 +39,7 @@ const updateMetaTags = (title: string, description: string) => {
     document.head.appendChild(ogTitle);
   }
   ogTitle.setAttribute('content', title || '');
-  
+
   let ogDescription = document.querySelector('meta[property="og:description"]');
   if (!ogDescription) {
     ogDescription = document.createElement('meta');
@@ -59,17 +59,65 @@ const NewProductDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAdBanner, setShowAdBanner] = useState(true);
-  
+
   // State to track selected variant from ProductDetails component
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
-  
+
+  // Scroll to top when navigating to a new product (slug changes)
+  useEffect(() => {
+    // Helper function to scroll all possible scroll containers to top
+    const scrollAllToTop = () => {
+      // Try window first
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      } catch (err) {
+        // ignore
+      }
+
+      // Try all possible scroll containers
+      const candidates: (Element | null | undefined)[] = [
+        document.scrollingElement,
+        document.documentElement,
+        document.body,
+        document.getElementById('root'),
+        document.querySelector('.app-wrapper'),
+        document.querySelector('.page-content'),
+        document.querySelector('.productdetails_container'),
+      ];
+
+      for (const el of candidates) {
+        if (!el) continue;
+        const anyEl: any = el;
+        try {
+          if (typeof anyEl.scrollTo === 'function') {
+            anyEl.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+          } else {
+            anyEl.scrollTop = 0;
+          }
+        } catch (e) {
+          try {
+            anyEl.scrollTop = 0;
+          } catch { }
+        }
+      }
+    };
+
+    // Execute immediately
+    scrollAllToTop();
+
+    // Also execute after a short delay to handle any late-rendering content
+    const timeoutId = setTimeout(scrollAllToTop, 50);
+
+    return () => clearTimeout(timeoutId);
+  }, [slug]);
+
   // Get initial variant from URL params or default to first variant
   useEffect(() => {
     if (!product?.variants || product.variants.length === 0) {
       setSelectedVariant(null);
       return;
     }
-    
+
     const variantIdFromUrl = searchParams.get('variant') ? parseInt(searchParams.get('variant')!) : null;
     if (variantIdFromUrl) {
       const variant = product.variants.find((v: any) => v.id === variantIdFromUrl);
@@ -78,7 +126,7 @@ const NewProductDetails: React.FC = () => {
         return;
       }
     }
-    
+
     // Fallback to first active variant
     const firstVariant = product.variants.find((v: any) => v.is_active) || product.variants[0] || null;
     setSelectedVariant(firstVariant);
@@ -91,7 +139,7 @@ const NewProductDetails: React.FC = () => {
         setShowAdBanner(true); // Show by default for non-authenticated users
         return;
       }
-      
+
       try {
         const response = await authAPI.getProfile();
         const profile = response.data.user || response.data;
@@ -103,12 +151,12 @@ const NewProductDetails: React.FC = () => {
             return null;
           }
         })();
-        
+
         const mergedProfile = {
           ...userFromStorage,
           ...profile,
         };
-        
+
         // Show banner only if advertising is enabled (default to true)
         setShowAdBanner(mergedProfile.advertising_enabled !== false);
       } catch (error) {
@@ -116,22 +164,22 @@ const NewProductDetails: React.FC = () => {
         setShowAdBanner(true); // Default to showing banner
       }
     };
-    
+
     checkAdvertisingPreference();
   }, [state.isAuthenticated, state.user]);
 
   useEffect(() => {
     const fetchProductData = async () => {
       if (!slug) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
+
         // Fetch product details (includes recommendations)
         const productResponse = await productAPI.getProductDetail(slug);
         const productData = productResponse.data;
-        
+
         // Update meta tags if product has custom meta title and description
         if (productData.meta_title || productData.meta_description) {
           updateMetaTags(
@@ -142,7 +190,7 @@ const NewProductDetails: React.FC = () => {
           // Fallback to product title and short description
           updateMetaTags(productData.title, productData.short_description);
         }
-        
+
         // If product has variants and no variant is selected in URL, redirect to first variant
         if (productData.variants && productData.variants.length > 0) {
           const firstVariant = productData.variants.find((v: any) => v.is_active) || productData.variants[0];
@@ -152,9 +200,9 @@ const NewProductDetails: React.FC = () => {
             window.history.replaceState({}, '', `${window.location.pathname}?variant=${firstVariant.id}`);
           }
         }
-        
+
         setProduct(productData);
-        
+
         // Transform recommendation data to match slider component format
         const transformProducts = (products: any[]) => {
           if (!products || products.length === 0) return [];
@@ -174,7 +222,7 @@ const NewProductDetails: React.FC = () => {
             color_count: product.color_count || product.colorCount || 0
           }));
         };
-        
+
         // Use recommendations from product data if available, otherwise fetch separately
         let rawRecommendations = {
           buy_with: productData.buy_with_products || [],
@@ -183,14 +231,14 @@ const NewProductDetails: React.FC = () => {
           similar: productData.similar_products || [],
           recommended: productData.recommended_products || []
         };
-        
+
         // If no recommendations in product data, try fetching from recommendations endpoint
-        const hasRecommendations = rawRecommendations.buy_with.length > 0 || 
-                                   rawRecommendations.inspired_by.length > 0 ||
-                                   rawRecommendations.frequently_viewed.length > 0 ||
-                                   rawRecommendations.similar.length > 0 ||
-                                   rawRecommendations.recommended.length > 0;
-        
+        const hasRecommendations = rawRecommendations.buy_with.length > 0 ||
+          rawRecommendations.inspired_by.length > 0 ||
+          rawRecommendations.frequently_viewed.length > 0 ||
+          rawRecommendations.similar.length > 0 ||
+          rawRecommendations.recommended.length > 0;
+
         if (!hasRecommendations) {
           try {
             const recommendationsResponse = await productAPI.getProductRecommendations(slug);
@@ -199,7 +247,7 @@ const NewProductDetails: React.FC = () => {
             console.warn('Could not fetch recommendations:', recErr);
           }
         }
-        
+
         const transformedRecommendations = {
           buy_with: rawRecommendations.buy_with ? transformProducts(rawRecommendations.buy_with) : [],
           inspired_by: rawRecommendations.inspired_by ? transformProducts(rawRecommendations.inspired_by) : [],
@@ -207,9 +255,9 @@ const NewProductDetails: React.FC = () => {
           similar: rawRecommendations.similar ? transformProducts(rawRecommendations.similar) : [],
           recommended: rawRecommendations.recommended ? transformProducts(rawRecommendations.recommended) : []
         };
-        
+
         setRecommendations(transformedRecommendations);
-        
+
       } catch (err: any) {
         console.error('Error fetching product data:', err);
         setError(err.response?.data?.message || 'Failed to load product details');
@@ -289,7 +337,7 @@ const NewProductDetails: React.FC = () => {
 
   return (
     <div>
-     <Navbar />
+      <Navbar />
       <div className="page-content">
         <div id="navbar-changed">
           <SubNav />
@@ -302,19 +350,19 @@ const NewProductDetails: React.FC = () => {
             </div>
           )}
         </div>
-        </div>
-             
-    
+      </div>
+
+
       <div className="productdetails_container">
         <Productdetails product={product} onVariantChange={setSelectedVariant} />
-        
+
         {/* First Row - Buy it with
 
 
 
  */}
         {recommendations?.buy_with && recommendations.buy_with.length > 0 && (
-          <Productdetails_Slider1 
+          <Productdetails_Slider1
             title="Buy it with
 
 
@@ -323,38 +371,38 @@ const NewProductDetails: React.FC = () => {
             products={recommendations.buy_with}
           />
         )}
-        
+
         {/* Second Row - Inspired by browsing history */}
         {recommendations?.inspired_by && recommendations.inspired_by.length > 0 && (
-          <Productdetails_Slider1 
+          <Productdetails_Slider1
             title="Inspired by your browsing history"
             products={recommendations.inspired_by}
           />
         )}
-         
+
         <ProductInformation product={product} selectedVariant={selectedVariant} />
-        
+
         {/* Third Row - Frequently viewed */}
         {recommendations?.frequently_viewed && recommendations.frequently_viewed.length > 0 && (
-          <Productdetails_Slider1 
+          <Productdetails_Slider1
             title="Customers frequently viewed | Popular products in the last 7 days"
             products={recommendations.frequently_viewed}
           />
         )}
-        
+
         <CustomerReview product={product} />
-        
+
         {/* Fourth Row - Similar products */}
         {recommendations?.similar && recommendations.similar.length > 0 && (
-          <Productdetails_Slider1 
+          <Productdetails_Slider1
             title="Similar products"
             products={recommendations.similar}
           />
         )}
-        
+
         {/* Fifth Row - Recommended for you */}
         {recommendations?.recommended && recommendations.recommended.length > 0 && (
-          <Productdetails_Slider1 
+          <Productdetails_Slider1
             title="Recommended for you"
             products={recommendations.recommended}
           />
@@ -363,7 +411,7 @@ const NewProductDetails: React.FC = () => {
 
 
 
-<Footer />
+      <Footer />
     </div>
   );
 };
