@@ -20,6 +20,17 @@ interface CartItem {
     main_image: string;
     slug: string;
   };
+  variant?: {
+    id: number;
+    title?: string;
+    image?: string;
+    color?: { id: number; name: string; hex_code?: string };
+    size?: string;
+    pattern?: string;
+    quality?: string;
+    price?: number;
+    stock_quantity?: number;
+  };
   quantity: number;
   total_price: number;
 }

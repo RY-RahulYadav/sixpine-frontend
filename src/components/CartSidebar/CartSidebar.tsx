@@ -10,13 +10,13 @@ interface CartSidebarProps {
 }
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
-    // isOpen =false;
+  // isOpen =false;
   const navigate = useNavigate();
   const { state, fetchCart } = useApp();
 
   const updateQuantity = async (itemId: number, quantity: number) => {
     if (quantity < 1) return;
-    
+
     try {
       await cartAPI.updateCartItem(itemId, { quantity });
       await fetchCart();
@@ -79,7 +79,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
           )}
 
           {/* Details Link */}
-          
+
 
           {/* Go to Cart Button */}
           {subtotal > 0 && (
@@ -90,7 +90,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
 
           {/* Cart Items */}
           <div className={styles.cartItems}>
-                              <hr />
+            <hr />
 
             {state.cart && state.cart.items.length > 0 ? (
               state.cart.items.map((item) => (
@@ -98,17 +98,17 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                   {/* clickable image to product page (if slug available) */}
                   <div>
                     {item.product?.slug ? (
-                      <a onClick={() => { navigate(`/products-details/${item.product.slug}`); onClose(); }} style={{cursor:'pointer'}}>
+                      <a onClick={() => { navigate(`/products-details/${item.product.slug}${item.variant?.id ? `?variant=${item.variant.id}` : ''}`); onClose(); }} style={{ cursor: 'pointer' }}>
                         <img
-                          src={item.product.main_image || '/placeholder-image.jpg'}
-                          alt={item.product.title}
+                          src={item.variant?.image || item.product.main_image || '/placeholder-image.jpg'}
+                          alt={item.variant?.title || item.product.title}
                           className={styles.itemImage}
                         />
                       </a>
                     ) : (
                       <img
-                        src={item.product.main_image || '/placeholder-image.jpg'}
-                        alt={item.product.title}
+                        src={item.variant?.image || item.product.main_image || '/placeholder-image.jpg'}
+                        alt={item.variant?.title || item.product.title}
                         className={styles.itemImage}
                       />
                     )}
@@ -116,15 +116,16 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
 
                   <div className={styles.itemPrice}>₹{Number(item.total_price).toLocaleString('en-IN')}</div>
 
-                  {/* Quantity Selector (trash | qty | +) */}
+                  {/* Quantity Selector (- | qty | +) */}
                   <div className={styles.quantitySelector}>
                     <button
                       className={styles.quantityButton}
-                      onClick={() => removeItem(item.id)}
-                      title="Delete item"
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      disabled={item.quantity <= 1}
+                      title="Decrease quantity"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                       </svg>
                     </button>
 
@@ -136,8 +137,8 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                       title="Increase quantity"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                       </svg>
                     </button>
                   </div>
