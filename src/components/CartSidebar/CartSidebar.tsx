@@ -25,15 +25,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const removeItem = async (itemId: number) => {
-    try {
-      await cartAPI.removeFromCart(itemId);
-      await fetchCart();
-    } catch (error) {
-      console.error('Remove item error:', error);
-    }
-  };
-
   const handleGoToCart = () => {
     navigate('/cart');
     onClose();
