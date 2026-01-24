@@ -206,10 +206,6 @@ const BannerCards: React.FC<BannerCardsProps> = ({ data: propData, isLoading: _i
         {bannerCards.map((b, i) => (
           <div
             className={styles.bannerCard}
-            style={{
-              backgroundImage: `url(${b.img})`,
-              cursor: b.navigateUrl ? 'pointer' : 'default'
-            }}
             key={i}
             onClick={() => {
               const url = b.navigateUrl;
@@ -217,11 +213,19 @@ const BannerCards: React.FC<BannerCardsProps> = ({ data: propData, isLoading: _i
                 navigate(url);
               }
             }}
+            style={{ cursor: b.navigateUrl ? 'pointer' : 'default' }}
           >
-            <div className={styles.bannerOverlay}>
-              <h4>{b.title}</h4>
-              <p>{b.text}</p>
-            </div>
+            <img
+              src={b.img}
+              alt={b.title || `Banner ${i + 1}`}
+              className={styles.bannerImg}
+            />
+            {(b.title || b.text) && (
+              <div className={styles.bannerOverlay}>
+                <h4>{b.title}</h4>
+                <p>{b.text}</p>
+              </div>
+            )}
           </div>
         ))}
       </div>

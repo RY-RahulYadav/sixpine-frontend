@@ -121,10 +121,11 @@
   width: 100%;
   height: 150px;
   /* Match right grid image height */
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px 8px 0 0;
   /* Match right grid border-radius */
   display: block;
+  background-color: #fff;
 }
 
 .leftProductName {
@@ -195,10 +196,10 @@
 .productImg {
   width: 100%;
   height: 150px;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px 8px 0 0;
   display: block;
-
+  background-color: #fff;
 }
 
 .productName {
@@ -317,9 +318,10 @@
 .cardImage img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  /* Ensure image fits well */
+  object-fit: contain;
+  /* Ensure image fits without cropping */
   display: block;
+  background-color: #fff;
 }
 
 /* ---------- Custom arrows ---------- */

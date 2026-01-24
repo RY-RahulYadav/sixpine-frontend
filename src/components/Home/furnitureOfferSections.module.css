@@ -9,7 +9,8 @@
 
 /* Section */
 .section {
-  margin-top: 40px; /* standardized top spacing */
+  margin-top: 40px;
+  /* standardized top spacing */
   margin-bottom: 0px;
   border-radius: 0px;
   /* box-shadow: 0 4px 15px rgba(0,0,0,0.04); */
@@ -27,8 +28,10 @@
 
 /* Ensure each section's white inner box has a consistent gray border on all sides */
 .sectionBox {
-  box-sizing: border-box; /* include border in sizing calculations */
-  border: 5px solid #eee; /* uniform light gray border */
+  box-sizing: border-box;
+  /* include border in sizing calculations */
+  border: 5px solid #eee;
+  /* uniform light gray border */
 }
 
 
@@ -80,6 +83,7 @@
   display: flex;
   align-items: center;
 }
+
 .slider {
   display: flex;
   overflow-x: auto;
@@ -92,20 +96,24 @@
 
 /* ✅ Thin scrollbar */
 .slider::-webkit-scrollbar {
-  height: 3px; /* thin horizontal scrollbar */
+  height: 3px;
+  /* thin horizontal scrollbar */
 }
 
 .slider::-webkit-scrollbar-track {
-  background: transparent; /* optional */
+  background: transparent;
+  /* optional */
 }
 
 .slider::-webkit-scrollbar-thumb {
-  background: #ccc; /* color of the scrollbar */
+  background: #ccc;
+  /* color of the scrollbar */
   border-radius: 10px;
 }
 
 .slider::-webkit-scrollbar-thumb:hover {
-  background: #999; /* darker on hover */
+  background: #999;
+  /* darker on hover */
 }
 
 
@@ -119,21 +127,23 @@
   background: #fff;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  border: 1px solid #eee; /* match the light gray family for cards */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+  /* match the light gray family for cards */
   margin: 5px 3px;
 }
 
 .card:hover {
   transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .card img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.5s ease;
+  background-color: #fff;
 }
 
 .card:hover img {
@@ -171,12 +181,15 @@
 }
 
 .leftBtn {
-  left: -15px; /* Positioned at the edge/outside of gray section */
+  left: -15px;
+  /* Positioned at the edge/outside of gray section */
 }
 
 .rightBtn {
-  right: -15px; /* Positioned at the edge/outside of gray section */
+  right: -15px;
+  /* Positioned at the edge/outside of gray section */
 }
+
 /* ---------------- RESPONSIVE BREAKPOINTS ---------------- */
 
 /* Large screens (desktops) */
@@ -184,10 +197,12 @@
   .offercontainer {
     padding: 0 15px;
   }
+
   .card {
     width: 200px;
     height: 180px;
   }
+
   .sectionHeader h2 {
     font-size: 20px;
   }
@@ -198,27 +213,34 @@
   .offercontainer {
     padding: 0 12px;
   }
+
   .card {
     width: 200px;
     height: 170px;
   }
+
   .sectionHeader {
     padding: 0 15px 0px;
   }
+
   .sectionHeader h2 {
     font-size: 19px;
   }
+
   .slider {
     margin: 0 15px;
   }
+
   .navBtn {
     width: 44px;
     height: 44px;
     font-size: 14px;
   }
+
   .leftBtn {
     left: -10px;
   }
+
   .rightBtn {
     right: -10px;
   }
@@ -229,40 +251,50 @@
   .offercontainer {
     padding: 0 10px;
   }
+
   .section {
     margin-top: 30px;
   }
+
   .sectionBox {
     padding: 12px;
   }
+
   .card {
     width: 190px;
     height: 150px;
     margin: 5px 2px;
   }
+
   .sectionHeader {
     padding: 0 12px 0px;
     margin-bottom: 12px;
   }
+
   .sectionHeader h2 {
     font-size: 17px;
   }
+
   .sectionHeader a {
     font-size: 12px;
     padding: 4px 8px;
   }
+
   .slider {
     margin: 0 12px;
     gap: 12px;
   }
+
   .navBtn {
     width: 40px;
     height: 40px;
     font-size: 13px;
   }
+
   .leftBtn {
     left: -5px;
   }
+
   .rightBtn {
     right: -5px;
   }
@@ -273,10 +305,12 @@
   .offercontainer {
     padding: 0 8px;
   }
+
   .card {
     width: 170px;
     height: 140px;
   }
+
   .slider {
     margin: 0 10px;
     gap: 10px;
@@ -288,17 +322,21 @@
   .offercontainer {
     padding: 0 6px;
   }
+
   .section {
     margin-top: 25px;
   }
+
   .sectionBox {
     padding: 10px;
   }
+
   .card {
     width: 150px;
     height: 130px;
     margin: 5px 2px;
   }
+
   .sectionHeader {
     flex-direction: column;
     align-items: flex-start;
@@ -306,25 +344,31 @@
     margin-bottom: 10px;
     gap: 8px;
   }
+
   .sectionHeader h2 {
     font-size: 15px;
   }
+
   .sectionHeader a {
     font-size: 11px;
     padding: 3px 6px;
   }
+
   .slider {
     margin: 0 8px;
     gap: 8px;
   }
+
   .navBtn {
     width: 32px;
     height: 32px;
     font-size: 11px;
   }
+
   .leftBtn {
     left: 0;
   }
+
   .rightBtn {
     right: 0;
   }
@@ -335,28 +379,35 @@
   .offercontainer {
     padding: 0 5px;
   }
+
   .sectionBox {
     padding: 8px;
   }
+
   .card {
     width: 140px;
     height: 120px;
     margin: 4px 2px;
   }
+
   .sectionHeader {
     padding: 0 6px 0px;
   }
+
   .sectionHeader h2 {
     font-size: 14px;
   }
+
   .sectionHeader a {
     font-size: 10px;
     padding: 3px 5px;
   }
+
   .slider {
     margin: 0 6px;
     gap: 6px;
   }
+
   .navBtn {
     width: 28px;
     height: 28px;
@@ -369,28 +420,35 @@
   .offercontainer {
     padding: 0 4px;
   }
+
   .sectionBox {
     padding: 6px;
   }
+
   .card {
     width: 120px;
     height: 100px;
     margin: 3px 1px;
   }
+
   .sectionHeader {
     padding: 0 4px 0px;
   }
+
   .sectionHeader h2 {
     font-size: 13px;
   }
+
   .sectionHeader a {
     font-size: 9px;
     padding: 2px 4px;
   }
+
   .slider {
     margin: 0 4px;
     gap: 5px;
   }
+
   .navBtn {
     width: 24px;
     height: 24px;

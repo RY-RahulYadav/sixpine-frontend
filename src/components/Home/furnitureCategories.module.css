@@ -1,9 +1,12 @@
 .container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 0px 0; /* standardized vertical padding */
+  padding: 0px 0;
+  /* standardized vertical padding */
   text-align: center;
-  background-color: transparent; /* removed gray background per request */
-  border-radius: 0; /* remove rounded bg */
+  background-color: transparent;
+  /* removed gray background per request */
+  border-radius: 0;
+  /* remove rounded bg */
   box-shadow: none;
   margin-top: 30px;
   margin-bottom: 0;
@@ -36,9 +39,8 @@
   font-weight: 600;
 }
 
-.subtitle
-{
-  padding: 0 20px ;
+.subtitle {
+  padding: 0 20px;
   margin-bottom: 10px;
 }
 
@@ -51,21 +53,21 @@
   transition: all 0.3s ease;
   font-size: 13px;
   font-weight: 500;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .filterButtons button:hover {
   background: #ff6f00;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255,111,0,0.2);
+  box-shadow: 0 4px 8px rgba(255, 111, 0, 0.2);
 }
 
 .active {
   background: #ff6f00;
   color: #333;
   border-color: #ff6f00;
-  box-shadow: 0 4px 8px rgba(255,111,0,0.3);
+  box-shadow: 0 4px 8px rgba(255, 111, 0, 0.3);
 }
 
 /* Section 1 - Grid */
@@ -75,7 +77,8 @@
   gap: 20px;
   padding: 10px;
 
-  justify-content: center; /* Cards ko center align karega */
+  justify-content: center;
+  /* Cards ko center align karega */
 }
 
 .card {
@@ -84,21 +87,22 @@
   transition: all 0.4s ease;
   cursor: pointer;
   background: #fff;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   border: 1px solid #f0f0f0;
 }
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   border-color: #e0e0e0;
 }
 
 .card img {
   width: 100%;
   height: 180px;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.5s ease;
+  background-color: #fff;
 }
 
 .card:hover img {
@@ -115,7 +119,8 @@
 
 /* Section 2 - Slider */
 .sliderSection {
-  margin-top: 30px; /* standardized top spacing */
+  margin-top: 30px;
+  /* standardized top spacing */
   margin-bottom: 30px;
   text-align: left;
   /* border-radius: 10px; */
@@ -151,11 +156,12 @@
 
 .sliderWrapper {
   display: flex;
-   align-items: center;
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
   gap: 10px;
   z-index: 2;
-  position: relative; /* ensure nav buttons positioned relative to this box */
+  position: relative;
+  /* ensure nav buttons positioned relative to this box */
 }
 
 .sliderTrack {
@@ -173,7 +179,8 @@
 }
 
 .moreLink {
-  color: #007ec3; /* blue accent */
+  color: #007ec3;
+  /* blue accent */
   font-weight: 600;
   cursor: pointer;
   margin-left: 5px;
@@ -194,20 +201,21 @@
   background: #fff;
   text-align: center;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   margin: 5px;
 }
 
 .sliderCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .sliderCard img {
   width: 100%;
   height: 180px;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.5s ease;
+  background-color: #fff;
 }
 
 .sliderCard:hover img {
@@ -239,8 +247,10 @@
 .sliderCard:hover p:after {
   opacity: 1;
 }
+
 .sliderWrapper {
-  position: relative; /* Needed for absolute positioning of buttons */
+  position: relative;
+  /* Needed for absolute positioning of buttons */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,11 +287,13 @@
 }
 
 .navBtn.left {
-  left: -15px;  /* Position outside the gray box to match other sections */
+  left: -15px;
+  /* Position outside the gray box to match other sections */
 }
 
 .navBtn.right {
-  right: -15px; /* Position outside the gray box to match other sections */
+  right: -15px;
+  /* Position outside the gray box to match other sections */
 }
 
 .navBtn:disabled {
@@ -296,48 +308,61 @@
   .container {
     padding: 0 15px;
   }
+
   .title {
     font-size: 24px;
   }
+
   .title2 {
     font-size: 24px;
   }
+
   .subtitle {
     font-size: 15px;
   }
+
   .subtitle2 {
     font-size: 14px;
   }
+
   .filterButtons {
     gap: 12px;
     padding: 0 15px;
   }
+
   .filterButtons button {
     font-size: 12px;
     padding: 5px 12px;
   }
+
   .gridContainer {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
   }
+
   .card img {
     height: 160px;
   }
+
   .sliderCard {
     min-width: 220px;
     max-width: 260px;
   }
+
   .sliderCard img {
     height: 160px;
   }
+
   .navBtn {
     width: 36px;
     height: 36px;
     font-size: 14px;
   }
+
   .navBtn.left {
     left: -10px;
   }
+
   .navBtn.right {
     right: -10px;
   }
@@ -348,48 +373,60 @@
   .container {
     padding: 0 12px;
   }
+
   .title {
     font-size: 22px;
   }
+
   .title2 {
     font-size: 22px;
   }
+
   .subtitle {
     font-size: 14px;
   }
+
   .subtitle2 {
     font-size: 13px;
     max-width: 100%;
   }
+
   .filterButtons {
     gap: 10px;
     padding: 0 12px;
     margin-bottom: 20px;
   }
+
   .filterButtons button {
     font-size: 11px;
     padding: 5px 10px;
     min-width: 65px;
   }
+
   .gridContainer {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
     padding: 8px;
   }
+
   .card img {
     height: 140px;
   }
+
   .card p {
     font-size: 13px;
     padding: 0 8px 8px;
   }
+
   .sliderSection {
     padding: 20px 15px !important;
   }
+
   /* Hide navigation arrows on mobile/tablet */
   .navBtn {
     display: none;
   }
+
   /* Enable horizontal scrolling on mobile/tablet */
   .sliderWrapper {
     overflow-x: auto;
@@ -399,6 +436,7 @@
     justify-content: flex-start;
     padding: 0;
   }
+
   .sliderTrack {
     overflow-x: auto;
     overflow-y: hidden;
@@ -409,14 +447,17 @@
     gap: 15px;
     padding: 0 10px;
   }
+
   .sliderCard {
     min-width: 200px;
     max-width: 220px;
     flex-shrink: 0;
   }
+
   .sliderCard img {
     height: 150px;
   }
+
   .sliderCard p {
     font-size: 15px;
   }
@@ -427,32 +468,40 @@
   .container {
     padding: 0 10px;
   }
+
   .title {
     font-size: 20px;
   }
+
   .title2 {
     font-size: 20px;
   }
+
   .filterButtons {
     gap: 8px;
     padding: 0 10px;
   }
+
   .filterButtons button {
     min-width: 60px;
     font-size: 11px;
     padding: 5px 8px;
   }
+
   .gridContainer {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
+
   .card img {
     height: 130px;
   }
+
   /* Hide navigation arrows on mobile */
   .navBtn {
     display: none;
   }
+
   /* Enable horizontal scrolling on mobile */
   .sliderWrapper {
     overflow-x: auto;
@@ -462,6 +511,7 @@
     justify-content: flex-start;
     padding: 0;
   }
+
   .sliderTrack {
     overflow-x: auto;
     overflow-y: hidden;
@@ -472,6 +522,7 @@
     gap: 15px;
     padding: 0 10px;
   }
+
   .sliderCard {
     min-width: 180px;
     max-width: 200px;
@@ -484,48 +535,60 @@
   .container {
     padding: 0 8px;
   }
+
   .title {
     font-size: 18px;
   }
+
   .title2 {
     font-size: 18px;
   }
+
   .subtitle {
     font-size: 13px;
   }
+
   .subtitle2 {
     font-size: 12px;
     max-width: 100%;
   }
+
   .filterButtons {
     gap: 6px;
     padding: 0 8px;
     margin-bottom: 15px;
   }
+
   .filterButtons button {
     min-width: 55px;
     font-size: 10px;
     padding: 4px 8px;
   }
+
   .gridContainer {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     padding: 5px;
   }
+
   .card img {
     height: 120px;
   }
+
   .card p {
     font-size: 12px;
     padding: 0 5px 5px;
   }
+
   .sliderSection {
     padding: 15px 10px !important;
   }
+
   /* Hide navigation arrows on mobile */
   .navBtn {
     display: none;
   }
+
   /* Enable horizontal scrolling on mobile */
   .sliderWrapper {
     overflow-x: auto;
@@ -536,6 +599,7 @@
     padding: 0;
     margin: 0 -10px;
   }
+
   .sliderTrack {
     overflow-x: auto;
     overflow-y: hidden;
@@ -546,14 +610,17 @@
     gap: 12px;
     padding: 0 10px;
   }
+
   .sliderCard {
     min-width: 160px;
     max-width: 180px;
     flex-shrink: 0;
   }
+
   .sliderCard img {
     height: 140px;
   }
+
   .sliderCard p {
     font-size: 14px;
   }
@@ -564,48 +631,60 @@
   .container {
     padding: 0 6px;
   }
+
   .title {
     font-size: 17px;
   }
+
   .title2 {
     font-size: 17px;
   }
+
   .subtitle {
     font-size: 12px;
   }
+
   .subtitle2 {
     font-size: 11px;
     max-width: 100%;
   }
+
   .filterButtons {
     gap: 5px;
     padding: 0 6px;
   }
+
   .filterButtons button {
     min-width: 50px;
     font-size: 9px;
     padding: 4px 6px;
   }
+
   .gridContainer {
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
     padding: 4px;
   }
+
   .card img {
     height: 110px;
-    object-fit: cover;
+    object-fit: contain;
   }
+
   .card p {
     font-size: 11px;
     padding: 0 4px 4px;
   }
+
   .sliderSection {
     padding: 12px 8px !important;
   }
+
   /* Hide navigation arrows on mobile */
   .navBtn {
     display: none;
   }
+
   /* Enable horizontal scrolling on mobile */
   .sliderWrapper {
     overflow-x: auto;
@@ -616,6 +695,7 @@
     padding: 0;
     margin: 0 -8px;
   }
+
   .sliderTrack {
     overflow-x: auto;
     overflow-y: hidden;
@@ -626,14 +706,17 @@
     gap: 10px;
     padding: 0 8px;
   }
+
   .sliderCard {
     min-width: 140px;
     max-width: 160px;
     flex-shrink: 0;
   }
+
   .sliderCard img {
     height: 110px;
   }
+
   .sliderCard p {
     font-size: 13px;
   }
@@ -644,47 +727,59 @@
   .container {
     padding: 0 5px;
   }
+
   .title {
     font-size: 16px;
   }
+
   .title2 {
     font-size: 16px;
   }
+
   .subtitle {
     font-size: 11px;
   }
+
   .subtitle2 {
     font-size: 10px;
     max-width: 100%;
   }
+
   .filterButtons {
     gap: 4px;
     padding: 0 5px;
   }
+
   .filterButtons button {
     min-width: 45px;
     font-size: 8px;
     padding: 3px 5px;
   }
+
   .gridContainer {
     grid-template-columns: repeat(2, 1fr);
     gap: 5px;
     padding: 3px;
   }
+
   .card img {
     height: 100px;
   }
+
   .card p {
     font-size: 10px;
     padding: 0 3px 3px;
   }
+
   .sliderSection {
     padding: 10px 6px !important;
   }
+
   /* Hide navigation arrows on mobile */
   .navBtn {
     display: none;
   }
+
   /* Enable horizontal scrolling on mobile */
   .sliderWrapper {
     overflow-x: auto;
@@ -695,6 +790,7 @@
     padding: 0;
     margin: 0 -6px;
   }
+
   .sliderTrack {
     overflow-x: auto;
     overflow-y: hidden;
@@ -705,14 +801,17 @@
     gap: 8px;
     padding: 0 6px;
   }
+
   .sliderCard {
     min-width: 130px;
     max-width: 150px;
     flex-shrink: 0;
   }
+
   .sliderCard img {
     height: 100px;
   }
+
   .sliderCard p {
     font-size: 12px;
   }
