@@ -15,7 +15,16 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
   const { state, fetchCart } = useApp();
 
   const updateQuantity = async (itemId: number, quantity: number) => {
-    if (quantity < 1) return;
+    // If quantity would be 0 or less, remove the item instead
+    if (quantity < 1) {
+      try {
+        await cartAPI.removeFromCart(itemId);
+        await fetchCart();
+      } catch (error) {
+        console.error('Remove cart item error:', error);
+      }
+      return;
+    }
 
     try {
       await cartAPI.updateCartItem(itemId, { quantity });
@@ -112,7 +121,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, onClose }) => {
                     <button
                       className={styles.quantityButton}
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      disabled={item.quantity <= 1}
                       title="Decrease quantity"
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
