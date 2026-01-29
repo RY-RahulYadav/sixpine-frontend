@@ -31,6 +31,9 @@ const AdminMedia: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [altText, setAltText] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [applyWatermark, setApplyWatermark] = useState<boolean>(false);
+  const [convertWebp, setConvertWebp] = useState<boolean>(false);
+  const [keepOriginal, setKeepOriginal] = useState<boolean>(false);
   const [showUploadModal, setShowUploadModal] = useState<boolean>(false);
   const [copySuccess, setCopySuccess] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +108,11 @@ const AdminMedia: React.FC = () => {
         formData.append('description', description.trim());
       }
 
+      // Append processing options
+      formData.append('apply_watermark', applyWatermark ? 'true' : 'false');
+      formData.append('convert_webp', convertWebp ? 'true' : 'false');
+      formData.append('keep_original', keepOriginal ? 'true' : 'false');
+
       await adminAPI.uploadMedia(formData);
       showToast('Image uploaded successfully', 'success');
       setShowUploadModal(false);
@@ -123,6 +131,9 @@ const AdminMedia: React.FC = () => {
     setPreviewUrl(null);
     setAltText('');
     setDescription('');
+    setApplyWatermark(false);
+    setConvertWebp(false);
+    setKeepOriginal(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -426,6 +437,22 @@ const AdminMedia: React.FC = () => {
                   className="admin-form-input"
                   rows={3}
                 />
+              </div>
+
+              <div className="form-group">
+                <label style={{ fontWeight: 600, marginBottom: '6px', display: 'block' }}>Upload Options</label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <input type="checkbox" checked={applyWatermark} onChange={(e) => setApplyWatermark(e.target.checked)} />
+                  <span>Apply Watermark</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <input type="checkbox" checked={convertWebp} onChange={(e) => setConvertWebp(e.target.checked)} />
+                  <span>Convert to WebP</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input type="checkbox" checked={keepOriginal} onChange={(e) => setKeepOriginal(e.target.checked)} />
+                  <span>Keep Original (upload original copy)</span>
+                </label>
               </div>
 
               <div className="admin-modal-footer">

@@ -886,6 +886,7 @@ const AdminProductDetail: React.FC = () => {
   const [uploadingVideo, setUploadingVideo] = useState<{ [key: number]: boolean }>({});
   const [videoUploadProgress, setVideoUploadProgress] = useState<{ [key: number]: number }>({});
   const [showVideoUploadModal, setShowVideoUploadModal] = useState<{ [key: number]: boolean }>({});
+  const [imageOptions, setImageOptions] = useState<{ [key: number]: { applyWatermark: boolean; convertWebp: boolean; keepOriginal: boolean } }>({});
   
   const handleBulkImageUpload = async (variantIndex: number, files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -944,6 +945,11 @@ const AdminProductDetail: React.FC = () => {
         
         const formData = new FormData();
         formData.append('image', file);
+        // Append per-variant processing options
+        const opts = imageOptions[variantIndex] || { applyWatermark: false, convertWebp: false, keepOriginal: false };
+        formData.append('apply_watermark', opts.applyWatermark ? 'true' : 'false');
+        formData.append('convert_webp', opts.convertWebp ? 'true' : 'false');
+        formData.append('keep_original', opts.keepOriginal ? 'true' : 'false');
         
         // Use XMLHttpRequest for progress tracking
         const xhr = new XMLHttpRequest();
@@ -4665,6 +4671,34 @@ const AdminProductDetail: React.FC = () => {
                             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>cloud_upload</span>
                             Bulk Upload Images
                           </h5>
+                          <div style={{ marginBottom: '12px' }}>
+                            <label style={{ display: 'flex', gap: '12px', alignItems: 'center', fontSize: '13px', color: '#374151' }}>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={!!(imageOptions[variantIndex]?.applyWatermark)}
+                                  onChange={(e) => setImageOptions(prev => ({ ...prev, [variantIndex]: { ...(prev[variantIndex] || {}), applyWatermark: e.target.checked } }))}
+                                />
+                                <span>Apply Watermark</span>
+                              </label>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={!!(imageOptions[variantIndex]?.convertWebp)}
+                                  onChange={(e) => setImageOptions(prev => ({ ...prev, [variantIndex]: { ...(prev[variantIndex] || {}), convertWebp: e.target.checked } }))}
+                                />
+                                <span>Convert to WebP</span>
+                              </label>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={!!(imageOptions[variantIndex]?.keepOriginal)}
+                                  onChange={(e) => setImageOptions(prev => ({ ...prev, [variantIndex]: { ...(prev[variantIndex] || {}), keepOriginal: e.target.checked } }))}
+                                />
+                                <span>Keep Original</span>
+                              </label>
+                            </label>
+                          </div>
                           <div
                             onDragOver={(e) => {
                               e.preventDefault();
