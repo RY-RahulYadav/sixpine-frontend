@@ -55,10 +55,10 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
         return;
       }
 
-      // Validate file size (max 10MB)
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        alert(`${file.name} is too large. Maximum size is 10MB.`);
+        alert(`${file.name} is too large. Maximum size is 5MB.`);
         return;
       }
 
@@ -184,7 +184,7 @@ const CustomerReview = ({ product }: CustomerReviewProps) => {
               {/* File Upload */}
               <div className={styles.fileUploadSection}>
                 <label htmlFor="review-attachments" className={styles.fileUploadLabel}>
-                  Attach Files (Images, PDFs, Videos) - Max 10MB each
+                  Attach Files (Images, PDFs, Videos) - Max 5MB each
                 </label>
                 <input
                   id="review-attachments"

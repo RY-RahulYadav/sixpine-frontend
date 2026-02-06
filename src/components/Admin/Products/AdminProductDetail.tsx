@@ -4411,11 +4411,44 @@ const AdminProductDetail: React.FC = () => {
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
                             Variant {variantIndex + 1} - Details
                           </h2>
-                          {selectedColor && (
-                            <p style={{ color: '#6b7280', fontSize: '14px' }}>
-                              {selectedColor.name} {variant.size && `• ${variant.size}`} {variant.pattern && `• ${variant.pattern}`}
+                          <div style={{ marginBottom: '8px' }}>
+                            <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {variant.color?.name && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span style={{ 
+                                    display: 'inline-block', 
+                                    width: '16px', 
+                                    height: '16px', 
+                                    borderRadius: '50%', 
+                                    backgroundColor: variant.color.hex_code,
+                                    border: '1px solid #e5e7eb'
+                                  }}></span>
+                                  {variant.color.name}
+                                </span>
+                              )}
+                              {variant.size && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.size}</span>
+                                </>
+                              )}
+                              {variant.pattern && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.pattern}</span>
+                                </>
+                              )}
+                              {variant.quality && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.quality}</span>
+                                </>
+                              )}
                             </p>
-                          )}
+                            <p style={{ color: '#6b7280', fontSize: '14px', marginTop: '4px' }}>
+                              Quantity: <span style={{ fontWeight: '600', color: variant.stock_quantity > 0 ? '#059669' : '#dc2626' }}>{variant.stock_quantity}</span>
+                            </p>
+                          </div>
                         </div>
                         <button
                           type="button"
@@ -4651,9 +4684,46 @@ const AdminProductDetail: React.FC = () => {
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
                             Variant {variantIndex + 1} - Images
                           </h2>
-                          <p style={{ color: '#6b7280', fontSize: '14px' }}>
-                            Upload up to {maxImages} images. First image becomes main image. ({totalImages}/{maxImages} images)
-                          </p>
+                          <div style={{ marginBottom: '8px' }}>
+                            <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {variant.color?.name && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span style={{ 
+                                    display: 'inline-block', 
+                                    width: '16px', 
+                                    height: '16px', 
+                                    borderRadius: '50%', 
+                                    backgroundColor: variant.color.hex_code,
+                                    border: '1px solid #e5e7eb'
+                                  }}></span>
+                                  {variant.color.name}
+                                </span>
+                              )}
+                              {variant.size && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.size}</span>
+                                </>
+                              )}
+                              {variant.pattern && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.pattern}</span>
+                                </>
+                              )}
+                              {variant.quality && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.quality}</span>
+                                </>
+                              )}
+                            </p>
+                            <p style={{ color: '#6b7280', fontSize: '14px', marginTop: '4px' }}>
+                              Quantity: <span style={{ fontWeight: '600', color: variant.stock_quantity > 0 ? '#059669' : '#dc2626' }}>{variant.stock_quantity}</span>
+                              {' '} • {' '}
+                              Upload up to {maxImages} images ({totalImages}/{maxImages} images)
+                            </p>
+                          </div>
                         </div>
                       </div>
                       
@@ -5327,9 +5397,46 @@ const AdminProductDetail: React.FC = () => {
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
                             Variant {variantIndex + 1} - Specification Template
                           </h2>
-                          <p style={{ color: '#6b7280', fontSize: '14px' }}>
-                            Manage specifications for this variant
-                          </p>
+                          <div style={{ marginBottom: '8px' }}>
+                            <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {variant.color?.name && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <span style={{ 
+                                    display: 'inline-block', 
+                                    width: '16px', 
+                                    height: '16px', 
+                                    borderRadius: '50%', 
+                                    backgroundColor: variant.color.hex_code,
+                                    border: '1px solid #e5e7eb'
+                                  }}></span>
+                                  {variant.color.name}
+                                </span>
+                              )}
+                              {variant.size && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.size}</span>
+                                </>
+                              )}
+                              {variant.pattern && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.pattern}</span>
+                                </>
+                              )}
+                              {variant.quality && (
+                                <>
+                                  <span style={{ color: '#d1d5db' }}>•</span>
+                                  <span>{variant.quality}</span>
+                                </>
+                              )}
+                            </p>
+                            <p style={{ color: '#6b7280', fontSize: '14px', marginTop: '4px' }}>
+                              Quantity: <span style={{ fontWeight: '600', color: variant.stock_quantity > 0 ? '#059669' : '#dc2626' }}>{variant.stock_quantity}</span>
+                              {' '} • {' '}
+                              Manage specifications for this variant
+                            </p>
+                          </div>
                         </div>
                       </div>
                       
