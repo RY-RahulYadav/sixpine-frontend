@@ -426,6 +426,16 @@ const SellerProductDetail: React.FC = () => {
     }
   };
   
+  // Helper to generate variant title from variant properties
+  const getVariantTitle = (variant: ProductVariant) => {
+    const titleParts = [];
+    if (variant.color?.name) titleParts.push(variant.color.name);
+    if (variant.size) titleParts.push(variant.size);
+    if (variant.pattern) titleParts.push(variant.pattern);
+    if (variant.quality) titleParts.push(variant.quality);
+    return titleParts.length > 0 ? ` (${titleParts.join(' ')})` : '';
+  };
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
@@ -1419,7 +1429,7 @@ const SellerProductDetail: React.FC = () => {
                             <span className="material-symbols-outlined tw-text-blue-600">style</span>
                           </div>
                           <div>
-                            <h4 className="tw-font-bold tw-text-gray-800 tw-text-lg">Variant {variantIndex + 1}</h4>
+                            <h4 className="tw-font-bold tw-text-gray-800 tw-text-lg">Variant {variantIndex + 1}{getVariantTitle(variant)}</h4>
                             {variant.title && (
                               <p className="tw-text-sm tw-text-gray-500">{variant.title}</p>
                             )}

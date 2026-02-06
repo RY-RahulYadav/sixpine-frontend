@@ -198,6 +198,16 @@ const AdminProductDetail: React.FC = () => {
     });
   };
   
+  // Helper to generate variant title from variant properties
+  const getVariantTitle = (variant: ProductVariant) => {
+    const titleParts = [];
+    if (variant.color?.name) titleParts.push(variant.color.name);
+    if (variant.size) titleParts.push(variant.size);
+    if (variant.pattern) titleParts.push(variant.pattern);
+    if (variant.quality) titleParts.push(variant.quality);
+    return titleParts.length > 0 ? ` (${titleParts.join(' ')})` : '';
+  };
+  
   // Helper to navigate to variant section
   const navigateToVariantSection = (variantIndex: number, section: 'variant-details' | 'variant-images' | 'variant-specs') => {
     setActiveVariantIndex(variantIndex);
@@ -4409,7 +4419,7 @@ const AdminProductDetail: React.FC = () => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div>
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1} - Details
+                            Variant {variantIndex + 1}{getVariantTitle(variant)} - Details
                           </h2>
                           <div style={{ marginBottom: '8px' }}>
                             <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -4682,7 +4692,7 @@ const AdminProductDetail: React.FC = () => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div>
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1} - Images
+                            Variant {variantIndex + 1}{getVariantTitle(variant)} - Images
                           </h2>
                           <div style={{ marginBottom: '8px' }}>
                             <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -5395,7 +5405,7 @@ const AdminProductDetail: React.FC = () => {
                       <div style={{ marginBottom: '24px' }}>
                         <div>
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1} - Specification Template
+                            Variant {variantIndex + 1}{getVariantTitle(variant)} - Specification Template
                           </h2>
                           <div style={{ marginBottom: '8px' }}>
                             <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -5976,7 +5986,7 @@ const AdminProductDetail: React.FC = () => {
                             <span className="material-symbols-outlined tw-text-blue-600">style</span>
                           </div>
                           <div>
-                            <h4 className="tw-font-bold tw-text-gray-800 tw-text-lg">Variant {variantIndex + 1}</h4>
+                            <h4 className="tw-font-bold tw-text-gray-800 tw-text-lg">Variant {variantIndex + 1}{getVariantTitle(variant)}</h4>
                             {variant.title && (
                               <p className="tw-text-sm tw-text-gray-500">{variant.title}</p>
                             )}
