@@ -1156,6 +1156,17 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     }
   };
 
+  // Helper to generate variant title from variant properties
+  const getVariantTitle = (variant: any) => {
+    if (!variant) return product?.title || 'Product';
+    const titleParts = [];
+    if (variant.color?.name) titleParts.push(variant.color.name);
+    if (variant.size) titleParts.push(variant.size);
+    if (variant.pattern) titleParts.push(variant.pattern);
+    if (variant.quality) titleParts.push(variant.quality);
+    return titleParts.length > 0 ? titleParts.join(' ') : (product?.title || 'Product');
+  };
+
   // Truncate product title for breadcrumb
   const truncateTitle = (title: string, maxLength: number = 60): string => {
     if (!title || title.length <= maxLength) {
@@ -1348,16 +1359,14 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
         </div>
       )}
 
-      {/* Breadcrumb - Amazon style */}
+      {/* Breadcrumb */}
       <nav className={styles.breadcrumb}>
-        <a href="/">{product?.category?.parent_category?.name || "Home & Kitchen"}</a>
-        <span className={styles.breadcrumbSeparator}>›</span>
-        <a href="/products">{product?.category?.name || "Furniture"}</a>
-        <span className={styles.breadcrumbSeparator}>›</span>
-        <a href={`/products?subcategory=${product?.subcategory?.id || ''}`}>{product?.subcategory?.name || "Living Room Furniture"}</a>
-        <span className={styles.breadcrumbSeparator}>›</span>
-        <span className={styles.breadcrumbCurrent} title={selectedVariant?.title || product?.title || "Product Name"}>
-          {truncateTitle(selectedVariant?.title || product?.title || "Sofas & Couches", 40)}
+        <a href="/">Home</a>
+        <span className={styles.breadcrumbSeparator}>/</span>
+        <a href="/products">Products</a>
+        <span className={styles.breadcrumbSeparator}>/</span>
+        <span className={styles.breadcrumbCurrent} title={getVariantTitle(selectedVariant)}>
+          {truncateTitle(getVariantTitle(selectedVariant), 40)}
         </span>
       </nav>
 
