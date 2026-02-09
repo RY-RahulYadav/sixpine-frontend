@@ -499,62 +499,57 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     };
   }, [variants, selectedColor, selectedSize, selectedPattern, selectedQuality, colors, sizes, patterns, qualities]);
 
-  // Smart auto-selection: When user selects one attribute, find matching variant that preserves other selections
+  // Smart auto-selection: When user selects one attribute, find the best matching complete variant
   const findBestMatchingVariant = (attributeType: 'color' | 'size' | 'pattern' | 'quality', value: string, currentSelections: any) => {
     if (variants.length === 0) return null;
 
-    // First, try to find a variant that matches the new attribute AND all currently selected attributes
-    const exactMatch = variants.find((v: any) => {
-      const variantColor = v.color?.name || v.color_name || '';
-      const variantSize = v.size || '';
-      const variantPattern = v.pattern || '';
-      const variantQuality = v.quality || '';
+    // Strategy: Find the best variant that includes the selected attribute
+    // Priority 1: Exact match with all currently selected attributes
+    // Priority 2: Match with as many current selections as possible
+    // Priority 3: First variant with the selected attribute
 
-      // Check if the new attribute matches
-      let newAttributeMatches = false;
-      if (attributeType === 'color') {
-        newAttributeMatches = variantColor === value;
-      } else if (attributeType === 'size') {
-        newAttributeMatches = variantSize === value;
-      } else if (attributeType === 'pattern') {
-        newAttributeMatches = variantPattern === value;
-      } else if (attributeType === 'quality') {
-        newAttributeMatches = variantQuality === value;
-      }
+    const getVariantAttribute = (v: any, attr: 'color' | 'size' | 'pattern' | 'quality') => {
+      if (attr === 'color') return v.color?.name || v.color_name || '';
+      if (attr === 'size') return v.size || '';
+      if (attr === 'pattern') return v.pattern || '';
+      if (attr === 'quality') return v.quality || '';
+      return '';
+    };
 
-      if (!newAttributeMatches) return false;
+    const matchesAttribute = (v: any, attr: 'color' | 'size' | 'pattern' | 'quality', val: string) => {
+      return getVariantAttribute(v, attr) === val;
+    };
 
-      // Check if all other currently selected attributes match
-      const colorMatch = attributeType === 'color' || !currentSelections.color || variantColor === currentSelections.color;
-      const sizeMatch = attributeType === 'size' || !currentSelections.size || variantSize === currentSelections.size;
-      const patternMatch = attributeType === 'pattern' || !currentSelections.pattern || variantPattern === currentSelections.pattern;
-      const qualityMatch = attributeType === 'quality' || !currentSelections.quality || variantQuality === currentSelections.quality;
+    // Filter variants that have the selected attribute value
+    const candidateVariants = variants.filter((v: any) => matchesAttribute(v, attributeType, value));
+    
+    if (candidateVariants.length === 0) return null;
+    if (candidateVariants.length === 1) return candidateVariants[0];
 
-      return colorMatch && sizeMatch && patternMatch && qualityMatch;
+    // Score each candidate by how many current selections it matches
+    const scoredVariants = candidateVariants.map((v: any) => {
+      let score = 0;
+      const otherAttributes: Array<'color' | 'size' | 'pattern' | 'quality'> = ['color', 'size', 'pattern', 'quality']
+        .filter(attr => attr !== attributeType) as Array<'color' | 'size' | 'pattern' | 'quality'>;
+
+      otherAttributes.forEach(attr => {
+        const currentValue = currentSelections[attr];
+        if (currentValue && matchesAttribute(v, attr, currentValue)) {
+          score++;
+        }
+      });
+
+      return { variant: v, score };
     });
 
-    // If exact match found, return it
-    if (exactMatch) return exactMatch;
-
-    // Otherwise, find first variant with just the new attribute (fallback)
-    return variants.find((v: any) => {
-      if (attributeType === 'color') {
-        return (v.color?.name || v.color_name) === value;
-      } else if (attributeType === 'size') {
-        return v.size === value;
-      } else if (attributeType === 'pattern') {
-        return v.pattern === value;
-      } else if (attributeType === 'quality') {
-        return v.quality === value;
-      }
-      return false;
-    });
+    // Sort by score (descending) and return the highest scoring variant
+    scoredVariants.sort((a: { variant: any; score: number }, b: { variant: any; score: number }) => b.score - a.score);
+    return scoredVariants[0].variant;
   };
 
-  // Auto-select all other attributes when one attribute is changed by user
+  // Auto-select all attributes from the matching variant when user changes one attribute
   useEffect(() => {
     if (variants.length === 0 || isAutoSelecting.current) {
-      // Update prevSelections even if we're auto-selecting
       prevSelections.current = {
         color: selectedColor,
         size: selectedSize,
@@ -564,9 +559,8 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
       return;
     }
 
-    // Check if this is a user-initiated change (not auto-selection)
+    // Check if this is a user-initiated change
     if (!userChangedAttribute.current) {
-      // Update prevSelections
       prevSelections.current = {
         color: selectedColor,
         size: selectedSize,
@@ -577,131 +571,69 @@ const ProductDetails = ({ product, onVariantChange }: ProductDetailsProps) => {
     }
 
     const changedAttr = userChangedAttribute.current;
-    let matchingVariant = null;
+    let newValue = '';
+
+    // Get the new value that was just changed
+    if (changedAttr === 'color') newValue = selectedColor;
+    else if (changedAttr === 'size') newValue = selectedSize;
+    else if (changedAttr === 'pattern') newValue = selectedPattern;
+    else if (changedAttr === 'quality') newValue = selectedQuality;
+
+    // Check if the value actually changed
+    if (newValue === prevSelections.current[changedAttr]) {
+      userChangedAttribute.current = null;
+      return;
+    }
 
     // Get current selections (before the change)
     const currentSelections = {
-      color: changedAttr === 'color' ? selectedColor : prevSelections.current.color,
-      size: changedAttr === 'size' ? selectedSize : prevSelections.current.size,
-      pattern: changedAttr === 'pattern' ? selectedPattern : prevSelections.current.pattern,
-      quality: changedAttr === 'quality' ? selectedQuality : prevSelections.current.quality
+      color: prevSelections.current.color,
+      size: prevSelections.current.size,
+      pattern: prevSelections.current.pattern,
+      quality: prevSelections.current.quality
     };
 
-    // Find best matching variant that preserves other selections
-    if (changedAttr === 'color' && selectedColor && selectedColor !== prevSelections.current.color) {
-      matchingVariant = findBestMatchingVariant('color', selectedColor, currentSelections);
-    } else if (changedAttr === 'size' && selectedSize && selectedSize !== prevSelections.current.size) {
-      matchingVariant = findBestMatchingVariant('size', selectedSize, currentSelections);
-    } else if (changedAttr === 'pattern' && selectedPattern && selectedPattern !== prevSelections.current.pattern) {
-      matchingVariant = findBestMatchingVariant('pattern', selectedPattern, currentSelections);
-    } else if (changedAttr === 'quality' && selectedQuality && selectedQuality !== prevSelections.current.quality) {
-      matchingVariant = findBestMatchingVariant('quality', selectedQuality, currentSelections);
-    }
+    // Find best matching variant
+    const matchingVariant = findBestMatchingVariant(changedAttr, newValue, currentSelections);
 
     if (matchingVariant) {
       isAutoSelecting.current = true;
 
-      // Auto-select other attributes from this variant, but only if they don't conflict with current selections
+      // Auto-select ALL attributes from the matching variant
       const variantColor = matchingVariant.color?.name || matchingVariant.color_name || '';
       const variantSize = matchingVariant.size || '';
       const variantPattern = matchingVariant.pattern || '';
       const variantQuality = matchingVariant.quality || '';
 
-      // Only update attributes that don't have a matching variant with current selections
-      // This preserves user's current selections when possible
-      if (variantColor && changedAttr !== 'color' && selectedColor) {
-        // Check if there's a variant with current color + new attribute
-        const hasVariantWithCurrentColor = variants.some((v: any) => {
-          const vColor = v.color?.name || v.color_name || '';
-          const newAttrValue = changedAttr === 'size' ? selectedSize :
-            changedAttr === 'pattern' ? selectedPattern :
-              changedAttr === 'quality' ? selectedQuality : '';
-          const vNewAttr = changedAttr === 'size' ? v.size :
-            changedAttr === 'pattern' ? v.pattern :
-              changedAttr === 'quality' ? v.quality : '';
-
-          return vColor === selectedColor && vNewAttr === newAttrValue;
-        });
-
-        if (!hasVariantWithCurrentColor) {
-          setSelectedColor(variantColor);
-        }
-      } else if (variantColor && changedAttr !== 'color' && !selectedColor) {
+      // Update all attributes (except the one the user just changed)
+      if (changedAttr !== 'color' && variantColor && variantColor !== selectedColor) {
         setSelectedColor(variantColor);
       }
-
-      if (variantSize && changedAttr !== 'size' && selectedSize) {
-        const hasVariantWithCurrentSize = variants.some((v: any) => {
-          const newAttrValue = changedAttr === 'color' ? selectedColor :
-            changedAttr === 'pattern' ? selectedPattern :
-              changedAttr === 'quality' ? selectedQuality : '';
-          const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
-            changedAttr === 'pattern' ? v.pattern :
-              changedAttr === 'quality' ? v.quality : '';
-
-          return v.size === selectedSize && vNewAttr === newAttrValue;
-        });
-
-        if (!hasVariantWithCurrentSize) {
-          setSelectedSize(variantSize);
-        }
-      } else if (variantSize && changedAttr !== 'size' && !selectedSize) {
+      if (changedAttr !== 'size' && variantSize && variantSize !== selectedSize) {
         setSelectedSize(variantSize);
       }
-
-      if (variantPattern && changedAttr !== 'pattern' && selectedPattern) {
-        const hasVariantWithCurrentPattern = variants.some((v: any) => {
-          const newAttrValue = changedAttr === 'color' ? selectedColor :
-            changedAttr === 'size' ? selectedSize :
-              changedAttr === 'quality' ? selectedQuality : '';
-          const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
-            changedAttr === 'size' ? v.size :
-              changedAttr === 'quality' ? v.quality : '';
-
-          return v.pattern === selectedPattern && vNewAttr === newAttrValue;
-        });
-
-        if (!hasVariantWithCurrentPattern) {
-          setSelectedPattern(variantPattern);
-        }
-      } else if (variantPattern && changedAttr !== 'pattern' && !selectedPattern) {
+      if (changedAttr !== 'pattern' && variantPattern && variantPattern !== selectedPattern) {
         setSelectedPattern(variantPattern);
       }
-
-      if (variantQuality && changedAttr !== 'quality' && selectedQuality) {
-        const hasVariantWithCurrentQuality = variants.some((v: any) => {
-          const newAttrValue = changedAttr === 'color' ? selectedColor :
-            changedAttr === 'size' ? selectedSize :
-              changedAttr === 'pattern' ? selectedPattern : '';
-          const vNewAttr = changedAttr === 'color' ? (v.color?.name || v.color_name) :
-            changedAttr === 'size' ? v.size :
-              changedAttr === 'pattern' ? v.pattern : '';
-
-          return v.quality === selectedQuality && vNewAttr === newAttrValue;
-        });
-
-        if (!hasVariantWithCurrentQuality) {
-          setSelectedQuality(variantQuality);
-        }
-      } else if (variantQuality && changedAttr !== 'quality' && !selectedQuality) {
+      if (changedAttr !== 'quality' && variantQuality && variantQuality !== selectedQuality) {
         setSelectedQuality(variantQuality);
       }
 
-      // Update prevSelections and reset flags
+      // Update prevSelections to reflect the new complete variant
       prevSelections.current = {
-        color: selectedColor,
-        size: selectedSize,
-        pattern: selectedPattern,
-        quality: selectedQuality
+        color: changedAttr === 'color' ? selectedColor : variantColor,
+        size: changedAttr === 'size' ? selectedSize : variantSize,
+        pattern: changedAttr === 'pattern' ? selectedPattern : variantPattern,
+        quality: changedAttr === 'quality' ? selectedQuality : variantQuality
       };
 
-      // Reset flag after state updates
+      // Reset flags after state updates
       setTimeout(() => {
         isAutoSelecting.current = false;
         userChangedAttribute.current = null;
       }, 0);
     } else {
-      // Update prevSelections even if no match found
+      // No matching variant found, just update prevSelections
       prevSelections.current = {
         color: selectedColor,
         size: selectedSize,

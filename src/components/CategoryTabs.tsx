@@ -42,8 +42,22 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ preloadedCategories }) => {
     return `/products?category=${categorySlug}`;
   };
 
+  // Helper function to get the link for a subcategory (uses custom link if provided)
+  const getSubcategoryLink = (subcategory: NavbarSubcategory, categorySlug: string): string => {
+    // If subcategory has a custom link, use it; otherwise use the standard product link
+    if (subcategory.link && subcategory.link.trim() !== '') {
+      return subcategory.link;
+    }
+    return createProductLink(categorySlug, subcategory.slug);
+  };
+
   // Helper function to handle category link clicks
-  const handleCategoryClick = (e: React.MouseEvent<HTMLAnchorElement>, categorySlug: string, subcategorySlug?: string) => {
+  const handleCategoryClick = (e: React.MouseEvent<HTMLAnchorElement>, categorySlug: string, subcategorySlug?: string, customLink?: string) => {
+    // If there's a custom link, let the Link component handle it normally
+    if (customLink && customLink.trim() !== '') {
+      return;
+    }
+    
     // If already on products page, use navigate to ensure proper URL update
     if (location.pathname === '/products') {
       e.preventDefault();
@@ -159,11 +173,12 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ preloadedCategories }) => {
                     {category.items.length > 0 ? (
                       category.items.map((item, itemIdx) => {
                         const subcategory = category.subcategories.find(sub => sub.name === item);
+                        const linkUrl = subcategory ? getSubcategoryLink(subcategory, category.categorySlug) : createProductLink(category.categorySlug);
                         return (
                           <li key={itemIdx}>
                             <Link
-                              to={createProductLink(category.categorySlug, subcategory?.slug)}
-                              onClick={(e) => handleCategoryClick(e, category.categorySlug, subcategory?.slug)}
+                              to={linkUrl}
+                              onClick={(e) => handleCategoryClick(e, category.categorySlug, subcategory?.slug, subcategory?.link)}
                             >
                               {item}
                             </Link>
@@ -206,8 +221,8 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ preloadedCategories }) => {
                       category.subcategories.map((subcategory) => (
                         <li key={subcategory.id}>
                           <Link
-                            to={createProductLink(category.slug, subcategory.slug)}
-                            onClick={(e) => handleCategoryClick(e, category.slug, subcategory.slug)}
+                            to={getSubcategoryLink(subcategory, category.slug)}
+                            onClick={(e) => handleCategoryClick(e, category.slug, subcategory.slug, subcategory.link)}
                           >
                             {subcategory.name}
                           </Link>
@@ -259,12 +274,13 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ preloadedCategories }) => {
                       {category.items.length > 0 ? (
                         category.items.map((item, itemIdx) => {
                           const subcategory = category.subcategories.find(sub => sub.name === item);
+                          const linkUrl = subcategory ? getSubcategoryLink(subcategory, category.categorySlug) : createProductLink(category.categorySlug);
                           return (
                             <li key={itemIdx}>
                               <Link
-                                to={createProductLink(category.categorySlug, subcategory?.slug)}
+                                to={linkUrl}
                                 onClick={(e) => {
-                                  handleCategoryClick(e, category.categorySlug, subcategory?.slug);
+                                  handleCategoryClick(e, category.categorySlug, subcategory?.slug, subcategory?.link);
                                   setActiveMobileDropdown(null);
                                   setDropdownPosition(null);
                                 }}
@@ -324,9 +340,9 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({ preloadedCategories }) => {
                         category.subcategories.map((subcategory) => (
                           <li key={subcategory.id}>
                             <Link
-                              to={createProductLink(category.slug, subcategory.slug)}
+                              to={getSubcategoryLink(subcategory, category.slug)}
                               onClick={(e) => {
-                                handleCategoryClick(e, category.slug, subcategory.slug);
+                                handleCategoryClick(e, category.slug, subcategory.slug, subcategory.link);
                                 setActiveMobileDropdown(null);
                                 setDropdownPosition(null);
                               }}

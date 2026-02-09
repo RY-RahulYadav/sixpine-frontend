@@ -201,11 +201,17 @@ const AdminProductDetail: React.FC = () => {
   // Helper to generate variant title from variant properties
   const getVariantTitle = (variant: ProductVariant) => {
     const titleParts = [];
-    if (variant.color?.name) titleParts.push(variant.color.name);
+    
+    // Get color name from variant.color or from colors array using color_id
+    const colorName = variant.color?.name || 
+      (variant.color_id ? colors.find(c => c.id === variant.color_id)?.name : null);
+    
+    if (colorName) titleParts.push(colorName);
     if (variant.size) titleParts.push(variant.size);
     if (variant.pattern) titleParts.push(variant.pattern);
     if (variant.quality) titleParts.push(variant.quality);
-    return titleParts.length > 0 ? ` (${titleParts.join(' ')})` : '';
+    
+    return titleParts.length > 0 ? ` (${titleParts.join(' - ')})` : '';
   };
   
   // Helper to navigate to variant section
@@ -3945,7 +3951,6 @@ const AdminProductDetail: React.FC = () => {
               {variants.map((variant, variantIndex) => {
                 const isExpanded = expandedVariants.has(variantIndex);
                 const isActive = activeVariantIndex === variantIndex && activeSection.startsWith('variant');
-                const selectedColor = colors.find(c => c.id === (variant.color_id || variant.color?.id));
                 
                 return (
                   <div key={variantIndex} style={{ 
@@ -3980,19 +3985,8 @@ const AdminProductDetail: React.FC = () => {
                         }}>
                           chevron_right
                         </span>
-                        <span>Variant {variantIndex + 1}</span>
-                        {selectedColor && (
-                          <div 
-                            style={{ 
-                              width: '16px', 
-                              height: '16px', 
-                              borderRadius: '4px',
-                              backgroundColor: selectedColor.hex_code || '#ccc',
-                              border: '1px solid #e5e7eb'
-                            }}
-                            title={selectedColor.name}
-                          />
-                        )}
+                        <span>Variant {variantIndex + 1}{getVariantTitle(variant)}</span>
+                        
                       </div>
                     </div>
 
@@ -4419,7 +4413,7 @@ const AdminProductDetail: React.FC = () => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div>
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1}{getVariantTitle(variant)} - Details
+                            Variant {variantIndex + 1}{variant.title ? ` (${variant.title})` : ''} - Details
                           </h2>
                           <div style={{ marginBottom: '8px' }}>
                             <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -4692,7 +4686,7 @@ const AdminProductDetail: React.FC = () => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <div>
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1}{getVariantTitle(variant)} - Images
+                            Variant {variantIndex + 1}{variant.title ? ` (${variant.title})` : ''} - Images
                           </h2>
                           <div style={{ marginBottom: '8px' }}>
                             <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -5405,7 +5399,7 @@ const AdminProductDetail: React.FC = () => {
                       <div style={{ marginBottom: '24px' }}>
                         <div>
                           <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>
-                            Variant {variantIndex + 1}{getVariantTitle(variant)} - Specification Template
+                            Variant {variantIndex + 1}{variant.title ? ` (${variant.title})` : ''} - Specification Template
                           </h2>
                           <div style={{ marginBottom: '8px' }}>
                             <p style={{ color: '#374151', fontSize: '15px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>

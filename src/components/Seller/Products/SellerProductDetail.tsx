@@ -429,11 +429,17 @@ const SellerProductDetail: React.FC = () => {
   // Helper to generate variant title from variant properties
   const getVariantTitle = (variant: ProductVariant) => {
     const titleParts = [];
-    if (variant.color?.name) titleParts.push(variant.color.name);
+    
+    // Get color name from variant.color or from colors array using color_id
+    const colorName = variant.color?.name || 
+      (variant.color_id ? colors.find(c => c.id === variant.color_id)?.name : null);
+    
+    if (colorName) titleParts.push(colorName);
     if (variant.size) titleParts.push(variant.size);
     if (variant.pattern) titleParts.push(variant.pattern);
     if (variant.quality) titleParts.push(variant.quality);
-    return titleParts.length > 0 ? ` (${titleParts.join(' ')})` : '';
+    
+    return titleParts.length > 0 ? ` (${titleParts.join(' - ')})` : '';
   };
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
