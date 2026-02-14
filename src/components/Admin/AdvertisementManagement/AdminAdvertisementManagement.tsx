@@ -58,7 +58,8 @@ const AdminAdvertisementManagement: React.FC = () => {
       discount_percentage: null,
       is_active: true,
       display_order: advertisements.length,
-      valid_from: null,
+      // Default to current time for start date
+      valid_from: new Date().toISOString(),
       valid_until: null,
     });
     setShowModal(true);
@@ -105,13 +106,21 @@ const AdminAdvertisementManagement: React.FC = () => {
       return;
     }
 
+    // Prepare ad for saving
+    const adToSave = { ...editingAd };
+
+    // Ensure start date is present (default to now if missing)
+    if (!adToSave.valid_from) {
+      adToSave.valid_from = new Date().toISOString();
+    }
+
     try {
       setSaving(true);
-      if (editingAd.id) {
-        await adminAPI.updateAdvertisement(editingAd.id, editingAd);
+      if (adToSave.id) {
+        await adminAPI.updateAdvertisement(adToSave.id, adToSave);
         showToast('Advertisement updated successfully', 'success');
       } else {
-        await adminAPI.createAdvertisement(editingAd);
+        await adminAPI.createAdvertisement(adToSave);
         showToast('Advertisement created successfully', 'success');
       }
       setShowModal(false);
@@ -132,6 +141,21 @@ const AdminAdvertisementManagement: React.FC = () => {
   const handleChange = (field: keyof Advertisement, value: any) => {
     if (!editingAd) return;
     setEditingAd({ ...editingAd, [field]: value });
+  };
+
+  // Helper to format date for input (Local Time)
+  const formatDateForInput = (isoString: string | null) => {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+
+    // Get local components
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   if (loading) {
@@ -237,7 +261,7 @@ const AdminAdvertisementManagement: React.FC = () => {
                 <label>Valid From</label>
                 <input
                   type="datetime-local"
-                  value={ad.valid_from ? new Date(ad.valid_from).toISOString().slice(0, 16) : ''}
+                  value={formatDateForInput(ad.valid_from)}
                   readOnly
                   className="tw-w-full"
                 />
@@ -246,7 +270,7 @@ const AdminAdvertisementManagement: React.FC = () => {
                 <label>Valid Until</label>
                 <input
                   type="datetime-local"
-                  value={ad.valid_until ? new Date(ad.valid_until).toISOString().slice(0, 16) : ''}
+                  value={formatDateForInput(ad.valid_until)}
                   readOnly
                   className="tw-w-full"
                 />
@@ -371,19 +395,19 @@ const AdminAdvertisementManagement: React.FC = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Valid From</label>
+                  <label>Start Date (Defaults to now if empty)</label>
                   <input
                     type="datetime-local"
-                    value={editingAd.valid_from ? new Date(editingAd.valid_from).toISOString().slice(0, 16) : ''}
+                    value={formatDateForInput(editingAd.valid_from)}
                     onChange={(e) => handleChange('valid_from', e.target.value ? new Date(e.target.value).toISOString() : null)}
                     className="tw-w-full"
                   />
                 </div>
                 <div className="form-group">
-                  <label>Valid Until</label>
+                  <label>End Date (Optional - Leave empty for indefinite)</label>
                   <input
                     type="datetime-local"
-                    value={editingAd.valid_until ? new Date(editingAd.valid_until).toISOString().slice(0, 16) : ''}
+                    value={formatDateForInput(editingAd.valid_until)}
                     onChange={(e) => handleChange('valid_until', e.target.value ? new Date(e.target.value).toISOString() : null)}
                     className="tw-w-full"
                   />
@@ -407,8 +431,8 @@ const AdminAdvertisementManagement: React.FC = () => {
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="admin-btn primary"
                   disabled={saving}
                 >
