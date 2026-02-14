@@ -2169,6 +2169,27 @@ const AdminProductDetail: React.FC = () => {
       return;
     }
 
+    // Validate uniqueness of variants
+    const variantSignatures = new Set<string>();
+    for (let i = 0; i < variants.length; i++) {
+      const v = variants[i];
+      const colorId = v.color_id || v.color?.id;
+      // We know colorId is present due to check above
+      if (!colorId) continue;
+
+      const size = (v.size || '').trim().toLowerCase();
+      const pattern = (v.pattern || '').trim().toLowerCase();
+      const quality = (v.quality || '').trim().toLowerCase();
+
+      const signature = `${colorId}|${size}|${pattern}|${quality}`;
+
+      if (variantSignatures.has(signature)) {
+        setError(`Duplicate variant found at position ${i + 1}. Each variant must have a unique combination of Color, Size, Pattern, and Quality.`);
+        return;
+      }
+      variantSignatures.add(signature);
+    }
+
     try {
       setSaving(true);
       setError(null);
@@ -2314,7 +2335,17 @@ const AdminProductDetail: React.FC = () => {
             }
 
             // If variant has changed, send full payload
-            return buildVariantPayload(v);
+            const variantPayload = buildVariantPayload(v);
+
+            // Optimization: If images haven't changed, remove them from payload
+            if (original) {
+              const originalPayload = buildVariantPayload(original);
+              if (deepEqual(variantPayload.images, originalPayload.images)) {
+                delete (variantPayload as any).images;
+              }
+            }
+
+            return variantPayload;
           });
           // If parent price fields changed, ensure first variant reflects new parent-level price values
           if (payload.variants.length > 0) {
